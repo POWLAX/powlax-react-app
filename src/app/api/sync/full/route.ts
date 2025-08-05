@@ -1,23 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { wordpressTeamSync } from '@/lib/wordpress-team-sync'
-import { supabase } from '@/lib/supabase'
-import { headers } from 'next/headers'
+import { createServerClient, getAuthUser } from '@/lib/supabase-server'
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if user is authenticated and has admin role
-    const headersList = headers()
-    const authorization = headersList.get('authorization')
-    
-    if (!authorization) {
-      return NextResponse.json(
-        { error: 'Unauthorized - No authorization header' },
-        { status: 401 }
-      )
-    }
-
-    const token = authorization.replace('Bearer ', '')
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    // Check if user is authenticated
+    const { user, error: authError } = await getAuthUser()
     
     if (authError || !user) {
       return NextResponse.json(
@@ -25,6 +13,8 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       )
     }
+
+    const supabase = await createServerClient()
 
     // Check if user has admin role
     const { data: userData } = await supabase

@@ -1,24 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { wordpressTeamSync } from '@/lib/wordpress-team-sync'
-import { supabase } from '@/lib/supabase'
-import { headers } from 'next/headers'
+import { createServerClient, getAuthUser } from '@/lib/supabase-server'
 
 export async function GET(request: NextRequest) {
   try {
-    // Get the authorization header
-    const headersList = headers()
-    const authorization = headersList.get('authorization')
-    
-    if (!authorization) {
-      return NextResponse.json(
-        { error: 'Unauthorized - No authorization header' },
-        { status: 401 }
-      )
-    }
-
-    // Set the auth header for Supabase
-    const token = authorization.replace('Bearer ', '')
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    // Check authentication
+    const { user, error: authError } = await getAuthUser()
     
     if (authError || !user) {
       return NextResponse.json(
@@ -26,6 +13,8 @@ export async function GET(request: NextRequest) {
         { status: 401 }
       )
     }
+
+    const supabase = await createServerClient()
 
     // Get limit from query params
     const { searchParams } = new URL(request.url)
