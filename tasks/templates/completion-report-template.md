@@ -1,95 +1,103 @@
-# Task Completion Report
-**Task**: [Original Task Name]  
-**Agent**: [Agent Name]  
-**Completed**: [YYYY-MM-DD]  
-**Duration**: [X days/weeks]  
-**Domain**: [database | gamification | frontend | infrastructure | academy]
+# Task Completion Report: [Task Name]
 
-## 📋 Original Objectives
-List the original success criteria from the task:
-- [✅/❌] Objective 1 - [Status/Notes]
-- [✅/❌] Objective 2 - [Status/Notes]
-- [✅/❌] Objective 3 - [Status/Notes]
+---
+**Completed By**: [Agent Name]  
+**Completion Date**: [YYYY-MM-DD]  
+**Original Task**: `tasks/active/[domain]/[original-task-file].md`  
+**Total Duration**: [X days/weeks]  
+---
 
-## 🎯 Outcomes Delivered
-### Code Changes
-- `path/to/file1.tsx` - [Description of changes]
-- `path/to/file2.md` - [Description of changes]
-- `path/to/file3.sql` - [Description of changes]
+## ✅ Accomplishments Summary
 
-### Documentation Updates
-- Updated: [List documentation files]
-- Created: [List new documentation]
+### **Primary Objectives Completed**
+- [x] [Original objective 1] - `path/to/modified/file.tsx`
+- [x] [Original objective 2] - `path/to/modified/file.ts`
+- [x] [Original objective 3] - `path/to/modified/file.tsx`
 
-### Tests
-- Unit tests: [X added/updated]
-- Integration tests: [X added/updated]
-- E2E tests: [X added/updated]
+### **Additional Work Completed**
+- [Unexpected tasks that were necessary]
+- [Improvements made beyond scope]
 
-## 📊 Impact Assessment
-### Performance Impact
-- [Metric]: Improved by [X%] or No change
-- [Metric]: Improved by [X%] or No change
+## 📁 Files Modified/Created
 
-### User Experience Impact
-- [Improvement description]
-- [Improvement description]
+### **Core Changes**
+| File Path | Change Type | Description |
+|-----------|-------------|-------------|
+| `src/components/example.tsx` | Modified | [Brief description] |
+| `src/lib/example.ts` | Created | [Brief description] |
+| `docs/example.md` | Modified | [Brief description] |
 
-### Developer Experience Impact
-- [How this helps other developers]
-- [What new capabilities this enables]
+### **Configuration Changes**
+| File Path | Change Type | Description |
+|-----------|-------------|-------------|
+| `package.json` | Modified | [Dependencies added/updated] |
+| `supabase/migrations/xxx.sql` | Created | [Database changes] |
 
-## 🚧 Issues Encountered
-### Blockers Resolved
-- **Issue**: [Description]
-- **Resolution**: [How it was solved]
-- **Time Impact**: [X days delay]
+## 🧪 Testing Results
 
-### Technical Challenges
-- **Challenge**: [Description]
-- **Solution**: [How it was addressed]
-- **Lessons Learned**: [Key insights]
+### **Tests Passed**
+- [ ] Unit tests: [X/Y passed]
+- [ ] Integration tests: [X/Y passed]  
+- [ ] E2E tests: [X/Y passed]
+- [ ] Manual testing: [Scenarios verified]
 
-## 🔄 Follow-up Actions Required
-- [ ] Action 1 - [Assigned to: Agent/Team]
-- [ ] Action 2 - [Assigned to: Agent/Team]
-- [ ] Action 3 - [Assigned to: Agent/Team]
+### **Performance Impact**
+- Load time: [Before vs After]
+- Bundle size: [Before vs After]
+- Database queries: [Optimization notes]
 
-## 📝 Lessons Learned
-### What Went Well
+## 🚨 Known Issues & Future Work
+
+### **Minor Issues**
+- [Issue 1]: [Description and potential fix]
+- [Issue 2]: [Description and potential fix]
+
+### **Future Enhancement Opportunities**
+- [Enhancement 1]: [Description and estimated effort]
+- [Enhancement 2]: [Description and estimated effort]
+
+## 🤝 Impact on Other Agents
+
+### **Coordination Notes**
+- **Database Agent**: [What they need to know]
+- **Frontend Agent**: [What they need to know]
+- **Gamification Agent**: [What they need to know]
+
+### **Breaking Changes**
+- None / [Description of any breaking changes]
+
+## 📊 Lessons Learned
+
+### **What Went Well**
 - [Positive aspect 1]
 - [Positive aspect 2]
 
-### What Could Be Improved
-- [Area for improvement 1]
-- [Area for improvement 2]
+### **What Could Be Improved**
+- [Process improvement 1]
+- [Process improvement 2]
 
-### Process Improvements
-- [Suggestion for better workflow]
-- [Suggestion for better coordination]
+### **Technical Insights**
+- [Technical learning 1]
+- [Technical learning 2]
+
+## 📋 Handoff Checklist
+
+- [ ] All code changes committed and pushed
+- [ ] Documentation updated with relative paths
+- [ ] Tests passing in CI/CD
+- [ ] Agent coordination log updated
+- [ ] Next steps documented (if any)
+- [ ] Task moved to `/completed/` directory
 
 ## 🔗 Related Tasks
-### Unblocked by This Task
-- `tasks/active/[domain]/[task-name].md` - [How this unblocks it]
 
-### New Tasks Created
-- `tasks/active/[domain]/[new-task].md` - [Brief description]
+### **Spawned Tasks**
+- `tasks/active/[domain]/[new-task].md` - [Description]
 
-## 📁 Artifacts
-### Code
-- PR: [Link to pull request]
-- Branch: [Branch name if preserved]
-
-### Documentation
-- [File name] - [Brief description]
-- [File name] - [Brief description]
-
-### Data/Scripts
-- [File name] - [Brief description]
-- [File name] - [Brief description]
+### **Dependent Tasks**
+- [Task that was waiting for this completion]
 
 ---
 
-**Archival Location**: `tasks/completed/[YYYY-MM-DD]-[task-name]/`  
-**Original Task File**: [Link to original task]  
-**Coordination Updates**: [References to relevant coordination log entries]
+**Report Generated**: [YYYY-MM-DD]  
+**Archive Location**: `tasks/completed/[YYYY-MM-DD]-[task-name]/`

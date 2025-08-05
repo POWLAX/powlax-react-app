@@ -56,4 +56,4 @@ next-env.d.ts
 /dist/
 
 # OS files
-Thumbs.db
+Thumbs.dbdev-server.log

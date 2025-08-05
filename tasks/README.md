@@ -1,113 +1,65 @@
-# POWLAX Tasks Organization
+# POWLAX Task Management System
 
-## Overview
-This directory contains all active development tasks for the POWLAX application. Tasks are organized by feature area and assigned to specific agents.
+## 🎯 Purpose
+Organized task management system for POWLAX development with clear agent coordination and progress tracking.
 
-## Directory Structure
+## 📁 Directory Structure
 
-### `/academy/`
-Tasks related to Skills Academy features including:
-- Individual drill pages
-- Workout collections
-- Progress tracking
-- Video integration
+### `/active/` - Current Work
+- **`database/`** - Database schema, migrations, security fixes
+- **`gamification/`** - Gamification system implementation
+- **`frontend/`** - UI/UX components and features  
+- **`infrastructure/`** - DevOps, configs, build processes
 
-### `/database/`
-Database-related tasks including:
-- Data imports and migrations
-- Relationship mapping
-- Performance optimization
-- Data validation
+### `/completed/` - Finished Tasks
+- **`[YYYY-MM-DD]-[task-name]/`** - Archived completed work
+- Each folder contains completion report and final deliverables
 
-### `/practice-plan/`
-Practice planner enhancements:
-- Strategy integration
-- Drill recommendations
-- Timeline improvements
-- Export features
+### `/templates/` - Standard Templates
+- **`standard-task-template.md`** - Consistent task format
+- **`completion-report-template.md`** - Standard completion reporting
 
-### `/gamification/`
-Gamification system tasks:
-- Points and badges
-- Streaks and challenges
-- Leaderboards
-- Parent notifications
+### `/coordination/` - Inter-Agent Communication
+- **`agent-coordination-log.md`** - Cross-agent updates and notifications
 
-## Task File Format
+## 🔧 Usage Guidelines
 
-Each task file should follow this template:
+### For Agents
+1. **Work Location**: Always work in `/tasks/active/[domain]/`
+2. **File References**: Use relative paths from project root
+3. **Progress Updates**: Update daily with specific file references
+4. **Coordination**: Document breaking changes in coordination log
 
+### For Task Management
+1. **New Tasks**: Create in appropriate `/active/` subdirectory
+2. **Task Completion**: Move to `/completed/` with date prefix
+3. **Documentation**: Follow template standards consistently
+4. **Archive Policy**: Keep completed tasks for 90 days minimum
+
+## 📋 File Reference Standards
+
+### ✅ CORRECT Path References
 ```markdown
-# TASK [NUMBER]: [Title]
-
-## Overview
-Brief description of the task
-
-## Agent Assignment
-- Primary: [Agent Name]
-- Supporting: [Other Agents]
-
-## Tasks
-- [ ] Specific task item
-- [ ] Another task item
-
-## Progress
-- ⏳ In Progress: [Item]
-- ✅ Completed: [Item]
-- ❌ Blocked: [Item] - [Reason]
-
-## Files Modified/Created
-- `/path/to/file` - Description
-
-## Notes
-Any additional context
+- `src/components/practice-planner/DrillLibrary.tsx`
+- `docs/existing/Gamification/Gemini Gamification for POWLAX.md`
+- `tasks/active/database/schema-updates.md`
 ```
 
-## Active Tasks
+### ❌ AVOID These References
+```markdown
+- "DrillLibrary.tsx"
+- "the gamification document"
+- "database task file"
+```
 
-### High Priority
-1. **TASK_001**: Academy & Strategy Pages Implementation
-   - Agent: Frontend Developer
-   - Status: Ready to start
+## 🚀 Quick Start
 
-2. **TASK_002**: Database Integration & Data Mapping
-   - Agent: Data Analyst
-   - Status: Ready to start
+1. **Create New Task**: Copy template from `/templates/`
+2. **Place in Active**: Move to appropriate `/active/` subdirectory
+3. **Work and Update**: Update progress with relative paths
+4. **Complete**: Move to `/completed/` with completion report
 
-### Medium Priority
-- Practice planner strategy integration
-- Gamification phase 1 implementation
+---
 
-### Low Priority
-- Workspace cleanup
-- Documentation updates
-
-## Task Management Rules
-
-1. **File References**: Always use relative paths from project root
-2. **Progress Updates**: Update task files daily with progress
-3. **Subtasks**: Create separate files for complex subtasks
-4. **Communication**: Use task file comments for inter-agent communication
-5. **Completion**: Move completed tasks to `/tasks/completed/` with date
-
-## Agent Responsibilities
-
-### When Starting a Task:
-1. Read the full task file
-2. Create subtask files if needed
-3. Update status to "In Progress"
-
-### During Development:
-1. Update progress section daily
-2. Document any blockers
-3. List all files created/modified
-
-### When Completing:
-1. Mark all items as completed
-2. Add summary of changes
-3. Note any follow-up tasks needed
-
-## Coordination
-- Check other active tasks before making breaking changes
-- Coordinate database schema changes through TASK_002
-- UI components should follow existing patterns
+*Last Updated: January 15, 2025*
+*Maintained by: Workspace Organization Architect*
