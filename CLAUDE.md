@@ -95,6 +95,11 @@ export default async function Page() {
 - Implement features in phases as documented in /docs/implementation-phases/
 - Reference /tasks/ directory for current sprint planning
 
+### Commit & Production Guidelines
+- **REQUIRED**: Follow [GitHub Commit & Production Guidelines](docs/development/GITHUB_COMMIT_AND_PRODUCTION_GUIDELINES.md)
+- **Quick Reference**: [Quick Commit Checklist](docs/development/QUICK_COMMIT_CHECKLIST.md)
+- **Before Every Commit**: Run `npm run lint && npm run build && npx playwright test`
+
 ### Testing Strategy
 - E2E tests cover critical user journeys
 - Test on multiple devices (Desktop, Mobile, iPad)
