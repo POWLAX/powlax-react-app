@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { wordpressTeamSync } from '@/lib/wordpress-team-sync'
 import { createServerClient, getAuthUser } from '@/lib/supabase-server'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     // Check authentication

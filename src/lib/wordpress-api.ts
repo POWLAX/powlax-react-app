@@ -37,7 +37,9 @@ class WordPressAPI {
       appPassword: process.env.WORDPRESS_APP_PASSWORD,
       jwtToken: process.env.WORDPRESS_JWT_TOKEN,
     };
+  }
 
+  private ensureConfigured() {
     if (!this.config.baseUrl) {
       throw new Error('WORDPRESS_API_URL environment variable is required');
     }
@@ -62,6 +64,7 @@ class WordPressAPI {
   }
 
   async fetchDrills(page = 1, perPage = 100): Promise<WordPressDrill[]> {
+    this.ensureConfigured();
     try {
       const url = `${this.config.baseUrl}/posts?per_page=${perPage}&page=${page}&post_type=drill`;
       
@@ -83,6 +86,7 @@ class WordPressAPI {
   }
 
   async fetchCustomDrills(): Promise<any[]> {
+    this.ensureConfigured();
     try {
       // If using custom POWLAX endpoints
       const customEndpoint = process.env.WORDPRESS_DRILLS_ENDPOINT || '/drills';
@@ -112,6 +116,7 @@ class WordPressAPI {
   }
 
   async testConnection(): Promise<boolean> {
+    this.ensureConfigured();
     try {
       const url = `${this.config.baseUrl}/posts?per_page=1`;
       const response = await fetch(url, {

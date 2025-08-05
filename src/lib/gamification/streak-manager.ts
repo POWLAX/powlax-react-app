@@ -1,7 +1,7 @@
 // Streak management service for POWLAX gamification
 // Phase 1: Anti-Gaming Foundation
 
-import { createClient } from '@/lib/supabase'
+import { SupabaseClient } from '@supabase/supabase-js'
 
 export interface StreakData {
   current_streak: number
@@ -26,8 +26,7 @@ export interface StreakUpdateResult {
  * Update user's workout streak
  * This calls the database function which handles all streak logic
  */
-export async function updateUserStreak(userId: string): Promise<StreakUpdateResult> {
-  const supabase = createClient()
+export async function updateUserStreak(userId: string, supabase: SupabaseClient): Promise<StreakUpdateResult> {
   
   try {
     // Call the database function to update streak
@@ -48,7 +47,7 @@ export async function updateUserStreak(userId: string): Promise<StreakUpdateResu
     
     // If milestone reached, award bonus points
     if (result.milestone_reached) {
-      await awardMilestoneBonus(userId, result.milestone_reached)
+      await awardMilestoneBonus(userId, result.milestone_reached, supabase)
     }
     
     return result
@@ -62,8 +61,7 @@ export async function updateUserStreak(userId: string): Promise<StreakUpdateResu
 /**
  * Get current streak data for a user
  */
-export async function getUserStreakData(userId: string): Promise<StreakData> {
-  const supabase = createClient()
+export async function getUserStreakData(userId: string, supabase: SupabaseClient): Promise<StreakData> {
   
   const { data, error } = await supabase
     .from('user_streak_data')
@@ -74,7 +72,7 @@ export async function getUserStreakData(userId: string): Promise<StreakData> {
   if (error) {
     if (error.code === 'PGRST116') {
       // No record found, create one
-      return await createUserStreakData(userId)
+      return await createUserStreakData(userId, supabase)
     }
     throw new Error(`Failed to get streak data: ${error.message}`)
   }
@@ -85,8 +83,7 @@ export async function getUserStreakData(userId: string): Promise<StreakData> {
 /**
  * Create initial streak data for a user
  */
-async function createUserStreakData(userId: string): Promise<StreakData> {
-  const supabase = createClient()
+async function createUserStreakData(userId: string, supabase: SupabaseClient): Promise<StreakData> {
   
   const { data, error } = await supabase
     .from('user_streak_data')
@@ -136,11 +133,9 @@ function getMilestoneBonus(milestone: number): number {
 /**
  * Award milestone bonus points
  */
-async function awardMilestoneBonus(userId: string, milestone: number): Promise<void> {
+async function awardMilestoneBonus(userId: string, milestone: number, supabase: SupabaseClient): Promise<void> {
   const bonusPoints = getMilestoneBonus(milestone)
   if (bonusPoints === 0) return
-  
-  const supabase = createClient()
   
   // Award Lax Credits for milestone
   const { error } = await supabase.rpc('award_points', {
@@ -185,8 +180,7 @@ export function canUseStreakFreeze(
 /**
  * Get streak statistics for a user
  */
-export async function getStreakStats(userId: string) {
-  const supabase = createClient()
+export async function getStreakStats(userId: string, supabase: SupabaseClient) {
   
   const { data, error } = await supabase
     .from('user_streak_view')
@@ -241,8 +235,7 @@ function getMilestoneProgress(currentStreak: number) {
 /**
  * Reset streak (admin function)
  */
-export async function resetUserStreak(userId: string): Promise<void> {
-  const supabase = createClient()
+export async function resetUserStreak(userId: string, supabase: SupabaseClient): Promise<void> {
   
   const { error } = await supabase
     .from('user_streak_data')

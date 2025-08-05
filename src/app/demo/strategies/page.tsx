@@ -13,8 +13,8 @@ import {
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { vimeoService } from '@/lib/vimeo-service'
-import { VideoModal } from '@/components/practice-planner/modals/VideoModal'
-import { LacrosseLabModal } from '@/components/practice-planner/modals/LacrosseLabModal'
+import VideoModal from '@/components/practice-planner/modals/VideoModal'
+import LacrosseLabModal from '@/components/practice-planner/modals/LacrosseLabModal'
 
 interface Strategy {
   id: string

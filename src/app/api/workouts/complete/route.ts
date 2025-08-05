@@ -2,7 +2,7 @@
 // Phase 1: Anti-Gaming Foundation
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase'
+import { createServerClient } from '@/lib/supabase-server'
 import { calculateWorkoutPoints, Drill } from '@/lib/gamification/point-calculator'
 import { updateUserStreak, getUserStreakData } from '@/lib/gamification/streak-manager'
 
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get authenticated user
-    const supabase = createClient()
+    const supabase = await createServerClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user's current streak data
-    const streakData = await getUserStreakData(user.id)
+    const streakData = await getUserStreakData(user.id, supabase)
     const isFirstToday = streakData.last_activity_date !== new Date().toISOString().split('T')[0]
 
     // Calculate points using new system
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       await awardPointsToUser(user.id, workoutScore.categoryPoints)
 
       // 3. Update user streak
-      const streakResult = await updateUserStreak(user.id)
+      const streakResult = await updateUserStreak(user.id, supabase)
 
       // 4. Check badge progress
       const badgeUpdates = await checkBadgeProgress(user.id, workoutScore.categoryPoints)
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
  * Fetch drills by IDs from appropriate table
  */
 async function fetchDrillsByIds(drillIds: number[], workoutType: string): Promise<Drill[]> {
-  const supabase = createClient()
+  const supabase = await createServerClient()
   
   let tableName: string
   let selectFields = 'id, title, difficulty_score'
@@ -180,7 +180,7 @@ async function recordWorkoutCompletion(
   workoutType?: string,
   sessionData?: any
 ) {
-  const supabase = createClient()
+  const supabase = await createServerClient()
 
   const completionData = {
     user_id: userId,
@@ -213,7 +213,7 @@ async function recordWorkoutCompletion(
  * Award points to user across all categories
  */
 async function awardPointsToUser(userId: string, categoryPoints: any) {
-  const supabase = createClient()
+  const supabase = await createServerClient()
   
   const pointEntries = Object.entries(categoryPoints)
     .filter(([_, amount]) => (amount as number) > 0)
@@ -254,7 +254,7 @@ async function awardPointsToUser(userId: string, categoryPoints: any) {
  * Check badge progress and award new badges if eligible
  */
 async function checkBadgeProgress(userId: string, categoryPoints: any) {
-  const supabase = createClient()
+  const supabase = await createServerClient()
   
   // Get user's current point balances
   const { data: balances } = await supabase

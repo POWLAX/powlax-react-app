@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Clock, Trophy, Target, Zap, Shield, Users } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { vimeoService } from '@/lib/vimeo-service'
-import { VideoModal } from '@/components/practice-planner/modals/VideoModal'
+import VideoModal from '@/components/practice-planner/modals/VideoModal'
 
 interface Workout {
   id: string
