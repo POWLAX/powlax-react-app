@@ -1,34 +1,47 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { useWordPressAuth } from '@/hooks/useWordPressAuth'
+import { useAuth } from '@/contexts/JWTAuthContext'
 import { Loader2, AlertCircle } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
-  const { login, loading, error } = useWordPressAuth()
+  const { login, error, user } = useAuth()
   const [formData, setFormData] = useState({
     username: '',
     password: '',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [loginError, setLoginError] = useState<string | null>(null)
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      router.push('/dashboard')
+    }
+  }, [user, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setLoginError(null)
 
     try {
-      const response = await login(formData.username, formData.password)
+      const success = await login(formData.username, formData.password)
       
-      if (response.success) {
-        // Redirect to dashboard or previous page
+      if (success) {
+        // Redirect to dashboard
         router.push('/dashboard')
+      } else {
+        setLoginError(error || 'Login failed. Please check your credentials.')
+        setFormData(prev => ({ ...prev, password: '' })) // Clear password on error
       }
     } catch (err) {
       console.error('Login error:', err)
+      setLoginError('Connection error. Please try again.')
     } finally {
       setIsSubmitting(false)
     }
@@ -40,21 +53,21 @@ export default function LoginPage() {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">Welcome to POWLAX</CardTitle>
           <CardDescription className="text-center">
-            Sign in with your POWLAX account to continue
+            Sign in with your POWLAX account
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
+            {(error || loginError) && (
               <div className="bg-red-50 border border-red-200 rounded-md p-3 flex items-start gap-2">
                 <AlertCircle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-red-600">{error}</p>
+                <p className="text-sm text-red-600">{loginError || error}</p>
               </div>
             )}
 
             <div className="space-y-2">
               <label htmlFor="username" className="text-sm font-medium">
-                Username or Email
+                Username
               </label>
               <input
                 id="username"
@@ -62,7 +75,7 @@ export default function LoginPage() {
                 value={formData.username}
                 onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your username"
+                placeholder="Your POWLAX username"
                 required
                 disabled={isSubmitting}
               />
@@ -78,7 +91,7 @@ export default function LoginPage() {
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your password"
+                placeholder="Your POWLAX password"
                 required
                 disabled={isSubmitting}
               />
@@ -87,7 +100,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               className="w-full"
-              disabled={isSubmitting || loading}
+              disabled={isSubmitting}
             >
               {isSubmitting ? (
                 <>

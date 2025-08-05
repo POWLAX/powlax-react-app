@@ -1,12 +1,20 @@
 'use client'
 
 import { useState } from 'react'
+import { useParams } from 'next/navigation'
 import { Calendar, Clock, MapPin, Save, Printer, RefreshCw, FolderOpen, Plus } from 'lucide-react'
 import DrillLibrary from '@/components/practice-planner/DrillLibrary'
 import PracticeTimelineWithParallel from '@/components/practice-planner/PracticeTimelineWithParallel'
 import PracticeDurationBar from '@/components/practice-planner/PracticeDurationBar'
+import SavePracticeModal from '@/components/practice-planner/modals/SavePracticeModal'
+import LoadPracticeModal from '@/components/practice-planner/modals/LoadPracticeModal'
+import { usePracticePlans } from '@/hooks/usePracticePlans'
+import { toast } from 'sonner'
 
 export default function PracticePlansPage() {
+  const params = useParams()
+  const teamId = params.teamId as string
+  const { savePracticePlan, plans, loading: plansLoading } = usePracticePlans(teamId)
   const [practiceDate, setPracticeDate] = useState(new Date().toISOString().split('T')[0])
   const [startTime, setStartTime] = useState('07:00')
   const [duration, setDuration] = useState(90) // Default 90 minutes for youth
@@ -16,6 +24,8 @@ export default function PracticePlansPage() {
   const [practiceNotes, setPracticeNotes] = useState('')
   const [timeSlots, setTimeSlots] = useState<any[]>([])
   const [showDrillLibrary, setShowDrillLibrary] = useState(false)
+  const [showSaveModal, setShowSaveModal] = useState(false)
+  const [showLoadModal, setShowLoadModal] = useState(false)
 
   // Calculate total drill time from all time slots
   const totalDrillTime = timeSlots.reduce((acc, slot) => acc + slot.duration, 0)
@@ -36,6 +46,61 @@ export default function PracticePlansPage() {
     setTimeSlots([...timeSlots, newSlot])
   }
 
+  const handleSavePracticePlan = async (title: string, notes?: string) => {
+    const drillSequence = {
+      timeSlots,
+      practiceInfo: {
+        startTime,
+        setupTime: addSetupTime ? setupDuration : undefined,
+        field
+      }
+    }
+
+    const { data, error } = await savePracticePlan({
+      title,
+      team_id: teamId,
+      practice_date: practiceDate,
+      duration_minutes: duration,
+      drill_sequence: drillSequence,
+      notes: notes || practiceNotes || undefined
+    })
+
+    if (error) {
+      toast.error(`Failed to save practice plan: ${error}`)
+      throw new Error(error)
+    } else {
+      toast.success('Practice plan saved successfully!')
+      setShowSaveModal(false)
+    }
+  }
+
+  const handleLoadPracticePlan = (plan: any) => {
+    // Load the practice plan data
+    setPracticeDate(plan.practice_date)
+    setDuration(plan.duration_minutes)
+    setPracticeNotes(plan.notes || '')
+    
+    // Load drill sequence
+    if (plan.drill_sequence) {
+      setTimeSlots(plan.drill_sequence.timeSlots || [])
+      
+      // Load practice info
+      if (plan.drill_sequence.practiceInfo) {
+        const info = plan.drill_sequence.practiceInfo
+        setStartTime(info.startTime || '07:00')
+        setField(info.field || 'Turf')
+        
+        if (info.setupTime) {
+          setAddSetupTime(true)
+          setSetupDuration(info.setupTime)
+        }
+      }
+    }
+    
+    toast.success(`Loaded practice plan: ${plan.title}`)
+    setShowLoadModal(false)
+  }
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -48,10 +113,18 @@ export default function PracticePlansPage() {
           
           {/* Toolbar */}
           <div className="flex items-center space-x-2">
-            <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded">
+            <button 
+              onClick={() => setShowLoadModal(true)}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
+              title="Open Practice Plan"
+            >
               <FolderOpen className="h-5 w-5" />
             </button>
-            <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded">
+            <button 
+              onClick={() => setShowSaveModal(true)}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
+              title="Save Practice Plan"
+            >
               <Save className="h-5 w-5" />
             </button>
             <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded">
@@ -217,6 +290,23 @@ export default function PracticePlansPage() {
       >
         <Plus className="h-6 w-6" />
       </button>
+
+      {/* Save Practice Modal */}
+      <SavePracticeModal
+        isOpen={showSaveModal}
+        onClose={() => setShowSaveModal(false)}
+        onSave={handleSavePracticePlan}
+        defaultNotes={practiceNotes}
+      />
+
+      {/* Load Practice Modal */}
+      <LoadPracticeModal
+        isOpen={showLoadModal}
+        onClose={() => setShowLoadModal(false)}
+        onLoad={handleLoadPracticePlan}
+        plans={plans}
+        loading={plansLoading}
+      />
     </div>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useWordPressAuth } from './useWordPressAuth';
+import { useAuth } from '@/contexts/JWTAuthContext';
 import { 
   getUserSecurityContext, 
   fetchDashboardData,
@@ -16,7 +16,7 @@ import { toast } from 'sonner';
  * Hook to fetch dashboard data with security context
  */
 export function useDashboardData() {
-  const { user } = useWordPressAuth();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   // Get user's security context
@@ -73,7 +73,7 @@ export function useDashboardData() {
  * Hook to verify data access before fetching
  */
 export function useSecureDataAccess() {
-  const { user } = useWordPressAuth();
+  const { user } = useAuth();
 
   const checkAccess = useMutation({
     mutationFn: async ({ 
@@ -114,7 +114,7 @@ export function useSecureDataAccess() {
  * Hook for admin role toggle functionality
  */
 export function useAdminRoleToggle() {
-  const { user } = useWordPressAuth();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   
   const isAdmin = user?.roles?.includes('administrator');
@@ -166,7 +166,7 @@ export function useAdminRoleToggle() {
  * Hook to fetch data for a specific organization (Director use)
  */
 export function useOrganizationData(organizationId?: string) {
-  const { user } = useWordPressAuth();
+  const { user } = useAuth();
   const { checkAccess } = useSecureDataAccess();
 
   return useQuery({
@@ -202,7 +202,7 @@ export function useOrganizationData(organizationId?: string) {
  * Hook to fetch team data (Coach use)
  */
 export function useTeamData(teamId?: string) {
-  const { user } = useWordPressAuth();
+  const { user } = useAuth();
   const { checkAccess } = useSecureDataAccess();
 
   return useQuery({
@@ -240,7 +240,7 @@ export function useTeamData(teamId?: string) {
  * Hook to fetch children data (Parent use)
  */
 export function useChildrenData() {
-  const { user } = useWordPressAuth();
+  const { user } = useAuth();
   const { securityContext } = useDashboardData();
 
   return useQuery({

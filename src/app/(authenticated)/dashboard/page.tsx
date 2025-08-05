@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useWordPressAuth, useRequireAuth, useSubscriptionStatus } from '@/hooks/useWordPressAuth'
+import { useAuth, useRequireAuth } from '@/contexts/JWTAuthContext'
 import { useDashboardData } from '@/hooks/useDashboardData'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -12,9 +12,10 @@ import Link from 'next/link'
 type UserRole = 'admin' | 'coach' | 'player' | 'parent' | 'director'
 
 export default function DashboardPage() {
-  const { user, loading: authLoading } = useWordPressAuth()
-  const { isAuthorized, loading: authCheckLoading } = useRequireAuth()
-  const { hasActiveSubscription, activeSubscriptions } = useSubscriptionStatus()
+  const { user, loading: authLoading } = useAuth()
+  const { loading: authCheckLoading } = useRequireAuth()
+  const hasActiveSubscription = true // TODO: Implement subscription check
+  const activeSubscriptions: any[] = []
   const [userRole, setUserRole] = useState<UserRole>('coach')
 
   useEffect(() => {
@@ -45,7 +46,7 @@ export default function DashboardPage() {
     )
   }
 
-  if (!isAuthorized || !user) {
+  if (!user) {
     return null // Will redirect via useRequireAuth
   }
 

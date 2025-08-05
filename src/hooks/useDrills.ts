@@ -28,14 +28,40 @@ interface Drill {
   notes?: string
 }
 
-// Mock data fallback
+// Mock data fallback - comprehensive drill library
 const mockDrills: Drill[] = [
-  { id: '1', name: '2 Ball Reaction Drill', duration: 10, category: 'skill', strategies: ['Ground Ball'] },
-  { id: '2', name: '3 Man Passing', duration: 15, category: 'skill', strategies: ['Clearing'] },
-  { id: '3', name: '+1 Ground Ball', duration: 10, category: 'skill', strategies: ['Ground Ball'] },
-  { id: '4', name: '10 Man Ride', duration: 20, category: '1v1', strategies: ['Riding'] },
-  { id: '5', name: 'Box Lacrosse Ground Ball', duration: 15, category: 'concept', strategies: ['Ground Ball'] },
-  { id: '6', name: 'Clear vs Ride', duration: 25, category: 'concept', strategies: ['Clearing', 'Riding'] },
+  // Admin Drills
+  { id: '1', name: 'Dynamic Warm-Up', duration: 10, category: 'admin', strategies: ['Warm-Up'], notes: 'Progressive warm-up with dynamic stretching' },
+  { id: '2', name: 'Line Drills', duration: 8, category: 'admin', strategies: ['Warm-Up', 'Footwork'] },
+  { id: '3', name: 'Stick Work Lines', duration: 10, category: 'admin', strategies: ['Warm-Up', 'Stick Skills'] },
+  
+  // Skill Drills
+  { id: '4', name: '2 Ball Reaction Drill', duration: 10, category: 'skill', strategies: ['Ground Ball'], notes: 'Quick reaction and ground ball technique' },
+  { id: '5', name: '3 Man Passing', duration: 15, category: 'skill', strategies: ['Passing', 'Catching'] },
+  { id: '6', name: 'Star Drill', duration: 12, category: 'skill', strategies: ['Passing', 'Movement'] },
+  { id: '7', name: 'Box Passing', duration: 10, category: 'skill', strategies: ['Passing', 'Catching'] },
+  { id: '8', name: 'Over the Shoulder', duration: 10, category: 'skill', strategies: ['Catching', 'Communication'] },
+  { id: '9', name: 'Quick Stick Drill', duration: 8, category: 'skill', strategies: ['Stick Skills'] },
+  { id: '10', name: 'Wall Ball Circuit', duration: 15, category: 'skill', strategies: ['Stick Skills'], notes: 'Individual skill development' },
+  
+  // 1v1 Drills
+  { id: '11', name: '1v1 Ground Balls', duration: 15, category: '1v1', strategies: ['Ground Ball', 'Competition'] },
+  { id: '12', name: '1v1 from X', duration: 20, category: '1v1', strategies: ['Dodging', 'Defense'] },
+  { id: '13', name: '1v1 from Top', duration: 20, category: '1v1', strategies: ['Dodging', 'Defense'] },
+  { id: '14', name: 'Mirror Dodge', duration: 10, category: '1v1', strategies: ['Dodging', 'Footwork'] },
+  { id: '15', name: 'Defensive Positioning 1v1', duration: 15, category: '1v1', strategies: ['Defense', 'Positioning'] },
+  
+  // Concept Drills
+  { id: '16', name: '3v2 Fast Break', duration: 20, category: 'concept', strategies: ['Transition', 'Offense'] },
+  { id: '17', name: '4v3 West Genny', duration: 25, category: 'concept', strategies: ['Transition', 'Decision Making'] },
+  { id: '18', name: '5v4 Slow Break', duration: 25, category: 'concept', strategies: ['Transition', 'Offense'] },
+  { id: '19', name: 'Clear vs Ride', duration: 25, category: 'concept', strategies: ['Clearing', 'Riding'] },
+  { id: '20', name: '6v6 Ground Ball to Offense', duration: 30, category: 'concept', strategies: ['Transition', 'Ground Ball'] },
+  { id: '21', name: 'Defensive Slides', duration: 20, category: 'concept', strategies: ['Defense', 'Communication'] },
+  { id: '22', name: 'Motion Offense', duration: 25, category: 'concept', strategies: ['Offense', 'Movement'] },
+  { id: '23', name: '2-3-1 Zone Defense', duration: 20, category: 'concept', strategies: ['Defense', 'Zone'] },
+  { id: '24', name: 'Man-Up Offense', duration: 20, category: 'concept', strategies: ['Offense', 'Special Teams'] },
+  { id: '25', name: 'Man-Down Defense', duration: 20, category: 'concept', strategies: ['Defense', 'Special Teams'] },
 ]
 
 export function useDrills() {
@@ -50,14 +76,19 @@ export function useDrills() {
   const fetchDrills = async () => {
     try {
       setLoading(true)
+      console.log('Fetching drills from Supabase...')
       
       // Fetch from the drills table based on v3 schema
       const { data, error } = await supabase
         .from('drills')
         .select('*')
         .order('title')
+        .limit(100)  // Add limit for performance
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase error fetching drills:', error)
+        throw error
+      }
 
       if (!data || data.length === 0) {
         console.log('No drills found in database, using mock data')
@@ -139,7 +170,8 @@ export function useDrills() {
     }
   }
 
-  return { drills, loading, error }
+  // TEMPORARY: Return mock data with loading false for testing
+  return { drills: drills.length > 0 ? drills : mockDrills, loading: false, error }
 }
 
 // Helper function to map drill categories to our UI categories

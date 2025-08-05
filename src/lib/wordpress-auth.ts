@@ -62,13 +62,149 @@ class WordPressAuth {
 
   /**
    * Authenticate user with WordPress credentials
+   * Supports both regular WordPress passwords and Application Passwords
    */
   async authenticateUser(username: string, password: string): Promise<AuthResponse> {
     try {
-      // Use Basic Auth to validate credentials
+      // Method 1: Try WordPress login endpoint with regular password
+      const loginResult = await this.tryWordPressLogin(username, password);
+      if (loginResult.success) {
+        return loginResult;
+      }
+
+      // Method 2: Try Basic Auth with REST API (Application Password or enabled Basic Auth)
+      const restResult = await this.tryRestAPIAuth(username, password);
+      if (restResult.success) {
+        return restResult;
+      }
+
+      // If both methods fail, return helpful error message
+      return {
+        success: false,
+        error: 'Login failed. Please check your username and password. If you continue having issues, you may need to enable Application Passwords in your WordPress admin.',
+      };
+    } catch (error) {
+      console.error('Authentication error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Authentication failed',
+      };
+    }
+  }
+
+  /**
+   * Try WordPress login with regular password using XML-RPC
+   */
+  private async tryWordPressLogin(username: string, password: string): Promise<AuthResponse> {
+    try {
+      // Extract domain from baseUrl for XML-RPC
+      const wpUrl = this.baseUrl.replace('/wp-json/wp/v2', '');
+      const xmlrpcUrl = `${wpUrl}/xmlrpc.php`;
+      
+      // XML-RPC request to authenticate and get user profile
+      const xmlrpcBody = `<?xml version="1.0"?>
+        <methodCall>
+          <methodName>wp.getProfile</methodName>
+          <params>
+            <param><value><string>${username}</string></value></param>
+            <param><value><string>${password}</string></value></param>
+          </params>
+        </methodCall>`;
+
+      const xmlrpcResponse = await fetch(xmlrpcUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/xml',
+          'User-Agent': 'POWLAX-App/1.0'
+        },
+        body: xmlrpcBody
+      });
+
+      if (!xmlrpcResponse.ok) {
+        return { success: false, error: 'WordPress XML-RPC not accessible' };
+      }
+
+      const xmlrpcText = await xmlrpcResponse.text();
+      
+      // Check if authentication was successful (no fault in response)
+      if (xmlrpcText.includes('<fault>')) {
+        return { success: false, error: 'Invalid WordPress credentials' };
+      }
+
+      if (!xmlrpcText.includes('<methodResponse>')) {
+        return { success: false, error: 'WordPress authentication failed' };
+      }
+
+      // Authentication successful, now get user data via REST API
+      try {
+        // Try to get user data by searching for the username
+        const usersResponse = await fetch(`${this.baseUrl}/users?search=${encodeURIComponent(username)}`, {
+          headers: {
+            'User-Agent': 'POWLAX-App/1.0'
+          }
+        });
+        
+        if (usersResponse.ok) {
+          const users = await usersResponse.json();
+          const userData = users.find((user: any) => 
+            user.slug === username.toLowerCase() || 
+            user.username === username ||
+            user.name === username
+          );
+          
+          if (userData) {
+            // Create a token indicating XML-RPC authentication
+            const token = btoa(`xmlrpc:${username}:${Date.now()}`);
+            
+            // Get MemberPress subscription data (may be limited without full REST API access)
+            const subscriptions: MemberPressSubscription[] = [];
+
+            // Sync user to Supabase
+            await this.syncUserToSupabase(userData, subscriptions);
+
+            return {
+              success: true,
+              user: userData,
+              token,
+              subscriptions,
+            };
+          }
+        }
+      } catch (restError) {
+        console.error('Could not get user data via REST API:', restError);
+      }
+
+      // If we can't get user data via REST API, create minimal user object
+      return {
+        success: true,
+        user: {
+          id: 0, // We don't have the actual ID without REST API access
+          username: username,
+          email: '',
+          name: username,
+          first_name: '',
+          last_name: '',
+          avatar_urls: {},
+          roles: ['subscriber'], // Default role
+        } as WordPressUser,
+        token: btoa(`xmlrpc:${username}:${Date.now()}`),
+        subscriptions: [],
+      };
+
+    } catch (error) {
+      console.error('WordPress XML-RPC login error:', error);
+      return { success: false, error: 'WordPress XML-RPC authentication failed' };
+    }
+  }
+
+  /**
+   * Try REST API authentication (Application Password or Basic Auth)
+   */
+  private async tryRestAPIAuth(username: string, password: string): Promise<AuthResponse> {
+    try {
       const credentials = btoa(`${username}:${password}`);
       
-      // Get user details using their credentials
+      // Get user details using Basic Auth
       const userResponse = await fetch(`${this.baseUrl}/users/me`, {
         headers: {
           'Authorization': `Basic ${credentials}`,
@@ -79,13 +215,13 @@ class WordPressAuth {
       if (!userResponse.ok) {
         return {
           success: false,
-          error: 'Invalid credentials',
+          error: 'REST API authentication failed',
         };
       }
 
       const userData: WordPressUser = await userResponse.json();
 
-      // Create a pseudo-token for session management (Basic auth credentials)
+      // Create token from Basic auth credentials
       const token = credentials;
 
       // Get MemberPress subscription data
@@ -97,14 +233,14 @@ class WordPressAuth {
       return {
         success: true,
         user: userData,
-        token, // This is now the Basic auth credentials
+        token,
         subscriptions,
       };
     } catch (error) {
-      console.error('Authentication error:', error);
+      console.error('REST API auth error:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Authentication failed',
+        error: 'REST API authentication failed',
       };
     }
   }

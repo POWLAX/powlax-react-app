@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useWordPressAuth } from '@/hooks/useWordPressAuth'
+import { useAuth } from '@/contexts/JWTAuthContext'
 import { roleManager, WORDPRESS_ROLES, WordPressRole } from '@/lib/wordpress-role-management'
 import { supabase } from '@/lib/supabase'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -63,7 +63,7 @@ interface RoleChangeModal {
 }
 
 export default function RoleManagementPage() {
-  const { user: currentUser } = useWordPressAuth()
+  const { user: currentUser } = useAuth()
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')

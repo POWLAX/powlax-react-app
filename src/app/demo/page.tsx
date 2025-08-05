@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { 
   Trophy, Target, Shield, Zap, Star, Award, 
-  BookOpen, Users, ChevronRight
+  BookOpen, Users, ChevronRight, Calendar, User
 } from 'lucide-react'
 
 export default function DemoHomePage() {
@@ -15,7 +15,8 @@ export default function DemoHomePage() {
       pages: [
         { name: 'Public Overview', href: '/skills-academy', description: 'Marketing page' },
         { name: 'Workouts Browser', href: '/demo/skills-academy/workouts', description: 'Browse & start workouts' },
-        { name: 'Progress Tracker', href: '/demo/skills-academy/progress', description: 'View progress & badges' }
+        { name: 'Progress Tracker', href: '/demo/skills-academy/progress', description: 'View progress & badges' },
+        { name: 'Interactive Workout', href: '/demo/skills-academy/interactive-workout', description: 'Full workout with drill navigation & animations' }
       ]
     },
     {
@@ -34,6 +35,22 @@ export default function DemoHomePage() {
       pages: [
         { name: 'Public Overview', href: '/gamification', description: 'System explanation' },
         { name: 'Player Dashboard', href: '/demo/gamification', description: 'Points, badges, ranks' }
+      ]
+    },
+    {
+      category: 'Practice Planner',
+      icon: Calendar,
+      color: 'text-green-500',
+      pages: [
+        { name: 'Practice Planner Demo', href: '/demo/practice-planner', description: 'Full practice planning tool' }
+      ]
+    },
+    {
+      category: 'Player Profile',
+      icon: User,
+      color: 'text-orange-500',
+      pages: [
+        { name: 'Player Profile Demo', href: '/demo/player-profile', description: 'Player card with avatar, rank, points & badges' }
       ]
     }
   ]

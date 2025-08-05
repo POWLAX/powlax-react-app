@@ -1,8 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { useRequireAuth } from '@/contexts/JWTAuthContext'
 import BottomNavigation from '@/components/navigation/BottomNavigation'
 import SidebarNavigation from '@/components/navigation/SidebarNavigation'
 
@@ -11,43 +9,7 @@ export default function AuthenticatedLayout({
 }: {
   children: React.ReactNode
 }) {
-  const router = useRouter()
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      // Check for WordPress auth token
-      const wpToken = localStorage.getItem('wp_token')
-      
-      if (!wpToken) {
-        router.push('/auth/login')
-        return
-      }
-
-      // Validate the token
-      try {
-        const response = await fetch('https://powlax.com/wp-json/wp/v2/users/me', {
-          headers: {
-            'Authorization': `Basic ${wpToken}`,
-            'Content-Type': 'application/json',
-          },
-        })
-
-        if (!response.ok) {
-          localStorage.removeItem('wp_token')
-          router.push('/auth/login')
-          return
-        }
-
-        setLoading(false)
-      } catch (error) {
-        console.error('Auth check error:', error)
-        router.push('/auth/login')
-      }
-    }
-
-    checkAuth()
-  }, [router])
+  const { loading } = useRequireAuth()
 
   if (loading) {
     return (

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { WordPressAuthProvider } from '@/hooks/useWordPressAuth'
+import { JWTAuthProvider } from '@/contexts/JWTAuthContext'
 import { QueryProvider } from '@/providers/query-provider'
 import { Toaster } from 'sonner'
 
@@ -21,10 +21,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <QueryProvider>
-          <WordPressAuthProvider>
+          <JWTAuthProvider>
             {children}
             <Toaster position="top-right" />
-          </WordPressAuthProvider>
+          </JWTAuthProvider>
         </QueryProvider>
       </body>
     </html>

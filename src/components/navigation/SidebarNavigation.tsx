@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, Users, GraduationCap, BookOpen, MessageCircle, LogOut, User } from 'lucide-react'
-import { useWordPressAuth } from '@/hooks/useWordPressAuth'
+import { useAuth } from '@/contexts/JWTAuthContext'
 import { Button } from '@/components/ui/button'
 
 const navItems = [
@@ -36,7 +36,7 @@ const navItems = [
 
 export default function SidebarNavigation() {
   const pathname = usePathname()
-  const { user, logout } = useWordPressAuth()
+  const { user, logout } = useAuth()
 
   return (
     <aside className="hidden md:flex md:flex-shrink-0">
