@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { RefreshCw, CheckCircle, XCircle, AlertCircle, Upload } from 'lucide-react'
 import { format } from 'date-fns'
+import { supabase } from '@/lib/supabase'
 
 interface SyncResult {
   success: boolean
@@ -55,8 +56,20 @@ export default function AdminSyncPage() {
 
   const fetchSyncStatus = async () => {
     try {
-      const response = await fetch('/api/sync/status')
-      if (!response.ok) throw new Error('Failed to fetch sync status')
+      // Get the current session token
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      const response = await fetch('/api/sync/status', {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token || ''}`
+        }
+      })
+      
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || `Failed with status ${response.status}`)
+      }
+      
       const data = await response.json()
       setSyncStatus(data)
     } catch (error) {
@@ -69,10 +82,14 @@ export default function AdminSyncPage() {
     setErrors([])
     
     try {
+      // Get the current session token
+      const { data: { session } } = await supabase.auth.getSession()
+      
       const response = await fetch(`/api/sync/${type}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token || ''}`
         },
         body: JSON.stringify({
           // For now, we're not passing CSV path - will add file upload later

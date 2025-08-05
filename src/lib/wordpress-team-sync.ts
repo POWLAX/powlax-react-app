@@ -3,7 +3,7 @@
  * Handles syncing teams and organizations from WordPress/LearnDash/BuddyBoss
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { supabase } from '@/lib/supabase'
 import { parse } from 'csv-parse/sync'
 import { readFileSync } from 'fs'
 
@@ -31,11 +31,7 @@ interface SyncResult {
 }
 
 class WordPressTeamSync {
-  private supabase: any
-
-  async initialize() {
-    this.supabase = await createClient()
-  }
+  private supabase = supabase
 
   /**
    * Parse serialized PHP array from WordPress/LearnDash
@@ -98,8 +94,6 @@ class WordPressTeamSync {
    * Sync organizations from WordPress (BuddyBoss groups)
    */
   async syncOrganizationsFromWordPress(): Promise<SyncResult> {
-    await this.initialize()
-    
     const result: SyncResult = {
       success: false,
       created: 0,
@@ -215,8 +209,6 @@ class WordPressTeamSync {
    * Sync teams from WordPress (LearnDash groups)
    */
   async syncTeamsFromWordPress(csvPath?: string): Promise<SyncResult> {
-    await this.initialize()
-    
     const result: SyncResult = {
       success: false,
       created: 0,
@@ -351,8 +343,6 @@ class WordPressTeamSync {
    * Sync user memberships from WordPress teams
    */
   async syncUserMemberships(csvPath?: string): Promise<SyncResult> {
-    await this.initialize()
-    
     const result: SyncResult = {
       success: false,
       created: 0,
@@ -507,8 +497,6 @@ class WordPressTeamSync {
     teams: SyncResult
     users: SyncResult
   }> {
-    await this.initialize()
-
     // Start full sync log
     const { data: syncLog } = await this.supabase
       .from('wp_sync_log')
@@ -571,8 +559,6 @@ class WordPressTeamSync {
    * Get sync status and history
    */
   async getSyncStatus(limit: number = 10): Promise<any[]> {
-    await this.initialize()
-    
     const { data, error } = await this.supabase
       .from('wp_sync_log')
       .select('*')
