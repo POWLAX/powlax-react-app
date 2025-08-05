@@ -5,8 +5,39 @@
 **Version**: 1.0  
 **Updated**: January 15, 2025
 **Always Apply**: true
-**Focus Area**: `/tasks/database/` directory
+**Focus Area**: Database management and security implementation
+**Primary Workspace**: `/tasks/active/database/`
 ---
+
+## 📁 File References Standards
+
+### **✅ REQUIRED: Use Relative Paths Always**
+```markdown
+- `supabase/migrations/004_fix_unrestricted_tables.sql` - Migration files
+- `docs/technical/implementation-status-and-next-steps.md` - Documentation
+- `tasks/active/database/TASK_002_Database_Integration.md` - Active tasks
+- `src/lib/supabase.ts` - Database client configuration
+```
+
+### **❌ NEVER Use These References**
+```markdown
+- "the migration file"
+- "database task" 
+- "supabase config"
+- File names without full relative paths
+```
+
+## 📋 Task Management Requirements
+
+### **Primary Workspace**
+- **ALL database work happens in**: `/tasks/active/database/`
+- **Current active task**: `tasks/active/database/TASK_002_Database_Integration.md`
+- **Use templates from**: `/tasks/templates/standard-task-template.md`
+
+### **Daily Progress Updates**
+- Update task files with specific file changes using relative paths
+- Document all migration files and schema changes
+- Report progress in coordination log for breaking changes
 
 ## 🎯 Architect Purpose
 
@@ -164,10 +195,42 @@ Use this structure for all database tasks:
 
 ---
 
+## 🤝 Agent Coordination Requirements
+
+### **Breaking Changes Communication**
+- **IMMEDIATELY** update `/tasks/coordination/agent-coordination-log.md` for:
+  - Schema changes affecting frontend components
+  - New migration files that other agents need to know about
+  - Table security policy changes
+  - POWLAX prefix updates
+
+### **Daily Coordination Protocol**
+```markdown
+### **[YYYY-MM-DD] - Database Schema Update**
+**From**: Database Integration Architect
+**To**: Frontend Agent, Gamification Agent
+**Type**: Breaking Change
+
+**Files Affected**:
+- `supabase/migrations/006_new_schema.sql` - Added new columns
+- `src/types/database.types.ts` - Type definitions need updating
+
+**Action Required**:
+- [ ] Frontend: Update component interfaces
+- [ ] Gamification: Update badge calculation queries
+```
+
+### **Coordination Checklist**
+- [ ] Check coordination log daily for updates affecting database work
+- [ ] Update agent status board when starting major migrations
+- [ ] Document all breaking changes with specific file paths
+- [ ] Notify other agents before schema changes that affect their domains
+
 ## 🎯 Success Metrics
 
 - All actual tables have appropriate RLS policies
 - Zero "genuinely unrestricted" tables in Supabase dashboard  
 - POWLAX prefix updates completed with analyst approval
 - Migration files execute cleanly without errors
-- Complete documentation of database structure for other agents
+- Complete documentation using relative paths for other agents
+- All schema changes coordinated through proper communication channels

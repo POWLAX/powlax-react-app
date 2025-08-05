@@ -5,8 +5,43 @@
 **Version**: 1.0
 **Updated**: January 15, 2025  
 **Always Apply**: true
-**Focus Area**: `/tasks/gamification/` directory
+**Focus Area**: Gamification system implementation and engagement mechanics
+**Primary Workspace**: `/tasks/active/gamification/`
 ---
+
+## 📁 File References Standards
+
+### **✅ REQUIRED: Use Relative Paths Always**
+```markdown
+- `docs/existing/Gamification/Gemini Gamification for POWLAX.md` - Blueprint
+- `tasks/active/gamification/phase-1-anti-gaming-foundation.md` - Phase 1 tasks
+- `src/components/gamification/BadgeSystem.tsx` - UI components
+- `src/lib/gamification/difficulty-scoring.ts` - Business logic
+- `supabase/migrations/005_gamification_tables.sql` - Database changes
+```
+
+### **❌ NEVER Use These References**
+```markdown
+- "the gamification document"
+- "phase 1 file"
+- "badge component"
+- File names without full relative paths
+```
+
+## 📋 Task Management Requirements
+
+### **Primary Workspace**
+- **ALL gamification work happens in**: `/tasks/active/gamification/`
+- **Current tasks**:
+  - `tasks/active/gamification/phase-1-anti-gaming-foundation.md`
+  - `tasks/active/gamification/phase-2-enhanced-engagement.md`
+  - `tasks/active/gamification/phase-3-advanced-community.md`
+- **Use templates from**: `/tasks/templates/standard-task-template.md`
+
+### **Phase-Based Progress Updates**
+- Update phase task files with specific component changes using relative paths
+- Document all gamification UI components and their file locations
+- Report major feature completions in coordination log
 
 ## 🎯 Architect Purpose
 
@@ -228,10 +263,49 @@ Location: `tasks/gamification/phase-3-advanced-community.md`
 
 ---
 
-## 📝 Task Documentation Standards
+## 🤝 Agent Coordination Requirements
 
-Always reference documents using relative paths:
+### **Breaking Changes Communication**
+- **IMMEDIATELY** update `/tasks/coordination/agent-coordination-log.md` for:
+  - New gamification UI components affecting frontend structure
+  - Database schema requirements for badges, points, streaks
+  - Changes to drill difficulty scoring that affect database queries
+  - Major gamification features that need backend API updates
+
+### **Daily Coordination Protocol**
+```markdown
+### **[YYYY-MM-DD] - Gamification Phase 1 Progress**
+**From**: Gamification Implementation Architect  
+**To**: Database Agent, Frontend Agent
+**Type**: Update
+
+**Files Affected**:
+- `src/components/gamification/DifficultyScoring.tsx` - New difficulty UI component
+- `src/lib/gamification/point-calculation.ts` - Point calculation logic
+- `tasks/active/gamification/phase-1-anti-gaming-foundation.md` - Progress update
+
+**Action Required**:
+- [ ] Database: Create difficulty_scores table migration
+- [ ] Frontend: Integrate new point display components
+```
+
+### **Phase Coordination Checklist**
+- [ ] **Phase 1**: Coordinate difficulty scoring with database agent before UI implementation
+- [ ] **Phase 2**: Ensure badge tier tables are created before implementing badge UI
+- [ ] **Phase 3**: Coordinate leaderboard backend requirements before frontend development
+- [ ] **Always**: Update agent status board when completing major phase milestones
+
+### **Critical Coordination Points**
+1. **With Database Agent**: All scoring calculations require backend validation
+2. **With Frontend Agent**: Gamification UI components integrate with existing design system  
+3. **With Testing**: Anti-gaming mechanics must be thoroughly validated
+
+## 📝 Documentation Standards
+
+### **File References** (REQUIRED)
 - ✅ `docs/existing/Gamification/Gemini Gamification for POWLAX.md`
-- ❌ "Gemini Gamification for POWLAX.md"
+- ✅ `tasks/active/gamification/phase-1-anti-gaming-foundation.md`
+- ✅ `src/components/gamification/BadgeSystem.tsx`
+- ❌ "Gemini Gamification document" or file names without paths
 
-Update progress in task files immediately when completing subtasks. Document all gamification component creations and coordinate timing with database schema changes.
+Update progress in phase task files immediately when completing subtasks using relative file paths. Document all gamification component creations and coordinate timing with database schema changes through the agent coordination log.

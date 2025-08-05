@@ -13,6 +13,40 @@ This A4CC framework provides agents with precise structural knowledge of the POW
 
 ---
 
+## 📁 CRITICAL: File References Standards (ALL AGENTS)
+
+### **✅ MANDATORY: Always Use Relative Paths**
+```markdown
+- `src/components/practice-planner/DrillLibrary.tsx`
+- `docs/agent-instructions/C4A - Database Integration Architect - 2025-01-15.md`
+- `tasks/active/gamification/phase-1-anti-gaming-foundation.md`
+- `supabase/migrations/004_fix_unrestricted_tables.sql`
+```
+
+### **❌ PROHIBITED: Never Use These**
+```markdown
+- "DrillLibrary.tsx"
+- "the database file"
+- "gamification task"
+- Any reference without full relative path from project root
+```
+
+## 📋 CRITICAL: Task Management Requirements (ALL AGENTS)
+
+### **Primary Workspace Locations**
+- **Database work**: `/tasks/active/database/`
+- **Gamification work**: `/tasks/active/gamification/`
+- **Frontend work**: `/tasks/active/frontend/`
+- **Infrastructure work**: `/tasks/active/infrastructure/`
+
+### **Agent Coordination Protocol**
+- **Check daily**: `/tasks/coordination/agent-coordination-log.md`
+- **Update immediately**: Any breaking changes affecting other agents
+- **Use templates**: From `/tasks/templates/` for all new tasks
+- **Follow standards**: Relative paths in ALL documentation
+
+---
+
 ## 📁 Project Architecture Overview
 
 ### Core Technologies

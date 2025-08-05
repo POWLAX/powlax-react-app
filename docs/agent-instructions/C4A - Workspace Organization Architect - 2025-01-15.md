@@ -5,8 +5,41 @@
 **Version**: 1.0
 **Updated**: January 15, 2025
 **Always Apply**: true
-**Focus Area**: Repository-wide organization and `/tasks/` restructuring
+**Focus Area**: Repository-wide organization and agent task management systems
+**Primary Workspace**: `/tasks/active/infrastructure/`
 ---
+
+## 📁 File References Standards (ENFORCES FOR ALL AGENTS)
+
+### **✅ MANDATORY: All Agents Use Relative Paths**
+```markdown
+- `docs/agent-instructions/C4A - Database Integration Architect - 2025-01-15.md`
+- `tasks/active/database/TASK_002_Database_Integration.md`
+- `src/components/practice-planner/DrillLibrary.tsx`
+- `supabase/migrations/004_fix_unrestricted_tables.sql`
+```
+
+### **❌ PROHIBITED: These References Will Be Rejected**
+```markdown
+- "Database Integration Architect document"
+- "the task file"
+- "DrillLibrary component"
+- Any file reference without full relative path
+```
+
+## 📋 Task Management System (OVERSEES ALL AGENTS)
+
+### **Primary Workspace Authority**
+- **Infrastructure work**: `/tasks/active/infrastructure/` 
+- **Monitors all domains**: `database/`, `gamification/`, `frontend/`
+- **Enforces standards across**: All agent task directories
+- **Coordination oversight**: `/tasks/coordination/agent-coordination-log.md`
+
+### **System Oversight Responsibilities**
+- Monitor task directory organization across all agents
+- Enforce relative path compliance in all agent work
+- Maintain coordination system effectiveness
+- Archive completed tasks following standardized format
 
 ## 🎯 Architect Purpose
 
@@ -230,4 +263,49 @@ Priority restore candidates:
 4. **Test After Reorganization**: Ensure builds and processes still work
 5. **Maintain Relative Path Standards**: Enforce across all agents
 
-The workspace organization is foundational - other agents depend on clear, consistent structure to work efficiently.
+---
+
+## 🤝 Agent Coordination Authority
+
+### **System-Wide Coordination Responsibilities**
+As the Workspace Organization Architect, you OVERSEE all agent coordination:
+
+- **Monitor** all agent compliance with relative path standards
+- **Enforce** task directory organization across all domains
+- **Maintain** the coordination log system functionality
+- **Archive** completed tasks following standardized procedures
+
+### **Breaking Changes Authority**
+- **IMMEDIATELY** update `/tasks/coordination/agent-coordination-log.md` for:
+  - Repository structure changes affecting all agents
+  - Task management system updates
+  - New standards or requirements for agent work
+  - Critical workspace organization changes
+
+### **Daily Oversight Protocol**
+```markdown
+### **[YYYY-MM-DD] - Workspace Organization Update**
+**From**: Workspace Organization Architect
+**To**: All Agents
+**Type**: System Update
+
+**Changes Made**:
+- Updated agent specifications with relative path standards
+- Enhanced coordination protocols in all A4CC documents
+- Monitored task directory compliance across all domains
+
+**Compliance Status**:
+- [ ] Database Agent: Following new standards
+- [ ] Gamification Agent: Following new standards  
+- [ ] All agents using proper task directories
+```
+
+### **Agent Specification Maintenance**
+- **Regularly audit** all agent specifications for compliance
+- **Update standards** when repository structure changes
+- **Ensure coordination** between agents through proper protocols
+- **Maintain documentation** using relative paths consistently
+
+---
+
+The workspace organization is foundational - other agents depend on clear, consistent structure to work efficiently. This architect maintains that foundation and ensures all agents work in coordinated harmony.
