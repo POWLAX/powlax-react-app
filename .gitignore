@@ -39,3 +39,21 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# BMad specific
+*.tmp
+.bmad-cache/
+/bmad/.bmad-cache/
+
+# Additional build outputs
+/dist/
+
+# OS files
+Thumbs.db

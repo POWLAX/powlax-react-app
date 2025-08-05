@@ -1,0 +1,30 @@
+# Auto-assign configuration for POWLAX
+addReviewers: true
+addAssignees: false
+
+reviewers:
+  - POWLAX
+
+# Number of reviewers to add
+numberOfReviewers: 1
+
+# Keywords that trigger specific review requirements
+skipKeywords:
+  - wip
+  - draft
+
+# File-based reviewer assignment
+reviewGroups:
+  schema:
+    - "**/*.sql"
+    - "**/schema/**"
+    - "**/*schema*.md"
+  frontend:
+    - "app/**"
+    - "components/**"
+    - "**/*.jsx"
+    - "**/*.tsx"
+  docs:
+    - "**/*.md"
+    - "docs/**"
+    - "README*"

@@ -1,0 +1,124 @@
+{
+  "timestamp": "2025-08-05T05:26:10.649Z",
+  "database_url": "https://avvpyjwytcmtoiyrbibb.supabase.co",
+  "tables": {
+    "strategies_powlax": {
+      "exists": true,
+      "recordCount": 221,
+      "columns": {
+        "id": {
+          "type": "number",
+          "nullable": true
+        },
+        "strategy_id": {
+          "type": "unknown",
+          "nullable": true
+        },
+        "reference_id": {
+          "type": "number",
+          "nullable": true
+        },
+        "strategy_categories": {
+          "type": "string",
+          "nullable": true
+        },
+        "strategy_name": {
+          "type": "string",
+          "nullable": true
+        },
+        "lacrosse_lab_links": {
+          "type": "array",
+          "nullable": true
+        },
+        "description": {
+          "type": "string",
+          "nullable": true
+        },
+        "embed_codes": {
+          "type": "array",
+          "nullable": true
+        },
+        "see_it_ages": {
+          "type": "string",
+          "nullable": true
+        },
+        "coach_it_ages": {
+          "type": "string",
+          "nullable": true
+        },
+        "own_it_ages": {
+          "type": "string",
+          "nullable": true
+        },
+        "has_pdf": {
+          "type": "boolean",
+          "nullable": true
+        },
+        "target_audience": {
+          "type": "string",
+          "nullable": true
+        },
+        "lesson_category": {
+          "type": "string",
+          "nullable": true
+        },
+        "master_pdf_url": {
+          "type": "string",
+          "nullable": true
+        },
+        "vimeo_id": {
+          "type": "number",
+          "nullable": true
+        },
+        "vimeo_link": {
+          "type": "string",
+          "nullable": true
+        },
+        "pdf_shortcode": {
+          "type": "string",
+          "nullable": true
+        },
+        "thumbnail_urls": {
+          "type": "array",
+          "nullable": true
+        },
+        "created_at": {
+          "type": "string",
+          "nullable": true
+        },
+        "updated_at": {
+          "type": "string",
+          "nullable": true
+        }
+      }
+    },
+    "drills_powlax": {
+      "exists": false,
+      "error": "relation \"public.drills_powlax\" does not exist"
+    },
+    "skills_academy_powlax": {
+      "exists": false,
+      "error": "relation \"public.skills_academy_powlax\" does not exist"
+    },
+    "wall_ball_powlax": {
+      "exists": false,
+      "error": "relation \"public.wall_ball_powlax\" does not exist"
+    },
+    "lessons_powlax": {
+      "exists": false,
+      "error": "relation \"public.lessons_powlax\" does not exist"
+    },
+    "drill_strategy_map_powlax": {
+      "exists": false,
+      "error": "relation \"public.drill_strategy_map_powlax\" does not exist"
+    },
+    "skills_academy_drills": {
+      "exists": true,
+      "note": "Not part of _powlax convention"
+    },
+    "skills_academy_workouts": {
+      "exists": true,
+      "note": "Not part of _powlax convention"
+    }
+  }
+}

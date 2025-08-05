@@ -1,0 +1,238 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { ChevronLeft, ChevronRight, ExternalLink, Beaker, Loader2 } from 'lucide-react'
+
+interface LacrosseLabModalProps {
+  isOpen: boolean
+  onClose: () => void
+  drill: {
+    name: string
+    drill_lab_url_1?: string
+    drill_lab_url_2?: string
+    drill_lab_url_3?: string
+    drill_lab_url_4?: string
+    drill_lab_url_5?: string
+    lacrosse_lab_urls?: string[]
+    lab_urls?: string[] | string  // JSONB field that could be string or array
+  }
+}
+
+export default function LacrosseLabModal({ isOpen, onClose, drill }: LacrosseLabModalProps) {
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
+  
+  // Collect all Lacrosse Lab URLs
+  const labUrls: string[] = []
+  
+  // First check lab_urls JSONB field (from database screenshot)
+  if (drill.lab_urls) {
+    if (Array.isArray(drill.lab_urls)) {
+      // It's already an array
+      drill.lab_urls.forEach(url => {
+        if (url && url.trim() && !labUrls.includes(url.trim())) {
+          labUrls.push(url.trim())
+        }
+      })
+    } else if (typeof drill.lab_urls === 'string') {
+      // It's a JSONB string, try to parse it
+      try {
+        const parsed = JSON.parse(drill.lab_urls)
+        if (Array.isArray(parsed)) {
+          parsed.forEach(url => {
+            if (url && url.trim() && !labUrls.includes(url.trim())) {
+              labUrls.push(url.trim())
+            }
+          })
+        }
+      } catch (e) {
+        console.error('Failed to parse lab_urls:', e)
+      }
+    }
+  }
+  
+  // Add individual lab URLs if no lab_urls array
+  if (labUrls.length === 0) {
+    if (drill.drill_lab_url_1) labUrls.push(drill.drill_lab_url_1)
+    if (drill.drill_lab_url_2) labUrls.push(drill.drill_lab_url_2)
+    if (drill.drill_lab_url_3) labUrls.push(drill.drill_lab_url_3)
+    if (drill.drill_lab_url_4) labUrls.push(drill.drill_lab_url_4)
+    if (drill.drill_lab_url_5) labUrls.push(drill.drill_lab_url_5)
+  }
+  
+  // Add array of lab URLs if available
+  if (drill.lacrosse_lab_urls && Array.isArray(drill.lacrosse_lab_urls)) {
+    drill.lacrosse_lab_urls.forEach(url => {
+      if (url && url.trim() && !labUrls.includes(url.trim())) {
+        labUrls.push(url.trim())
+      }
+    })
+  }
+
+  useEffect(() => {
+    // Reset to first lab when modal opens
+    setCurrentIndex(0)
+    setIsLoading(true)
+  }, [isOpen])
+
+  const handlePrevious = () => {
+    setIsLoading(true)
+    setCurrentIndex((prev) => (prev - 1 + labUrls.length) % labUrls.length)
+  }
+
+  const handleNext = () => {
+    setIsLoading(true)
+    setCurrentIndex((prev) => (prev + 1) % labUrls.length)
+  }
+
+  const handleDotClick = (index: number) => {
+    setIsLoading(true)
+    setCurrentIndex(index)
+  }
+
+  const handleOpenInNewTab = () => {
+    if (labUrls[currentIndex]) {
+      window.open(labUrls[currentIndex], '_blank', 'noopener,noreferrer')
+    }
+  }
+
+  const handleIframeLoad = () => {
+    setIsLoading(false)
+  }
+
+  // Convert URL to embed format if needed
+  const getEmbedUrl = (url: string) => {
+    // If it's already a Lacrosse Lab URL, return as is
+    if (url.includes('lacrosse.labradorsports.com')) {
+      return url
+    }
+    // Otherwise return the URL as is
+    return url
+  }
+
+  if (labUrls.length === 0) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Beaker className="h-5 w-5" />
+              {drill.name} - Lacrosse Lab
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex items-center justify-center p-8">
+            <p className="text-gray-600">No Lacrosse Lab diagrams available for this drill</p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    )
+  }
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-6xl max-h-[90vh]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Beaker className="h-5 w-5" />
+            {drill.name} - Lacrosse Lab Diagrams
+          </DialogTitle>
+          <DialogDescription className="flex items-center justify-between">
+            <span>Interactive drill diagrams and field setups</span>
+            <Badge variant="secondary">
+              {currentIndex + 1} of {labUrls.length}
+            </Badge>
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {/* Carousel Container */}
+          <div className="relative bg-white rounded-lg overflow-hidden shadow-inner">
+            {/* Loading Overlay */}
+            {isLoading && (
+              <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10">
+                <div className="text-center">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" />
+                  <p className="text-sm text-gray-600 mt-2">Loading diagram...</p>
+                </div>
+              </div>
+            )}
+
+            {/* Iframe Container - 500x500 with max-width 100% */}
+            <div className="relative flex justify-center items-center bg-white" style={{ minHeight: '500px' }}>
+              <iframe
+                key={labUrls[currentIndex]} // Force reload on URL change
+                src={getEmbedUrl(labUrls[currentIndex])}
+                width="500"
+                height="500"
+                style={{ maxWidth: '100%' }}
+                className="border-0"
+                onLoad={handleIframeLoad}
+                title={`Lacrosse Lab Diagram ${currentIndex + 1}`}
+                allow="fullscreen"
+                allowFullScreen
+              />
+            </div>
+
+            {/* Navigation Arrows */}
+            {labUrls.length > 1 && (
+              <>
+                <button
+                  onClick={handlePrevious}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-white/90 hover:bg-white rounded-full shadow-lg transition-all"
+                  aria-label="Previous diagram"
+                >
+                  <ChevronLeft className="h-6 w-6" />
+                </button>
+                <button
+                  onClick={handleNext}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-white/90 hover:bg-white rounded-full shadow-lg transition-all"
+                  aria-label="Next diagram"
+                >
+                  <ChevronRight className="h-6 w-6" />
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Dots Navigation */}
+          {labUrls.length > 1 && (
+            <div className="flex justify-center gap-2">
+              {labUrls.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleDotClick(index)}
+                  className={`h-2 w-2 rounded-full transition-all ${
+                    index === currentIndex
+                      ? 'bg-blue-600 w-8'
+                      : 'bg-gray-300 hover:bg-gray-400'
+                  }`}
+                  aria-label={`Go to diagram ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex justify-between items-center pt-4 border-t">
+            <div className="text-sm text-gray-600">
+              <p>Use arrow keys or click dots to navigate between diagrams</p>
+            </div>
+            <Button onClick={handleOpenInNewTab} variant="outline" size="sm">
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Open in Lab Editor
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}

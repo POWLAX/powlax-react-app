@@ -1,0 +1,24 @@
+# POWLAX Code Owners - Automatic Review Rules
+
+# Global ownership - all files require review
+* @POWLAX
+
+# Database Schema Files - Critical Review Required
+*.sql @POWLAX
+*.md @POWLAX
+scripts/ @POWLAX
+
+# React Components - Frontend Review
+app/ @POWLAX
+components/ @POWLAX
+
+# Configuration Files - Infrastructure Review
+*.json @POWLAX
+*.js @POWLAX
+*.mjs @POWLAX
+.env* @POWLAX
+
+# Documentation - Content Review
+README.md @POWLAX
+docs/ @POWLAX
+*.md @POWLAX

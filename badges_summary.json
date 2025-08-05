@@ -1,0 +1,25 @@
+{
+  "total_badges": 58,
+  "by_category": {
+    "attack": 8,
+    "defense": 8,
+    "midfield": 8,
+    "wall_ball": 10,
+    "lacrosse_iq": 9,
+    "solid_start": 6,
+    "completed_workouts": 9
+  },
+  "by_earned_type": {
+    "custom": 58
+  },
+  "by_points_type": {
+    "rebound_reward": 1
+  },
+  "point_requirements": {
+    "min": 5,
+    "max": 200,
+    "average": 76.25
+  },
+  "hidden_badges": 0,
+  "sequential_badges": 0
+}

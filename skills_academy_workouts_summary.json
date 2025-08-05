@@ -1,0 +1,44 @@
+{
+  "total_workouts": 192,
+  "workout_types": {
+    "general": 74,
+    "defense": 24,
+    "wall_ball": 53,
+    "attack": 38,
+    "midfield": 3
+  },
+  "duration_ranges": {
+    "5_min": 20,
+    "10_min": 17,
+    "15_plus": 17,
+    "unspecified": 138
+  },
+  "point_distribution": {
+    "lax_credit": 168,
+    "attack_token": 38,
+    "rebound_reward": 53,
+    "flex_points": 3
+  },
+  "tag_frequency": {
+    "Skills-Academy": 192,
+    "5-drill-workout": 56,
+    "10-drill-workout": 53,
+    "long-workout": 50,
+    "Ankle Breaker": 10,
+    "Fence Saver": 9,
+    "foundation-ace": 6,
+    "dominant-dodger": 6,
+    "stamina-star": 6,
+    "finishing-phenom": 6,
+    "bullet-snatcher": 6,
+    "long-pole-lizard": 6,
+    "wall-ball-hawk": 6,
+    "Ankle Breaker 5": 4,
+    "Skills-Academy-Flex": 3,
+    "independent-improver": 3,
+    "Ankle Breaker 15": 3,
+    "Ankle Breaker 10": 3,
+    "Easy Ball Hunt": 3,
+    "Long Workout": 1
+  }
+}
