@@ -57,3 +57,10 @@ next-env.d.ts
 
 # OS files
 Thumbs.dbdev-server.log
+
+# Development artifacts
+dev-server.log
+*.log
+.DS_Store
+.claude.md
+a4cc.mdc

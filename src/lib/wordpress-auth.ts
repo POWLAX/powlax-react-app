@@ -65,31 +65,13 @@ class WordPressAuth {
    */
   async authenticateUser(username: string, password: string): Promise<AuthResponse> {
     try {
-      // First, validate credentials with WordPress
-      const validateUrl = `${this.baseUrl.replace('/wp/v2', '')}/wp-json/jwt-auth/v1/token`;
+      // Use Basic Auth to validate credentials
+      const credentials = btoa(`${username}:${password}`);
       
-      const tokenResponse = await fetch(validateUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
-
-      if (!tokenResponse.ok) {
-        return {
-          success: false,
-          error: 'Invalid credentials',
-        };
-      }
-
-      const tokenData = await tokenResponse.json();
-      const token = tokenData.token;
-
-      // Get user details
+      // Get user details using their credentials
       const userResponse = await fetch(`${this.baseUrl}/users/me`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Basic ${credentials}`,
           'Content-Type': 'application/json',
         },
       });
@@ -97,11 +79,14 @@ class WordPressAuth {
       if (!userResponse.ok) {
         return {
           success: false,
-          error: 'Failed to fetch user details',
+          error: 'Invalid credentials',
         };
       }
 
       const userData: WordPressUser = await userResponse.json();
+
+      // Create a pseudo-token for session management (Basic auth credentials)
+      const token = credentials;
 
       // Get MemberPress subscription data
       const subscriptions = await this.getMemberPressSubscriptions(userData.id, token);
@@ -112,7 +97,7 @@ class WordPressAuth {
       return {
         success: true,
         user: userData,
-        token,
+        token, // This is now the Basic auth credentials
         subscriptions,
       };
     } catch (error) {
@@ -133,7 +118,7 @@ class WordPressAuth {
       
       const response = await fetch(mpUrl, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Basic ${token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -252,9 +237,10 @@ class WordPressAuth {
    */
   async validateSession(token: string): Promise<{ valid: boolean; user?: WordPressUser }> {
     try {
+      // Token is now Basic auth credentials
       const response = await fetch(`${this.baseUrl}/users/me`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Basic ${token}`,
           'Content-Type': 'application/json',
         },
       });
