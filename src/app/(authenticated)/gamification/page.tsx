@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -12,87 +12,12 @@ import {
   Flame, Medal, Crown, Gem
 } from 'lucide-react'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
+import { useGamificationData } from '@/hooks/useGamificationData'
 
-interface PlayerStats {
-  totalPoints: number
-  pointsByType: {
-    lax_credit: number
-    attack_token: number
-    defense_dollar: number
-    midfield_medal: number
-    rebound_reward: number
-    flex_points: number
-  }
-  currentRank: {
-    name: string
-    level: number
-    nextRank: string
-    progressToNext: number
-    pointsToNext: number
-  }
-  streaks: {
-    current: number
-    longest: number
-    lastActive: string
-  }
-  badges: {
-    total: number
-    bronze: number
-    silver: number
-    gold: number
-    recent: BadgeInfo[]
-  }
-  achievements: Achievement[]
-  weeklyProgress: WeeklyData[]
-}
-
-interface BadgeInfo {
-  id: string
-  name: string
-  description: string
-  tier: 'bronze' | 'silver' | 'gold'
-  earnedDate: string
-  category: string
-  imageUrl?: string
-}
-
-interface Achievement {
-  id: string
-  title: string
-  description: string
-  progress: number
-  total: number
-  reward: number
-  rewardType: string
-  completed: boolean
-}
-
-interface WeeklyData {
-  day: string
-  points: number
-  workouts: number
-}
 
 export default function PlayerGamificationPage() {
-  const [playerStats, setPlayerStats] = useState<PlayerStats | null>(null)
-  const [loading, setLoading] = useState(true)
   const [selectedTab, setSelectedTab] = useState('overview')
-
-  useEffect(() => {
-    fetchPlayerStats()
-  }, [])
-
-  const fetchPlayerStats = async () => {
-    try {
-      // TODO: Fetch real player stats
-      setPlayerStats(getMockPlayerStats())
-    } catch (error) {
-      console.error('Error fetching player stats:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const { data: playerStats, loading, error } = useGamificationData()
 
   const getPointIcon = (type: string) => {
     switch (type) {
@@ -419,101 +344,3 @@ export default function PlayerGamificationPage() {
   )
 }
 
-function getMockPlayerStats(): PlayerStats {
-  return {
-    totalPoints: 4850,
-    pointsByType: {
-      lax_credit: 2000,
-      attack_token: 850,
-      defense_dollar: 700,
-      midfield_medal: 600,
-      rebound_reward: 500,
-      flex_points: 200
-    },
-    currentRank: {
-      name: 'All-Star',
-      level: 7,
-      nextRank: 'Elite',
-      progressToNext: 65,
-      pointsToNext: 1150
-    },
-    streaks: {
-      current: 12,
-      longest: 21,
-      lastActive: '2025-01-14'
-    },
-    badges: {
-      total: 18,
-      bronze: 8,
-      silver: 7,
-      gold: 3,
-      recent: [
-        {
-          id: '1',
-          name: 'Wall Ball Master',
-          description: 'Complete 50 wall ball workouts',
-          tier: 'gold',
-          earnedDate: '2025-01-12',
-          category: 'wall_ball'
-        },
-        {
-          id: '2',
-          name: 'Defensive Specialist',
-          description: 'Master 20 defensive drills',
-          tier: 'silver',
-          earnedDate: '2025-01-10',
-          category: 'defense'
-        },
-        {
-          id: '3',
-          name: 'Week Warrior',
-          description: 'Complete workouts 7 days in a row',
-          tier: 'bronze',
-          earnedDate: '2025-01-08',
-          category: 'consistency'
-        }
-      ]
-    },
-    achievements: [
-      {
-        id: '1',
-        title: 'Attack Specialist',
-        description: 'Complete 100 attack-focused drills',
-        progress: 67,
-        total: 100,
-        reward: 500,
-        rewardType: 'attack_token',
-        completed: false
-      },
-      {
-        id: '2',
-        title: 'Marathon Month',
-        description: 'Work out every day for 30 days',
-        progress: 12,
-        total: 30,
-        reward: 1000,
-        rewardType: 'lax_credit',
-        completed: false
-      },
-      {
-        id: '3',
-        title: 'Skill Sampler',
-        description: 'Try drills from all 5 categories',
-        progress: 5,
-        total: 5,
-        reward: 250,
-        rewardType: 'flex_points',
-        completed: true
-      }
-    ],
-    weeklyProgress: [
-      { day: 'Mon', points: 150, workouts: 2 },
-      { day: 'Tue', points: 0, workouts: 0 },
-      { day: 'Wed', points: 200, workouts: 3 },
-      { day: 'Thu', points: 100, workouts: 1 },
-      { day: 'Fri', points: 175, workouts: 2 },
-      { day: 'Sat', points: 125, workouts: 1 },
-      { day: 'Sun', points: 0, workouts: 0 }
-    ]
-  }
-}

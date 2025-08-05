@@ -48,20 +48,24 @@ export default function StrategiesPage() {
   const fetchStrategies = async () => {
     try {
       const { data, error } = await supabase
-        .from('strategies')
-        .select(`
-          *,
-          strategy_drills (
-            drills (*)
-          )
-        `)
-        .order('name')
+        .from('strategies_powlax')
+        .select('*')
+        .order('strategy_name')
 
       if (error) throw error
 
       const formattedStrategies = data?.map(strategy => ({
-        ...strategy,
-        related_drills: strategy.strategy_drills?.map((sd: any) => sd.drills) || []
+        id: strategy.id?.toString() || 'strategy-' + Math.random(),
+        name: strategy.strategy_name || 'Unnamed Strategy',
+        category: strategy.strategy_categories?.toLowerCase().replace(/\s+/g, '_') || 'general',
+        description: strategy.description,
+        complexity: getComplexityFromAge(strategy.see_it_ages, strategy.coach_it_ages, strategy.own_it_ages),
+        age_level: strategy.see_it_ages || strategy.coach_it_ages || strategy.own_it_ages,
+        video_url: strategy.vimeo_link,
+        lacrosse_lab_url: strategy.lacrosse_lab_links?.[0],
+        tags: strategy.strategy_categories ? [strategy.strategy_categories] : [],
+        related_drills: [], // Will be populated when we have drill relationships
+        related_concepts: []
       })) || []
 
       setStrategies(formattedStrategies)
@@ -71,6 +75,20 @@ export default function StrategiesPage() {
     } finally {
       setLoading(false)
     }
+  }
+  
+  const getComplexityFromAge = (seeIt: string, coachIt: string, ownIt: string) => {
+    const ages = [seeIt, coachIt, ownIt].filter(Boolean);
+    if (ages.length === 0) return 'foundation';
+    
+    const maxAge = Math.max(...ages.map(age => {
+      const match = age.match(/(\d+)/);
+      return match ? parseInt(match[1]) : 8;
+    }));
+    
+    if (maxAge >= 14) return 'advanced';
+    if (maxAge >= 12) return 'building';
+    return 'foundation';
   }
 
   const getCategoryIcon = (category: string) => {

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-05T05:26:10.649Z",
+  "timestamp": "2025-08-05T06:51:21.330Z",
   "database_url": "https://avvpyjwytcmtoiyrbibb.supabase.co",
   "tables": {
     "strategies_powlax": {
@@ -93,24 +93,28 @@
       }
     },
     "drills_powlax": {
-      "exists": false,
-      "error": "relation \"public.drills_powlax\" does not exist"
+      "exists": true,
+      "recordCount": 0,
+      "columns": "Unknown - table is empty"
     },
     "skills_academy_powlax": {
       "exists": false,
       "error": "relation \"public.skills_academy_powlax\" does not exist"
     },
     "wall_ball_powlax": {
-      "exists": false,
-      "error": "relation \"public.wall_ball_powlax\" does not exist"
+      "exists": true,
+      "recordCount": 0,
+      "columns": "Unknown - table is empty"
     },
     "lessons_powlax": {
-      "exists": false,
-      "error": "relation \"public.lessons_powlax\" does not exist"
+      "exists": true,
+      "recordCount": 0,
+      "columns": "Unknown - table is empty"
     },
     "drill_strategy_map_powlax": {
-      "exists": false,
-      "error": "relation \"public.drill_strategy_map_powlax\" does not exist"
+      "exists": true,
+      "recordCount": 0,
+      "columns": "Unknown - table is empty"
     },
     "skills_academy_drills": {
       "exists": true,

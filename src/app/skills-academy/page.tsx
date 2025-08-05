@@ -43,11 +43,22 @@ export default function PublicSkillsAcademyPage() {
     try {
       const { data, error } = await supabase
         .from('skills_academy_workouts')
-        .select('id, name, workout_type, duration, point_value, tags')
+        .select('id, title, workout_type, duration_minutes, point_values, tags')
         .limit(6)
 
       if (error) throw error
-      setWorkoutPreviews(data || [])
+      
+      const previews = data?.map(workout => ({
+        id: workout.id?.toString() || 'workout-' + Math.random(),
+        name: workout.title || 'Unnamed Workout',
+        workout_type: workout.workout_type || 'general',
+        duration: workout.duration_minutes,
+        point_value: workout.point_values?.lax_credit || 0,
+        tags: workout.tags || [],
+        drill_count: Math.floor(Math.random() * 8) + 3 // Mock for now
+      })) || []
+      
+      setWorkoutPreviews(previews)
     } catch (error) {
       console.error('Error fetching workouts:', error)
       setWorkoutPreviews(getMockWorkoutPreviews())

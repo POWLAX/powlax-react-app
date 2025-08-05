@@ -1,5 +1,5 @@
 -- POWLAX Skills Academy Complete Import
--- Generated: 2025-08-04T22:50:21.939447
+-- Generated: 2025-08-05T00:52:06.913041
 -- This file contains all Skills Academy data for Supabase import
 -- 
 -- Contents:

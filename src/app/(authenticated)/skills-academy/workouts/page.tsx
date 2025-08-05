@@ -51,22 +51,23 @@ export default function WorkoutsPage() {
     try {
       const { data, error } = await supabase
         .from('skills_academy_workouts')
-        .select(`
-          *,
-          skills_academy_workout_drills (
-            drill_order,
-            skills_academy_drills (*)
-          )
-        `)
-        .order('name')
+        .select('*')
+        .order('title')
 
       if (error) throw error
 
       const formattedWorkouts = data?.map(workout => ({
-        ...workout,
-        drills: workout.skills_academy_workout_drills
-          ?.sort((a: any, b: any) => a.drill_order - b.drill_order)
-          ?.map((wd: any) => wd.skills_academy_drills) || []
+        id: workout.id?.toString() || 'workout-' + Math.random(),
+        name: workout.title || 'Unnamed Workout',
+        description: workout.description,
+        workout_type: workout.workout_type || 'general',
+        duration: workout.duration_minutes,
+        complexity: workout.complexity,
+        point_value: workout.point_values?.lax_credit || 0,
+        point_type: 'lax_credit',
+        video_url: workout.vimeo_link,
+        tags: workout.tags || [],
+        drills: [] // Will be populated when we have drill relationships
       })) || []
 
       setWorkouts(formattedWorkouts)

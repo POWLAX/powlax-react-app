@@ -41,21 +41,21 @@ export default function PublicStrategiesPage() {
   const fetchStrategyPreviews = async () => {
     try {
       const { data, error } = await supabase
-        .from('strategies')
-        .select('id, name, category, description, complexity, video_url, lacrosse_lab_url')
+        .from('strategies_powlax')
+        .select('id, strategy_name, strategy_categories, description, vimeo_link, lacrosse_lab_links, see_it_ages, coach_it_ages, own_it_ages')
         .limit(9)
 
       if (error) throw error
 
       const previews = data?.map(strategy => ({
-        id: strategy.id,
-        name: strategy.name,
-        category: strategy.category,
+        id: strategy.id?.toString() || 'strategy-' + Math.random(),
+        name: strategy.strategy_name || 'Unnamed Strategy',
+        category: strategy.strategy_categories?.toLowerCase() || 'general',
         description: strategy.description,
-        complexity: strategy.complexity,
-        hasVideo: !!strategy.video_url,
-        hasLab: !!strategy.lacrosse_lab_url,
-        drillCount: Math.floor(Math.random() * 10) + 3 // Mock drill count
+        complexity: getComplexityFromAge(strategy.see_it_ages, strategy.coach_it_ages, strategy.own_it_ages),
+        hasVideo: !!strategy.vimeo_link,
+        hasLab: !!(strategy.lacrosse_lab_links && strategy.lacrosse_lab_links.length > 0),
+        drillCount: Math.floor(Math.random() * 10) + 3 // Mock drill count for now
       })) || []
 
       setStrategyPreviews(previews)
@@ -65,6 +65,20 @@ export default function PublicStrategiesPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const getComplexityFromAge = (seeIt: string, coachIt: string, ownIt: string) => {
+    const ages = [seeIt, coachIt, ownIt].filter(Boolean);
+    if (ages.length === 0) return 'foundation';
+    
+    const maxAge = Math.max(...ages.map(age => {
+      const match = age.match(/(\d+)/);
+      return match ? parseInt(match[1]) : 8;
+    }));
+    
+    if (maxAge >= 14) return 'advanced';
+    if (maxAge >= 12) return 'building';
+    return 'foundation';
   }
 
   const categoryStats: CategoryStats[] = [
