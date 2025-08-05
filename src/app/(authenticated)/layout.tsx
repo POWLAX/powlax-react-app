@@ -15,28 +15,38 @@ export default function AuthenticatedLayout({
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // TEMPORARY: Skip auth check for development
-    setLoading(false)
-    return
-
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
+      // Check for WordPress auth token
+      const wpToken = localStorage.getItem('wp_token')
+      
+      if (!wpToken) {
         router.push('/auth/login')
-      } else {
+        return
+      }
+
+      // Validate the token
+      try {
+        const response = await fetch('https://powlax.com/wp-json/wp/v2/users/me', {
+          headers: {
+            'Authorization': `Basic ${wpToken}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        if (!response.ok) {
+          localStorage.removeItem('wp_token')
+          router.push('/auth/login')
+          return
+        }
+
         setLoading(false)
+      } catch (error) {
+        console.error('Auth check error:', error)
+        router.push('/auth/login')
       }
     }
 
     checkAuth()
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) {
-        router.push('/auth/login')
-      }
-    })
-
-    return () => subscription.unsubscribe()
   }, [router])
 
   if (loading) {
