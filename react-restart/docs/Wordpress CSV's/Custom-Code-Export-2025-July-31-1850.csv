@@ -1,0 +1,9 @@
+﻿ID,Title,Content,Excerpt,Date,"Post Type",Permalink,URL,Title,Caption,Description,"Alt Text",Featured,URL,_elementor_conditions,_elementor_location,_elementor_priority,_elementor_code,_elementor_extra_options,_elementor_page_assets,Status,"Author ID","Author Username","Author Email","Author First Name","Author Last Name",Slug,Format,Template,Parent,"Parent Slug",Order,"Comment Status","Ping Status","Post Modified Date"
+30976,"Close Popups",,,"2024-11-26 01:18:34",elementor_snippet,https://powlax.com/?elementor_snippet=close-popups,,,,,,,,"a:1:{i:0;s:15:""include/general"";}",elementor_head,1,"<script>
+jQuery(document).ready(function($) {
+    $('.close-popup-button').on('click', function() {
+        elementorProFrontend.modules.popup.closePopup();
+    });
+});
+</script>
+",a:0:{},a:0:{},publish,1,powlax,patrick@powlax.com,Patrick,Chapla,close-popups,,,0,0,0,closed,closed,"2024-11-26 01:36:13"

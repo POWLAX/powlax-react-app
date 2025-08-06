@@ -1,0 +1,48 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(git status)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git checkout:*)",
+      "Bash(npm run dev)",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run typecheck:*)",
+      "Bash(uvicorn:*)",
+      "Bash(rg:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(git rev-list:*)",
+      "Bash(git cherry-pick:*)",
+      "Bash(git fetch:*)"
+    ]
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "type": "command",
+        "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/UserPromptSubmit/append_ultrathink.py"
+      },
+      {
+        "type": "command",
+        "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/UserPromptSubmit/append_explain.py"
+      },
+      {
+        "type": "command",
+        "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/UserPromptSubmit/append_default.py"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/PostToolUse/commit_reminder.py"
+      }
+    ]
+  }
+}

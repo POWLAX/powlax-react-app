@@ -1,0 +1,148 @@
+﻿ID,Title,Content,Excerpt,Date,"Post Type",Permalink,URL,Title,Caption,Description,"Alt Text",Featured,URL,_bpptc_tab_is_active,_bpptc_tab_label,_bpptc_tab_slug,_bpptc_is_default_component,_bpptc_tab_enabled_roles,_bpptc_tab_visible_roles,_bpptc_tab_position,_bpptc_subnav_items,_bpptc_tab_update_label,_wp_old_date,_bpptc_tab_is_existing,_bpptc_site_admin_only,Status,"Author ID","Author Username","Author Email","Author First Name","Author Last Name",Slug,Format,Template,Parent,"Parent Slug",Order,"Comment Status","Ping Status","Post Modified Date"
+38679,Academy,,,"2025-04-12 08:40:00",bpptc_profile_tab,https://powlax.com/bpptc_profile_tab/skills-academy/,,,,,,,,on,"My Academy",skills-academy,on,"a:1:{i:0;s:3:""all"";}","a:2:{i:0;s:4:""self"";i:1;s:13:""administrator"";}",1,"a:4:{i:0;a:13:{s:9:""is_active"";s:2:""on"";s:11:""is_existing"";b:0;s:5:""label"";s:15:""Academy Profile"";s:4:""slug"";s:15:""academy-profile"";s:8:""position"";s:0:"""";s:15:""site_admin_only"";b:0;s:13:""enabled_roles"";a:1:{i:0;s:3:""all"";}s:13:""visible_roles"";a:2:{i:0;s:4:""self"";i:1;s:13:""administrator"";}s:3:""url"";s:0:"""";s:11:""item_css_id"";s:0:"""";s:15:""add_to_adminbar"";b:0;s:18:""item_adminbar_slug"";s:0:"""";s:7:""content"";s:21:""[current_user_points]"";}i:1;a:13:{s:9:""is_active"";s:2:""on"";s:11:""is_existing"";b:0;s:5:""label"";s:16:""Progress Tracker"";s:4:""slug"";s:16:""progress-tracker"";s:8:""position"";s:0:"""";s:15:""site_admin_only"";b:0;s:13:""enabled_roles"";a:1:{i:0;s:3:""all"";}s:13:""visible_roles"";a:2:{i:0;s:4:""self"";i:1;s:13:""administrator"";}s:3:""url"";s:0:"""";s:11:""item_css_id"";s:0:"""";s:15:""add_to_adminbar"";b:0;s:18:""item_adminbar_slug"";s:0:"""";s:7:""content"";s:456:""[gamipress_frontend_reports_points_types_graph type=""lax-credit,attack-token,defense-dollar,flex-point,lax-iq-point,midfield-metal,rebound-rewards"" amount=""earned"" current_user=""yes"" period=""yes"" period_value=""this-week"" range=""yes"" range_value=""week"" legend=""yes"" background=""rgba(54,162,235,0.5),rgba(255,99,132,0.5),rgba(75,192,192,0.5),rgba(255,205,86,0.5),rgba(201,203,207,0.5)"" border=""#36a2eb,#ff6384,#4bc0c0,#ffcd56,#c9cbcf"" grid=""rgba(0,0,0,0.1)""]"";}i:2;a:13:{s:9:""is_active"";s:2:""on"";s:11:""is_existing"";b:0;s:5:""label"";s:16:""Academy Workouts"";s:4:""slug"";s:22:""skill-academy-workouts"";s:8:""position"";s:0:"""";s:15:""site_admin_only"";b:0;s:13:""enabled_roles"";a:1:{i:0;s:3:""all"";}s:13:""visible_roles"";a:2:{i:0;s:4:""self"";i:1;s:13:""administrator"";}s:3:""url"";s:0:"""";s:11:""item_css_id"";s:0:"""";s:15:""add_to_adminbar"";b:0;s:18:""item_adminbar_slug"";s:0:"""";s:7:""content"";s:1666:""<style>
+.powlax-workout-links {
+    max-width: 600px;
+    margin: 20px auto;
+}
+
+.powlax-workout-links a {
+    display: block;
+    margin-bottom: 10px;
+    padding: 15px 20px;
+    background-color: #f5f5f5;
+    color: #333 !important;
+    text-decoration: none !important;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+}
+
+.powlax-workout-links a:hover {
+    background-color: #667eea;
+    color: #fff !important;
+    border-color: #667eea;
+    transform: translateY(-2px);
+}
+
+.powlax-workout-links a.featured {
+    background-color: #667eea;
+    color: #fff !important;
+    border-color: #667eea;
+}
+
+.powlax-workout-links a.featured:hover {
+    background-color: #5a67d8;
+    border-color: #5a67d8;
+}
+
+@media (max-width: 600px) {
+    .powlax-workout-links {
+        margin: 10px auto;
+    }
+
+    .powlax-workout-links a {
+        padding: 12px 15px;
+        margin-bottom: 8px;
+        font-size: 15px;
+    }
+}
+</style>
+
+<div class=""powlax-workout-links"">
+    <a class=""featured"" href=""https://powlax.com/skills-academy-basic-workouts/"">Academy Basic Workouts</a>
+    <a href=""https://powlax.com/solid-start-workouts/"">Solid Start Workouts</a>
+    <a href=""https://powlax.com/attack-workouts/"">Attack Workouts</a>
+    <a href=""https://powlax.com/midfield-workouts/"">Midfield Workouts</a>
+    <a href=""https://powlax.com/defense-workouts/"">Defense Workouts</a>
+    <a href=""https://powlax.com/wall-ball-workouts/"">Wall Ball Workouts</a>
+    <a href=""https://powlax.com/self-guided-workouts/"">Self-Guided Workouts</a>
+</div>"";}i:3;a:5:{s:5:""label"";s:23:""Log Self-Guided Workout"";s:4:""slug"";s:13:""log-a-workout"";s:13:""enabled_roles"";a:1:{i:0;s:3:""all"";}s:13:""visible_roles"";a:1:{i:0;s:3:""all"";}s:7:""content"";s:1666:""<style>
+.powlax-workout-links {
+    max-width: 600px;
+    margin: 20px auto;
+}
+
+.powlax-workout-links a {
+    display: block;
+    margin-bottom: 10px;
+    padding: 15px 20px;
+    background-color: #f5f5f5;
+    color: #333 !important;
+    text-decoration: none !important;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+}
+
+.powlax-workout-links a:hover {
+    background-color: #667eea;
+    color: #fff !important;
+    border-color: #667eea;
+    transform: translateY(-2px);
+}
+
+.powlax-workout-links a.featured {
+    background-color: #667eea;
+    color: #fff !important;
+    border-color: #667eea;
+}
+
+.powlax-workout-links a.featured:hover {
+    background-color: #5a67d8;
+    border-color: #5a67d8;
+}
+
+@media (max-width: 600px) {
+    .powlax-workout-links {
+        margin: 10px auto;
+    }
+
+    .powlax-workout-links a {
+        padding: 12px 15px;
+        margin-bottom: 8px;
+        font-size: 15px;
+    }
+}
+</style>
+
+<div class=""powlax-workout-links"">
+    <a class=""featured"" href=""https://powlax.com/skills-academy-basic-workouts/"">Academy Basic Workouts</a>
+    <a href=""https://powlax.com/solid-start-workouts/"">Solid Start Workouts</a>
+    <a href=""https://powlax.com/attack-workouts/"">Attack Workouts</a>
+    <a href=""https://powlax.com/midfield-workouts/"">Midfield Workouts</a>
+    <a href=""https://powlax.com/defense-workouts/"">Defense Workouts</a>
+    <a href=""https://powlax.com/wall-ball-workouts/"">Wall Ball Workouts</a>
+    <a href=""https://powlax.com/self-guided-workouts/"">Self-Guided Workouts</a>
+</div>"";}}",,,,,publish,1,powlax,patrick@powlax.com,Patrick,Chapla,skills-academy,,,0,0,0,closed,closed,"2025-07-22 18:10:41"
+38737,"My Teams",,,"2025-04-13 21:54:26",bpptc_profile_tab,https://powlax.com/bpptc_profile_tab/teams/,,,,,,,,on,"My Teams",my-teams,on,"a:2:{i:0;s:3:""all"";i:1;s:15:""team-hq-members"";}","a:3:{i:0;s:4:""self"";i:1;s:13:""administrator"";i:2;s:15:""bbp_participant"";}",3,"a:1:{i:0;a:7:{s:9:""is_active"";s:2:""on"";s:5:""label"";s:5:""Teams"";s:4:""slug"";s:8:""subteams"";s:8:""position"";s:1:""1"";s:13:""enabled_roles"";a:2:{i:0;s:3:""all"";i:1;s:15:""team-hq-members"";}s:13:""visible_roles"";a:2:{i:0;s:4:""self"";i:1;s:13:""administrator"";}s:7:""content"";s:80:""<h4>My Clubs and Teams</h4>
+[group type=""club-hq717,single-team-hq,team-hq363""]"";}}",on,,,,publish,1,powlax,patrick@powlax.com,Patrick,Chapla,teams,,,0,0,0,closed,closed,"2025-07-22 17:42:52"
+38741,Groups,,,"2025-04-27 16:10:37",bpptc_profile_tab,https://powlax.com/bpptc_profile_tab/groups/,,,,,,,,on,"My Groups",groups,on,"a:1:{i:0;s:3:""all"";}","a:3:{i:0;s:4:""self"";i:1;s:13:""administrator"";i:2;s:12:""powlax_admin"";}",4,"a:1:{i:0;a:3:{s:13:""enabled_roles"";a:1:{i:0;s:3:""all"";}s:13:""visible_roles"";a:1:{i:0;s:29:""powlax_community_group_member"";}s:7:""content"";s:31:""[group type=""discussion-group""]"";}}",on,2025-04-13,on,,publish,1,powlax,patrick@powlax.com,Patrick,Chapla,groups,,,0,0,0,closed,closed,"2025-07-22 01:39:52"
+38748,"Playbooks & Master Classes",,,"2025-04-14 01:06:30",bpptc_profile_tab,https://powlax.com/bpptc_profile_tab/master-classes/,,,,,,,,on,"My Playbooks",my-playbooks,on,"a:1:{i:0;s:3:""all"";}","a:2:{i:0;s:4:""self"";i:1;s:13:""administrator"";}",2,"a:4:{i:0;a:13:{s:9:""is_active"";s:2:""on"";s:11:""is_existing"";b:0;s:5:""label"";s:14:""Team Playbooks"";s:4:""slug"";s:14:""team-playbooks"";s:8:""position"";s:1:""1"";s:15:""site_admin_only"";b:0;s:13:""enabled_roles"";a:1:{i:0;s:3:""all"";}s:13:""visible_roles"";a:1:{i:0;s:4:""self"";}s:3:""url"";s:0:"""";s:11:""item_css_id"";s:0:"""";s:15:""add_to_adminbar"";b:0;s:18:""item_adminbar_slug"";s:0:"""";s:7:""content"";s:99:""[ld_course_list orderby=""title"" order=""ASC"" num=""10"" col=""2"" course_tag=""custom-coaches-playbooks""]"";}i:1;a:13:{s:9:""is_active"";s:2:""on"";s:11:""is_existing"";b:0;s:5:""label"";s:16:""POWLAX Playbooks"";s:4:""slug"";s:16:""powlax-playbooks"";s:8:""position"";s:0:"""";s:15:""site_admin_only"";b:0;s:13:""enabled_roles"";a:1:{i:0;s:3:""all"";}s:13:""visible_roles"";a:1:{i:0;s:3:""all"";}s:3:""url"";s:0:"""";s:11:""item_css_id"";s:0:"""";s:15:""add_to_adminbar"";b:0;s:18:""item_adminbar_slug"";s:0:"""";s:7:""content"";s:89:""[ld_course_list orderby=""title"" order=""ASC"" num=""10"" col=""2"" course_tag=""coaches-corner""]"";}i:2;a:13:{s:9:""is_active"";b:0;s:11:""is_existing"";b:0;s:5:""label"";s:18:""Unopened Playbooks"";s:4:""slug"";s:18:""unopened-playbooks"";s:8:""position"";s:0:"""";s:15:""site_admin_only"";b:0;s:13:""enabled_roles"";a:1:{i:0;s:3:""all"";}s:13:""visible_roles"";a:2:{i:0;s:3:""all"";i:1;s:9:""logged_in"";}s:3:""url"";s:0:"""";s:11:""item_css_id"";s:0:"""";s:15:""add_to_adminbar"";b:0;s:18:""item_adminbar_slug"";s:0:"""";s:7:""content"";s:131:""[ld_course_list orderby=""title"" order=""ASC"" num=""10"" mycourses=""enrolled"" status=""not_started"" col=""2"" course_tag=""coaches-corner""]"";}i:3;a:6:{s:9:""is_active"";s:2:""on"";s:5:""label"";s:23:""Coaching Master Classes"";s:4:""slug"";s:23:""coaching-master-classes"";s:13:""enabled_roles"";a:1:{i:0;s:3:""all"";}s:13:""visible_roles"";a:1:{i:0;s:3:""all"";}s:7:""content"";s:98:""[ld_course_list orderby=""title"" order=""ASC"" num=""10"" col=""2"" course_tag=""coaching-master-classes""]"";}}",on,,,,publish,1,powlax,patrick@powlax.com,Patrick,Chapla,master-classes,,,0,0,0,closed,closed,"2025-07-22 17:42:24"
+41024,Discussions,,,"2025-04-30 05:44:28",bpptc_profile_tab,https://powlax.com/bpptc_profile_tab/discussions/,,,,,,,,on,"My Discussions",forums,on,"a:1:{i:0;s:3:""all"";}","a:1:{i:0;s:9:""logged_in"";}",,"a:1:{i:0;a:7:{s:9:""is_active"";s:2:""on"";s:5:""label"";s:9:""My Groups"";s:4:""slug"";s:9:""my-groups"";s:8:""position"";s:1:""4"";s:13:""enabled_roles"";a:1:{i:0;s:29:""powlax_community_group_member"";}s:13:""visible_roles"";a:1:{i:0;s:4:""self"";}s:7:""content"";s:31:""[group type=""discussion-group""]"";}}",on,,on,,publish,1,powlax,patrick@powlax.com,Patrick,Chapla,discussions,,,0,0,0,closed,closed,"2025-07-22 17:39:51"
+41026,"Activity Feed",,,"2025-04-30 05:49:33",bpptc_profile_tab,https://powlax.com/bpptc_profile_tab/activity-feed/,,,,,,,,on,"Activity Feed",activity,on,"a:1:{i:0;s:3:""all"";}","a:1:{i:0;s:9:""logged_in"";}",,"a:1:{i:0;a:2:{s:13:""enabled_roles"";a:1:{i:0;s:3:""all"";}s:13:""visible_roles"";a:2:{i:0;s:3:""all"";i:1;s:9:""logged_in"";}}}",on,,on,,publish,1,powlax,patrick@powlax.com,Patrick,Chapla,activity-feed,,,0,0,0,closed,closed,"2025-07-22 17:34:28"
+43036,"My Resources",,,"2025-06-09 03:17:44",bpptc_profile_tab,https://powlax.com/bpptc_profile_tab/my-resources/,,,,,,,,on,"My Resources",my-resources,on,"a:1:{i:0;s:3:""all"";}","a:1:{i:0;s:3:""all"";}",2,"a:6:{i:0;a:13:{s:9:""is_active"";s:2:""on"";s:11:""is_existing"";b:0;s:5:""label"";s:14:""Free Resources"";s:4:""slug"";s:14:""free-resources"";s:8:""position"";s:0:"""";s:15:""site_admin_only"";b:0;s:13:""enabled_roles"";a:1:{i:0;s:3:""all"";}s:13:""visible_roles"";a:1:{i:0;s:3:""all"";}s:3:""url"";s:0:"""";s:11:""item_css_id"";s:0:"""";s:15:""add_to_adminbar"";b:0;s:18:""item_adminbar_slug"";s:0:"""";s:7:""content"";s:1901:""<p class=""p1""><a href=""https://powlax.com/lacrosse-coaching-mastery-assessment/""><b>Coach Mastery Assessment:</b></a> ""Know Where to Start."" Identify your team's current standing and get recommendations for relevant free training videos.</p>
+<p class=""p1""><a href=""https://powlax.com/groups/""><b>Lacrosse Community and Discussion:</b></a> ""You’re Not Coaching Alone."" Join the POWLAX community forums for discussions, shared drills, and Q&amp;A.</p>
+<p class=""p1""><a href=""https://powlax.com/coaches-corner/""><b>Coaching Video Library:</b></a> “See It, Coach It.” Short strategy breakdowns and drill demos turn confusing X’s &amp; O’s into clear, step-by-step clips you can play on the sideline or share with assistants for instant practice clarity.</p>
+<p class=""p1""><a href=""https://powlax.com/practice-videos/""><b>Player Practice Videos:</b></a> “Reps Anywhere, Results Everywhere.” Quick backyard and wall-ball videos show athletes exactly how to sharpen dodges, shots, and stick skills on their own time—so they arrive at practice already better.</p>
+<p class=""p1""><a href=""https://powlax.com/lacrosse-basics/""><b>Lacrosse 101 Series:</b></a> “Learn the Game in Minutes.” Parent-friendly explainers cover rules, positions, equipment, and basic drills, giving families the confidence to cheer (and practice) without confusion.</p>
+<p class=""p1""><a href=""https://powlax.com/6questions""><b>6-Question Lax Skill Check:</b></a> “Know Your Next Move.” A lightning-fast self-assessment pinpoints each player’s biggest growth area and drops them into the exact Skills Academy workouts to fix it.</p>
+<p class=""p1""><a href=""https://powlax.com/lacrosse-parents-pathway-quiz/""><b>Parents Pathway Quiz:</b></a> A fun quiz that reveals how ready you are to support your athlete, then hands you tailored tips, videos, and gear guides to become the team’s most helpful fan.</p>"";}i:1;a:13:{s:9:""is_active"";s:2:""on"";s:11:""is_existing"";b:0;s:5:""label"";s:9:""Downloads"";s:4:""slug"";s:9:""downloads"";s:8:""position"";s:0:"""";s:15:""site_admin_only"";b:0;s:13:""enabled_roles"";a:2:{i:0;s:3:""all"";i:1;s:12:""group_leader"";}s:13:""visible_roles"";a:1:{i:0;s:3:""all"";}s:3:""url"";s:0:"""";s:11:""item_css_id"";s:0:"""";s:15:""add_to_adminbar"";b:0;s:18:""item_adminbar_slug"";s:0:"""";s:7:""content"";s:795:""<strong>[mepr-show rules=""41978""]</strong>Coach Resources
+<ul>
+ 	<li><a href=""https://powlax.com/mp-files/powlax-lacrosse-coach-email-templates.pdf/"">POWLAX Lacrosse Coach Email Templates</a></li>
+ 	<li><a href=""https://powlax.com/mp-files/powlax-skill-verbiage-cheat-sheet-lacrosse.pdf/"">Lacrosse Skill Verbiage Sheet</a></li>
+</ul>
+<strong>[/mepr-show]</strong>
+
+<strong>[mepr-hide rules=""41978""]</strong>Download Strategy Playbooks from the <a href=""https://powlax.com/coaches-corner/"">strategy videos and playbook section</a> —this is where you'll find resources from <a href=""https://powlax.com/coaching-kits/"">Coaching Kits</a>, <a href=""https://powlax.com/team-hq/"">Team HQ</a>, and <a href=""https://powlax.com/club-os/"">Club OS</a> all in one place.<strong>[/mepr-hide]</strong>"";}i:2;a:13:{s:9:""is_active"";s:2:""on"";s:11:""is_existing"";b:0;s:5:""label"";s:14:""Master Classes"";s:4:""slug"";s:14:""master-classes"";s:8:""position"";s:0:"""";s:15:""site_admin_only"";b:0;s:13:""enabled_roles"";a:1:{i:0;s:3:""all"";}s:13:""visible_roles"";a:1:{i:0;s:9:""logged_in"";}s:3:""url"";s:0:"""";s:11:""item_css_id"";s:0:"""";s:15:""add_to_adminbar"";b:0;s:18:""item_adminbar_slug"";s:0:"""";s:7:""content"";s:362:""[ld_course_list orderby=""title"" order=""ASC"" num=""10"" mycourses=""enrolled"" status=""not_started,in_progress,completed"" col=""2"" course_tag=""strategy-master-classes""]
+
+Master each phase of the game with video walkthroughs, printables, and quizzes to train yourself or your whole team.  <a href=""https://powlax.com/coaches-corner/"">View Strategy Master Classes</a>"";}i:3;a:13:{s:9:""is_active"";s:2:""on"";s:11:""is_existing"";b:0;s:5:""label"";s:16:""Coaches Training"";s:4:""slug"";s:21:""coaching-master-class"";s:8:""position"";s:0:"""";s:15:""site_admin_only"";b:0;s:13:""enabled_roles"";a:1:{i:0;s:3:""all"";}s:13:""visible_roles"";a:1:{i:0;s:9:""logged_in"";}s:3:""url"";s:0:"""";s:11:""item_css_id"";s:0:"""";s:15:""add_to_adminbar"";b:0;s:18:""item_adminbar_slug"";s:0:"""";s:7:""content"";s:484:""[ld_course_list orderby=""title"" order=""ASC"" num=""10"" mycourses=""enrolled"" status=""not_started,in_progress,completed"" col=""2"" course_tag=""coaching-master-classes""]
+
+Build confident, effective practices with the Youth Lacrosse Coaching Master Class—your complete guide for teaching the game at any level. <a class=""cursor-pointer"" href=""https://powlax.com/youth-lacrosse-coaching-master-class/"" target=""_new"" rel=""noopener"" data-start=""516"" data-end=""588"">Start the Master Class</a>"";}i:4;a:13:{s:9:""is_active"";s:2:""on"";s:11:""is_existing"";b:0;s:5:""label"";s:13:""Team Playbook"";s:4:""slug"";s:13:""team-playbook"";s:8:""position"";s:0:"""";s:15:""site_admin_only"";b:0;s:13:""enabled_roles"";a:1:{i:0;s:3:""all"";}s:13:""visible_roles"";a:1:{i:0;s:3:""all"";}s:3:""url"";s:0:"""";s:11:""item_css_id"";s:0:"""";s:15:""add_to_adminbar"";b:0;s:18:""item_adminbar_slug"";s:0:"""";s:7:""content"";s:368:""[ld_course_list orderby=""title"" order=""ASC"" num=""10"" mycourses=""enrolled"" status=""not_started,in_progress,completed"" col=""2"" course_tag=""team-playbooks""]
+
+Access a playbook for your team—featuring integrated strategy videos, printable playbooks, and digital diagrams for your team’s complete strategy. <a href=""https://powlax.com/team-hq/"">Check out Team HQ!</a>"";}i:5;a:6:{s:9:""is_active"";s:2:""on"";s:5:""label"";s:16:""Digital Playbook"";s:4:""slug"";s:16:""digital-playbook"";s:13:""enabled_roles"";a:1:{i:0;s:3:""all"";}s:13:""visible_roles"";a:1:{i:0;s:3:""all"";}s:7:""content"";s:377:""The POWLAX Digital Playbook gives you full access to all of my plays, drills, and systems—customizable and shareable inside <a href=""https://labradorsports.com/lacrosse"">Lacrosse Lab.</a> It's included with <a href=""https://powlax.com/coaching-kits/"">Coaching Kits</a>, <a href=""https://powlax.com/team-hq/"">Team HQ</a>, and <a href=""https://powlax.com/club-os/"">Club OS</a>."";}}",,,,,publish,1,powlax,patrick@powlax.com,Patrick,Chapla,my-resources,,,0,0,0,closed,closed,"2025-07-22 17:33:19"
+43166,"My Info & Subscriptions",,,"2025-06-09 21:30:42",bpptc_profile_tab,https://powlax.com/bpptc_profile_tab/my-info-subscriptions/,,,,,,,,on,"My Info & Subscriptions",mp-membership,on,"a:1:{i:0;s:3:""all"";}","a:1:{i:0;s:13:""do_not_modify"";}",,"a:1:{i:0;a:2:{s:13:""enabled_roles"";a:1:{i:0;s:3:""all"";}s:13:""visible_roles"";a:1:{i:0;s:3:""all"";}}}",on,,on,,publish,1,powlax,patrick@powlax.com,Patrick,Chapla,my-info-subscriptions,,,0,0,0,closed,closed,"2025-06-09 21:31:08"
+48287,,,,"2025-07-22 07:51:46",bpptc_profile_tab,https://powlax.com/bpptc_profile_tab/48287/,,,,,,,,,"Master Classes",master-classes/,on,"a:1:{i:0;s:3:""all"";}","a:1:{i:0;s:3:""all"";}",,"a:1:{i:0;a:5:{s:11:""is_existing"";s:2:""on"";s:5:""label"";s:15:""My Certificates"";s:4:""slug"";s:12:""certificates"";s:13:""enabled_roles"";a:1:{i:0;s:3:""all"";}s:13:""visible_roles"";a:1:{i:0;s:3:""all"";}}}",,,on,on,publish,1,powlax,patrick@powlax.com,Patrick,Chapla,48287,,,0,0,0,closed,closed,"2025-07-22 07:52:24"
