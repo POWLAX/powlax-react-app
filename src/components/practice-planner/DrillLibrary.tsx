@@ -10,7 +10,7 @@ import FilterDrillsModal from './FilterDrillsModal'
 import VideoModal from './modals/VideoModal'
 import LinksModal from './modals/LinksModal'
 import StrategiesModal from './modals/StrategiesModal'
-import LacrosseLabModal from './modals/LacrosseLabModal'
+import LacrosseLabModal, { hasLabUrls } from './modals/LacrosseLabModal'
 
 interface Drill {
   id: string
@@ -307,17 +307,19 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
                                 />
                               </button>
 
-                              <button
-                                onClick={(e) => openLacrosseLabModal(drill, e)}
-                                className="p-1 hover:bg-gray-100 rounded"
-                                title="Lacrosse Lab Diagrams"
-                              >
-                                <img 
-                                  src="https://powlax.com/wp-content/uploads/2025/06/Lacrosse-Lab-Link-1.svg" 
-                                  alt="Lacrosse Lab" 
-                                  className="h-4 w-4"
-                                />
-                              </button>
+                              {hasLabUrls(drill) && (
+                                <button
+                                  onClick={(e) => openLacrosseLabModal(drill, e)}
+                                  className="p-1 hover:bg-gray-100 rounded"
+                                  title="Lacrosse Lab Diagrams"
+                                >
+                                  <img 
+                                    src="https://powlax.com/wp-content/uploads/2025/06/Lacrosse-Lab-Link-1.svg" 
+                                    alt="Lacrosse Lab" 
+                                    className="h-4 w-4"
+                                  />
+                                </button>
+                              )}
 
                               <button
                                 onClick={(e) => openLinksModal(drill, e)}

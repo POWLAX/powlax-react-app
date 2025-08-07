@@ -27,6 +27,47 @@ interface LacrosseLabModalProps {
   }
 }
 
+// Utility function to check if drill has lab URLs
+export const hasLabUrls = (drill: {
+  lab_urls?: string[] | string
+  lacrosse_lab_urls?: string[]
+  drill_lab_url_1?: string
+  drill_lab_url_2?: string
+  drill_lab_url_3?: string
+  drill_lab_url_4?: string
+  drill_lab_url_5?: string
+}): boolean => {
+  // Check lab_urls JSONB field
+  if (drill.lab_urls) {
+    if (Array.isArray(drill.lab_urls)) {
+      return drill.lab_urls.some(url => url && url.trim())
+    } else if (typeof drill.lab_urls === 'string') {
+      try {
+        const parsed = JSON.parse(drill.lab_urls)
+        if (Array.isArray(parsed)) {
+          return parsed.some(url => url && url.trim())
+        }
+      } catch (e) {
+        // If it's not JSON, treat as single URL
+        return drill.lab_urls.trim() !== ''
+      }
+    }
+  }
+  
+  // Check individual lab URL fields
+  if (drill.drill_lab_url_1 || drill.drill_lab_url_2 || drill.drill_lab_url_3 || 
+      drill.drill_lab_url_4 || drill.drill_lab_url_5) {
+    return true
+  }
+  
+  // Check lacrosse_lab_urls array
+  if (drill.lacrosse_lab_urls && Array.isArray(drill.lacrosse_lab_urls)) {
+    return drill.lacrosse_lab_urls.some(url => url && url.trim())
+  }
+  
+  return false
+}
+
 export default function LacrosseLabModal({ isOpen, onClose, drill }: LacrosseLabModalProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
@@ -109,13 +150,34 @@ export default function LacrosseLabModal({ isOpen, onClose, drill }: LacrosseLab
     setIsLoading(false)
   }
 
-  // Convert URL to embed format if needed
+  // Convert URL to proper embed format
   const getEmbedUrl = (url: string) => {
-    // If it's already a Lacrosse Lab URL, return as is
-    if (url.includes('lacrosse.labradorsports.com')) {
+    if (!url) return ''
+    
+    // If it's already a play URL, return as is
+    if (url.includes('lacrosse.labradorsports.com/play?l=')) {
       return url
     }
-    // Otherwise return the URL as is
+    
+    // If it's a Lacrosse Lab URL with an ID, extract it
+    if (url.includes('lacrosse.labradorsports.com')) {
+      const idMatch = url.match(/[?&]l=([^&]+)/)
+      if (idMatch) {
+        return `https://lacrosse.labradorsports.com/play?l=${idMatch[1]}`
+      }
+      // If no ID found, try to extract from path
+      const pathMatch = url.match(/\/([A-Za-z0-9]+)\/?$/)
+      if (pathMatch) {
+        return `https://lacrosse.labradorsports.com/play?l=${pathMatch[1]}`
+      }
+    }
+    
+    // If it looks like just an ID, wrap it in the full URL
+    if (url.match(/^[A-Za-z0-9]+$/)) {
+      return `https://lacrosse.labradorsports.com/play?l=${url}`
+    }
+    
+    // Return original URL if we can't parse it
     return url
   }
 

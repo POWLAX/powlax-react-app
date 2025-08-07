@@ -17,7 +17,7 @@ import {
 import VideoModal from './modals/VideoModal'
 import LinksModal from './modals/LinksModal'
 import StrategiesModal from './modals/StrategiesModal'
-import LacrosseLabModal from './modals/LacrosseLabModal'
+import LacrosseLabModal, { hasLabUrls } from './modals/LacrosseLabModal'
 
 interface DrillCardProps {
   drill: {
@@ -223,17 +223,19 @@ const DrillCard = memo(function DrillCard({
               />
             </button>
 
-            <button
-              onClick={() => setShowLacrosseLabModal(true)}
-              className="min-w-[48px] min-h-[48px] flex items-center justify-center bg-blue-100 hover:bg-blue-200 active:bg-blue-300 rounded-xl shadow-sm transition-colors"
-              title="Lacrosse Lab Diagrams"
-            >
-              <img 
-                src="https://powlax.com/wp-content/uploads/2025/06/Lacrosse-Lab-Link-1.svg" 
-                alt="Lacrosse Lab" 
-                className="h-6 w-6"
-              />
-            </button>
+            {hasLabUrls(drill) && (
+              <button
+                onClick={() => setShowLacrosseLabModal(true)}
+                className="min-w-[48px] min-h-[48px] flex items-center justify-center bg-blue-100 hover:bg-blue-200 active:bg-blue-300 rounded-xl shadow-sm transition-colors"
+                title="Lacrosse Lab Diagrams"
+              >
+                <img 
+                  src="https://powlax.com/wp-content/uploads/2025/06/Lacrosse-Lab-Link-1.svg" 
+                  alt="Lacrosse Lab" 
+                  className="h-6 w-6"
+                />
+              </button>
+            )}
 
             <button
               onClick={() => setShowLinksModal(true)}
