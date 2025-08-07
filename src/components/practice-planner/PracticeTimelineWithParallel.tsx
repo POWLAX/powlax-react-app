@@ -3,6 +3,7 @@
 import DrillCard from './DrillCard'
 import ParallelDrillPicker from './ParallelDrillPicker'
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface Drill {
   id: string
@@ -128,15 +129,30 @@ export default function PracticeTimelineWithParallel({
 
   if (timeSlots.length === 0) {
     return (
-      <div className="text-center py-12">
+      <motion.div 
+        className="text-center py-12"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
         {getSetupTime()}
-        <h3 className="text-xl font-semibold text-gray-700 mb-2">
+        <motion.h3 
+          className="text-xl font-semibold text-gray-700 mb-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
           Ready to Build Your Practice!
-        </h3>
-        <p className="text-gray-500 mb-4">
+        </motion.h3>
+        <motion.p 
+          className="text-gray-500 mb-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+        >
           Click the + in the Drill Library 👉
-        </p>
-      </div>
+        </motion.p>
+      </motion.div>
     )
   }
 
@@ -145,8 +161,21 @@ export default function PracticeTimelineWithParallel({
       {getSetupTime()}
       
       <div className="space-y-4">
-        {timeSlots.map((slot, slotIndex) => (
-          <div key={slot.id} className="relative">
+        <AnimatePresence>
+          {timeSlots.map((slot, slotIndex) => (
+            <motion.div 
+              key={slot.id} 
+              className="relative"
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+              transition={{ 
+                duration: 0.3,
+                ease: "easeOut",
+                delay: slotIndex * 0.05 // Stagger animation
+              }}
+              layout
+            >
             <div className="flex items-start gap-2">
               {/* Time indicator for the slot */}
               <div className="text-lg font-semibold text-gray-700 mt-4 min-w-[80px]">
@@ -155,8 +184,20 @@ export default function PracticeTimelineWithParallel({
               
               {/* Drills in this time slot */}
               <div className="flex-1 space-y-2">
-                {slot.drills.map((drill, drillIndex) => (
-                  <div key={drill.id} className={drillIndex > 0 ? 'ml-4' : ''}>
+                <AnimatePresence>
+                  {slot.drills.map((drill, drillIndex) => (
+                    <motion.div 
+                      key={drill.id} 
+                      className={drillIndex > 0 ? 'ml-4' : ''}
+                      initial={{ opacity: 0, x: drillIndex > 0 ? -20 : 0 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: drillIndex > 0 ? -20 : 20 }}
+                      transition={{ 
+                        duration: 0.2,
+                        ease: "easeInOut"
+                      }}
+                      layout
+                    >
                     <DrillCard
                       drill={drill}
                       startTime={getSlotStartTime(slotIndex)}
@@ -174,19 +215,26 @@ export default function PracticeTimelineWithParallel({
                       canMoveDown={slotIndex < timeSlots.length - 1}
                       isParallel={drillIndex > 0}
                     />
-                  </div>
-                ))}
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
                 
                 {/* Show count indicator for parallel drills */}
                 {slot.drills.length > 1 && (
-                  <div className="text-sm text-gray-500 italic ml-4">
+                  <motion.div 
+                    className="text-sm text-gray-500 italic ml-4 bg-blue-50 px-3 py-1 rounded-full border border-blue-200"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2 }}
+                  >
                     {slot.drills.length} activities running in parallel
-                  </div>
+                  </motion.div>
                 )}
               </div>
             </div>
-          </div>
-        ))}
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
 
       {/* Parallel Drill Picker Modal */}

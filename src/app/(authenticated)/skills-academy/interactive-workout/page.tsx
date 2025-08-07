@@ -251,7 +251,7 @@ export default function InteractiveWorkoutPage() {
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Today's Drills</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Today&apos;s Drills</h3>
                 <div className="space-y-3">
                   {workoutSession.drills.map((drill, index) => (
                     <div key={drill.id} className="flex items-center p-3 bg-gray-50 rounded-lg">

@@ -1,9 +1,11 @@
+import { memo } from 'react'
+
 interface PracticeDurationBarProps {
   totalDuration: number
   usedDuration: number
 }
 
-export default function PracticeDurationBar({ totalDuration, usedDuration }: PracticeDurationBarProps) {
+const PracticeDurationBar = memo(function PracticeDurationBar({ totalDuration, usedDuration }: PracticeDurationBarProps) {
   const percentage = Math.min((usedDuration / totalDuration) * 100, 100)
   const isOverTime = usedDuration > totalDuration
   
@@ -42,4 +44,6 @@ export default function PracticeDurationBar({ totalDuration, usedDuration }: Pra
       )}
     </div>
   )
-}
+})
+
+export default PracticeDurationBar

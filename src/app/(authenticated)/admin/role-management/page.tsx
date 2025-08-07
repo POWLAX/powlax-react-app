@@ -234,7 +234,7 @@ export default function RoleManagementPage() {
               Access Denied
             </CardTitle>
             <CardDescription>
-              You don't have permission to manage user roles
+              You don&apos;t have permission to manage user roles
             </CardDescription>
           </CardHeader>
         </Card>
@@ -492,7 +492,7 @@ export default function RoleManagementPage() {
               <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
                 <p className="text-sm text-yellow-800">
                   <AlertCircle className="h-4 w-4 inline mr-1" />
-                  This will update the user's role in WordPress and require them to log in again.
+                  This will update the user&apos;s role in WordPress and require them to log in again.
                 </p>
               </div>
             )}

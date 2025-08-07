@@ -5,7 +5,7 @@
 -- but don't actually exist in Supabase yet.
 
 -- 1. Team Drills Table (for WordPress drill exports)
-CREATE TABLE IF NOT EXISTS drills_powlax (
+CREATE TABLE IF NOT EXISTS powlax_drills (
   id SERIAL PRIMARY KEY,
   wp_id TEXT,
   title TEXT NOT NULL,
@@ -62,8 +62,8 @@ CREATE TABLE IF NOT EXISTS lessons_powlax (
 -- 4. Drill-Strategy Mapping Table
 CREATE TABLE IF NOT EXISTS drill_strategy_map_powlax (
   id SERIAL PRIMARY KEY,
-  drill_id INTEGER REFERENCES drills_powlax(id) ON DELETE CASCADE,
-  strategy_id INTEGER REFERENCES strategies_powlax(id) ON DELETE CASCADE,
+  drill_id INTEGER REFERENCES powlax_drills(id) ON DELETE CASCADE,
+  strategy_id INTEGER REFERENCES powlax_strategies(id) ON DELETE CASCADE,
   confidence_score DECIMAL(3,2),
   mapping_source TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -71,10 +71,10 @@ CREATE TABLE IF NOT EXISTS drill_strategy_map_powlax (
 );
 
 -- Create indexes for performance
-CREATE INDEX IF NOT EXISTS idx_drills_powlax_title ON drills_powlax(title);
-CREATE INDEX IF NOT EXISTS idx_drills_powlax_drill_types ON drills_powlax(drill_types);
-CREATE INDEX IF NOT EXISTS idx_drills_powlax_game_phase ON drills_powlax(game_phase);
-CREATE INDEX IF NOT EXISTS idx_drills_powlax_wp_id ON drills_powlax(wp_id);
+CREATE INDEX IF NOT EXISTS idx_powlax_drills_title ON powlax_drills(title);
+CREATE INDEX IF NOT EXISTS idx_powlax_drills_drill_types ON powlax_drills(drill_types);
+CREATE INDEX IF NOT EXISTS idx_powlax_drills_game_phase ON powlax_drills(game_phase);
+CREATE INDEX IF NOT EXISTS idx_powlax_drills_wp_id ON powlax_drills(wp_id);
 
 CREATE INDEX IF NOT EXISTS idx_wall_ball_powlax_title ON wall_ball_powlax(title);
 CREATE INDEX IF NOT EXISTS idx_wall_ball_powlax_workouts ON wall_ball_powlax USING gin(included_in_workouts);

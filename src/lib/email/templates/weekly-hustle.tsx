@@ -78,7 +78,7 @@ export function WeeklyHustleEmail({
   return (
     <html>
       <head>
-        <title>{playerName}'s Weekly Hustle Report</title>
+        <title>{playerName}&apos;s Weekly Hustle Report</title>
         <style>{`
           body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
@@ -219,7 +219,7 @@ export function WeeklyHustleEmail({
         <div className="container">
           {/* Header */}
           <div className="header">
-            <h1>{getStreakEmoji(weekData.streak)} {playerName}'s Weekly Hustle</h1>
+            <h1>{getStreakEmoji(weekData.streak)} {playerName}&apos;s Weekly Hustle</h1>
             <p>Training Report • Week Ending {new Date().toLocaleDateString()}</p>
           </div>
 
@@ -227,7 +227,7 @@ export function WeeklyHustleEmail({
           <div style={{ marginBottom: '20px' }}>
             <p>Hi {parentName},</p>
             <p>
-              Here's how {playerName} performed this week! {' '}
+              Here&apos;s how {playerName} performed this week! {' '}
               {weekData.streak > 0 && `They maintained a ${weekData.streak}-day training streak 🔥`}
               {weekData.difficultyImprovement > 0 && ` and increased their workout difficulty by ${weekData.difficultyImprovement}%!`}
             </p>
@@ -334,7 +334,7 @@ export function WeeklyHustleEmail({
           {/* Coach Notes */}
           {coachNotes && (
             <div className="coach-notes">
-              <h4 style={{ margin: '0 0 10px 0', color: '#1e40af' }}>💬 Coach's Notes</h4>
+              <h4 style={{ margin: '0 0 10px 0', color: '#1e40af' }}>💬 Coach&apos;s Notes</h4>
               <p style={{ margin: 0 }}>{coachNotes}</p>
             </div>
           )}
@@ -342,7 +342,7 @@ export function WeeklyHustleEmail({
           {/* Next Week Goals */}
           {nextWeekGoals && (
             <div className="goals-section">
-              <h3 style={{ margin: '0 0 15px 0', color: '#065f46' }}>🎯 Next Week's Goals</h3>
+              <h3 style={{ margin: '0 0 15px 0', color: '#065f46' }}>🎯 Next Week&apos;s Goals</h3>
               <ul style={{ margin: 0, paddingLeft: '20px' }}>
                 <li>Maintain a {nextWeekGoals.streakTarget}-day streak</li>
                 <li>Average difficulty of {nextWeekGoals.difficultyTarget}+</li>

@@ -1,20 +1,20 @@
 # POWLAX Database Table Naming Convention
 
-## Standard Format: `[entity]_powlax`
+## Standard Format: `powlax_[entity]`
 
 All tables in the POWLAX database should follow the naming convention of:
-- **Format**: `[entity_name]_powlax`
-- **Pattern**: Lowercase entity name followed by `_powlax` suffix
+- **Format**: `powlax_[entity_name]`
+- **Pattern**: `powlax_` prefix followed by lowercase entity name
 
 ### Examples:
-- ✅ `strategies_powlax` - Strategies and concepts
-- ✅ `drills_powlax` - Drill library
-- ✅ `skills_academy_powlax` - Skills academy content
-- ✅ `wall_ball_powlax` - Wall ball exercises
-- ✅ `lessons_powlax` - Video lessons
-- ✅ `users_powlax` - User accounts
-- ✅ `teams_powlax` - Team data
-- ✅ `practice_plans_powlax` - Practice plans
+- ✅ `powlax_strategies` - Strategies and concepts
+- ✅ `powlax_drills` - Drill library
+- ✅ `skills_academy_drills` - Skills academy content
+- ✅ `wall_ball_powlax` - Wall ball exercises (legacy naming)
+- ✅ `lessons_powlax` - Video lessons (legacy naming)
+- ✅ `user_drills` - User-created drills
+- ✅ `user_strategies` - User-created strategies
+- ✅ `practice_plans` - Practice plans
 
 ### Why This Convention?
 1. **Namespace Isolation**: Prevents conflicts with other applications sharing the database
@@ -24,9 +24,9 @@ All tables in the POWLAX database should follow the naming convention of:
 
 ### Migration Mapping:
 When importing from WordPress or other sources:
-- `wp_strategies` → `strategies_powlax`
-- `wp_drills` → `drills_powlax`
-- `staging_wp_*` → `staging_[entity]_powlax`
+- `wp_strategies` → `powlax_strategies`
+- `wp_drills` → `powlax_drills`
+- `staging_wp_*` → `staging_[entity]_powlax` (staging tables keep legacy naming)
 
 ### Related Tables:
 Junction tables should follow the pattern:
@@ -35,4 +35,4 @@ Junction tables should follow the pattern:
 
 ### Indexes:
 - Format: `idx_[table_name]_[column(s)]`
-- Example: `idx_strategies_powlax_vimeo_id`
+- Example: `idx_powlax_strategies_vimeo_id`

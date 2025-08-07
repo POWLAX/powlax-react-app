@@ -188,7 +188,7 @@ export default function ResourcesPage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <BookOpen className="h-5 w-5 mr-2" />
-              Coach's Toolkit
+              Coach&apos;s Toolkit
             </CardTitle>
           </CardHeader>
           <CardContent>

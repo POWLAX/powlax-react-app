@@ -183,7 +183,7 @@ export default function WordPressAuthTestPage() {
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              <strong>Before testing:</strong> Ensure you've configured your .env.local file with WORDPRESS_API_URL. You can test with either your regular WordPress password or an Application Password.
+              <strong>Before testing:</strong> Ensure you&apos;ve configured your .env.local file with WORDPRESS_API_URL. You can test with either your regular WordPress password or an Application Password.
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -308,7 +308,7 @@ export default function WordPressAuthTestPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-2 text-sm">
-            <p>✅ <strong>All tests pass?</strong> You're ready to enable real authentication!</p>
+            <p>✅ <strong>All tests pass?</strong> You&apos;re ready to enable real authentication!</p>
             <p>❌ <strong>Tests failing?</strong> Check the WordPress-Auth-Setup-Plan.md for troubleshooting.</p>
             <p>🔄 <strong>Ready to go live?</strong> Remove demo mode and enable protected routes.</p>
           </div>

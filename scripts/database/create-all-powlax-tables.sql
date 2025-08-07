@@ -2,7 +2,7 @@
 -- Create all tables following the [entity]_powlax naming convention
 
 -- 1. Team Drills Table
-CREATE TABLE IF NOT EXISTS drills_powlax (
+CREATE TABLE IF NOT EXISTS powlax_drills (
   id SERIAL PRIMARY KEY,
   wp_id TEXT,
   title TEXT NOT NULL,
@@ -83,9 +83,9 @@ CREATE TABLE IF NOT EXISTS drill_strategy_map_powlax (
 );
 
 -- Create indexes for better performance
-CREATE INDEX IF NOT EXISTS idx_drills_powlax_title ON drills_powlax(title);
-CREATE INDEX IF NOT EXISTS idx_drills_powlax_drill_types ON drills_powlax(drill_types);
-CREATE INDEX IF NOT EXISTS idx_drills_powlax_game_phase ON drills_powlax(game_phase);
+CREATE INDEX IF NOT EXISTS idx_powlax_drills_title ON powlax_drills(title);
+CREATE INDEX IF NOT EXISTS idx_powlax_drills_drill_types ON powlax_drills(drill_types);
+CREATE INDEX IF NOT EXISTS idx_powlax_drills_game_phase ON powlax_drills(game_phase);
 
 CREATE INDEX IF NOT EXISTS idx_skills_academy_powlax_title ON skills_academy_powlax(title);
 CREATE INDEX IF NOT EXISTS idx_skills_academy_powlax_category ON skills_academy_powlax(academy_category);
@@ -98,7 +98,7 @@ CREATE INDEX IF NOT EXISTS idx_lessons_powlax_title ON lessons_powlax(title);
 CREATE INDEX IF NOT EXISTS idx_lessons_powlax_type ON lessons_powlax(lesson_type);
 
 -- Enable RLS on all tables (but with permissive policies for now)
-ALTER TABLE drills_powlax ENABLE ROW LEVEL SECURITY;
+ALTER TABLE powlax_drills ENABLE ROW LEVEL SECURITY;
 ALTER TABLE skills_academy_powlax ENABLE ROW LEVEL SECURITY;
 ALTER TABLE wall_ball_powlax ENABLE ROW LEVEL SECURITY;
 ALTER TABLE lessons_powlax ENABLE ROW LEVEL SECURITY;
@@ -108,7 +108,7 @@ ALTER TABLE drill_strategy_map_powlax ENABLE ROW LEVEL SECURITY;
 DO $$
 DECLARE
   table_name TEXT;
-  tables TEXT[] := ARRAY['drills_powlax', 'skills_academy_powlax', 'wall_ball_powlax', 'lessons_powlax', 'drill_strategy_map_powlax'];
+  tables TEXT[] := ARRAY['powlax_drills', 'skills_academy_powlax', 'wall_ball_powlax', 'lessons_powlax', 'drill_strategy_map_powlax'];
 BEGIN
   FOREACH table_name IN ARRAY tables
   LOOP

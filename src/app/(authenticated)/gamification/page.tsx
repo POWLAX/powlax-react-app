@@ -151,7 +151,7 @@ export default function PlayerGamificationPage() {
           {/* Weekly Progress Chart */}
           <Card>
             <CardHeader>
-              <CardTitle>This Week's Activity</CardTitle>
+              <CardTitle>This Week&apos;s Activity</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">

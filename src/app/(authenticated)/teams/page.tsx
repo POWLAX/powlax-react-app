@@ -34,7 +34,7 @@ export default function TeamsPage() {
       <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
         <Users className="h-12 w-12 text-gray-400 mb-4" />
         <h3 className="text-lg font-semibold">No Teams Yet</h3>
-        <p className="text-gray-600 mt-2">You haven't been added to any teams.</p>
+        <p className="text-gray-600 mt-2">You haven&apos;t been added to any teams.</p>
       </div>
     )
   }

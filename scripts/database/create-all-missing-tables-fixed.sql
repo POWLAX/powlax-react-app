@@ -10,7 +10,7 @@
 -- ============================================
 
 -- 1. Team Drills Table (for WordPress drill exports)
-CREATE TABLE IF NOT EXISTS drills_powlax (
+CREATE TABLE IF NOT EXISTS powlax_drills (
   id SERIAL PRIMARY KEY,
   wp_id TEXT,
   title TEXT NOT NULL,

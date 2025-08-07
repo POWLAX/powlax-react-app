@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { Calendar, Clock, MapPin, Save, Printer, RefreshCw, FolderOpen, Plus } from 'lucide-react'
-import DrillLibrary from '@/components/practice-planner/DrillLibrary'
-import PracticeTimelineWithParallel from '@/components/practice-planner/PracticeTimelineWithParallel'
+import LazyDrillLibrary from '@/components/practice-planner/lazy/LazyDrillLibrary'
+import LazyPracticeTimeline from '@/components/practice-planner/lazy/LazyPracticeTimeline'
 import PracticeDurationBar from '@/components/practice-planner/PracticeDurationBar'
 import { toast } from 'sonner'
 
@@ -279,7 +279,7 @@ export default function PracticePlannerDemoPage() {
               )}
             </div>
             
-            <PracticeTimelineWithParallel
+            <LazyPracticeTimeline
               drills={timeSlots}
               setDrills={setTimeSlots}
               startTime={startTime}
@@ -298,7 +298,7 @@ export default function PracticePlannerDemoPage() {
         {/* Drill Library Sidebar - Desktop/Tablet */}
         <div className="hidden lg:block w-80 xl:w-96">
           <div className="bg-white rounded-lg shadow-sm border h-full overflow-hidden">
-            <DrillLibrary onAddDrill={handleAddDrill} />
+            <LazyDrillLibrary onAddDrill={handleAddDrill} />
           </div>
         </div>
       </div>
@@ -316,7 +316,7 @@ export default function PracticePlannerDemoPage() {
                 ✕
               </button>
             </div>
-            <DrillLibrary onAddDrill={(drill) => {
+            <LazyDrillLibrary onAddDrill={(drill) => {
               handleAddDrill(drill)
               setShowDrillLibrary(false)
             }} />

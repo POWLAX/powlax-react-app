@@ -2,19 +2,25 @@
 
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
-import { Calendar, Clock, MapPin, Save, Printer, RefreshCw, FolderOpen, Plus } from 'lucide-react'
-import DrillLibrary from '@/components/practice-planner/DrillLibrary'
-import PracticeTimelineWithParallel from '@/components/practice-planner/PracticeTimelineWithParallel'
+import { Calendar, Clock, MapPin, Save, Printer, RefreshCw, FolderOpen, Plus, Timer, Users } from 'lucide-react'
+import LazyDrillLibrary from '@/components/practice-planner/lazy/LazyDrillLibrary'
+import LazyPracticeTimeline from '@/components/practice-planner/lazy/LazyPracticeTimeline'
 import PracticeDurationBar from '@/components/practice-planner/PracticeDurationBar'
 import SavePracticeModal from '@/components/practice-planner/modals/SavePracticeModal'
 import LoadPracticeModal from '@/components/practice-planner/modals/LoadPracticeModal'
+import PrintablePracticePlan from '@/components/practice-planner/PrintablePracticePlan'
+import PracticeTemplateSelector from '@/components/practice-planner/PracticeTemplateSelector'
 import { usePracticePlans } from '@/hooks/usePracticePlans'
+import { useDrills } from '@/hooks/useDrills'
+import { usePrint } from '@/hooks/usePrint'
 import { toast } from 'sonner'
 
 export default function PracticePlansPage() {
   const params = useParams()
   const teamId = params.teamId as string
   const { savePracticePlan, plans, loading: plansLoading } = usePracticePlans(teamId)
+  const { refreshDrills } = useDrills()
+  const { isPrinting, printContent } = usePrint()
   const [practiceDate, setPracticeDate] = useState(new Date().toISOString().split('T')[0])
   const [startTime, setStartTime] = useState('07:00')
   const [duration, setDuration] = useState(90) // Default 90 minutes for youth
@@ -26,6 +32,10 @@ export default function PracticePlansPage() {
   const [showDrillLibrary, setShowDrillLibrary] = useState(false)
   const [showSaveModal, setShowSaveModal] = useState(false)
   const [showLoadModal, setShowLoadModal] = useState(false)
+  const [showPrintPreview, setShowPrintPreview] = useState(false)
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false)
+  const [practiceStarted, setPracticeStarted] = useState(false)
+  const [currentDrillIndex, setCurrentDrillIndex] = useState(0)
 
   // Calculate total drill time from all time slots
   const totalDrillTime = timeSlots.reduce((acc, slot) => acc + slot.duration, 0)
@@ -44,6 +54,11 @@ export default function PracticePlansPage() {
     }
     
     setTimeSlots([...timeSlots, newSlot])
+    
+    // Close mobile drill library after adding drill
+    if (showDrillLibrary) {
+      setShowDrillLibrary(false)
+    }
   }
 
   const handleSavePracticePlan = async (title: string, notes?: string) => {
@@ -101,6 +116,38 @@ export default function PracticePlansPage() {
     setShowLoadModal(false)
   }
 
+  const handlePrint = () => {
+    if (timeSlots.length === 0) {
+      toast.error('Add some drills to your practice plan first!')
+      return
+    }
+    
+    setShowPrintPreview(true)
+  }
+
+  const handleRefresh = () => {
+    refreshDrills()
+    toast.success('Drill library refreshed!')
+  }
+
+  const handleLoadTemplate = (template: any) => {
+    // Clear existing practice
+    setTimeSlots([])
+    setPracticeNotes('')
+    
+    // Set practice info from template
+    setDuration(template.duration)
+    setPracticeNotes(template.description + '\n\n' + template.coachingTips.join('\n'))
+    
+    // Load template time slots
+    if (template.timeSlots) {
+      setTimeSlots(template.timeSlots)
+    }
+    
+    toast.success(`Loaded template: ${template.name}`)
+    setShowTemplateSelector(false)
+  }
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -113,6 +160,13 @@ export default function PracticePlansPage() {
           
           {/* Toolbar */}
           <div className="flex items-center space-x-2">
+            <button 
+              onClick={() => setShowTemplateSelector(true)}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
+              title="Use Practice Template"
+            >
+              <Plus className="h-5 w-5" />
+            </button>
             <button 
               onClick={() => setShowLoadModal(true)}
               className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
@@ -127,10 +181,19 @@ export default function PracticePlansPage() {
             >
               <Save className="h-5 w-5" />
             </button>
-            <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded">
-              <Printer className="h-5 w-5" />
+            <button 
+              onClick={handlePrint}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
+              title="Print Practice Plan"
+              disabled={isPrinting || timeSlots.length === 0}
+            >
+              <Printer className={`h-5 w-5 ${isPrinting ? 'animate-pulse' : ''}`} />
             </button>
-            <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded">
+            <button 
+              onClick={handleRefresh}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
+              title="Refresh Drill Library"
+            >
               <RefreshCw className="h-5 w-5" />
             </button>
           </div>
@@ -245,9 +308,40 @@ export default function PracticePlansPage() {
             />
           </div>
 
+          {/* Field Mode Quick Actions */}
+          {timeSlots.length > 0 && (
+            <div className="bg-blue-50 rounded-lg border border-blue-200 p-4 mb-4">
+              <h3 className="font-semibold text-blue-900 mb-3 flex items-center">
+                <Timer className="h-5 w-5 mr-2" />
+                Field Mode
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                <button 
+                  onClick={() => setPracticeStarted(!practiceStarted)}
+                  className={`px-4 py-2 rounded font-medium ${
+                    practiceStarted 
+                      ? 'bg-red-100 text-red-700 hover:bg-red-200' 
+                      : 'bg-green-100 text-green-700 hover:bg-green-200'
+                  }`}
+                >
+                  {practiceStarted ? 'End Practice' : 'Start Practice'}
+                </button>
+                <button 
+                  onClick={handlePrint}
+                  className="px-4 py-2 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded font-medium"
+                >
+                  Quick Print
+                </button>
+                <span className="px-3 py-2 bg-white rounded text-sm font-medium border">
+                  {timeSlots.length} Activities • {totalDrillTime}min
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* Practice Timeline */}
           <div className="bg-white rounded-lg shadow-sm border p-4">
-            <PracticeTimelineWithParallel
+            <LazyPracticeTimeline
               drills={timeSlots}
               setDrills={setTimeSlots}
               startTime={startTime}
@@ -258,7 +352,7 @@ export default function PracticePlansPage() {
 
         {/* Drill Library Sidebar - Desktop/Tablet */}
         <div className="hidden md:block w-80 lg:w-96 border-l bg-white overflow-y-auto">
-          <DrillLibrary onAddDrill={handleAddDrill} />
+          <LazyDrillLibrary onAddDrill={handleAddDrill} />
         </div>
       </div>
 
@@ -275,10 +369,7 @@ export default function PracticePlansPage() {
                 ✕
               </button>
             </div>
-            <DrillLibrary onAddDrill={(drill) => {
-              handleAddDrill(drill)
-              setShowDrillLibrary(false)
-            }} />
+            <LazyDrillLibrary onAddDrill={handleAddDrill} />
           </div>
         </div>
       )}
@@ -307,6 +398,54 @@ export default function PracticePlansPage() {
         plans={plans}
         loading={plansLoading}
       />
+
+      {/* Template Selector Modal */}
+      <PracticeTemplateSelector
+        isOpen={showTemplateSelector}
+        onClose={() => setShowTemplateSelector(false)}
+        onSelectTemplate={handleLoadTemplate}
+      />
+
+      {/* Print Preview Modal */}
+      {showPrintPreview && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="text-lg font-semibold">Print Practice Plan</h3>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => printContent('printable-plan')}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  disabled={isPrinting}
+                >
+                  {isPrinting ? 'Printing...' : 'Print'}
+                </button>
+                <button
+                  onClick={() => setShowPrintPreview(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+            <div className="overflow-y-auto max-h-[calc(90vh-80px)]">
+              <div id="printable-plan">
+                <PrintablePracticePlan
+                  practiceDate={practiceDate}
+                  startTime={startTime}
+                  duration={duration + (addSetupTime ? setupDuration : 0)}
+                  field={field}
+                  setupTime={addSetupTime ? setupDuration : 0}
+                  timeSlots={timeSlots}
+                  practiceNotes={practiceNotes}
+                  coachName="Coach"
+                  teamName={`Team ${teamId}`}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

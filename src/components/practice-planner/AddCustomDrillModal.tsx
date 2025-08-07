@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { useUserDrills } from '@/hooks/useUserDrills'
+import { toast } from 'sonner'
 
 interface AddCustomDrillModalProps {
   isOpen: boolean
@@ -20,6 +22,7 @@ interface AddCustomDrillModalProps {
 }
 
 export default function AddCustomDrillModal({ isOpen, onClose, onAdd }: AddCustomDrillModalProps) {
+  const { createUserDrill, loading: creating } = useUserDrills()
   const [name, setName] = useState('')
   const [duration, setDuration] = useState(10)
   const [category, setCategory] = useState('skill')
@@ -34,39 +37,66 @@ export default function AddCustomDrillModal({ isOpen, onClose, onAdd }: AddCusto
   const [newConcept, setNewConcept] = useState('')
   const [newSkill, setNewSkill] = useState('')
 
-  const handleSubmit = (e?: React.FormEvent) => {
+  const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault()
     
     if (!name.trim()) {
-      alert('Please enter a drill name')
+      toast.error('Please enter a drill name')
       return
     }
 
-    const customDrill = {
-      id: `custom-${Date.now()}`,
-      name: name.trim(),
-      duration,
-      category,
-      strategies: strategies.filter(Boolean),
-      concepts: concepts.filter(Boolean),
-      skills: skills.filter(Boolean),
-      notes,
-      videoUrl: videoUrl.trim(),
-      isCustom: true,
-    }
+    try {
+      // Create drill in database first
+      const drillData = {
+        title: name.trim(),
+        drill_category: category,
+        drill_duration: `${duration} minutes`,
+        drill_notes: notes,
+        drill_video_url: videoUrl.trim() || undefined,
+        content: `Custom drill: ${notes}`,
+        // Store additional data as JSON in content field
+        drill_types: JSON.stringify({
+          strategies: strategies.filter(Boolean),
+          concepts: concepts.filter(Boolean),
+          skills: skills.filter(Boolean)
+        })
+      }
 
-    onAdd(customDrill)
-    
-    // Reset form
-    setName('')
-    setDuration(10)
-    setCategory('skill')
-    setStrategies([])
-    setConcepts([])
-    setSkills([])
-    setNotes('')
-    setVideoUrl('')
-    onClose()
+      const createdDrill = await createUserDrill(drillData)
+
+      // Also add to practice planner immediately
+      const practiceReadyDrill = {
+        id: `user-${createdDrill.id}`,
+        name: name.trim(),
+        duration,
+        category,
+        strategies: strategies.filter(Boolean),
+        concepts: concepts.filter(Boolean),
+        skills: skills.filter(Boolean),
+        notes,
+        videoUrl: videoUrl.trim(),
+        isCustom: true,
+        drill_video_url: videoUrl.trim()
+      }
+
+      onAdd(practiceReadyDrill)
+      
+      // Reset form
+      setName('')
+      setDuration(10)
+      setCategory('skill')
+      setStrategies([])
+      setConcepts([])
+      setSkills([])
+      setNotes('')
+      setVideoUrl('')
+      onClose()
+      
+      toast.success('Custom drill created and added to practice!')
+    } catch (error) {
+      console.error('Error creating custom drill:', error)
+      toast.error('Failed to create custom drill')
+    }
   }
 
   const addStrategy = () => {
@@ -311,11 +341,11 @@ export default function AddCustomDrillModal({ isOpen, onClose, onAdd }: AddCusto
         </ScrollArea>
 
         <DialogFooter className="px-6 py-4 border-t">
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onClose} disabled={creating}>
             Cancel
           </Button>
-          <Button onClick={() => handleSubmit()}>
-            Add Drill
+          <Button onClick={() => handleSubmit()} disabled={creating}>
+            {creating ? 'Creating...' : 'Add Drill'}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Filter, Plus, Star, ChevronDown, ChevronRight, X, Video, Link, Edit3, Beaker } from 'lucide-react'
 import { useDrills } from '@/hooks/useDrills'
+import { useFavorites } from '@/hooks/useFavorites'
 import AddCustomDrillModal from './AddCustomDrillModal'
 import FilterDrillsModal from './FilterDrillsModal'
 import VideoModal from './modals/VideoModal'
@@ -45,12 +47,13 @@ const categories = [
 
 export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
   const { drills: supabaseDrills, loading, error } = useDrills()
+  const { toggleFavorite, isFavorite, loading: favoritesLoading } = useFavorites()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [expandedCategories, setExpandedCategories] = useState<string[]>(['skill'])
   const [showFilterModal, setShowFilterModal] = useState(false)
   const [showAddDrillModal, setShowAddDrillModal] = useState(false)
-  const [favorites, setFavorites] = useState<string[]>([])
+  // Removed local favorites state - now using useFavorites hook
   
   // Modal states for individual drills
   const [showVideoModal, setShowVideoModal] = useState(false)
@@ -73,13 +76,9 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
     }
   }
 
-  const toggleFavorite = (drillId: string, e: React.MouseEvent) => {
+  const handleToggleFavorite = async (drill: Drill, e: React.MouseEvent) => {
     e.stopPropagation()
-    if (favorites.includes(drillId)) {
-      setFavorites(favorites.filter(id => id !== drillId))
-    } else {
-      setFavorites([...favorites, drillId])
-    }
+    await toggleFavorite(drill.id, drill)
   }
 
   // Filter drills based on all criteria
@@ -199,6 +198,7 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
         <button 
           onClick={() => setShowAddDrillModal(true)}
           className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center justify-center"
+          data-testid="add-custom-drill-btn"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Custom Drill
@@ -248,6 +248,7 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
               <button
                 onClick={() => toggleCategory(category.id)}
                 className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50"
+                data-testid={`category-${category.id}`}
               >
                 <div className="flex items-center">
                   {isExpanded ? (
@@ -265,11 +266,23 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
                   {categoryDrills.length === 0 ? (
                     <p className="px-6 py-3 text-sm text-gray-500">No drills found</p>
                   ) : (
-                    categoryDrills.map(drill => (
-                      <div
-                        key={drill.id}
-                        className="px-6 py-3 border-t border-gray-200 hover:bg-gray-50"
-                      >
+                    <AnimatePresence>
+                      {categoryDrills.map((drill, index) => (
+                        <motion.div
+                          key={drill.id}
+                          className="px-6 py-3 border-t border-gray-200 hover:bg-gray-50"
+                          initial={index < 10 ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ 
+                            duration: 0.15,
+                            delay: Math.min(index * 0.01, 0.1)
+                          }}
+                          whileHover={{ 
+                            scale: 1.005,
+                            transition: { duration: 0.1 }
+                          }}
+                        >
                         <div className="flex items-start justify-between">
                           <div className="flex-1 pr-4">
                             <h4 className="font-medium text-gray-900">{drill.name}</h4>
@@ -327,16 +340,17 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
                           <div className="flex items-center gap-2">
                             <span className="text-sm text-gray-500">{drill.duration}m</span>
                             <button
-                              onClick={(e) => toggleFavorite(drill.id, e)}
+                              onClick={(e) => handleToggleFavorite(drill, e)}
                               className={`p-1 rounded ${
-                                favorites.includes(drill.id)
+                                isFavorite(drill.id)
                                   ? 'text-yellow-500'
                                   : 'text-gray-400 hover:text-gray-600'
                               }`}
+                              disabled={favoritesLoading}
                             >
                               <Star
                                 className={`h-4 w-4 ${
-                                  favorites.includes(drill.id) ? 'fill-current' : ''
+                                  isFavorite(drill.id) ? 'fill-current' : ''
                                 }`}
                               />
                             </button>
@@ -346,13 +360,16 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
                                 onAddDrill(drill)
                               }}
                               className="p-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                              data-testid={`add-drill-${drill.id}`}
+                              title="Add to Practice"
                             >
                               <Plus className="h-5 w-5" />
                             </button>
                           </div>
                         </div>
-                      </div>
-                    ))
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
                   )}
                 </div>
               )}

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react'
+import React, { useRef, useEffect, useState, useCallback, memo } from 'react'
 
 interface Particle {
   x: number
@@ -23,7 +23,7 @@ interface PointExplosionCanvasProps {
   onComplete?: () => void
 }
 
-export default function PointExplosionCanvas({
+const PointExplosionCanvas = memo(function PointExplosionCanvas({
   points,
   pointType,
   triggerExplosion,
@@ -314,7 +314,9 @@ export default function PointExplosionCanvas({
       `}</style>
     </>
   )
-}
+})
+
+export default PointExplosionCanvas
 
 // Demo component for testing
 export function PointExplosionDemo() {

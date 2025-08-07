@@ -66,7 +66,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-gray-600">
-              Your subscription has expired or you don't have an active plan. 
+              Your subscription has expired or you don&apos;t have an active plan. 
               Please visit POWLAX.com to renew or subscribe.
             </p>
             <div className="flex gap-2">
@@ -256,13 +256,13 @@ function ParentDashboard({ user }: { user: any }) {
       
       <Card>
         <CardHeader>
-          <CardTitle>Your Children's Progress</CardTitle>
+          <CardTitle>Your Children&apos;s Progress</CardTitle>
           <CardDescription>
-            Monitor your children's lacrosse development and team activities
+            Monitor your children&apos;s lacrosse development and team activities
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-gray-600">Connect with your child's coach to view their progress</p>
+          <p className="text-gray-600">Connect with your child&apos;s coach to view their progress</p>
         </CardContent>
       </Card>
     </div>

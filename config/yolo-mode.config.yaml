@@ -1,0 +1,124 @@
+# 🚀 YOLO Mode Configuration
+# Autonomous operation settings for Master Controller and sub-agents
+# When enabled, agents operate without constant permission requests
+
+enabled: true
+version: 1.0.0
+lastUpdated: 2025-01-16
+
+# Autonomous Operations Allowed Without Permission
+autonomousOperations:
+  # File Operations
+  fileOperations:
+    read: true           # Read any file in project
+    write: true          # Write/create files
+    edit: true           # Edit existing files
+    delete: false        # Still requires permission
+    
+  # Image/Media Operations
+  imageOperations:
+    view: true           # View screenshots/images
+    analyze: true        # Analyze UI screenshots
+    capture: true        # Capture test screenshots
+    
+  # Development Environment
+  devEnvironment:
+    checkExisting: true  # Always check for existing servers
+    useExisting: true    # Use existing dev servers
+    startNew: ask        # Ask before starting new servers
+    stop: never          # NEVER stop user's servers
+    portRange: [3000, 3001, 3002, 3003]
+    
+  # Testing Operations
+  testing:
+    runTests: true       # Run Playwright/Jest tests
+    createTests: true    # Write new test files
+    updateTests: true    # Modify existing tests
+    deleteTests: false   # Requires permission
+    
+  # Build Operations
+  buildOperations:
+    npmInstall: true     # Install dependencies
+    npmBuild: true       # Run build commands
+    npmLint: true        # Run linting
+    npmTest: true        # Run test suites
+    
+  # Database Operations
+  databaseOperations:
+    read: true           # Query database
+    create: ask          # Ask before creating tables
+    update: ask          # Ask before schema changes
+    delete: never        # Never delete without permission
+
+# Quality Gate Automation
+qualityGates:
+  autoIterate: true      # Automatically iterate on failures
+  maxIterations: 3       # Maximum automatic iterations
+  qualityThreshold: 80   # Minimum quality score
+  escalateAfter: 3       # Escalate to user after N failures
+
+# Contract Management
+contracts:
+  autoGenerate: true     # Generate contracts from requests
+  requireApproval: true  # Still need user approval
+  trackFulfillment: true # Track completion automatically
+  archiveCompleted: true # Archive when done
+
+# Notification Settings
+notifications:
+  enabled: true
+  methods:
+    - terminal_bell      # Terminal bell sound
+    - desktop_notify     # Desktop notifications
+    - status_file        # Write status to file
+    - console_banner     # Large console banner
+    
+# Iteration Management
+iterations:
+  automatic: true        # Enable automatic iterations
+  parallel: false        # Run iterations sequentially
+  logging: verbose       # Log all iteration details
+  
+# State Management
+stateManagement:
+  autoUpdate: true       # Update state files automatically
+  trackChanges: true     # Track all changes
+  createBackups: true    # Backup before changes
+  
+# Sub-Agent Coordination
+subAgentCoordination:
+  parallelDeployment: true    # Deploy multiple agents
+  autoSelect: true            # Auto-select best agent
+  requireStructuredResponse: true  # Enforce JSON responses
+  validateResponses: true     # Validate response format
+  
+# Server Protection Rules
+serverProtection:
+  neverClose: true       # Never close existing servers
+  alwaysCheck: true      # Always check before starting
+  respectUserOwnership: true  # User owns their servers
+  documentStatus: true   # Document server status
+
+# Performance Limits
+performanceLimits:
+  maxExecutionTime: 600000  # 10 minutes max per task
+  maxMemoryUsage: 2048      # 2GB max memory
+  maxFileSize: 10485760     # 10MB max file size
+  
+# Safety Overrides (require explicit permission)
+safetyOverrides:
+  - deleteDatabase
+  - dropTables
+  - removeAuthentication
+  - disableTests
+  - skipQualityGates
+  - productionDeployment
+  
+# Audit Trail
+auditTrail:
+  enabled: true
+  logLevel: detailed
+  includeTiming: true
+  includeDecisions: true
+  persistToFile: true
+  filePath: /logs/yolo-mode-audit.log

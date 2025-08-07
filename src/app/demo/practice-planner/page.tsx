@@ -1,10 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { Calendar, Clock, MapPin, Save, Printer, RefreshCw, FolderOpen, Plus } from 'lucide-react'
-import DrillLibrary from '@/components/practice-planner/DrillLibrary'
-import PracticeTimelineWithParallel from '@/components/practice-planner/PracticeTimelineWithParallel'
+import { Calendar, Clock, MapPin, Save, Printer, RefreshCw, FolderOpen, Plus, Search, FileText } from 'lucide-react'
+import LazyDrillLibrary from '@/components/practice-planner/lazy/LazyDrillLibrary'
+import LazyPracticeTimeline from '@/components/practice-planner/lazy/LazyPracticeTimeline'
 import PracticeDurationBar from '@/components/practice-planner/PracticeDurationBar'
+import PrintablePracticePlan from '@/components/practice-planner/PrintablePracticePlan'
+import { usePrint } from '@/hooks/usePrint'
+import { createPortal } from 'react-dom'
+import SearchTrigger from '@/components/search/SearchTrigger'
+import PracticeTemplateSelector from '@/components/practice-planner/PracticeTemplateSelector'
+import { PracticeTemplate } from '@/data/practice-templates'
+import { useServiceWorker } from '@/hooks/useServiceWorker'
 
 export default function PracticePlannerDemoPage() {
   const [practiceDate, setPracticeDate] = useState(new Date().toISOString().split('T')[0])
@@ -16,6 +23,11 @@ export default function PracticePlannerDemoPage() {
   const [practiceNotes, setPracticeNotes] = useState('')
   const [timeSlots, setTimeSlots] = useState<any[]>([])
   const [showDrillLibrary, setShowDrillLibrary] = useState(false)
+  const [showPrintPreview, setShowPrintPreview] = useState(false)
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false)
+  
+  const { printPage, createPrintWindow } = usePrint()
+  const { cachePracticeData, isOnline, savePendingData } = useServiceWorker()
 
   // Calculate total drill time from all time slots
   const totalDrillTime = timeSlots.reduce((acc, slot) => acc + slot.duration, 0)
@@ -33,7 +45,68 @@ export default function PracticePlannerDemoPage() {
       duration: newDrill.duration
     }
     
-    setTimeSlots([...timeSlots, newSlot])
+    const updatedTimeSlots = [...timeSlots, newSlot]
+    setTimeSlots(updatedTimeSlots)
+    
+    // Auto-save practice plan for offline access
+    const practiceData = {
+      id: `practice-${Date.now()}`,
+      date: practiceDate,
+      startTime,
+      duration,
+      field,
+      timeSlots: updatedTimeSlots,
+      notes: practiceNotes,
+      lastModified: new Date().toISOString()
+    }
+    
+    if (isOnline) {
+      cachePracticeData(practiceData)
+    } else {
+      // Save for sync when back online
+      savePendingData(practiceData)
+    }
+  }
+
+  const handlePrint = () => {
+    const printContent = `
+      <div class="printable-practice-plan">
+        ${document.getElementById('printable-practice-content')?.innerHTML || ''}
+      </div>
+    `
+    
+    createPrintWindow(printContent, {
+      title: `POWLAX Practice Plan - ${practiceDate}`,
+      onBeforePrint: () => console.log('Preparing to print practice plan'),
+      onAfterPrint: () => console.log('Print completed')
+    })
+  }
+
+  const handleLoadTemplate = (template: PracticeTemplate) => {
+    // Convert template to timeSlots format
+    const newTimeSlots = template.timeSlots.map((slot, index) => ({
+      id: `slot-${Date.now()}-${index}`,
+      drills: slot.drills.map(drill => ({
+        ...drill,
+        id: `${drill.id}-${Date.now()}-${index}`
+      })),
+      duration: slot.duration
+    }))
+    
+    setTimeSlots(newTimeSlots)
+    setDuration(template.duration)
+    setPracticeNotes(template.notes)
+    setShowTemplateSelector(false)
+    
+    // Cache the loaded template for offline use
+    const practiceData = {
+      id: `template-${template.id}-${Date.now()}`,
+      template: template.id,
+      date: practiceDate,
+      timeSlots: newTimeSlots,
+      notes: template.notes
+    }
+    cachePracticeData(practiceData)
   }
 
   return (
@@ -57,13 +130,25 @@ export default function PracticePlannerDemoPage() {
           
           {/* Toolbar */}
           <div className="flex items-center space-x-2">
+            <SearchTrigger variant="button" className="" />
+            <button 
+              onClick={() => setShowTemplateSelector(true)}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded template-button"
+              title="Practice Templates"
+            >
+                              <FileText className="h-5 w-5" />
+            </button>
             <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded">
               <FolderOpen className="h-5 w-5" />
             </button>
             <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded">
               <Save className="h-5 w-5" />
             </button>
-            <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded">
+            <button 
+              onClick={handlePrint}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded print-button"
+              title="Print Practice Plan"
+            >
               <Printer className="h-5 w-5" />
             </button>
             <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded">
@@ -179,7 +264,7 @@ export default function PracticePlannerDemoPage() {
 
           {/* Practice Timeline */}
           <div className="bg-white rounded-lg shadow-sm border p-4">
-            <PracticeTimelineWithParallel
+            <LazyPracticeTimeline
               drills={timeSlots}
               setDrills={setTimeSlots}
               startTime={startTime}
@@ -190,7 +275,7 @@ export default function PracticePlannerDemoPage() {
 
         {/* Drill Library Sidebar - Desktop/Tablet */}
         <div className="hidden md:block w-80 lg:w-96 border-l bg-white overflow-y-auto">
-          <DrillLibrary onAddDrill={handleAddDrill} />
+          <LazyDrillLibrary onAddDrill={handleAddDrill} />
         </div>
       </div>
 
@@ -207,7 +292,7 @@ export default function PracticePlannerDemoPage() {
                 ✕
               </button>
             </div>
-            <DrillLibrary onAddDrill={(drill) => {
+            <LazyDrillLibrary onAddDrill={(drill) => {
               handleAddDrill(drill)
               setShowDrillLibrary(false)
             }} />
@@ -222,6 +307,28 @@ export default function PracticePlannerDemoPage() {
       >
         <Plus className="h-6 w-6" />
       </button>
+
+      {/* Hidden printable content */}
+      <div id="printable-practice-content" className="hidden">
+        <PrintablePracticePlan
+          practiceDate={practiceDate}
+          startTime={startTime}
+          duration={duration}
+          field={field}
+          setupTime={addSetupTime ? setupDuration : 0}
+          timeSlots={timeSlots}
+          practiceNotes={practiceNotes}
+          coachName="Demo Coach"
+          teamName="Demo Team"
+        />
+      </div>
+
+      {/* Template Selector Modal */}
+      <PracticeTemplateSelector
+        isOpen={showTemplateSelector}
+        onClose={() => setShowTemplateSelector(false)}
+        onSelectTemplate={handleLoadTemplate}
+      />
     </div>
   )
 }

@@ -3,6 +3,10 @@
 *Auto-updated: 2025-01-16*  
 *Purpose: Local context for Claude when working on POWLAX practice planning components*
 
+## ⚠️ **CRITICAL: READ FIRST**
+**BEFORE making ANY changes, read `MASTER_CONTRACT.md` in this directory.**
+**All modifications must follow the user-approved enhancement contract.**
+
 ## 🎯 **What This Area Does**
 Core practice planning functionality that enables coaches to create 15-minute practice sessions using POWLAX's drill library, with drag-and-drop timeline interface, parallel activities, and mobile-first design optimized for field usage.
 

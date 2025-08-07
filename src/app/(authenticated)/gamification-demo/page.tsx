@@ -392,7 +392,7 @@ export default function GamificationDemo() {
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Important Note</AlertTitle>
                 <AlertDescription>
-                  Currently, workout completion is based on user action (clicking "Complete Workout"). 
+                  Currently, workout completion is based on user action (clicking &quot;Complete Workout&quot;). 
                   Future versions will integrate with video tracking or coach verification.
                 </AlertDescription>
               </Alert>
@@ -404,7 +404,7 @@ export default function GamificationDemo() {
                     <li>1. User selects drills for workout</li>
                     <li>2. User starts workout (timer begins)</li>
                     <li>3. User completes drills at their own pace</li>
-                    <li>4. User clicks "Complete Workout"</li>
+                    <li>4. User clicks &quot;Complete Workout&quot;</li>
                     <li>5. System calculates points based on drill difficulty</li>
                     <li>6. Points are awarded server-side (no client manipulation)</li>
                   </ol>

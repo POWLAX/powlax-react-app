@@ -26,7 +26,7 @@ const animations: AnimationDemo[] = [
     id: 'badge-unlock',
     name: 'Badge Unlock',
     description: 'CSS keyframe animations with burst effects and confetti',
-    component: () => {
+    component: function BadgeUnlockDemo() {
       const [showBadge, setShowBadge] = useState(false)
       
       return (

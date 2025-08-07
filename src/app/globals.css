@@ -1,3 +1,253 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* CSS Variables for Dark Mode */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 94.1%;
+  }
+}
+
+/* Dark mode specific styles */
+.dark {
+  /* Practice planner dark mode */
+  .practice-header {
+    border-color: #374151;
+    color: #f9fafb;
+  }
+  
+  .practice-title {
+    color: #60a5fa;
+  }
+  
+  .timeline-item {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+  
+  /* Navigation dark mode */
+  .bottom-nav {
+    background-color: #1f2937;
+    border-color: #374151;
+  }
+  
+  /* Search dark mode */
+  .search-input {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+  
+  /* FAB dark mode */
+  .fab-shadow {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Print Styles for Practice Plans */
+@media print {
+  /* Hide navigation and UI elements */
+  .no-print,
+  nav,
+  .fixed,
+  .sticky,
+  .sidebar,
+  .demo-banner,
+  .toolbar,
+  button:not(.print-keep),
+  .drill-library {
+    display: none !important;
+  }
+
+  /* Reset page margins */
+  @page {
+    margin: 0.5in;
+    size: letter;
+  }
+
+  /* Body styles */
+  body {
+    font-family: 'Arial', sans-serif;
+    font-size: 12pt;
+    line-height: 1.4;
+    color: #000;
+    background: white;
+  }
+
+  /* Practice plan header */
+  .practice-header {
+    border-bottom: 2px solid #003366;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+  }
+
+  .practice-title {
+    font-size: 18pt;
+    font-weight: bold;
+    color: #003366;
+    margin-bottom: 5px;
+  }
+
+  .practice-info {
+    font-size: 11pt;
+    color: #333;
+  }
+
+  /* Timeline styles */
+  .practice-timeline {
+    page-break-inside: avoid;
+  }
+
+  .timeline-item {
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    padding: 8px;
+    page-break-inside: avoid;
+  }
+
+  .timeline-time {
+    font-weight: bold;
+    font-size: 11pt;
+    color: #003366;
+  }
+
+  .timeline-drill {
+    margin-left: 15px;
+  }
+
+  .drill-name {
+    font-weight: bold;
+    font-size: 12pt;
+  }
+
+  .drill-description {
+    font-size: 10pt;
+    margin-top: 3px;
+    color: #555;
+  }
+
+  .drill-notes {
+    font-size: 9pt;
+    margin-top: 5px;
+    font-style: italic;
+    color: #666;
+  }
+
+  /* Duration and equipment info */
+  .drill-meta {
+    font-size: 9pt;
+    color: #777;
+    margin-top: 3px;
+  }
+
+  /* Practice notes */
+  .practice-notes {
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid #ccc;
+  }
+
+  .notes-title {
+    font-weight: bold;
+    font-size: 12pt;
+    margin-bottom: 5px;
+  }
+
+  /* Equipment list */
+  .equipment-list {
+    margin-top: 15px;
+  }
+
+  .equipment-title {
+    font-weight: bold;
+    font-size: 12pt;
+    margin-bottom: 5px;
+  }
+
+  /* Page breaks */
+  .page-break-before {
+    page-break-before: always;
+  }
+
+  .page-break-after {
+    page-break-after: always;
+  }
+
+  /* Remove shadows and backgrounds */
+  * {
+    box-shadow: none !important;
+    background: transparent !important;
+    text-shadow: none !important;
+  }
+
+  /* Ensure text is black */
+  h1, h2, h3, h4, h5, h6, p, div, span, li {
+    color: #000 !important;
+  }
+
+  /* Links should be underlined for print */
+  a {
+    text-decoration: underline !important;
+    color: #000 !important;
+  }
+
+  /* Tables for equipment or roster */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+  }
+
+  th, td {
+    border: 1px solid #000;
+    padding: 5px;
+    text-align: left;
+  }
+
+  th {
+    background: #f5f5f5 !important;
+    font-weight: bold;
+  }
+}

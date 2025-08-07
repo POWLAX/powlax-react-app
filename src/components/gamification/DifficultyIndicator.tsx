@@ -1,6 +1,7 @@
 // Difficulty Indicator Component
 // Phase 1: Anti-Gaming Foundation
 
+import { memo } from 'react'
 import { Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -27,7 +28,7 @@ const DIFFICULTY_COLORS = {
   5: 'text-red-500 fill-red-500'
 }
 
-export function DifficultyIndicator({ 
+export const DifficultyIndicator = memo(function DifficultyIndicator({ 
   score, 
   size = 'md', 
   showLabel = false,
@@ -75,7 +76,7 @@ export function DifficultyIndicator({
       )}
     </div>
   )
-}
+})
 
 // Variant for showing average difficulty with decimal precision
 interface AverageDifficultyProps {
@@ -85,7 +86,7 @@ interface AverageDifficultyProps {
   className?: string
 }
 
-export function AverageDifficulty({ 
+export const AverageDifficulty = memo(function AverageDifficulty({ 
   averageScore, 
   totalDrills, 
   size = 'md',
@@ -106,7 +107,7 @@ export function AverageDifficulty({
       </div>
     </div>
   )
-}
+})
 
 // Difficulty badge for compact display
 interface DifficultyBadgeProps {
@@ -114,7 +115,7 @@ interface DifficultyBadgeProps {
   className?: string
 }
 
-export function DifficultyBadge({ score, className }: DifficultyBadgeProps) {
+export const DifficultyBadge = memo(function DifficultyBadge({ score, className }: DifficultyBadgeProps) {
   const normalizedScore = Math.max(1, Math.min(5, Math.round(score)))
   const label = DIFFICULTY_LABELS[normalizedScore as keyof typeof DIFFICULTY_LABELS]
   
@@ -136,7 +137,7 @@ export function DifficultyBadge({ score, className }: DifficultyBadgeProps) {
       {label}
     </span>
   )
-}
+})
 
 // Difficulty progression bar (for workout averages)
 interface DifficultyProgressBarProps {
@@ -145,7 +146,7 @@ interface DifficultyProgressBarProps {
   className?: string
 }
 
-export function DifficultyProgressBar({ 
+export const DifficultyProgressBar = memo(function DifficultyProgressBar({ 
   currentDifficulty, 
   targetDifficulty = 5,
   className 
@@ -174,4 +175,4 @@ export function DifficultyProgressBar({
       </div>
     </div>
   )
-}
+})

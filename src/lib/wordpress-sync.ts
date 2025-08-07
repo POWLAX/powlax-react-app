@@ -215,10 +215,10 @@ export class WordPressSync {
       console.log('Sample transformed drills:');
       drills.forEach((drill, index) => {
         const transformed = this.transformDrillForSupabase(drill);
-        console.log(\`\${index + 1}. \${transformed.title}\`);
-        console.log(\`   Category: \${transformed.category}\`);
-        console.log(\`   Duration: \${transformed.duration_minutes} minutes\`);
-        console.log(\`   Equipment: \${transformed.equipment.join(', ')}\`);
+        console.log(`${index + 1}. ${transformed.title}`);
+        console.log(`   Category: ${transformed.category}`);
+        console.log(`   Duration: ${transformed.duration_minutes} minutes`);
+        console.log(`   Equipment: ${transformed.equipment.join(', ')}`);
         console.log('');
       });
       

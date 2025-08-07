@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import { vimeoService } from '@/lib/vimeo-service'
+import { useUserStrategies } from '@/hooks/useUserStrategies'
 import VideoModal from '@/components/practice-planner/modals/VideoModal'
 import LacrosseLabModal from '@/components/practice-planner/modals/LacrosseLabModal'
 
@@ -28,11 +28,32 @@ interface Strategy {
   tags?: string[]
   related_drills?: any[]
   related_concepts?: string[]
+  isUserStrategy?: boolean
 }
 
 export default function StrategiesPage() {
-  const [strategies, setStrategies] = useState<Strategy[]>([])
+  const { userStrategies, loading: userLoading, createUserStrategy } = useUserStrategies()
+  const [powlaxStrategies, setPowlaxStrategies] = useState<Strategy[]>([])
   const [loading, setLoading] = useState(true)
+  
+  // Combine user strategies with POWLAX strategies
+  const allStrategies = [
+    ...powlaxStrategies,
+    ...userStrategies.map(us => ({
+      id: `user-${us.id}`,
+      name: us.strategy_name,
+      category: us.strategy_categories?.toLowerCase().replace(/\s+/g, '_') || 'general',
+      description: us.description,
+      complexity: 'custom',
+      age_level: us.target_audience,
+      video_url: us.vimeo_link,
+      lacrosse_lab_url: undefined,
+      tags: [us.lesson_category || 'custom'].filter(Boolean),
+      related_drills: [],
+      related_concepts: [],
+      isUserStrategy: true
+    })) as Strategy[]
+  ]
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(null)
@@ -40,6 +61,7 @@ export default function StrategiesPage() {
   const [showLabModal, setShowLabModal] = useState(false)
   const [currentVideoUrl, setCurrentVideoUrl] = useState('')
   const [currentLabUrl, setCurrentLabUrl] = useState('')
+  const [showCreateModal, setShowCreateModal] = useState(false)
 
   useEffect(() => {
     fetchStrategies()
@@ -48,7 +70,7 @@ export default function StrategiesPage() {
   const fetchStrategies = async () => {
     try {
       const { data, error } = await supabase
-        .from('strategies_powlax')
+        .from('powlax_strategies')
         .select('*')
         .order('strategy_name')
 
@@ -68,12 +90,12 @@ export default function StrategiesPage() {
         related_concepts: []
       })) || []
 
-      setStrategies(formattedStrategies)
+      setPowlaxStrategies(formattedStrategies)
     } catch (error) {
       console.error('Error fetching strategies:', error)
-      setStrategies(getMockStrategies())
+      setPowlaxStrategies(getMockStrategies())
     } finally {
-      setLoading(false)
+      setLoading(false || userLoading)
     }
   }
   
@@ -114,11 +136,12 @@ export default function StrategiesPage() {
       case 'foundation': return 'bg-green-100 text-green-800'
       case 'building': return 'bg-yellow-100 text-yellow-800'
       case 'advanced': return 'bg-red-100 text-red-800'
+      case 'custom': return 'bg-purple-100 text-purple-800'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
 
-  const filteredStrategies = strategies.filter(strategy => {
+  const filteredStrategies = allStrategies.filter(strategy => {
     const matchesCategory = selectedCategory === 'all' || strategy.category === selectedCategory
     const matchesSearch = strategy.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          strategy.description?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -151,11 +174,20 @@ export default function StrategiesPage() {
 
   return (
     <div className="container mx-auto p-4 max-w-7xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-4">Strategies & Concepts</h1>
-        <p className="text-muted-foreground">
-          Master lacrosse strategies with detailed breakdowns and video analysis
-        </p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold mb-4">Strategies & Concepts</h1>
+          <p className="text-muted-foreground">
+            Master lacrosse strategies with detailed breakdowns and video analysis
+          </p>
+        </div>
+        <Button 
+          onClick={() => setShowCreateModal(true)}
+          className="flex items-center gap-2"
+        >
+          <Target className="w-4 h-4" />
+          Create Strategy
+        </Button>
       </div>
 
       {/* Search and Filter */}
@@ -214,9 +246,14 @@ export default function StrategiesPage() {
                       )}
                       
                       <div className="flex items-center gap-2">
+                        {strategy.isUserStrategy && (
+                          <Badge className="bg-blue-100 text-blue-800">
+                            Custom
+                          </Badge>
+                        )}
                         {strategy.complexity && (
                           <Badge className={getComplexityColor(strategy.complexity)}>
-                            {strategy.complexity}
+                            {strategy.complexity === 'custom' ? 'My Strategy' : strategy.complexity}
                           </Badge>
                         )}
                         {strategy.age_level && (
@@ -371,6 +408,15 @@ export default function StrategiesPage() {
           labUrl={currentLabUrl}
         />
       )}
+      
+      {/* Create Strategy Modal */}
+      {showCreateModal && (
+        <CreateStrategyModal
+          isOpen={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          onCreate={createUserStrategy}
+        />
+      )}
     </div>
   )
 }
@@ -412,4 +458,162 @@ function getMockStrategies(): Strategy[] {
       related_drills: []
     }
   ]
+}
+
+// Create Strategy Modal Component
+interface CreateStrategyModalProps {
+  isOpen: boolean
+  onClose: () => void
+  onCreate: (strategyData: any) => Promise<any>
+}
+
+function CreateStrategyModal({ isOpen, onClose, onCreate }: CreateStrategyModalProps) {
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
+  const [category, setCategory] = useState('offense')
+  const [targetAudience, setTargetAudience] = useState('')
+  const [videoLink, setVideoLink] = useState('')
+  const [creating, setCreating] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!name.trim()) {
+      return
+    }
+
+    setCreating(true)
+    try {
+      await onCreate({
+        strategy_name: name.trim(),
+        description: description.trim() || undefined,
+        strategy_categories: category,
+        lesson_category: category,
+        target_audience: targetAudience.trim() || undefined,
+        vimeo_link: videoLink.trim() || undefined,
+        is_public: false
+      })
+
+      // Reset form
+      setName('')
+      setDescription('')
+      setCategory('offense')
+      setTargetAudience('')
+      setVideoLink('')
+      onClose()
+    } catch (error) {
+      console.error('Error creating strategy:', error)
+    } finally {
+      setCreating(false)
+    }
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden">
+        <div className="flex items-center justify-between p-6 border-b">
+          <h3 className="text-lg font-semibold">Create New Strategy</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
+            disabled={creating}
+          >
+            ✕
+          </button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Strategy Name *
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g., Motion Offense Set Play"
+              required
+              disabled={creating}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Category
+            </label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={creating}
+            >
+              <option value="offense">Offense</option>
+              <option value="defense">Defense</option>
+              <option value="transition">Transition</option>
+              <option value="special teams">Special Teams</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Description
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              placeholder="Describe how this strategy works..."
+              disabled={creating}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Target Audience
+            </label>
+            <select
+              value={targetAudience}
+              onChange={(e) => setTargetAudience(e.target.value)}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={creating}
+            >
+              <option value="">Select age group (optional)</option>
+              <option value="Youth (8-10)">Youth (8-10)</option>
+              <option value="Middle School (11-13)">Middle School (11-13)</option>
+              <option value="High School (14-18)">High School (14-18)</option>
+              <option value="College">College</option>
+              <option value="All Ages">All Ages</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Video Link (optional)
+            </label>
+            <input
+              type="url"
+              value={videoLink}
+              onChange={(e) => setVideoLink(e.target.value)}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="https://vimeo.com/..."
+              disabled={creating}
+            />
+          </div>
+
+          <div className="flex justify-end space-x-3 pt-4">
+            <Button variant="outline" onClick={onClose} disabled={creating}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={creating}>
+              {creating ? 'Creating...' : 'Create Strategy'}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
 }

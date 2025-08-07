@@ -1,5 +1,6 @@
 import BottomNavigation from '@/components/navigation/BottomNavigation'
 import SidebarNavigation from '@/components/navigation/SidebarNavigation'
+import FloatingActionButton from '@/components/common/FloatingActionButton'
 
 export default function DemoLayout({
   children,
@@ -21,6 +22,11 @@ export default function DemoLayout({
         </main>
         
         <BottomNavigation />
+        
+        {/* FAB - Only show on mobile */}
+        <div className="md:hidden">
+          <FloatingActionButton />
+        </div>
       </div>
     </div>
   )

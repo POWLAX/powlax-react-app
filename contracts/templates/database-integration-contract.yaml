@@ -1,0 +1,83 @@
+# Database Integration Contract Template
+# Use for connecting components to Supabase tables
+
+contractTemplate:
+  type: DATABASE_INTEGRATION
+  version: 1.0.0
+  
+  parameters:
+    component: ""          # e.g., "DrillLibrary"
+    table: ""             # e.g., "powlax_drills" (was team_drills)
+    operations: []        # e.g., ["read", "create", "update"]
+    currentDataSource: "" # e.g., "mock data"
+    # Available tables:
+    # - powlax_drills (main drill library)
+    # - user_drills (user-created drills with sharing)
+    # - skills_academy_drills (skills academy specific)
+    # - powlax_strategies (strategy library)
+    # - user_strategies (user-created strategies)
+    # - skills_academy_workouts (workout templates)
+    
+  intent:
+    goal: "Connect {component} to {table} table"
+    scope:
+      - Remove mock data
+      - Implement Supabase queries
+      - Add error handling
+      - Implement caching
+      - Add real-time updates (if applicable)
+    outOfScope:
+      - UI redesign
+      - New features
+      - Table schema changes
+    assumptions:
+      - Table exists with correct schema
+      - RLS policies are configured
+      - User has necessary permissions
+    risks:
+      - Data migration issues
+      - Performance degradation
+      - Breaking existing features
+      
+  deliverables:
+    code:
+      hooks:
+        - "use{table}.ts"
+        - "use{table}Mutations.ts"
+      queries:
+        - "fetch{table}"
+        - "create{table}Item"
+        - "update{table}Item"
+        - "delete{table}Item"
+      types:
+        - "{table}Type.ts"
+    tests:
+      integration:
+        - "tests/integration/{table}-queries.test.ts"
+      e2e:
+        - "tests/e2e/{component}-data.spec.ts"
+        
+  successCriteria:
+    functional:
+      - All CRUD operations work
+      - Data loads on component mount
+      - Updates reflect immediately
+      - Deletes cascade properly
+    performance:
+      - Initial load <2 seconds
+      - Updates <500ms
+      - No N+1 queries
+    reliability:
+      - Handles network errors
+      - Retries failed requests
+      - Shows offline state
+    security:
+      - RLS policies enforced
+      - No data leaks
+      - Proper authentication
+      
+  qualityGates:
+    queryPerformance: 2000  # ms
+    errorRate: 0.01         # 1%
+    cacheHitRate: 0.8       # 80%
+    testCoverage: 85

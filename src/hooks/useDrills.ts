@@ -28,41 +28,7 @@ interface Drill {
   notes?: string
 }
 
-// Mock data fallback - comprehensive drill library
-const mockDrills: Drill[] = [
-  // Admin Drills
-  { id: '1', name: 'Dynamic Warm-Up', duration: 10, category: 'admin', strategies: ['Warm-Up'], notes: 'Progressive warm-up with dynamic stretching' },
-  { id: '2', name: 'Line Drills', duration: 8, category: 'admin', strategies: ['Warm-Up', 'Footwork'] },
-  { id: '3', name: 'Stick Work Lines', duration: 10, category: 'admin', strategies: ['Warm-Up', 'Stick Skills'] },
-  
-  // Skill Drills
-  { id: '4', name: '2 Ball Reaction Drill', duration: 10, category: 'skill', strategies: ['Ground Ball'], notes: 'Quick reaction and ground ball technique' },
-  { id: '5', name: '3 Man Passing', duration: 15, category: 'skill', strategies: ['Passing', 'Catching'] },
-  { id: '6', name: 'Star Drill', duration: 12, category: 'skill', strategies: ['Passing', 'Movement'] },
-  { id: '7', name: 'Box Passing', duration: 10, category: 'skill', strategies: ['Passing', 'Catching'] },
-  { id: '8', name: 'Over the Shoulder', duration: 10, category: 'skill', strategies: ['Catching', 'Communication'] },
-  { id: '9', name: 'Quick Stick Drill', duration: 8, category: 'skill', strategies: ['Stick Skills'] },
-  { id: '10', name: 'Wall Ball Circuit', duration: 15, category: 'skill', strategies: ['Stick Skills'], notes: 'Individual skill development' },
-  
-  // 1v1 Drills
-  { id: '11', name: '1v1 Ground Balls', duration: 15, category: '1v1', strategies: ['Ground Ball', 'Competition'] },
-  { id: '12', name: '1v1 from X', duration: 20, category: '1v1', strategies: ['Dodging', 'Defense'] },
-  { id: '13', name: '1v1 from Top', duration: 20, category: '1v1', strategies: ['Dodging', 'Defense'] },
-  { id: '14', name: 'Mirror Dodge', duration: 10, category: '1v1', strategies: ['Dodging', 'Footwork'] },
-  { id: '15', name: 'Defensive Positioning 1v1', duration: 15, category: '1v1', strategies: ['Defense', 'Positioning'] },
-  
-  // Concept Drills
-  { id: '16', name: '3v2 Fast Break', duration: 20, category: 'concept', strategies: ['Transition', 'Offense'] },
-  { id: '17', name: '4v3 West Genny', duration: 25, category: 'concept', strategies: ['Transition', 'Decision Making'] },
-  { id: '18', name: '5v4 Slow Break', duration: 25, category: 'concept', strategies: ['Transition', 'Offense'] },
-  { id: '19', name: 'Clear vs Ride', duration: 25, category: 'concept', strategies: ['Clearing', 'Riding'] },
-  { id: '20', name: '6v6 Ground Ball to Offense', duration: 30, category: 'concept', strategies: ['Transition', 'Ground Ball'] },
-  { id: '21', name: 'Defensive Slides', duration: 20, category: 'concept', strategies: ['Defense', 'Communication'] },
-  { id: '22', name: 'Motion Offense', duration: 25, category: 'concept', strategies: ['Offense', 'Movement'] },
-  { id: '23', name: '2-3-1 Zone Defense', duration: 20, category: 'concept', strategies: ['Defense', 'Zone'] },
-  { id: '24', name: 'Man-Up Offense', duration: 20, category: 'concept', strategies: ['Offense', 'Special Teams'] },
-  { id: '25', name: 'Man-Down Defense', duration: 20, category: 'concept', strategies: ['Defense', 'Special Teams'] },
-]
+// No more mock data - we fetch from real database
 
 export function useDrills() {
   const [drills, setDrills] = useState<Drill[]>([])
@@ -76,85 +42,72 @@ export function useDrills() {
   const fetchDrills = async () => {
     try {
       setLoading(true)
-      console.log('Fetching drills from Supabase...')
+      console.log('Fetching drills from powlax_drills table...')
       
-      // Fetch from the drills table based on v3 schema
+      // Fetch from the powlax_drills table
       const { data, error } = await supabase
-        .from('drills')
+        .from('powlax_drills')
         .select('*')
         .order('title')
-        .limit(100)  // Add limit for performance
+        .limit(200)  // Increased limit for full drill library
 
       if (error) {
         console.error('Supabase error fetching drills:', error)
-        throw error
-      }
-
-      if (!data || data.length === 0) {
-        console.log('No drills found in database, using mock data')
-        setDrills(mockDrills)
+        setError(error.message)
+        setDrills([])
         return
       }
 
-      // Transform the data to match our component's expected format
+      if (!data || data.length === 0) {
+        console.log('No drills found in powlax_drills table')
+        setDrills([])
+        return
+      }
+
+      // Transform powlax_drills data to our expected format
       const transformedDrills = data.map((drill: any) => ({
         id: drill.id?.toString() || `drill-${Date.now()}`,
-        drill_id: drill.wp_post_id?.toString(),
+        drill_id: drill.id?.toString(),
         name: drill.title || 'Unnamed Drill',
-        duration: drill.duration_minutes || 10,
-        category: mapDrillCategory(drill.category || ''),
-        subcategory: drill.category,
-        description: drill.content || drill.description,
+        duration: parseDuration(drill.drill_duration) || 10,
+        category: mapDrillCategory(drill.drill_category || drill.drill_types),
+        subcategory: drill.drill_category,
         
-        // Extract strategies from game_states and category
+        // Extract strategies, concepts, and skills from drill data
         strategies: extractStrategiesFromDrill(drill),
-        concepts: extractConceptsFromGameStates(drill.game_states),
-        skills: extractSkillsFromCategory(drill.category),
-        skill_ids: drill.game_states || [],
-        concept_ids: drill.game_states || [],
-        game_phase_ids: drill.game_states || [],
+        concepts: extractConceptsFromGameStates(parseArrayField(drill.game_states)),
+        skills: extractSkillsFromCategory(drill.drill_category || drill.drill_types || ''),
+        skill_ids: extractSkillsFromCategory(drill.drill_category || drill.drill_types || ''),
+        concept_ids: extractConceptsFromGameStates(parseArrayField(drill.game_states)),
+        game_phase_ids: parseArrayField(drill.game_phase),
         
-        // Video and lab URLs
-        videoUrl: drill.video_url,
-        drill_video_url: drill.video_url,
-        drill_lab_url_1: drill.drill_lab_url_1,
-        drill_lab_url_2: drill.drill_lab_url_2,
-        drill_lab_url_3: drill.drill_lab_url_3,
-        drill_lab_url_4: drill.drill_lab_url_4,
-        drill_lab_url_5: drill.drill_lab_url_5,
-        custom_url: drill.custom_url,
-        lab_urls: drill.lab_urls,  // JSONB array field
-        lacrosse_lab_urls: parseLacrosseLabUrls(drill.lab_urls),  // Parse JSONB to array
+        // Video and media URLs
+        videoUrl: drill.vimeo_url,
+        drill_video_url: drill.drill_video_url,
+        vimeo_url: drill.vimeo_url,
+        featured_image: drill.featured_image,
         
-        // Additional metadata from v3 schema
-        intensity_level: drill.difficulty_level,
-        difficulty_level: drill.difficulty_level,
-        min_players: drill.min_players,
-        max_players: drill.max_players,
-        equipment_needed: parseArrayField(drill.equipment),
-        equipment: parseArrayField(drill.equipment),
+        // Metadata extracted from drill fields
+        intensity_level: drill.drill_emphasis,
+        min_players: parseNumber(drill.do_it_ages),
+        max_players: parseNumber(drill.own_it_ages),
+        equipment_needed: parseArrayField(drill.drill_types),
         
         // Coaching information
-        setup_requirements: drill.setup_requirements || '',
-        coach_instructions: drill.coach_instructions || drill.notes || '',
-        notes: drill.notes || drill.content || '',
+        coach_instructions: drill.content || drill.drill_notes || '',
+        notes: drill.drill_notes || '',
+        content: drill.content,
         
-        // Age progressions (from v3 schema references)
-        age_adaptations: drill.age_adaptations,
-        do_it: drill.do_it,
-        coach_it: drill.coach_it,
-        own_it: drill.own_it,
+        // Age-appropriate information
+        do_it_ages: drill.do_it_ages,
+        coach_it_ages: drill.coach_it_ages,
+        own_it_ages: drill.own_it_ages,
         
-        // Additional URLs and references  - already handled above
-        
-        // Game context
-        applicable_situations: parseArrayField(drill.applicable_situations),
-        communication_focus: drill.communication_focus,
-        movement_principle_ids: parseArrayField(drill.movement_principle_ids),
-        
-        // Scoring and progression
-        scoring_system: drill.scoring_system,
-        progressions: drill.progressions,
+        // Additional drill metadata
+        game_states: drill.game_states,
+        drill_emphasis: drill.drill_emphasis,
+        game_phase: drill.game_phase,
+        status: drill.status
       }))
 
       console.log(`Loaded ${transformedDrills.length} drills from database`)
@@ -162,16 +115,17 @@ export function useDrills() {
     } catch (err: any) {
       console.error('Error fetching drills:', err)
       setError(err.message)
-      // Use mock data as fallback
-      console.log('Using mock drills as fallback')
-      setDrills(mockDrills)
+      setDrills([])
     } finally {
       setLoading(false)
     }
   }
 
-  // TEMPORARY: Return mock data with loading false for testing
-  return { drills: drills.length > 0 ? drills : mockDrills, loading: false, error }
+  const refreshDrills = () => {
+    fetchDrills()
+  }
+
+  return { drills, loading, error, refreshDrills }
 }
 
 // Helper function to map drill categories to our UI categories
@@ -341,4 +295,21 @@ function parseLacrosseLabUrls(labUrls: any): string[] {
   }
   
   return []
+}
+
+// Helper function to parse duration from text (e.g., "10 minutes" -> 10)
+function parseDuration(durationText: string | null): number {
+  if (!durationText) return 10
+  
+  // Extract number from text like "10 minutes", "5-10 min", etc.
+  const match = durationText.match(/\d+/)
+  return match ? parseInt(match[0], 10) : 10
+}
+
+// Helper function to parse number from text
+function parseNumber(text: string | null): number | undefined {
+  if (!text) return undefined
+  
+  const match = text.match(/\d+/)
+  return match ? parseInt(match[0], 10) : undefined
 }

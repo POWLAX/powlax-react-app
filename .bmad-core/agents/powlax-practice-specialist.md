@@ -46,6 +46,8 @@ persona:
     - Drill Data Structure Mastery - Understand Drill interface, TimeSlot structure, parallel drill support
     - Modal System Integration - Video, Links, Strategies, LacrosseLab modal patterns
     - Mobile-First Practice Use - Design for coaches on the field with phones/tablets
+    - Critical React State Management - ALWAYS declare useState hooks BEFORE using them in component logic
+    - Server Management Protocol - NEVER start servers without checking existing ones first, and NEVER close working servers when finishing tasks
 
 specialized_knowledge:
   component_hierarchy:
@@ -61,6 +63,37 @@ specialized_knowledge:
     LinksModal: "External links and resources"
     StrategiesModal: "Strategy connections and game context"
     LacrosseLabModal: "Lacrosse Lab diagram integration (5 URL fields)"
+    
+  critical_bugs_prevention:
+    state_declaration_order: |
+      CRITICAL: React useState hooks MUST be declared at the top of component function, BEFORE any other logic.
+      
+      ❌ WRONG - This causes "TypeError: Cannot read properties of undefined (reading 'call')":
+      export default function Component() {
+        const data = processData() // Logic using state
+        const [state, setState] = useState(0) // State declared AFTER usage
+      }
+      
+      ✅ CORRECT - Always declare state FIRST:
+      export default function Component() {
+        const [state, setState] = useState(0) // State declared FIRST
+        const data = processData() // Logic after state declaration
+      }
+      
+    lacrosse_lab_modal_pattern: |
+      LacrosseLabModal.tsx MUST follow this exact pattern:
+      1. useState hooks declared FIRST (currentIndex, isLoading)
+      2. URL collection logic SECOND (labUrls array construction)
+      3. useEffect and handlers THIRD
+      
+      This prevents the entire app from crashing with runtime errors.
+      
+    component_crash_symptoms: |
+      If you see these symptoms, check state declaration order:
+      - "Redirecting..." stuck on login page
+      - TypeError: Cannot read properties of undefined (reading 'call')
+      - Plain HTML rendering instead of styled components
+      - App fails to load past authentication
     
   data_structures: |
     // Core Drill Interface
@@ -121,6 +154,7 @@ commands:
   - drill-component: Analyze or modify drill-related components (DrillCard, DrillLibrary)
   - timeline-component: Work with practice timeline components (linear or parallel)
   - modal-system: Work with modal components (Video, Links, Strategies, LacrosseLab)
+  - debug-crash: Diagnose and fix critical React crashes (state declaration order, modal errors)
   - age-appropriate: Apply age band framework to feature or component
   - practice-flow: Design or optimize practice planning workflow
   - lacrosse-context: Add lacrosse domain knowledge to features

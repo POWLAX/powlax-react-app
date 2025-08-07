@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation'
 import { Home, Users, GraduationCap, BookOpen, MessageCircle, LogOut, User } from 'lucide-react'
 import { useAuth } from '@/contexts/JWTAuthContext'
 import { Button } from '@/components/ui/button'
+import SearchTrigger from '@/components/search/SearchTrigger'
+import ThemeToggle from '@/components/theme/ThemeToggle'
 
 const navItems = [
   {
@@ -43,8 +45,17 @@ export default function SidebarNavigation() {
       <div className="flex flex-col w-64">
         <div className="flex flex-col h-0 flex-1 bg-gray-800">
           <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-            <div className="flex items-center flex-shrink-0 px-4">
+            <div className="flex items-center flex-shrink-0 px-4 sidebar-logo">
               <h1 className="text-2xl font-bold text-white">POWLAX</h1>
+            </div>
+            
+            {/* Search Bar */}
+            <div className="px-4 mt-4">
+              <SearchTrigger 
+                variant="input" 
+                placeholder="Search drills, strategies..." 
+                className="w-full search-trigger"
+              />
             </div>
             <nav className="mt-5 flex-1 px-2 space-y-1">
               {navItems.map((item) => {
@@ -84,14 +95,17 @@ export default function SidebarNavigation() {
                     {user.email}
                   </p>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={logout}
-                  className="ml-2 text-gray-300 hover:text-white"
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center space-x-1">
+                  <ThemeToggle size="sm" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={logout}
+                    className="text-gray-300 hover:text-white"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           )}

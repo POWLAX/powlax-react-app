@@ -3,6 +3,11 @@
 import { useRequireAuth } from '@/contexts/JWTAuthContext'
 import BottomNavigation from '@/components/navigation/BottomNavigation'
 import SidebarNavigation from '@/components/navigation/SidebarNavigation'
+import FloatingActionButton from '@/components/common/FloatingActionButton'
+import TourOverlay from '@/components/onboarding/TourOverlay'
+import WelcomeModal from '@/components/onboarding/WelcomeModal'
+import OfflineIndicator from '@/components/common/OfflineIndicator'
+import { useState, useEffect } from 'react'
 
 export default function AuthenticatedLayout({
   children,
@@ -10,6 +15,16 @@ export default function AuthenticatedLayout({
   children: React.ReactNode
 }) {
   const { loading } = useRequireAuth()
+  const [showWelcome, setShowWelcome] = useState(false)
+
+  useEffect(() => {
+    // Check if user has seen welcome modal
+    const hasSeenWelcome = localStorage.getItem('powlax-welcome-seen')
+    if (!hasSeenWelcome) {
+      // Small delay to ensure page is loaded
+      setTimeout(() => setShowWelcome(true), 1000)
+    }
+  }, [])
 
   if (loading) {
     return (
@@ -32,6 +47,21 @@ export default function AuthenticatedLayout({
         </main>
         
         <BottomNavigation />
+        
+        {/* FAB - Only show on mobile */}
+        <div className="md:hidden">
+          <FloatingActionButton />
+        </div>
+        
+        {/* Onboarding components */}
+        <TourOverlay />
+        <WelcomeModal 
+          isOpen={showWelcome} 
+          onClose={() => setShowWelcome(false)} 
+        />
+        
+        {/* Offline support */}
+        <OfflineIndicator />
       </div>
     </div>
   )

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, memo } from 'react'
 import { useSpring, animated, useSprings } from '@react-spring/web'
 import { useDrag } from '@use-gesture/react'
 
@@ -18,7 +18,7 @@ interface BadgeCollectionSpringProps {
   onBadgeSelect: (badge: Badge) => void
 }
 
-export default function BadgeCollectionSpring({ 
+const BadgeCollectionSpring = memo(function BadgeCollectionSpring({ 
   badges, 
   onCollect, 
   onBadgeSelect 
@@ -347,7 +347,9 @@ export default function BadgeCollectionSpring({
       `}</style>
     </div>
   )
-}
+})
+
+export default BadgeCollectionSpring
 
 function getTierColor(tier: string): string {
   const tierColors = {

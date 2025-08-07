@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import { 
   Clock, 
   ChevronUp, 
@@ -53,7 +53,7 @@ interface DrillCardProps {
   isParallel?: boolean
 }
 
-export default function DrillCard({
+const DrillCard = memo(function DrillCard({
   drill,
   startTime,
   index,
@@ -193,66 +193,70 @@ export default function DrillCard({
           )}
 
           {/* Icon Row */}
-          <div className="flex items-center gap-2 mb-3">
+          <div className="grid grid-cols-3 sm:flex sm:items-center gap-3 mb-3">
             <button
               onClick={() => setEditingNotes(!editingNotes)}
-              className="p-2 hover:bg-gray-100 rounded"
+              className="min-w-[48px] min-h-[48px] flex items-center justify-center bg-gray-100 hover:bg-gray-200 active:bg-gray-300 rounded-xl shadow-sm transition-colors"
               title="Edit Notes"
             >
               <img 
                 src="https://powlax.com/wp-content/uploads/2025/06/Pencil-1.svg" 
                 alt="Edit Notes" 
-                className="h-5 w-5"
+                className="h-6 w-6"
               />
             </button>
 
             <button
               onClick={() => setShowVideoModal(true)}
-              className={`p-2 hover:bg-gray-100 rounded ${!drill.videoUrl ? 'opacity-40' : ''}`}
-              title="View Video"
+              className={`min-w-[48px] min-h-[48px] flex items-center justify-center rounded-xl shadow-sm transition-colors ${
+                drill.videoUrl 
+                  ? 'bg-red-100 hover:bg-red-200 active:bg-red-300' 
+                  : 'bg-gray-50 opacity-40 cursor-not-allowed'
+              }`}
+              title={drill.videoUrl ? "View Video" : "No video available"}
               disabled={!drill.videoUrl}
             >
               <img 
                 src="https://powlax.com/wp-content/uploads/2025/06/Video-1.svg" 
                 alt="View Video" 
-                className="h-5 w-5"
+                className="h-6 w-6"
               />
             </button>
 
             <button
               onClick={() => setShowLacrosseLabModal(true)}
-              className="p-2 hover:bg-gray-100 rounded"
+              className="min-w-[48px] min-h-[48px] flex items-center justify-center bg-blue-100 hover:bg-blue-200 active:bg-blue-300 rounded-xl shadow-sm transition-colors"
               title="Lacrosse Lab Diagrams"
             >
               <img 
                 src="https://powlax.com/wp-content/uploads/2025/06/Lacrosse-Lab-Link-1.svg" 
                 alt="Lacrosse Lab" 
-                className="h-5 w-5"
+                className="h-6 w-6"
               />
             </button>
 
             <button
               onClick={() => setShowLinksModal(true)}
-              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
+              className="min-w-[48px] min-h-[48px] flex items-center justify-center bg-green-100 hover:bg-green-200 active:bg-green-300 text-green-700 rounded-xl shadow-sm transition-colors"
               title="External Links"
             >
-              <Link className="h-4 w-4" />
+              <Link className="h-5 w-5" />
             </button>
 
             <button
               onClick={() => setShowStrategiesModal(true)}
-              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
+              className="min-w-[48px] min-h-[48px] flex items-center justify-center bg-orange-100 hover:bg-orange-200 active:bg-orange-300 text-orange-700 rounded-xl shadow-sm transition-colors"
               title="Strategies & Concepts"
             >
-              <span className="text-xs font-bold">X/O</span>
+              <span className="text-sm font-bold">X/O</span>
             </button>
 
             <button
               onClick={onRemove}
-              className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded ml-auto"
+              className="min-w-[48px] min-h-[48px] flex items-center justify-center bg-red-100 hover:bg-red-200 active:bg-red-300 text-red-600 rounded-xl shadow-sm transition-colors col-span-3 sm:col-span-1 sm:ml-auto"
               title="Remove Drill"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-5 w-5" />
             </button>
           </div>
 
@@ -291,4 +295,6 @@ export default function DrillCard({
       />
     </div>
   )
-}
+})
+
+export default DrillCard

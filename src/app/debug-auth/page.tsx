@@ -182,7 +182,7 @@ export default function DebugAuthPage() {
           </CardHeader>
           <CardContent>
             <ol className="list-decimal list-inside space-y-2">
-              <li>If you don't have a Supabase user, click "Create Test Admin"</li>
+              <li>If you don&apos;t have a Supabase user, click &quot;Create Test Admin&quot;</li>
               <li>Login with the test admin credentials</li>
               <li>Once logged in, try accessing <a href="/admin/sync" className="text-blue-600 underline">/admin/sync</a></li>
               <li>The sync page should now work with proper authentication</li>

@@ -44,7 +44,7 @@ export function ParentDashboard({ user }: ParentDashboardProps) {
         <h1 className="text-2xl font-bold text-gray-900">
           Welcome, {user.first_name || user.username}!
         </h1>
-        <p className="text-gray-600">Parent Dashboard - Monitor Your Children's Progress</p>
+        <p className="text-gray-600">Parent Dashboard - Monitor Your Children&apos;s Progress</p>
       </div>
 
       {/* Parent Resources Card */}
@@ -241,7 +241,7 @@ export function ParentDashboard({ user }: ParentDashboardProps) {
             <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600 mb-4">No children linked to your account yet.</p>
             <p className="text-sm text-gray-500 mb-6">
-              Contact your team coach to link your child's account.
+              Contact your team coach to link your child&apos;s account.
             </p>
             <Button asChild>
               <Link href="/support/linking-children">
