@@ -16,6 +16,7 @@
 Let me analyze the requirements..."
 [Present contract]
 "Do you approve this contract? (Type YES to proceed)"
+[TRIGGER NOTIFICATION: "READY" "Contract needs your approval"]
 
 ## For EXISTING Approved Work:
 "✅ I found an existing approved contract for this work:
@@ -54,6 +55,9 @@ No additional approval needed - proceeding with implementation.
 ### **2. New Work Requiring Approval**
 ```typescript
 function requestContractApproval(contract: Contract) {
+  // ALERT USER WITH NOTIFICATION
+  bash(`scripts/simple-notify.sh "READY" "Contract needs your approval"`);
+  
   return `
 📋 **New Contract Requires Approval**
 

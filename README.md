@@ -1,5 +1,25 @@
 # POWLAX - Modern Lacrosse Training Platform
 
+## 🤖 AI Assistant Users - START HERE
+
+**CRITICAL**: If you're using ChatGPT, Cursor, GitHub Copilot, or any AI assistant:
+
+1. **Read First**: [AI_FRAMEWORK_ERROR_PREVENTION.md](./AI_FRAMEWORK_ERROR_PREVENTION.md)
+2. **Project Guide**: [CLAUDE.md](./CLAUDE.md)  
+3. **Quick Start**: [AI_INIT_PROMPT.md](./AI_INIT_PROMPT.md)
+
+### For Cursor Users
+- `.cursorrules` file is configured with project rules
+- Use `@AI_FRAMEWORK_ERROR_PREVENTION.md` to reference guidelines
+
+### For GitHub Copilot Users
+- Check `.github/copilot-instructions.md` for patterns
+
+### Quick Validation
+```bash
+npm run lint  # Run this before AND after AI changes
+```
+
 ## Overview
 POWLAX is a comprehensive lacrosse training ecosystem designed to revolutionize how coaches plan practices, how players develop skills, and how clubs manage their programs. This React-based platform is the evolution of a successful WordPress plugin system with integrations from BuddyBoss, LearnDash, and GamiPress, bringing modern performance and enhanced strategic depth to lacrosse training.
 

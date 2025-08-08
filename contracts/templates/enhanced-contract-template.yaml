@@ -1,0 +1,111 @@
+# Enhanced Contract Template with PRD Requirements
+# Keeps original contract format, ADDS PRD checklist
+
+contractTemplate:
+  type: ENHANCED_CONTRACT
+  version: 1.0.0
+  
+  # ===== ORIGINAL CONTRACT FORMAT (UNCHANGED) =====
+  parameters:
+    component: ""
+    currentIssue: ""
+    
+  intent:
+    goal: ""
+    scope: []
+    outOfScope: []
+    assumptions: []
+    risks: []
+    
+  deliverables:
+    code:
+      files: []
+      functions: []
+    tests:
+      unit: []
+      integration: []
+    documentation: []
+    
+  successCriteria:
+    functional: []
+    performance: []
+    quality: []
+    testing: []
+    
+  qualityGates:
+    buildMustPass: true
+    lintMaxErrors: 0
+    testCoverage: 80
+    mobileResponsive: true
+    performanceTarget: 3
+    
+  # ===== NEW: PRD REQUIREMENTS SECTION =====
+  prdRequirements:
+    description: "What MUST EXIST on this page/feature when complete"
+    
+    pageRequirements:
+      # Check these like a checklist - does the page have these?
+      mustHave:
+        - name: "Working Video Modal"
+          exists: false
+          tested: false
+          notes: "Opens, loads videos, closes properly"
+          
+        - name: "Working Strategy Modal"
+          exists: false
+          tested: false
+          notes: "Shows strategies, links work"
+          
+        - name: "Database Connection"
+          exists: false
+          tested: false
+          notes: "Real data, no mock fallbacks"
+          
+        - name: "Mobile Responsive"
+          exists: false
+          tested: false
+          notes: "Works at 375px viewport"
+          
+        - name: "Print Functionality"
+          exists: false
+          tested: false
+          notes: "Generates printable view"
+          
+        - name: "Error Handling"
+          exists: false
+          tested: false
+          notes: "Graceful failures, user feedback"
+          
+      niceToHave:
+        - name: "Offline Mode"
+          exists: false
+          priority: low
+          
+        - name: "Keyboard Shortcuts"
+          exists: false
+          priority: low
+          
+    verificationMethod:
+      manual:
+        - "Open page at http://localhost:3000/[page-url]"
+        - "Check each requirement exists"
+        - "Test each feature works"
+        - "Mark as exists: true when verified"
+        
+      automated:
+        - "Run Playwright tests"
+        - "Check test coverage"
+        - "Verify no console errors"
+        
+    completionCriteria:
+      - "All mustHave items marked exists: true"
+      - "All mustHave items marked tested: true"
+      - "Quality score >= 80"
+      - "No critical bugs"
+      
+  # ===== TRACKING =====
+  tracking:
+    lastChecked: ""
+    checkedBy: ""
+    completionPercentage: 0
+    blockers: []

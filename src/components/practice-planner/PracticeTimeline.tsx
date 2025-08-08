@@ -46,13 +46,13 @@ export default function PracticeTimeline({
     const setupStartTime = calculateTime(startTime, -setupTime)
     
     return (
-      <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+      <div className="mb-4 p-4 bg-yellow-50 field-border-strong border-yellow-400 rounded-lg shadow-md">
         <div className="flex items-center justify-between">
           <div>
-            <h4 className="font-semibold text-yellow-800">Setup Time</h4>
-            <p className="text-sm text-yellow-600">Arrive by {setupStartTime}</p>
+            <h4 className="field-text font-bold text-lg">Setup Time</h4>
+            <p className="text-sm field-text-secondary font-semibold">Arrive by {setupStartTime}</p>
           </div>
-          <div className="text-lg font-semibold text-yellow-800">
+          <div className="text-xl field-text font-bold">
             {setupTime} min
           </div>
         </div>
@@ -94,10 +94,10 @@ export default function PracticeTimeline({
     return (
       <div className="text-center py-12">
         {getSetupTime()}
-        <h3 className="text-xl font-semibold text-gray-700 mb-2">
+        <h3 className="text-xl field-drill-name mb-2">
           Ready to Build Your Practice!
         </h3>
-        <p className="text-gray-500 mb-4">
+        <p className="field-text-secondary mb-4 font-medium">
           Click the + in the Drill Library 👉
         </p>
       </div>

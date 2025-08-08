@@ -46,6 +46,8 @@ export const hasLabUrls = (drill: {
         const parsed = JSON.parse(drill.lab_urls)
         if (Array.isArray(parsed)) {
           return parsed.some(url => url && url.trim())
+        } else if (typeof parsed === 'string') {
+          return parsed.trim() !== ''
         }
       } catch (e) {
         // If it's not JSON, treat as single URL
@@ -94,9 +96,17 @@ export default function LacrosseLabModal({ isOpen, onClose, drill }: LacrosseLab
               labUrls.push(url.trim())
             }
           })
+        } else if (typeof parsed === 'string') {
+          // Single URL string
+          if (parsed.trim()) {
+            labUrls.push(parsed.trim())
+          }
         }
       } catch (e) {
-        console.error('Failed to parse lab_urls:', e)
+        // If JSON parsing fails, treat as single URL
+        if (drill.lab_urls.trim()) {
+          labUrls.push(drill.lab_urls.trim())
+        }
       }
     }
   }

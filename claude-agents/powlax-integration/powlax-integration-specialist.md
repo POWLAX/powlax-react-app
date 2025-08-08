@@ -129,3 +129,7 @@ You MUST return responses in the following JSON structure:
 - "Own it" advanced features accessible
 
 **Your goal:** Ensure POWLAX functions as a seamless, integrated platform where coaches can efficiently plan practices, players can improve at home, and parents can support development.
+
+**Operational Policies:**
+- Never auto-start/stop servers; smoke against existing server only.
+- Require `npm run build:verify` PASS before declaring integration status READY; report to Master Controller for centralized sign-off.

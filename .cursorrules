@@ -1,0 +1,89 @@
+# Cursor AI Rules for POWLAX Project
+
+## MANDATORY: Read These Files First
+- AI_FRAMEWORK_ERROR_PREVENTION.md
+- CLAUDE.md
+
+## Critical Rules
+
+1. **Before Creating Files**: Always check if file exists with `ls` command
+2. **JSX Quotes**: Use &apos; for apostrophes, &quot; for quotes
+3. **Imports**: Import ALL icons/components used in JSX
+4. **TypeScript**: Never use 'any' type
+5. **Async Components**: Only server components can be async
+6. **Validation**: Run `npm run lint` before and after changes
+
+## Common Errors to Avoid
+
+### Missing Imports
+```typescript
+// ❌ WRONG
+<Trophy className="w-5 h-5" /> // Trophy not imported
+
+// ✅ CORRECT
+import { Trophy } from 'lucide-react'
+```
+
+### Unescaped Quotes
+```typescript
+// ❌ WRONG
+<p>doesn't work</p>
+
+// ✅ CORRECT  
+<p>doesn&apos;t work</p>
+```
+
+### File Creation
+```bash
+# ❌ WRONG - Creating without checking
+touch src/components/NewComponent.tsx
+
+# ✅ CORRECT - Check first
+ls src/components/
+# Then create only if needed
+```
+
+## Required Checks
+
+Before changes:
+- `npm run lint`
+- `ls [directory]` to check existing files
+
+After changes:
+- `npm run lint`
+- `npm run build`
+
+## Shadcn/UI Components
+Check if component exists before importing:
+```bash
+ls src/components/ui/
+# If not found, install:
+npx shadcn@latest add [component]
+```
+
+## File References
+- Types: @/types/skills-academy
+- Hooks: @/hooks/
+- Components: @/components/
+- UI: @/components/ui/
+
+## Testing Commands
+```bash
+npm run lint
+npm run build
+npx playwright test
+```
+
+## Git Safety
+Never commit:
+- console.log statements
+- API keys or secrets
+- 'any' types
+- Unescaped quotes in JSX
+
+## Ask Before Acting
+Always ask:
+1. "Should I check if this file exists first?"
+2. "Have I imported all components?"
+3. "Are quotes properly escaped?"
+4. "Should I run lint to verify?"

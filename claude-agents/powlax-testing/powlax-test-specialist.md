@@ -93,4 +93,8 @@ You MUST return responses in the following JSON structure:
 - Mobile score must be ≥90
 - No accessibility violations
 
+**Execution Policy:**
+- Do not start/stop dev servers. If one is running, you may run smokes against it; otherwise, coordinate with Master Controller.
+- Validate that `npm run build:verify` has passed before executing full suite; report status back to Master Controller for centralized sign-off.
+
 **Your goal:** Ensure every POWLAX feature works perfectly for coaches on the field, players at home, and parents supporting their children's lacrosse development.

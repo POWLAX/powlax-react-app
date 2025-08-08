@@ -2,25 +2,29 @@
 
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
-import { Calendar, Clock, MapPin, Save, Printer, RefreshCw, FolderOpen, Plus, Timer, Users } from 'lucide-react'
+import { Calendar, Clock, MapPin, Save, Printer, RefreshCw, FolderOpen, Plus, Timer, Users, Target, Loader2 } from 'lucide-react'
 import LazyDrillLibrary from '@/components/practice-planner/lazy/LazyDrillLibrary'
 import LazyPracticeTimeline from '@/components/practice-planner/lazy/LazyPracticeTimeline'
 import PracticeDurationBar from '@/components/practice-planner/PracticeDurationBar'
 import SavePracticeModal from '@/components/practice-planner/modals/SavePracticeModal'
 import LoadPracticeModal from '@/components/practice-planner/modals/LoadPracticeModal'
+import AddCustomStrategiesModal from '@/components/practice-planner/modals/AddCustomStrategiesModal'
+import StrategiesListModal from '@/components/practice-planner/modals/StrategiesListModal'
 import PrintablePracticePlan from '@/components/practice-planner/PrintablePracticePlan'
 import PracticeTemplateSelector from '@/components/practice-planner/PracticeTemplateSelector'
 import { usePracticePlans } from '@/hooks/usePracticePlans'
 import { useDrills } from '@/hooks/useDrills'
 import { usePrint } from '@/hooks/usePrint'
+import { useStrategies } from '@/hooks/useStrategies'
 import { toast } from 'sonner'
 
 export default function PracticePlansPage() {
   const params = useParams()
   const teamId = params.teamId as string
   const { savePracticePlan, plans, loading: plansLoading } = usePracticePlans(teamId)
-  const { refreshDrills } = useDrills()
+  const { drills: supabaseDrills, refreshDrills } = useDrills()
   const { isPrinting, printContent } = usePrint()
+  const { refreshStrategies } = useStrategies()
   const [practiceDate, setPracticeDate] = useState(new Date().toISOString().split('T')[0])
   const [startTime, setStartTime] = useState('07:00')
   const [duration, setDuration] = useState(90) // Default 90 minutes for youth
@@ -34,8 +38,11 @@ export default function PracticePlansPage() {
   const [showLoadModal, setShowLoadModal] = useState(false)
   const [showPrintPreview, setShowPrintPreview] = useState(false)
   const [showTemplateSelector, setShowTemplateSelector] = useState(false)
+  const [showAddStrategiesModal, setShowAddStrategiesModal] = useState(false)
+  const [showStrategiesListModal, setShowStrategiesListModal] = useState(false)
   const [practiceStarted, setPracticeStarted] = useState(false)
   const [currentDrillIndex, setCurrentDrillIndex] = useState(0)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   // Calculate total drill time from all time slots
   const totalDrillTime = timeSlots.reduce((acc, slot) => acc + slot.duration, 0)
@@ -122,12 +129,29 @@ export default function PracticePlansPage() {
       return
     }
     
-    setShowPrintPreview(true)
+    // Check if we're on mobile - directly print without preview
+    if (window.innerWidth < 768) {
+      printContent('printable-plan')
+    } else {
+      setShowPrintPreview(true)
+    }
   }
 
-  const handleRefresh = () => {
-    refreshDrills()
-    toast.success('Drill library refreshed!')
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    try {
+      await refreshDrills()
+      // Get updated drill count after refresh
+      setTimeout(() => {
+        const drillCount = supabaseDrills?.length || 0
+        toast.success(`Drill library refreshed! ${drillCount} drills loaded.`)
+        setIsRefreshing(false)
+      }, 500) // Small delay to ensure state update
+    } catch (error) {
+      console.error('Error refreshing drills:', error)
+      toast.error('Failed to refresh drill library')
+      setIsRefreshing(false)
+    }
   }
 
   const handleLoadTemplate = (template: any) => {
@@ -175,6 +199,20 @@ export default function PracticePlansPage() {
               <FolderOpen className="h-5 w-5" />
             </button>
             <button 
+              onClick={() => setShowStrategiesListModal(true)}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
+              title="View Strategies"
+            >
+              <Target className="h-5 w-5" />
+            </button>
+            <button 
+              onClick={() => setShowAddStrategiesModal(true)}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
+              title="Add Custom Strategy"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+            <button 
               onClick={() => setShowSaveModal(true)}
               className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
               title="Save Practice Plan"
@@ -191,10 +229,17 @@ export default function PracticePlansPage() {
             </button>
             <button 
               onClick={handleRefresh}
-              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
-              title="Refresh Drill Library"
+              disabled={isRefreshing}
+              className={`p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors ${
+                isRefreshing ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+              title={isRefreshing ? 'Refreshing...' : 'Refresh Drill Library'}
             >
-              <RefreshCw className="h-5 w-5" />
+              {isRefreshing ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <RefreshCw className="h-5 w-5" />
+              )}
             </button>
           </div>
         </div>
@@ -406,6 +451,19 @@ export default function PracticePlansPage() {
         onSelectTemplate={handleLoadTemplate}
       />
 
+      {/* Add Custom Strategies Modal */}
+      <AddCustomStrategiesModal
+        isOpen={showAddStrategiesModal}
+        onClose={() => setShowAddStrategiesModal(false)}
+        onStrategyCreated={refreshStrategies}
+      />
+
+      {/* Strategies List Modal */}
+      <StrategiesListModal
+        isOpen={showStrategiesListModal}
+        onClose={() => setShowStrategiesListModal(false)}
+      />
+
       {/* Print Preview Modal */}
       {showPrintPreview && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
@@ -441,6 +499,17 @@ export default function PracticePlansPage() {
                   coachName="Coach"
                   teamName={`Team ${teamId}`}
                 />
+              </div>
+              
+              {/* Print Instructions for Mobile */}
+              <div className="md:hidden p-4 bg-blue-50 border-t border-blue-200 text-sm text-blue-800">
+                <p className="font-semibold mb-2">📱 Mobile Printing Tips:</p>
+                <ul className="space-y-1 text-blue-700">
+                  <li>• Use &quot;Print&quot; button above for best results</li>
+                  <li>• Select &quot;Save to Files&quot; or &quot;More&quot; &gt; &quot;Print&quot; in your browser</li>
+                  <li>• Choose &quot;Letter&quot; size for optimal formatting</li>
+                  <li>• Enable &quot;Print backgrounds&quot; for full design</li>
+                </ul>
               </div>
             </div>
           </div>

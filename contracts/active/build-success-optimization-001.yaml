@@ -1,0 +1,128 @@
+# Build Success Optimization Contract
+
+contract:
+  id: build-success-optimization-001
+  type: ENHANCED_CONTRACT
+  owner: powlax-master-controller
+  created: 2025-08-07
+  summary: "Implement universal quality gates, centralized sign-off, and minimal scripting to ensure first-go build success across POWLAX agents, using BMad for context-only when needed."
+
+parameters:
+  component: "Agent System and Build Pipeline"
+  currentIssue: "Intermittent build failures and inconsistent quality gates between agent handoffs"
+
+intent:
+  goal: "Guarantee first-go build success by enforcing a universal gate and centralized orchestration"
+  scope:
+    - "Add typecheck and build:verify scripts to package.json"
+    - "Update Master Controller to enforce 6-step gate and centralized sign-off"
+    - "Update FE/BE/QA/Test/Integration agent specs to align with the gate and server policy"
+    - "Document run instructions in MASTER_CONTROLLER_OPERATIONAL_GUIDE.md"
+    - "Add/verify minimal Playwright smoke for critical routes (Practice Planner, Skills Academy)"
+  outOfScope:
+    - "Feature redesigns or major UI changes"
+    - "Production CI/CD pipeline changes"
+    - "Starting/stopping servers automatically"
+  assumptions:
+    - "Next.js 14 build and ESLint are configured"
+    - "Playwright is available in devDependencies"
+    - "Local dev servers may already be running"
+  risks:
+    - "Stricter lint policy may surface new warnings that block builds"
+    - "Agent doc edits must remain consistent and not introduce contradictions"
+
+# Deliverables to be edited/created in this repo
+Deliverables:
+  code:
+    files:
+      - "package.json"                    # add scripts: typecheck, build:verify
+      - "claude-agents/powlax-controller/powlax-master-controller.md"  # enforce universal gate + centralized sign-off
+      - "claude-agents/powlax-engineering/powlax-frontend-developer.md" # require build:verify + import checks
+      - "claude-agents/powlax-engineering/powlax-backend-architect.md"  # staged integration guidance
+      - "claude-agents/powlax-quality/powlax-qa-specialist.md"          # reject without build:verify proof
+      - "claude-agents/powlax-testing/powlax-test-specialist.md"        # targeted tests + attach results
+      - "claude-agents/powlax-integration/powlax-integration-specialist.md" # integration validation expectations
+      - "docs/agent-instructions/MASTER_CONTROLLER_OPERATIONAL_GUIDE.md"    # add gate run instructions
+      - "docs/agent-instructions/C4A - Master Controller + BMad - 2025-08-07 - Build Success Optimization Plan.md" # reference plan
+    functions: []
+  tests:
+    playwright:
+      - "tests/e2e/practice-planner-smoke.spec.ts"   # create or update minimal smoke if missing
+      - "tests/e2e/skills-academy-smoke.spec.ts"     # create or update minimal smoke if missing
+    unit: []
+    integration: []
+  documentation:
+    - "Update sign-off centralization language (MC signs off for sub-agent work)"
+    - "Add server policy (never auto start/stop; check status and ask)"
+
+successCriteria:
+  functional:
+    - "package.json contains 'typecheck' (tsc --noEmit) and 'build:verify' scripts"
+    - "All updated agent specs include the 6-step gate and align on server policy"
+    - "Master Controller requires gate evidence and performs centralized sign-off"
+  performance:
+    - "build:verify completes without errors"
+  quality:
+    - "lint warnings treated as errors (max-warnings=0)"
+    - "0 lint errors; 0 type errors"
+  testing:
+    - "Targeted/smoke Playwright tests added or verified for key routes"
+
+qualityGates:
+  buildMustPass: true
+  lintMaxErrors: 0
+  testCoverage: 80
+  mobileResponsive: true
+  performanceTarget: 3
+
+# Process requirements specific to this contract
+processRequirements:
+  serverPolicy:
+    - "Never auto-start or stop servers"
+    - "Always check existing server status and only use if running"
+    - "If server is on, do not turn it off unless explicitly instructed"
+  orchestrationPolicy:
+    - "POWLAX Master Controller is primary orchestrator"
+    - "BMad may be consulted for context only and only via Master Controller when needed"
+  signOffPolicy:
+    - "Sub-agent responses are signed off by Master Controller before user handoff"
+
+prdRequirements:
+  description: "Agent workflow and gating requirements that MUST exist after implementation"
+  mustHave:
+    - name: "Centralized Sign-Off by Master Controller"
+      exists: false
+      tested: false
+      notes: "MC validates gate evidence and issues final sign-off"
+    - name: "No Auto Server Start/Stop"
+      exists: false
+      tested: false
+      notes: "Check only; ask before start/stop"
+    - name: "'build:verify' Script Present"
+      exists: false
+      tested: false
+      notes: "Runs lint (0 warnings), typecheck, build"
+    - name: "Lint Warnings Treated as Errors"
+      exists: false
+      tested: false
+      notes: "--max-warnings=0 enforced in lint step"
+    - name: "BMad Consult via MC Only"
+      exists: false
+      tested: false
+      notes: "Context-only fallback when POWLAX agents lack coverage"
+  verificationMethod:
+    manual:
+      - "Open modified agent files and verify gate text and policies"
+      - "Inspect package.json for scripts"
+    automated:
+      - "Run: npm run build:verify"
+      - "Run smoke tests for key routes"
+  completionCriteria:
+    - "All mustHave items marked exists: true and tested: true"
+    - "No critical contradictions across agent specs"
+
+tracking:
+  lastChecked: ""
+  checkedBy: ""
+  completionPercentage: 0
+  blockers: []

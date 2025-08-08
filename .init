@@ -1,0 +1,52 @@
+#!/bin/bash
+# POWLAX AI Assistant Auto-Initialization Script
+
+echo "🚀 POWLAX Development Session Initializing..."
+echo ""
+echo "📖 Loading AI Error Prevention Guidelines..."
+echo ""
+
+# Display critical rules
+cat << 'EOF'
+🤖 AI ASSISTANT RULES ACTIVATED
+================================
+
+BEFORE ANY CHANGES:
+1. ✓ Run 'npm run lint'
+2. ✓ Check existing files with 'ls'
+3. ✓ Review AI_FRAMEWORK_ERROR_PREVENTION.md
+
+CRITICAL PATTERNS:
+• JSX Quotes: Use &apos; not '
+• Imports: Import ALL icons from lucide-react
+• Types: Never use 'any'
+• Files: Check before creating
+
+VALIDATION COMMANDS:
+• npm run ai:check     - Pre-flight check
+• npm run ai:validate  - Full validation
+• npm run lint        - ESLint check
+
+EOF
+
+# Run initial lint check
+echo "🔍 Running initial lint check..."
+npm run lint --silent 2>/dev/null
+
+if [ $? -eq 0 ]; then
+    echo "✅ Lint check passed - ready to code!"
+else
+    echo "⚠️  Lint issues detected - fix before proceeding"
+fi
+
+echo ""
+echo "📚 Key Files:"
+echo "  • AI_FRAMEWORK_ERROR_PREVENTION.md"
+echo "  • CLAUDE.md"
+echo "  • init.md"
+echo ""
+echo "✨ Session initialized with error prevention active!"
+echo ""
+
+# Create a marker file to indicate initialization
+echo "$(date): Session initialized with AI error prevention" > .init.log

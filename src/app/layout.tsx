@@ -1,11 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { JWTAuthProvider } from '@/contexts/JWTAuthContext'
-import { QueryProvider } from '@/providers/query-provider'
-import { ThemeProvider } from '@/contexts/ThemeContext'
-import { OnboardingProvider } from '@/contexts/OnboardingContext'
-import { Toaster } from 'sonner'
+import ClientProviders from './ClientProviders'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -35,16 +31,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <ThemeProvider>
-          <OnboardingProvider>
-            <QueryProvider>
-              <JWTAuthProvider>
-                {children}
-                <Toaster position="top-right" />
-              </JWTAuthProvider>
-            </QueryProvider>
-          </OnboardingProvider>
-        </ThemeProvider>
+        <ClientProviders>
+          {children}
+        </ClientProviders>
       </body>
     </html>
   )

@@ -456,6 +456,31 @@ For every task I execute:
 - [ ] Explain iterations needed
 - [ ] Recommend next actions
 - [ ] Get final approval
+
+---
+
+## 🔧 Running the Universal Gate (Quick Ref)
+
+1) Static checks (no server changes):
+```bash
+npm run lint -- --max-warnings=0
+npm run typecheck
+npm run build
+```
+
+Or single command:
+```bash
+npm run build:verify
+```
+
+2) Server policy:
+- Never auto-start or stop servers.
+- If a server is already running, you may smoke test routes via curl.
+- Otherwise, request approval before starting/stopping.
+
+3) Centralized sign-off:
+- Sub-agents return gate evidence to Master Controller.
+- Master Controller validates and issues the final sign-off.
 ```
 
 ---

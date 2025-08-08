@@ -11,7 +11,7 @@
 ### **🔴 CRITICAL: READ BEFORE ANY CHANGES**
 1. **NO FEATURE REMOVAL** - Everything in MVP must be enhanced, not stripped
 2. **DIRECT NEGOTIATION REQUIRED** - Propose specific changes, get user approval
-3. **TEAM_DRILLS TABLE FOCUS** - Primary data source for all drill operations
+3. **POWLAX_DRILLS TABLE FOCUS** - Primary data source for all drill operations
 4. **MOBILE-FIRST APPROACH** - All changes must work perfectly on mobile devices
 
 ### **📋 CONTRACT NEGOTIATION PROCESS**
@@ -30,7 +30,7 @@
 ### **✅ FEATURES TO ENHANCE (NOT REMOVE)**
 ```
 ✅ Practice Timeline (drag-drop drills) - ENHANCE with better UX
-✅ Real Drill Library (from team_drills table) - CONNECT to database
+✅ Real Drill Library (from powlax_drills table) - CONNECT to database
 ✅ Save/Load Practice Plans - ENHANCE with better UI
 ✅ Mobile-First Design - OPTIMIZE for field usage
 ✅ Print functionality - MAKE FUNCTIONAL (PDF generation)
@@ -39,7 +39,8 @@
 ✅ Strategy modals - CONNECT to strategies table
 ✅ Video modals - MAKE FUNCTIONAL with real videos
 ✅ Lacrosse Lab modals - CONNECT to real lab URLs
-✅ Custom drill creation - SAVE to team_drills table
+✅ Custom drill creation - SAVE to user_drills table
+✅ Custom strategy creation - SAVE to user_strategies table
 ✅ Parallel drill system - ENHANCE functionality
 ✅ Favorites system - PERSIST to database
 ✅ All existing modal functionality - ENHANCE with real data
@@ -51,10 +52,10 @@
 
 ## 🗄️ **DATA INTEGRATION REQUIREMENTS**
 
-### **Primary Data Source: `team_drills` Table**
+### **Primary Data Source: `powlax_drills` Table**
 ```sql
 -- Expected schema (verify before implementing)
-team_drills {
+powlax_drills {
   id, name, duration, category, 
   video_url, drill_lab_url_1-5,
   strategies[], concepts[], skills[],
@@ -63,7 +64,7 @@ team_drills {
 ```
 
 ### **Secondary Data Sources**
-- **`strategies`** - Strategy-drill relationships
+- **`powlax_strategies`** - listing a spot to select each strategy under each gamephase
 - **`practice_plans`** - Saved practice sessions (already working)
 - **`user_favorites`** - Persistent favorites system
 - **`teams`** - Team-specific drill access
@@ -71,8 +72,8 @@ team_drills {
 ### **Current Problems to Fix**
 - ❌ `useDrills` hook falls back to mock data
 - ❌ Video URLs not connected to real videos
-- ❌ Strategy connections are hardcoded
-- ❌ Lacrosse Lab URLs are broken/outdated
+- ❌ Strategy connections are coded
+- ❌ Lacrosse Lab URLs are broken/outdated - most likely the method of extracting from the json and putting into iframe - correct iframe output is - <iframe width="500" height="500" src="https://lacrosse.labradorsports.com/play?l=PP4bb1KQCS6MdOxWMe4B" style="max-width: 100%"></iframe> must remain square, but can be manipulated otherwise.
 - ❌ Print button does nothing
 - ❌ Refresh button does nothing
 - ❌ Favorites don't persist
@@ -85,12 +86,12 @@ team_drills {
 
 #### **DrillLibrary.tsx** - Priority: HIGH
 **Current Issues:**
-- Uses mock data from `useDrills` fallback
+- Uses mock data from `useDrills` fallback - 
 - Categories don't match real data
 - Search/filter doesn't work with real database
 
 **Enhancement Requirements:**
-- Connect to `team_drills` Supabase table
+- Connect to `powlax_drills`and`user_drills` Supabase table - these are drills saved by the user, same structure as powlax drills
 - Dynamic categories based on real data
 - Functional search across all drill fields
 - Working strategy/skill filters
@@ -123,19 +124,16 @@ team_drills {
 - No connection to drill video URLs
 
 **Enhancement Requirements:**
-- Real video playback from drill.video_url
+- Real video playback from video_url column of powlax_drills
 - Fallback for missing videos
 - Mobile-optimized video controls
 
 #### **StrategiesModal.tsx** - Priority: HIGH
 **Current Issues:**
-- Hardcoded strategy data
-- No real drill-strategy relationships
+- Hardcoded strategy data - data should come from powlax_strategies and user_strategies
 
 **Enhancement Requirements:**
-- Connect to `strategies` table
-- Show real drill-strategy relationships
-- Allow strategy assignment to drills
+- Connect to `powlax_strategies` and `user_strategies` table
 
 #### **LacrosseLabModal.tsx** - Priority: MEDIUM
 **Current Issues:**
@@ -143,9 +141,9 @@ team_drills {
 - No connection to drill lab fields
 
 **Enhancement Requirements:**
-- Connect to drill.drill_lab_url_1-5 fields
+- Connect to lab_urls fields on `powlax_drills'
 - Update URLs to current Lacrosse Lab format
-- Handle missing diagrams gracefully
+- Handle missing diagrams by eliminating the icon on that drill. No url = no displayed icon
 
 #### **SavePracticeModal.tsx** - Status: ✅ WORKING
 **No changes needed** - Already connects to Supabase properly
@@ -165,6 +163,7 @@ team_drills {
 - Professional practice plan layout
 - Include team/coach information
 - Mobile print optimization
+- Optional display of added notes
 
 #### **FilterDrillsModal.tsx** - Priority: MEDIUM
 **Current Issues:**
@@ -172,7 +171,7 @@ team_drills {
 
 **Enhancement Requirements:**
 - Dynamic filter options from database
-- Working strategy/skill/category filters
+- Link to powlax_drills game_states column
 - Persistent filter preferences
 
 #### **AddCustomDrillModal.tsx** - Priority: MEDIUM
@@ -180,23 +179,30 @@ team_drills {
 - Doesn't save to database
 
 **Enhancement Requirements:**
-- Save custom drills to `team_drills` table
+- Save custom drills to `user_drills` table
 - Full drill property support
-- Team-specific custom drill access
+- Columns have been added to link to clubs and teams.
+
+#### **AddCustomStrategiesModal.tsx** - Priority: MEDIUM - Must create .tsx new, follow same requirements of Custom Drill Creation but for strategies.  No current data - NO FALL BACK
+**Current Issues:**
+- No .tsx created yet
+
+**Enhancement Requirements:**
+- Save custom strategies to `user_strategies` table
+- Full strategy property support
 
 ---
 
 ## 🎯 **SUCCESS CRITERIA**
 
 ### **Functional Requirements**
-1. ✅ All drill data comes from `team_drills` Supabase table
+1. ✅ All drill data comes from `powlax_drills` and `user_drills` Supabase table
 2. ✅ All modal buttons work with real data
 3. ✅ Print button generates professional PDF
 4. ✅ Refresh button syncs latest data
 5. ✅ Video modals play actual drill videos
-6. ✅ Strategy connections are functional
-7. ✅ Favorites persist to database
-8. ✅ Custom drills save to database
+6. ✅ Favorites persist to database
+7. ✅ Custom drills save to database
 
 ### **User Experience Requirements**
 1. ✅ Mobile-first design maintained
@@ -205,6 +211,7 @@ team_drills {
 4. ✅ Clear visual feedback
 5. ✅ Graceful error handling
 6. ✅ Works offline after initial load
+7. ✅ Optomize UI for Text contrast and visibility
 
 ### **Code Quality Requirements**
 1. ✅ Zero mock/fake data in production
@@ -262,7 +269,7 @@ team_drills {
 - ✅ Specific enhancement proposal for each feature
 - ✅ User approval for all changes before implementation
 - ✅ Zero feature removal (only enhancement)
-- ✅ Full connection to `team_drills` database table
+- ✅ Full connection to `powlax_drills` database table
 
 **The agent must negotiate this contract directly with the user before making any code changes.**
 

@@ -19,9 +19,10 @@ interface AddCustomDrillModalProps {
   isOpen: boolean
   onClose: () => void
   onAdd: (drill: any) => void
+  onDrillCreated?: () => void
 }
 
-export default function AddCustomDrillModal({ isOpen, onClose, onAdd }: AddCustomDrillModalProps) {
+export default function AddCustomDrillModal({ isOpen, onClose, onAdd, onDrillCreated }: AddCustomDrillModalProps) {
   const { createUserDrill, loading: creating } = useUserDrills()
   const [name, setName] = useState('')
   const [duration, setDuration] = useState(10)
@@ -76,10 +77,17 @@ export default function AddCustomDrillModal({ isOpen, onClose, onAdd }: AddCusto
         notes,
         videoUrl: videoUrl.trim(),
         isCustom: true,
-        drill_video_url: videoUrl.trim()
+        drill_video_url: videoUrl.trim(),
+        source: 'user' as const,
+        user_id: createdDrill.user_id
       }
 
       onAdd(practiceReadyDrill)
+      
+      // Also refresh main drill list if callback provided
+      if (onDrillCreated) {
+        onDrillCreated()
+      }
       
       // Reset form
       setName('')
@@ -126,15 +134,15 @@ export default function AddCustomDrillModal({ isOpen, onClose, onAdd }: AddCusto
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0">
-        <DialogHeader className="px-6 py-4 border-b">
-          <DialogTitle>Add Custom Drill</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0 bg-white">
+        <DialogHeader className="px-6 py-4 border-b bg-white">
+          <DialogTitle className="text-powlax-blue font-semibold">Add Custom Drill</DialogTitle>
+          <DialogDescription className="text-gray-600">
             Create a custom drill for your practice plan
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 px-6 py-4" style={{ maxHeight: 'calc(90vh - 180px)' }}>
+        <ScrollArea className="flex-1 px-6 py-4 bg-white" style={{ maxHeight: 'calc(90vh - 180px)' }}>
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Drill Name */}
             <div>
@@ -340,11 +348,11 @@ export default function AddCustomDrillModal({ isOpen, onClose, onAdd }: AddCusto
           </form>
         </ScrollArea>
 
-        <DialogFooter className="px-6 py-4 border-t">
-          <Button variant="outline" onClick={onClose} disabled={creating}>
+        <DialogFooter className="px-6 py-4 border-t bg-white">
+          <Button variant="outline" onClick={onClose} disabled={creating} className="border-gray-300 hover:bg-gray-50">
             Cancel
           </Button>
-          <Button onClick={() => handleSubmit()} disabled={creating}>
+          <Button onClick={() => handleSubmit()} disabled={creating} className="bg-powlax-blue hover:bg-powlax-blue/90 text-white">
             {creating ? 'Creating...' : 'Add Drill'}
           </Button>
         </DialogFooter>

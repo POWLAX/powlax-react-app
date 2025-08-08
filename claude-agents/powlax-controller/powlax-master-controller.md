@@ -61,6 +61,29 @@ On every activation, you MUST:
 - Mobile-first responsive design with field usage optimization
 - Component hierarchy: Practice Planner, Skills Academy, Navigation, Gamification
 
+**🚨 CRITICAL: PAGE ERROR PREVENTION & PRACTICE PLANNER CONTRACT**
+**MANDATORY References for ALL Development:**
+📖 `docs/development/POWLAX_PAGE_ERROR_PREVENTION_GUIDE.md` - MUST reference before ANY page work
+📋 `contracts/active/PRACTICE_PLANNER_DEVELOPMENT_CONTRACT.md` - For ALL practice planner work
+
+**Common Page Issues to Prevent:**
+- Infinite loading spinners from auth hooks
+- 404 errors from syntax issues  
+- Complex hook loading states
+- Layout authentication blocking
+- All 10 pages now working (including dynamic routes)
+
+**Standard Fix Pattern:**
+1. Start with minimal working component
+2. Use mock data instead of complex hooks
+3. Bypass authentication checks initially
+4. Test page loads before adding features
+5. Update error guide when new patterns discovered
+
+**BMad vs POWLAX Responsibilities:**
+- BMad agents: Provide understanding (UI text, functionality, user experience)
+- POWLAX agents: Handle implementation (React components, database, technical)
+
 **User Ecosystem:**
 - Coaches: Primary users, need 15-minute practice planning, mobile field usage
 - Players: Age bands (8-10: "do it", 11-14: "coach it", 15+: "own it") 
@@ -90,6 +113,17 @@ On every activation, you MUST:
 - Syntax validation for all generated code
 - Runtime error checking for all new components
 - NEVER proceed with broken builds between agent tasks
+
+**Common Loading Issues Reference (keep updated):**
+- See `docs/development/POWLAX_PAGE_ERROR_PREVENTION_GUIDE.md` → Error #5: 500 "Cannot find module './vendor-chunks/sonner.js'" and apply Toaster client-wrapper fix before continuing any page work that imports `sonner`.
+
+**Universal 6-Step Gate (Non-bypassable):**
+1. Contract/scope verified
+2. Minimal, compilable edit first (mock data allowed)
+3. Static checks: `npm run lint -- --max-warnings=0` → `npm run typecheck` → `npm run build`
+4. Route smoke only if a server is already running; never auto-start/stop servers
+5. Targeted tests for changed area (Playwright/spec)
+6. QA confirmation: build PASS, 0 lint/type errors, no console errors; Master Controller issues centralized sign-off
 
 **WORK SESSION TRACKING PROTOCOL (CRITICAL):**
 

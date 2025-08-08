@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Filter, Plus, Star, ChevronDown, ChevronRight, X, Video, Link, Edit3, Beaker } from 'lucide-react'
+import dynamic from 'next/dynamic'
+const motion = dynamic(() => import('framer-motion').then(m => ({ default: m.motion })), { ssr: false })
+const AnimatePresence = dynamic(() => import('framer-motion').then(m => ({ default: m.AnimatePresence })), { ssr: false })
+import { Filter, Plus, Star, ChevronDown, ChevronRight, X, Video, Link, Edit3, Beaker, User } from 'lucide-react'
 import { useDrills } from '@/hooks/useDrills'
 import { useFavorites } from '@/hooks/useFavorites'
 import AddCustomDrillModal from './AddCustomDrillModal'
@@ -11,6 +13,7 @@ import VideoModal from './modals/VideoModal'
 import LinksModal from './modals/LinksModal'
 import StrategiesModal from './modals/StrategiesModal'
 import LacrosseLabModal, { hasLabUrls } from './modals/LacrosseLabModal'
+import AddCustomStrategiesModal from './modals/AddCustomStrategiesModal'
 
 interface Drill {
   id: string
@@ -32,6 +35,9 @@ interface Drill {
   drill_lab_url_3?: string
   drill_lab_url_4?: string
   drill_lab_url_5?: string
+  source?: 'powlax' | 'user'
+  user_id?: string
+  is_public?: boolean
 }
 
 interface DrillLibraryProps {
@@ -46,13 +52,14 @@ const categories = [
 ]
 
 export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
-  const { drills: supabaseDrills, loading, error } = useDrills()
+  const { drills: supabaseDrills, loading, error, refreshDrills } = useDrills()
   const { toggleFavorite, isFavorite, loading: favoritesLoading } = useFavorites()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [expandedCategories, setExpandedCategories] = useState<string[]>(['skill'])
   const [showFilterModal, setShowFilterModal] = useState(false)
   const [showAddDrillModal, setShowAddDrillModal] = useState(false)
+  const [showAddStrategiesModal, setShowAddStrategiesModal] = useState(false)
   // Removed local favorites state - now using useFavorites hook
   
   // Modal states for individual drills
@@ -67,6 +74,7 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
   const [selectedSkills, setSelectedSkills] = useState<string[]>([])
   const [selectedGamePhase, setSelectedGamePhase] = useState<string | null>(null)
   const [selectedDuration, setSelectedDuration] = useState<{ min: number; max: number } | null>(null)
+  const [selectedGameStates, setSelectedGameStates] = useState<string[]>([])
 
   const toggleCategory = (categoryId: string) => {
     if (expandedCategories.includes(categoryId)) {
@@ -102,9 +110,21 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
       const matchesDuration = !selectedDuration ||
         (drill.duration >= selectedDuration.min && drill.duration <= selectedDuration.max)
       
-      return matchesSearch && matchesCategory && matchesStrategies && matchesSkills && matchesDuration
+      // Game states filter
+      const matchesGameStates = selectedGameStates.length === 0 ||
+        (drill.game_states && 
+         selectedGameStates.some(state => {
+           const drillStates = typeof drill.game_states === 'string' 
+             ? drill.game_states.split(',').map(s => s.trim())
+             : Array.isArray(drill.game_states) 
+               ? drill.game_states 
+               : []
+           return drillStates.includes(state)
+         }))
+      
+      return matchesSearch && matchesCategory && matchesStrategies && matchesSkills && matchesDuration && matchesGameStates
     })
-  }, [supabaseDrills, searchTerm, selectedCategory, selectedStrategies, selectedSkills, selectedDuration])
+  }, [supabaseDrills, searchTerm, selectedCategory, selectedStrategies, selectedSkills, selectedDuration, selectedGameStates])
 
   const getDrillsByCategory = (categoryId: string) => {
     return filteredDrills.filter(drill => drill.category === categoryId)
@@ -144,6 +164,7 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
     setSelectedSkills([])
     setSelectedGamePhase(null)
     setSelectedDuration(null)
+    setSelectedGameStates([])
     setSearchTerm('')
   }
 
@@ -151,7 +172,8 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
     selectedStrategies.length + 
     selectedSkills.length + 
     (selectedGamePhase ? 1 : 0) + 
-    (selectedDuration ? 1 : 0)
+    (selectedDuration ? 1 : 0) +
+    selectedGameStates.length
 
   if (loading) {
     return (
@@ -178,12 +200,12 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="p-4 border-b">
+      <div className="p-4 field-border-strong border-b">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xl font-bold text-gray-900">Drill Library</h2>
+          <h2 className="text-xl font-bold field-text">Drill Library</h2>
           <button
             onClick={() => setShowFilterModal(true)}
-            className="px-3 py-1 bg-blue-600 text-white rounded flex items-center text-sm relative"
+            className="touch-target bg-blue-600 text-white rounded-lg flex items-center text-sm relative font-semibold shadow-md hover:bg-blue-700 transition-colors"
           >
             <Filter className="h-4 w-4 mr-1" />
             Filter Drills
@@ -197,35 +219,44 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
         
         <button 
           onClick={() => setShowAddDrillModal(true)}
-          className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center justify-center"
+          className="w-full touch-target bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center mb-2 font-semibold shadow-md transition-colors"
           data-testid="add-custom-drill-btn"
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="h-5 w-5 mr-2" />
           Add Custom Drill
+        </button>
+        
+        <button 
+          onClick={() => setShowAddStrategiesModal(true)}
+          className="w-full touch-target bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center justify-center font-semibold shadow-md transition-colors"
+          data-testid="add-custom-strategy-btn"
+        >
+          <Plus className="h-5 w-5 mr-2" />
+          Add Custom Strategy
         </button>
       </div>
 
       {/* Search */}
-      <div className="p-4 border-b">
+      <div className="p-4 field-border-strong border-b">
         <input
           type="text"
           placeholder="Search drills..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-3 py-2 border rounded-md"
+          className="w-full px-4 py-3 field-border rounded-lg field-text bg-white font-medium text-base touch-target"
         />
       </div>
 
       {/* Active Filters */}
       {activeFilterCount > 0 && (
-        <div className="px-4 py-2 bg-blue-50 border-b">
+        <div className="px-4 py-2 bg-blue-50 field-border-strong border-b">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-blue-700">
+            <span className="text-sm field-text font-semibold">
               {activeFilterCount} filter{activeFilterCount > 1 ? 's' : ''} active
             </span>
             <button
               onClick={clearFilters}
-              className="text-sm text-blue-600 hover:text-blue-700"
+              className="touch-target-sm text-sm text-blue-600 hover:text-blue-700 font-semibold rounded-md field-button"
             >
               Clear all
             </button>
@@ -235,7 +266,7 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
 
       {/* Categories */}
       <div className="flex-1 overflow-y-auto">
-        <div className="text-center py-2 text-sm text-gray-600">
+        <div className="text-center py-2 text-sm field-text-secondary font-semibold">
           Total drills: {filteredDrills.length} of {supabaseDrills.length}
         </div>
         
@@ -244,20 +275,20 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
           const isExpanded = expandedCategories.includes(category.id)
           
           return (
-            <div key={category.id} className="border-b">
+            <div key={category.id} className="field-border-strong border-b">
               <button
                 onClick={() => toggleCategory(category.id)}
-                className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50"
+                className="w-full touch-target field-category flex items-center justify-between hover:bg-gray-100 rounded-none transition-colors"
                 data-testid={`category-${category.id}`}
               >
                 <div className="flex items-center">
                   {isExpanded ? (
-                    <ChevronDown className="h-4 w-4 mr-2 text-gray-400" />
+                    <ChevronDown className="h-5 w-5 mr-3 field-text" />
                   ) : (
-                    <ChevronRight className="h-4 w-4 mr-2 text-gray-400" />
+                    <ChevronRight className="h-5 w-5 mr-3 field-text" />
                   )}
-                  <span className="font-medium">{category.name}</span>
-                  <span className="ml-2 text-sm text-gray-500">({categoryDrills.length})</span>
+                  <span className="font-bold text-base">{category.name}</span>
+                  <span className="ml-2 text-sm field-text-secondary font-semibold">({categoryDrills.length})</span>
                 </div>
               </button>
               
@@ -285,73 +316,89 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
                         >
                         <div className="flex items-start justify-between">
                           <div className="flex-1 pr-4">
-                            <h4 className="font-medium text-gray-900">{drill.name}</h4>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="field-drill-name text-base">{drill.name}</h4>
+                              {drill.source === 'user' && (
+                                <div className="flex items-center gap-1">
+                                  <User className="h-3 w-3 text-green-600" />
+                                  <span className="text-xs px-1.5 py-0.5 bg-green-100 text-green-700 rounded-full font-medium">
+                                    Custom
+                                  </span>
+                                </div>
+                              )}
+                              {drill.source === 'powlax' && (
+                                <span className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">
+                                  POWLAX
+                                </span>
+                              )}
+                            </div>
                             {(drill.strategies && drill.strategies.length > 0) && (
-                              <p className="text-sm text-blue-600 mt-1">
+                              <p className="text-sm text-blue-700 mt-1 font-semibold">
                                 {drill.strategies.map(s => `#${s}`).join(' ')}
                               </p>
                             )}
                             
                             {/* Icon row for modals */}
-                            <div className="flex items-center gap-1 mt-2">
+                            <div className="flex items-center gap-2 mt-2">
                               <button
                                 onClick={(e) => openVideoModal(drill, e)}
-                                className={`p-1 rounded hover:bg-blue-50 ${!drill.videoUrl ? 'opacity-40' : ''}`}
+                                className={`touch-target-sm rounded-lg transition-colors ${!drill.videoUrl ? 'opacity-40 bg-gray-50' : 'hover:bg-blue-50 field-button'}`}
                                 title="View Video"
                                 disabled={!drill.videoUrl}
                               >
                                 <img 
                                   src="https://powlax.com/wp-content/uploads/2025/06/Video-1.svg" 
                                   alt="Video" 
-                                  className="h-4 w-4"
+                                  className="h-5 w-5"
                                 />
                               </button>
 
                               {hasLabUrls(drill) && (
                                 <button
                                   onClick={(e) => openLacrosseLabModal(drill, e)}
-                                  className="p-1 hover:bg-gray-100 rounded"
+                                  className="touch-target-sm hover:bg-blue-50 field-button rounded-lg transition-colors"
                                   title="Lacrosse Lab Diagrams"
                                 >
                                   <img 
                                     src="https://powlax.com/wp-content/uploads/2025/06/Lacrosse-Lab-Link-1.svg" 
                                     alt="Lacrosse Lab" 
-                                    className="h-4 w-4"
+                                    className="h-5 w-5"
                                   />
                                 </button>
                               )}
 
                               <button
                                 onClick={(e) => openLinksModal(drill, e)}
-                                className="p-1 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
+                                className="touch-target-sm text-gray-600 hover:text-gray-900 hover:bg-green-50 field-button rounded-lg transition-colors"
                                 title="External Links"
                               >
-                                <Link className="h-3 w-3" />
+                                <Link className="h-5 w-5" />
                               </button>
 
                               <button
                                 onClick={(e) => openStrategiesModal(drill, e)}
-                                className="p-1 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
+                                className="touch-target-sm text-gray-600 hover:text-gray-900 hover:bg-orange-50 field-button rounded-lg transition-colors"
                                 title="Strategies & Concepts"
                               >
-                                <span className="text-xs font-bold">X/O</span>
+                                <span className="text-sm font-bold">X/O</span>
                               </button>
                             </div>
                           </div>
                           
                           <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-500">{drill.duration}m</span>
+                            <span className="text-sm field-text-secondary font-semibold">{drill.duration}m</span>
                             <button
                               onClick={(e) => handleToggleFavorite(drill, e)}
-                              className={`p-1 rounded ${
+                              className={`touch-target-sm rounded-lg transition-colors ${
                                 isFavorite(drill.id)
-                                  ? 'text-yellow-500'
-                                  : 'text-gray-400 hover:text-gray-600'
+                                  ? 'text-yellow-500 bg-yellow-50 border-2 border-yellow-300'
+                                  : 'text-gray-400 hover:text-gray-600 field-button'
                               }`}
                               disabled={favoritesLoading}
+                              title="Toggle favorite"
                             >
                               <Star
-                                className={`h-4 w-4 ${
+                                className={`h-5 w-5 ${
                                   isFavorite(drill.id) ? 'fill-current' : ''
                                 }`}
                               />
@@ -361,11 +408,11 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
                                 e.stopPropagation()
                                 onAddDrill(drill)
                               }}
-                              className="p-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                              className="touch-target bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow-md transition-colors"
                               data-testid={`add-drill-${drill.id}`}
                               title="Add to Practice"
                             >
-                              <Plus className="h-5 w-5" />
+                              <Plus className="h-6 w-6" />
                             </button>
                           </div>
                         </div>
@@ -394,6 +441,8 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
           setSelectedGamePhase={setSelectedGamePhase}
           selectedDuration={selectedDuration}
           setSelectedDuration={setSelectedDuration}
+          selectedGameStates={selectedGameStates}
+          setSelectedGameStates={setSelectedGameStates}
         />
       )}
 
@@ -402,6 +451,7 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
           isOpen={showAddDrillModal}
           onClose={() => setShowAddDrillModal(false)}
           onAdd={handleAddCustomDrill}
+          onDrillCreated={refreshDrills}
         />
       )}
 

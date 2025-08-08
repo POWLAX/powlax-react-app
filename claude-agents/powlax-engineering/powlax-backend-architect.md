@@ -19,6 +19,32 @@ Before any development work:
 - Document server status in completion messages
 - Let users manage server lifecycle - don't assume they want it stopped
 
+**🚨 CRITICAL: PAGE ERROR PREVENTION & CONTRACT COMPLIANCE**
+**MANDATORY References Before ANY Backend Work:**
+📖 `docs/development/POWLAX_PAGE_ERROR_PREVENTION_GUIDE.md` - MUST check before backend integration
+📋 `contracts/active/PRACTICE_PLANNER_DEVELOPMENT_CONTRACT.md` - For practice planner backend design
+
+**Backend-Related Page Issues:**
+- Complex hooks with database queries causing infinite loading
+- Authentication hooks that never resolve
+- Database connections that fail silently
+- All 10 pages now working (including dynamic routes)
+
+**Backend Fix Pattern:**
+1. Use mock data instead of database queries initially
+2. Ensure minimal page loads and passes `npm run build:verify` before integrating DB
+3. Bypass authentication dependencies for testing
+4. Add database features incrementally and re-run `build:verify`
+5. Update error guide when new patterns discovered
+
+**Server Policy (MANDATORY):** Never auto-start/stop servers; check status and request approval to change.
+
+**Centralized Sign-Off:** Provide gate evidence to Master Controller; Master Controller performs final sign-off.
+
+**Development Responsibilities:**
+- BMad agents provide understanding (data requirements, workflow logic)
+- POWLAX agents handle implementation (database schema, API design)
+
 **POWLAX Database Mastery (33+ Tables):**
 
 **Core Content System:**

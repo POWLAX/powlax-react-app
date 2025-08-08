@@ -1,0 +1,186 @@
+# Practice Planner Requirements Contract
+# Original contract format PLUS PRD checklist
+
+contract:
+  id: practice-planner-requirements-001
+  type: ENHANCED_CONTRACT
+  page: /teams/[teamId]/practice-plans
+  localhost: http://localhost:3000/teams/1/practice-plans
+  created: 2025-01-16
+  approach: "Original contract for tasks + PRD checklist for verification"
+  
+# REQUIREMENTS CHECKLIST - "Does the Practice Planner have these?"
+
+requirements:
+
+  # MODAL SYSTEM
+  modals:
+    - id: "video-modal"
+      requirement: "Video modal opens when clicking video icon"
+      current_status: BROKEN
+      test: "Click video icon on any drill"
+      
+    - id: "strategy-modal"
+      requirement: "Strategy modal shows related strategies"
+      current_status: BROKEN
+      test: "Click strategy button on drill"
+      
+    - id: "lab-modal"
+      requirement: "Lacrosse Lab modal shows drill lab content"
+      current_status: BROKEN
+      test: "Click lab button on drill"
+      
+    - id: "links-modal"
+      requirement: "Links modal shows resource links"
+      current_status: BROKEN
+      test: "Click links button on drill"
+      
+    - id: "save-modal"
+      requirement: "Save modal allows naming and saving practice"
+      current_status: WORKING
+      test: "Click save button, enter name, save"
+      
+    - id: "load-modal"
+      requirement: "Load modal shows saved practices"
+      current_status: WORKING
+      test: "Click load button, see list, load one"
+
+  # DRILL LIBRARY
+  drill_library:
+    - id: "drill-data"
+      requirement: "Shows real drills from powlax_drills table"
+      current_status: PARTIAL
+      test: "Check if drills are from database"
+      
+    - id: "drill-search"
+      requirement: "Search filters drills by name/category"
+      current_status: WORKING
+      test: "Type in search box"
+      
+    - id: "drill-categories"
+      requirement: "Category tabs filter drills"
+      current_status: WORKING
+      test: "Click category tabs"
+      
+    - id: "add-drill"
+      requirement: "Can add drills to timeline"
+      current_status: WORKING
+      test: "Click + button on drill"
+
+  # TIMELINE
+  timeline:
+    - id: "drag-drop"
+      requirement: "Can drag drills to reorder"
+      current_status: WORKING
+      test: "Drag drill to new position"
+      
+    - id: "drill-duration"
+      requirement: "Shows drill duration and total time"
+      current_status: WORKING
+      test: "Check time displays"
+      
+    - id: "parallel-drills"
+      requirement: "Can run drills in parallel"
+      current_status: WORKING
+      test: "Add parallel activity"
+      
+    - id: "remove-drill"
+      requirement: "Can remove drills from timeline"
+      current_status: WORKING
+      test: "Click X on drill"
+
+  # PRACTICE INFO
+  practice_info:
+    - id: "practice-date"
+      requirement: "Can set practice date"
+      current_status: WORKING
+      test: "Change date field"
+      
+    - id: "practice-time"
+      requirement: "Can set start time and duration"
+      current_status: WORKING
+      test: "Change time fields"
+      
+    - id: "practice-notes"
+      requirement: "Can add practice notes/goals"
+      current_status: WORKING
+      test: "Type in notes field"
+      
+    - id: "field-location"
+      requirement: "Can specify field location"
+      current_status: WORKING
+      test: "Enter field name"
+
+  # TOOLBAR FEATURES
+  toolbar:
+    - id: "template-selector"
+      requirement: "Can load practice templates"
+      current_status: WORKING
+      test: "Click template button"
+      
+    - id: "print-function"
+      requirement: "Can print practice plan"
+      current_status: PARTIAL
+      test: "Click print button"
+      
+    - id: "refresh-drills"
+      requirement: "Can refresh drill library"
+      current_status: WORKING
+      test: "Click refresh button"
+
+  # MOBILE FEATURES
+  mobile:
+    - id: "mobile-responsive"
+      requirement: "Works on 375px+ screens"
+      current_status: PARTIAL
+      test: "View at 375px width"
+      
+    - id: "mobile-drill-library"
+      requirement: "Drill library accessible on mobile"
+      current_status: WORKING
+      test: "Tap + button on mobile"
+      
+    - id: "touch-targets"
+      requirement: "Buttons are 44px+ for touch"
+      current_status: PARTIAL
+      test: "Measure button sizes"
+
+  # DATA PERSISTENCE
+  persistence:
+    - id: "save-practice"
+      requirement: "Saves practice to database"
+      current_status: WORKING
+      test: "Save and reload"
+      
+    - id: "load-practice"
+      requirement: "Loads saved practices"
+      current_status: WORKING
+      test: "Load previous practice"
+      
+    - id: "team-association"
+      requirement: "Practices linked to correct team"
+      current_status: WORKING
+      test: "Check team_id in saved data"
+
+# SUCCESS CRITERIA
+success:
+  all_requirements_met: "Every requirement status is WORKING"
+  no_broken_features: "Zero items with status BROKEN"
+  mobile_ready: "All mobile requirements WORKING"
+  data_connected: "All data from real tables, no mock data"
+
+# CURRENT OVERALL STATUS
+overall_status:
+  total_requirements: 30
+  working: 18
+  partial: 5
+  broken: 7
+  completion_percentage: 60%
+  
+# PRIORITY FIXES
+priority_order:
+  1: "Fix all BROKEN modals (video, strategy, lab, links)"
+  2: "Complete drill data connection (remove mock fallback)"
+  3: "Fix print functionality"
+  4: "Improve mobile responsiveness"
+  5: "Optimize touch targets"

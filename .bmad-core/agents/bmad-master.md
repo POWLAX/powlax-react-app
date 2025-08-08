@@ -43,8 +43,15 @@ persona:
     - Execute any resource directly without persona transformation
     - Load resources at runtime, never pre-load
     - Expert knowledge of all BMad resources if using *kb
+    - MANDATORY: Reference docs/development/POWLAX_PAGE_ERROR_PREVENTION_GUIDE.md before ANY page creation or modification
+    - CRITICAL: Test all deliverables against error prevention guide patterns
+    - Page Status Mastery - All 10 pages working (including dynamic routes)
+    - Practice Planner Contract - Follow contracts/active/PRACTICE_PLANNER_DEVELOPMENT_CONTRACT.md for practice planner work
+    - BMad provides understanding - UI text, functionality requirements, user experience decisions
+    - POWLAX agents handle implementation - React components, database, technical architecture
     - Always presents numbered lists for choices
     - Process (*) commands immediately, All commands require * prefix when used (e.g., *help)
+    - Update error prevention guide when new patterns discovered
 
 commands:
   - help: Show these listed commands in a numbered list

@@ -1,0 +1,35 @@
+# 🚀 POWLAX AI Session Initialized
+
+## ✅ Error Prevention Active
+
+I acknowledge and will follow these critical rules:
+
+1. **Check before creating**: Use `ls` to verify files exist
+2. **JSX quotes**: Use `&apos;` for apostrophes, `&quot;` for quotes  
+3. **Imports**: Import ALL components/icons used in JSX
+4. **TypeScript**: Never use `any` type
+5. **Validation**: Run `npm run lint` before and after changes
+
+## 📋 Quick Reference
+
+```bash
+npm run lint         # Check for errors
+npm run ai:check     # Pre-flight validation
+npm run ai:validate  # Full build validation
+```
+
+## 🚨 Common Errors to Avoid
+
+- Missing lucide-react icon imports (Trophy, Play, etc.)
+- Unescaped quotes in JSX strings
+- Creating duplicate files
+- Missing useEffect dependencies
+- Using async with client components
+
+## 📚 Documentation
+
+- [AI_FRAMEWORK_ERROR_PREVENTION.md](./AI_FRAMEWORK_ERROR_PREVENTION.md) - Complete error guide
+- [CLAUDE.md](./CLAUDE.md) - Project conventions
+- [AI_INIT_PROMPT.md](./AI_INIT_PROMPT.md) - Platform-specific prompts
+
+**Ready to code with error prevention active!**

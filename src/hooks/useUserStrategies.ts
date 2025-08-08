@@ -9,7 +9,7 @@ interface UserStrategy {
   strategy_name: string
   strategy_categories?: string
   description?: string
-  lacrosse_lab_links?: any
+  lacrosse_lab_links?: string[]
   embed_codes?: any
   see_it_ages?: string
   coach_it_ages?: string
@@ -22,8 +22,8 @@ interface UserStrategy {
   vimeo_link?: string
   pdf_shortcode?: string
   thumbnail_urls?: any
-  team_share?: number[]
-  club_share?: number[]
+  team_share?: boolean
+  club_share?: boolean
   is_public?: boolean
   created_at?: string
   updated_at?: string
@@ -66,7 +66,7 @@ export function useUserStrategies() {
         strategy_name: strategy.strategy_name,
         strategy_categories: strategy.strategy_categories,
         description: strategy.description,
-        lacrosse_lab_links: strategy.lacrosse_lab_links,
+        lacrosse_lab_links: Array.isArray(strategy.lacrosse_lab_links) ? strategy.lacrosse_lab_links : [],
         embed_codes: strategy.embed_codes,
         see_it_ages: strategy.see_it_ages,
         coach_it_ages: strategy.coach_it_ages,
@@ -79,8 +79,8 @@ export function useUserStrategies() {
         vimeo_link: strategy.vimeo_link,
         pdf_shortcode: strategy.pdf_shortcode,
         thumbnail_urls: strategy.thumbnail_urls,
-        team_share: strategy.team_share || [],
-        club_share: strategy.club_share || [],
+        team_share: strategy.team_share || false,
+        club_share: strategy.club_share || false,
         is_public: strategy.is_public || false,
         created_at: strategy.created_at,
         updated_at: strategy.updated_at
@@ -105,11 +105,14 @@ export function useUserStrategies() {
           strategy_name: strategyData.strategy_name || 'New Strategy',
           description: strategyData.description,
           strategy_categories: strategyData.strategy_categories,
+          lacrosse_lab_links: strategyData.lacrosse_lab_links || [],
           target_audience: strategyData.target_audience,
           lesson_category: strategyData.lesson_category,
           vimeo_link: strategyData.vimeo_link,
           master_pdf_url: strategyData.master_pdf_url,
           has_pdf: strategyData.has_pdf || false,
+          team_share: strategyData.team_share || false,
+          club_share: strategyData.club_share || false,
           is_public: strategyData.is_public || false
         }])
         .select()
@@ -137,11 +140,14 @@ export function useUserStrategies() {
           strategy_name: updates.strategy_name,
           description: updates.description,
           strategy_categories: updates.strategy_categories,
+          lacrosse_lab_links: updates.lacrosse_lab_links,
           target_audience: updates.target_audience,
           lesson_category: updates.lesson_category,
           vimeo_link: updates.vimeo_link,
           master_pdf_url: updates.master_pdf_url,
           has_pdf: updates.has_pdf,
+          team_share: updates.team_share,
+          club_share: updates.club_share,
           is_public: updates.is_public
         })
         .eq('id', strategyId)

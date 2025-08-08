@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Check } from 'lucide-react'
+import { Check, Slider } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { useDrills } from '@/hooks/useDrills'
 
 interface FilterDrillsModalProps {
   isOpen: boolean
@@ -25,6 +26,8 @@ interface FilterDrillsModalProps {
   setSelectedGamePhase: (phase: string | null) => void
   selectedDuration: { min: number; max: number } | null
   setSelectedDuration: (duration: { min: number; max: number } | null) => void
+  selectedGameStates: string[]
+  setSelectedGameStates: (gameStates: string[]) => void
 }
 
 export default function FilterDrillsModal({
@@ -39,11 +42,16 @@ export default function FilterDrillsModal({
   setSelectedGamePhase,
   selectedDuration,
   setSelectedDuration,
+  selectedGameStates,
+  setSelectedGameStates,
 }: FilterDrillsModalProps) {
+  const { drills: allDrills } = useDrills()
   const [tempStrategies, setTempStrategies] = useState<string[]>(selectedStrategies)
   const [tempSkills, setTempSkills] = useState<string[]>(selectedSkills)
   const [tempGamePhase, setTempGamePhase] = useState<string | null>(selectedGamePhase)
   const [tempDuration, setTempDuration] = useState<{ min: number; max: number } | null>(selectedDuration)
+  const [tempGameStates, setTempGameStates] = useState<string[]>(selectedGameStates)
+  const [durationRange, setDurationRange] = useState<[number, number]>([5, 60])
 
   // Reset temp values when modal opens
   useEffect(() => {
@@ -52,27 +60,69 @@ export default function FilterDrillsModal({
       setTempSkills(selectedSkills)
       setTempGamePhase(selectedGamePhase)
       setTempDuration(selectedDuration)
+      setTempGameStates(selectedGameStates)
+      
+      // Set duration range from current selection or defaults
+      if (selectedDuration) {
+        setDurationRange([selectedDuration.min, selectedDuration.max])
+      } else {
+        setDurationRange([5, 60])
+      }
     }
-  }, [isOpen, selectedStrategies, selectedSkills, selectedGamePhase, selectedDuration])
+  }, [isOpen, selectedStrategies, selectedSkills, selectedGamePhase, selectedDuration, selectedGameStates])
 
-  // Extract unique values from drills
+  // Load filter preferences from localStorage
+  useEffect(() => {
+    if (isOpen) {
+      try {
+        const savedPreferences = localStorage.getItem('drill-filter-preferences')
+        if (savedPreferences) {
+          const preferences = JSON.parse(savedPreferences)
+          if (preferences.duration) {
+            setDurationRange(preferences.duration)
+          }
+        }
+      } catch (error) {
+        console.error('Error loading filter preferences:', error)
+      }
+    }
+  }, [isOpen])
+
+  // Extract unique values from all drills in database, not just filtered ones
+  const sourceData = allDrills.length > 0 ? allDrills : drills
+  
   const allStrategies = Array.from(new Set(
-    drills.flatMap(d => d.strategies || []).filter(Boolean)
+    sourceData.flatMap(d => d.strategies || []).filter(Boolean)
   )).sort()
 
   const allSkills = Array.from(new Set(
-    drills.flatMap(d => d.skills || []).filter(Boolean)
+    sourceData.flatMap(d => d.skills || []).filter(Boolean)
   )).sort()
 
   const allGamePhases = Array.from(new Set(
-    drills.map(d => d.game_phase).filter(Boolean)
+    sourceData.map(d => d.game_phase).filter(Boolean)
+  )).sort()
+
+  // Extract game states from the game_states column
+  const allGameStates = Array.from(new Set(
+    sourceData
+      .map(d => d.game_states || '')
+      .filter(Boolean)
+      .flatMap(states => 
+        typeof states === 'string' 
+          ? states.split(',').map(s => s.trim()).filter(Boolean)
+          : Array.isArray(states) 
+            ? states
+            : []
+      )
   )).sort()
 
   const durationRanges = [
     { label: '0-10 min', min: 0, max: 10 },
     { label: '10-20 min', min: 10, max: 20 },
     { label: '20-30 min', min: 20, max: 30 },
-    { label: '30+ min', min: 30, max: 999 },
+    { label: '30-45 min', min: 30, max: 45 },
+    { label: '45+ min', min: 45, max: 999 },
   ]
 
   const toggleStrategy = (strategy: string) => {
@@ -91,11 +141,37 @@ export default function FilterDrillsModal({
     }
   }
 
+  const toggleGameState = (gameState: string) => {
+    if (tempGameStates.includes(gameState)) {
+      setTempGameStates(tempGameStates.filter(s => s !== gameState))
+    } else {
+      setTempGameStates([...tempGameStates, gameState])
+    }
+  }
+
+  const handleDurationRangeChange = (values: number[]) => {
+    setDurationRange([values[0], values[1]])
+    setTempDuration({ min: values[0], max: values[1] })
+  }
+
   const applyFilters = () => {
     setSelectedStrategies(tempStrategies)
     setSelectedSkills(tempSkills)
     setSelectedGamePhase(tempGamePhase)
     setSelectedDuration(tempDuration)
+    setSelectedGameStates(tempGameStates)
+    
+    // Save preferences to localStorage
+    try {
+      const preferences = {
+        duration: durationRange,
+        lastUsed: Date.now()
+      }
+      localStorage.setItem('drill-filter-preferences', JSON.stringify(preferences))
+    } catch (error) {
+      console.error('Error saving filter preferences:', error)
+    }
+    
     onClose()
   }
 
@@ -104,9 +180,11 @@ export default function FilterDrillsModal({
     setTempSkills([])
     setTempGamePhase(null)
     setTempDuration(null)
+    setTempGameStates([])
+    setDurationRange([5, 60])
   }
 
-  const hasActiveFilters = tempStrategies.length > 0 || tempSkills.length > 0 || tempGamePhase || tempDuration
+  const hasActiveFilters = tempStrategies.length > 0 || tempSkills.length > 0 || tempGamePhase || tempDuration || tempGameStates.length > 0
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -195,32 +273,94 @@ export default function FilterDrillsModal({
               </div>
             )}
 
-            {/* Duration */}
+            {/* Game States */}
+            {allGameStates.length > 0 && (
+              <div>
+                <h3 className="font-semibold mb-3">Game States</h3>
+                <div className="flex flex-wrap gap-2">
+                  {allGameStates.map(gameState => (
+                    <button
+                      key={gameState}
+                      onClick={() => toggleGameState(gameState)}
+                      className={`px-3 py-1.5 rounded-full text-sm transition-colors flex items-center gap-1 ${
+                        tempGameStates.includes(gameState)
+                          ? 'bg-orange-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {gameState}
+                      {tempGameStates.includes(gameState) && (
+                        <Check className="h-3 w-3" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Duration with Range Slider */}
             <div>
-              <h3 className="font-semibold mb-3">Duration</h3>
-              <div className="flex flex-wrap gap-2">
-                {durationRanges.map(range => (
-                  <button
-                    key={range.label}
-                    onClick={() => 
-                      setTempDuration(
+              <h3 className="font-semibold mb-3">Duration Range</h3>
+              <div className="space-y-4">
+                <div className="px-3 py-2 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">Duration: {durationRange[0]}-{durationRange[1]} minutes</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="5"
+                    max="60"
+                    step="5"
+                    value={durationRange[0]}
+                    onChange={(e) => {
+                      const newMin = parseInt(e.target.value)
+                      if (newMin <= durationRange[1]) {
+                        handleDurationRangeChange([newMin, durationRange[1]])
+                      }
+                    }}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer mb-2"
+                  />
+                  <input
+                    type="range"
+                    min="5"
+                    max="60"
+                    step="5"
+                    value={durationRange[1]}
+                    onChange={(e) => {
+                      const newMax = parseInt(e.target.value)
+                      if (newMax >= durationRange[0]) {
+                        handleDurationRangeChange([durationRange[0], newMax])
+                      }
+                    }}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+                
+                {/* Quick Duration Presets */}
+                <div className="flex flex-wrap gap-2">
+                  {durationRanges.map(range => (
+                    <button
+                      key={range.label}
+                      onClick={() => 
+                        setTempDuration(
+                          tempDuration?.min === range.min && tempDuration?.max === range.max
+                            ? null
+                            : { min: range.min, max: range.max }
+                        )
+                      }
+                      className={`px-3 py-1.5 rounded-full text-sm transition-colors flex items-center gap-1 ${
                         tempDuration?.min === range.min && tempDuration?.max === range.max
-                          ? null
-                          : { min: range.min, max: range.max }
-                      )
-                    }
-                    className={`px-3 py-1.5 rounded-full text-sm transition-colors flex items-center gap-1 ${
-                      tempDuration?.min === range.min && tempDuration?.max === range.max
-                        ? 'bg-orange-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    {range.label}
-                    {tempDuration?.min === range.min && tempDuration?.max === range.max && (
-                      <Check className="h-3 w-3" />
-                    )}
-                  </button>
-                ))}
+                          ? 'bg-orange-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {range.label}
+                      {tempDuration?.min === range.min && tempDuration?.max === range.max && (
+                        <Check className="h-3 w-3" />
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

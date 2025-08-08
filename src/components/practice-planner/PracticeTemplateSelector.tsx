@@ -2,7 +2,9 @@
 
 import { useState } from 'react'
 import { BookOpen, Clock, Target, Users, ChevronRight, X } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import dynamic from 'next/dynamic'
+const motion = dynamic(() => import('framer-motion').then(m => ({ default: m.motion })), { ssr: false })
+const AnimatePresence = dynamic(() => import('framer-motion').then(m => ({ default: m.AnimatePresence })), { ssr: false })
 import { practiceTemplates, PracticeTemplate } from '@/data/practice-templates'
 import { Button } from '@/components/ui/button'
 

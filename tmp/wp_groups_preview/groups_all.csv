@@ -1,0 +1,9 @@
+wp_group_id,name,status,parent_id
+8,Your Club OS,public,0
+9,Your Varsity Team HQ,public,0
+16,Coaches’ Corner,private,0
+17,Player Skills Zone,private,0
+18,Fan Zone,private,0
+19,Rules & Refs,private,0
+20,Parent Support Group,private,0
+21,Gear Talk,private,0

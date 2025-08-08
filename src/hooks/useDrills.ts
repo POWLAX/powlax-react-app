@@ -26,6 +26,12 @@ interface Drill {
   max_players?: number
   equipment_needed?: string[]
   notes?: string
+  // Source indicator
+  source: 'powlax' | 'user'
+  user_id?: string
+  is_public?: boolean
+  team_share?: number[]
+  club_share?: number[]
 }
 
 // No more mock data - we fetch from real database
@@ -42,31 +48,61 @@ export function useDrills() {
   const fetchDrills = async () => {
     try {
       setLoading(true)
-      console.log('Fetching drills from powlax_drills table...')
+      console.log('Fetching drills from both powlax_drills and user_drills tables...')
       
-      // Fetch from the powlax_drills table
-      const { data, error } = await supabase
-        .from('powlax_drills')
-        .select('*')
-        .order('title')
-        .limit(200)  // Increased limit for full drill library
+      // Fetch both POWLAX drills and user drills in parallel
+      const [powlaxResponse, userResponse] = await Promise.allSettled([
+        // Fetch POWLAX drills
+        supabase
+          .from('powlax_drills')
+          .select('*')
+          .order('title')
+          .limit(200),
+        
+        // Fetch user drills (includes RLS filtering)
+        supabase
+          .from('user_drills')
+          .select('*')
+          .order('created_at', { ascending: false })
+      ])
 
-      if (error) {
-        console.error('Supabase error fetching drills:', error)
-        setError(error.message)
-        setDrills([])
-        return
+      let powlaxDrills: any[] = []
+      let userDrills: any[] = []
+      let hasErrors = false
+      let errorMessages: string[] = []
+
+      // Process POWLAX drills response
+      if (powlaxResponse.status === 'fulfilled') {
+        if (powlaxResponse.value.error) {
+          console.error('Error fetching POWLAX drills:', powlaxResponse.value.error)
+          errorMessages.push(`POWLAX drills: ${powlaxResponse.value.error.message}`)
+          hasErrors = true
+        } else {
+          powlaxDrills = powlaxResponse.value.data || []
+          console.log(`Loaded ${powlaxDrills.length} POWLAX drills`)
+        }
+      } else {
+        console.error('Failed to fetch POWLAX drills:', powlaxResponse.reason)
+        errorMessages.push(`POWLAX drills: ${powlaxResponse.reason}`)
+        hasErrors = true
       }
 
-      if (!data || data.length === 0) {
-        console.log('No drills found in powlax_drills table')
-        setDrills([])
-        return
+      // Process user drills response
+      if (userResponse.status === 'fulfilled') {
+        if (userResponse.value.error) {
+          // Don't treat user_drills errors as fatal - table might not exist yet
+          console.warn('Error fetching user drills (table may not exist):', userResponse.value.error)
+        } else {
+          userDrills = userResponse.value.data || []
+          console.log(`Loaded ${userDrills.length} user drills`)
+        }
+      } else {
+        console.warn('Failed to fetch user drills:', userResponse.reason)
       }
 
-      // Transform powlax_drills data to our expected format
-      const transformedDrills = data.map((drill: any) => ({
-        id: drill.id?.toString() || `drill-${Date.now()}`,
+      // Transform POWLAX drills
+      const transformedPowlaxDrills = powlaxDrills.map((drill: any) => ({
+        id: drill.id?.toString() || `powlax-drill-${Date.now()}`,
         drill_id: drill.id?.toString(),
         name: drill.title || 'Unnamed Drill',
         duration: parseDuration(drill.drill_duration) || 10,
@@ -107,11 +143,85 @@ export function useDrills() {
         game_states: drill.game_states,
         drill_emphasis: drill.drill_emphasis,
         game_phase: drill.game_phase,
-        status: drill.status
+        status: drill.status,
+        
+        // Source indicator
+        source: 'powlax' as const
       }))
 
-      console.log(`Loaded ${transformedDrills.length} drills from database`)
-      setDrills(transformedDrills)
+      // Transform user drills
+      const transformedUserDrills = userDrills.map((drill: any) => ({
+        id: `user-${drill.id}`,
+        drill_id: drill.id?.toString(),
+        name: drill.title || 'Unnamed Custom Drill',
+        duration: parseDuration(drill.drill_duration) || 10,
+        category: mapDrillCategory(drill.drill_category || drill.drill_types),
+        subcategory: drill.drill_category,
+        
+        // Extract strategies, concepts, and skills from drill data
+        strategies: extractStrategiesFromDrill(drill),
+        concepts: extractConceptsFromGameStates(parseArrayField(drill.game_states)),
+        skills: extractSkillsFromCategory(drill.drill_category || drill.drill_types || ''),
+        skill_ids: extractSkillsFromCategory(drill.drill_category || drill.drill_types || ''),
+        concept_ids: extractConceptsFromGameStates(parseArrayField(drill.game_states)),
+        game_phase_ids: parseArrayField(drill.game_phase),
+        
+        // Video and media URLs
+        videoUrl: drill.vimeo_url,
+        drill_video_url: drill.drill_video_url,
+        vimeo_url: drill.vimeo_url,
+        featured_image: drill.featured_image,
+        
+        // Metadata extracted from drill fields
+        intensity_level: drill.drill_emphasis,
+        min_players: parseNumber(drill.do_it_ages),
+        max_players: parseNumber(drill.own_it_ages),
+        equipment_needed: parseArrayField(drill.drill_types),
+        
+        // Coaching information
+        coach_instructions: drill.content || drill.drill_notes || '',
+        notes: drill.drill_notes || drill.content || '',
+        content: drill.content,
+        
+        // Age-appropriate information
+        do_it_ages: drill.do_it_ages,
+        coach_it_ages: drill.coach_it_ages,
+        own_it_ages: drill.own_it_ages,
+        
+        // Additional drill metadata
+        game_states: drill.game_states,
+        drill_emphasis: drill.drill_emphasis,
+        game_phase: drill.game_phase,
+        status: drill.status,
+        
+        // Source indicator and user-specific fields
+        source: 'user' as const,
+        user_id: drill.user_id,
+        is_public: drill.is_public,
+        team_share: drill.team_share || [],
+        club_share: drill.club_share || []
+      }))
+
+      // Combine both drill sources
+      const allDrills = [...transformedPowlaxDrills, ...transformedUserDrills]
+      
+      // Sort combined drills: user drills first, then POWLAX drills
+      allDrills.sort((a, b) => {
+        if (a.source !== b.source) {
+          return a.source === 'user' ? -1 : 1
+        }
+        return a.name.localeCompare(b.name)
+      })
+
+      console.log(`Combined ${allDrills.length} drills total (${transformedPowlaxDrills.length} POWLAX + ${transformedUserDrills.length} user)`)
+      setDrills(allDrills)
+      
+      // Set error only if POWLAX drills failed (user drills failure is not critical)
+      if (hasErrors && powlaxDrills.length === 0) {
+        setError(errorMessages.join('; '))
+      } else {
+        setError(null)
+      }
     } catch (err: any) {
       console.error('Error fetching drills:', err)
       setError(err.message)
@@ -125,7 +235,16 @@ export function useDrills() {
     fetchDrills()
   }
 
-  return { drills, loading, error, refreshDrills }
+  return { 
+    drills, 
+    loading, 
+    error, 
+    refreshDrills,
+    // Helper functions to identify drill types
+    getPowlaxDrills: () => drills.filter(drill => drill.source === 'powlax'),
+    getUserDrills: () => drills.filter(drill => drill.source === 'user'),
+    getDrillsBySource: (source: 'powlax' | 'user') => drills.filter(drill => drill.source === source)
+  }
 }
 
 // Helper function to map drill categories to our UI categories

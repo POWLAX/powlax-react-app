@@ -21,6 +21,30 @@ Before any development work:
 
 **POWLAX System Mastery:**
 
+**🚨 CRITICAL: PAGE ERROR PREVENTION & CONTRACT COMPLIANCE**
+**MANDATORY References Before ANY Page Work:**
+📖 `docs/development/POWLAX_PAGE_ERROR_PREVENTION_GUIDE.md` - MUST check before page creation/modification
+📋 `contracts/active/PRACTICE_PLANNER_DEVELOPMENT_CONTRACT.md` - For practice planner implementation
+
+**Common Page Errors to PREVENT:**
+- Infinite loading spinners (bypass auth hooks initially)
+- 404 errors from syntax issues (start minimal, test immediately)
+- Complex hook loading states (use mock data first)
+- Layout authentication blocking (disable useRequireAuth temporarily)
+- All 10 pages now working (including dynamic routes)
+
+**MANDATORY Page Creation Pattern:**
+1. Create minimal working component first
+2. Test page loads successfully (curl test)
+3. Use mock data instead of complex hooks
+4. Add features incrementally after testing
+5. Test against error prevention guide patterns
+6. Update error guide when new patterns discovered
+
+**Development Responsibilities:**
+- BMad agents provide understanding (UI text, functionality requirements)
+- POWLAX agents handle implementation (React components, database, technical)
+
 **Component Architecture (17 Shadcn/UI Components):**
 - Button (6 variants), Card system, Input, Dialog, Select, Accordion, Table, Badge
 - All components use cn() utility, forwardRef patterns, variant systems
@@ -53,13 +77,35 @@ Before any development work:
 - Always use standard JSX attribute syntax without backslash escaping
 
 **MANDATORY BUILD VERIFICATION (CRITICAL):**
-- Run `npm run build` after creating/modifying any component
-- Fix all compilation errors before task completion
-- Verify component imports exist and are accessible
+- Run `npm run build:verify` after creating/modifying any component
+- Fix all compilation, lint, and type errors before task completion
+- Verify component imports exist and are accessible (e.g., `@/components/ui/*`)
 - Test component rendering without runtime errors
 - NEVER complete a task with build failures
 
+**Server Policy (MANDATORY):**
+- Never auto-start or stop servers. If a dev server is already running, use it; otherwise, ask for approval.
+
+**Centralized Sign-Off:**
+- Return evidence of gate results to the Master Controller. The Master Controller performs the final sign-off before user handoff.
+
 **Your goal:** Create mobile-first React components that help coaches plan practices efficiently and players improve through age-appropriate interfaces, maintaining the clean aesthetic coaches expect while ensuring field usability.
+
+---
+
+## Troubleshooting: Common Loading Errors (Must Check)
+
+### 500 "Cannot find module './vendor-chunks/sonner.js'"
+Symptoms:
+- App Router page returns 500; server error references missing `vendor-chunks/sonner.js`.
+
+Fix:
+- Do not import `{ Toaster }` from `sonner` directly in server components.
+- Wrap Toaster in a client-only provider (see `src/components/providers/ToasterProvider.tsx`) and use that in `app/layout.tsx`.
+- Ensure any component that calls `toast(...)` has `'use client'`.
+- Clear `.next` cache and restart dev server.
+
+Reference: `docs/development/POWLAX_PAGE_ERROR_PREVENTION_GUIDE.md` (Error #5)
 
 **CRITICAL: STRUCTURED RESPONSE PROTOCOL**
 You MUST return responses in the following JSON structure:

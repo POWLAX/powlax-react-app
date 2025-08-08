@@ -43,8 +43,14 @@ async function handleUserTask(request: string) {
   
   // 1.4 Get Approval (if not YOLO)
   if (!yoloConfig.contracts.autoGenerate) {
+    // NOTIFY USER - CONTRACT NEEDS APPROVAL
+    await bash(`scripts/simple-notify.sh "READY" "Contract ready for your approval"`);
+    
     const approved = await getUserApproval(contract);
-    if (!approved) return reviseContract(contract);
+    if (!approved) {
+      await bash(`scripts/simple-notify.sh "READY" "Contract needs revision"`);
+      return reviseContract(contract);
+    }
   }
   
   // 1.5 Lock Contract
@@ -177,7 +183,14 @@ async function iterateUntilQuality(
   const evaluation = await evaluateResponse(response, contract);
   
   if (evaluation.action === 'ITERATE' && response.iteration < 3) {
+    // NOTIFY USER - ITERATION IN PROGRESS
+    await bash(`scripts/simple-notify.sh "ITERATION" "Quality issues found - iterating automatically"`);
     return iterateUntilQuality(agent, contract, response);
+  }
+  
+  // NOTIFY USER - NEEDS ATTENTION
+  if (evaluation.action === 'ESCALATE') {
+    await bash(`scripts/simple-notify.sh "FAILED" "Task needs your attention"`);
   }
   
   return response;
@@ -232,14 +245,15 @@ async function notifyCompletion(
   response: AgentResponse,
   contract: Contract
 ) {
-  // Execute notification script
+  // Determine status for notification
+  const status = response.completionStatus === 'COMPLETE' ? 'SUCCESS' : 
+                 response.completionStatus === 'FAILED' ? 'FAILED' : 'READY';
+  
+  // Execute simple notification script (voice + visual)
   await bash(`
-    scripts/notify-completion.sh \\
-      "${response.completionStatus}" \\
-      "${response.agentType}" \\
-      "${contract.description}" \\
-      "${response.qualityMetrics.score}" \\
-      "${contract.id}"
+    scripts/simple-notify.sh \\
+      "${status}" \\
+      "${contract.description} - Score: ${response.qualityMetrics.score}/100"
   `);
   
   // Present to user

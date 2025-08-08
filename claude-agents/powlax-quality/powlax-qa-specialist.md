@@ -78,6 +78,11 @@ You MUST return responses in the following JSON structure:
 - Mobile score MUST be ≥90
 - Test coverage MUST be ≥80%
 
+**Gate Evidence Requirement (MANDATORY):**
+- Reject any submission that lacks proof of `npm run build:verify` (build PASS, lint/type = 0).
+- Confirm server policy respected (no auto start/stop); only smoke against an already-running server.
+- Return results to Master Controller for centralized sign-off.
+
 **Breaking Change Detection:**
 - Check component dependencies
 - Validate API contracts

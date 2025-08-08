@@ -2,6 +2,167 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Field Visibility Utilities for Outdoor Coaching */
+@layer utilities {
+  /* High contrast text for field visibility */
+  .field-text {
+    color: #1a1a1a !important;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  }
+  
+  .field-text-secondary {
+    color: #4a4a4a !important;
+    font-weight: 500;
+  }
+  
+  /* High contrast borders */
+  .field-border {
+    border-color: #b0b0b0 !important;
+    border-width: 1.5px;
+  }
+  
+  .field-border-strong {
+    border-color: #808080 !important;
+    border-width: 2px;
+  }
+  
+  /* Touch targets - minimum 44px */
+  .touch-target {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 12px;
+  }
+  
+  .touch-target-sm {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 8px;
+  }
+  
+  /* High contrast buttons */
+  .field-button {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border: 2px solid #808080;
+    color: #1a1a1a;
+    font-weight: 600;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+  .field-button:hover {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-color: #666666;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2), 0 2px 3px rgba(0, 0, 0, 0.15);
+  }
+  
+  .field-button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Time display with maximum visibility */
+  .field-time {
+    background: linear-gradient(135deg, #003366 0%, #004488 100%);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1.125rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Drill name with maximum contrast */
+  .field-drill-name {
+    color: #1a1a1a;
+    font-weight: 700;
+    font-size: 1.125rem;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
+    letter-spacing: 0.025em;
+  }
+  
+  /* Notes with high visibility */
+  .field-notes {
+    background: linear-gradient(135deg, #fffbf0 0%, #fff8e7 100%);
+    border: 2px solid #e6cc00;
+    color: #1a1a1a;
+    font-weight: 500;
+  }
+  
+  /* Category headers */
+  .field-category {
+    color: #1a1a1a;
+    font-weight: 700;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1.5px solid #b0b0b0;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.9);
+  }
+  
+  /* Mobile-specific optimizations */
+  @media (max-width: 768px) {
+    .field-button {
+      font-size: 0.875rem;
+      padding: 14px;
+      min-width: 48px;
+      min-height: 48px;
+    }
+    
+    .touch-target {
+      min-width: 48px;
+      min-height: 48px;
+      padding: 14px;
+    }
+    
+    .touch-target-sm {
+      min-width: 48px;
+      min-height: 48px;
+      padding: 10px;
+    }
+    
+    .field-drill-name {
+      font-size: 1rem;
+      line-height: 1.2;
+    }
+    
+    .field-time {
+      font-size: 1rem;
+      padding: 8px 12px;
+    }
+  }
+  
+  /* Swipe gesture indicators */
+  .swipe-hint {
+    position: relative;
+  }
+  
+  .swipe-hint::after {
+    content: '→';
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.3;
+    font-size: 1.2rem;
+    color: #4a4a4a;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.7; }
+  }
+  
+  /* Enhanced focus states for accessibility */
+  .touch-target:focus-visible,
+  .touch-target-sm:focus-visible,
+  .field-button:focus-visible {
+    outline: 3px solid #003366;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px rgba(0, 51, 102, 0.2);
+  }
+}
+
 /* CSS Variables for Dark Mode */
 @layer base {
   :root {
@@ -93,12 +254,21 @@
   nav,
   .fixed,
   .sticky,
+  .absolute,
   .sidebar,
   .demo-banner,
   .toolbar,
   button:not(.print-keep),
-  .drill-library {
+  .drill-library,
+  .modal-overlay,
+  .print-preview-controls {
     display: none !important;
+  }
+  
+  /* Force background colors and improve contrast */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   /* Reset page margins */
@@ -110,29 +280,103 @@
   /* Body styles */
   body {
     font-family: 'Arial', sans-serif;
-    font-size: 12pt;
-    line-height: 1.4;
-    color: #000;
-    background: white;
+    font-size: 11pt;
+    line-height: 1.3;
+    color: #000 !important;
+    background: white !important;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Mobile print optimizations */
+  @media print and (max-width: 6in) {
+    body {
+      font-size: 10pt;
+    }
+    
+    .text-4xl {
+      font-size: 18pt !important;
+    }
+    
+    .text-xl {
+      font-size: 12pt !important;
+    }
+    
+    .grid-cols-3 {
+      grid-template-columns: 1fr !important;
+    }
+    
+    .grid-cols-2 {
+      grid-template-columns: 1fr !important;
+    }
   }
 
+  /* POWLAX Brand Colors for Print */
+  .text-blue-600,
+  .text-blue-800 {
+    color: #003366 !important;
+  }
+  
+  .text-orange-600,
+  .text-orange-800 {
+    color: #FF6600 !important;
+  }
+  
+  .bg-blue-600,
+  .bg-blue-800 {
+    background-color: #003366 !important;
+    color: white !important;
+  }
+  
+  .bg-orange-50 {
+    background-color: #fff8f0 !important;
+  }
+  
+  .bg-blue-50 {
+    background-color: #f0f8ff !important;
+  }
+  
+  .bg-green-50 {
+    background-color: #f8fff8 !important;
+  }
+  
+  .bg-yellow-50 {
+    background-color: #fffbf0 !important;
+  }
+  
+  .bg-red-50 {
+    background-color: #fff5f5 !important;
+  }
+  
+  .border-orange-500,
+  .border-orange-200 {
+    border-color: #FF6600 !important;
+  }
+  
+  .border-blue-600,
+  .border-blue-200 {
+    border-color: #003366 !important;
+  }
+  
   /* Practice plan header */
   .practice-header {
-    border-bottom: 2px solid #003366;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
+    margin-bottom: 15pt;
   }
 
   .practice-title {
-    font-size: 18pt;
+    font-size: 16pt;
     font-weight: bold;
-    color: #003366;
-    margin-bottom: 5px;
+    color: #003366 !important;
+    margin-bottom: 8pt;
+    text-align: center;
   }
 
   .practice-info {
-    font-size: 11pt;
-    color: #333;
+    font-size: 10pt;
+    color: #333 !important;
+    padding: 8pt;
+    border: 1px solid #ccc;
+    background: #f8f9fa !important;
   }
 
   /* Timeline styles */
@@ -141,69 +385,99 @@
   }
 
   .timeline-item {
-    border: 1px solid #ccc;
-    margin-bottom: 10px;
-    padding: 8px;
+    border: 1px solid #ddd !important;
+    margin-bottom: 8pt;
     page-break-inside: avoid;
+    border-radius: 3pt;
+    overflow: hidden;
   }
 
   .timeline-time {
     font-weight: bold;
     font-size: 11pt;
-    color: #003366;
+    color: white !important;
+    background-color: #003366 !important;
+    padding: 6pt;
+    margin: 0;
   }
 
   .timeline-drill {
-    margin-left: 15px;
+    padding: 8pt;
+    border-left: 3pt solid #FF6600 !important;
+    padding-left: 12pt;
   }
 
   .drill-name {
     font-weight: bold;
-    font-size: 12pt;
+    font-size: 11pt;
+    color: #000 !important;
+    margin-bottom: 3pt;
   }
 
   .drill-description {
     font-size: 10pt;
-    margin-top: 3px;
-    color: #555;
+    margin: 3pt 0;
+    color: #333 !important;
+    line-height: 1.4;
   }
 
   .drill-notes {
     font-size: 9pt;
-    margin-top: 5px;
-    font-style: italic;
-    color: #666;
+    margin-top: 6pt;
+    padding: 6pt;
+    background: #fffbf0 !important;
+    border: 1px solid #f0e68c !important;
+    color: #333 !important;
+    border-radius: 3pt;
   }
 
   /* Duration and equipment info */
   .drill-meta {
     font-size: 9pt;
-    color: #777;
-    margin-top: 3px;
+    color: #666 !important;
+    margin: 2pt 0;
+  }
+  
+  /* Equipment checkboxes for print */
+  input[type="checkbox"] {
+    width: 12pt;
+    height: 12pt;
+    margin-right: 4pt;
+    border: 1px solid #666 !important;
   }
 
   /* Practice notes */
   .practice-notes {
-    margin-top: 20px;
-    padding-top: 10px;
-    border-top: 1px solid #ccc;
+    margin: 16pt 0;
+    padding: 10pt;
+    border: 1px solid #FF6600 !important;
+    background: #fff8f0 !important;
+    border-radius: 3pt;
+    page-break-inside: avoid;
   }
 
   .notes-title {
     font-weight: bold;
-    font-size: 12pt;
-    margin-bottom: 5px;
+    font-size: 11pt;
+    margin-bottom: 6pt;
+    color: #FF6600 !important;
   }
 
   /* Equipment list */
   .equipment-list {
-    margin-top: 15px;
+    margin: 16pt 0;
+    padding: 10pt;
+    border: 1px solid #28a745 !important;
+    background: #f8fff8 !important;
+    border-radius: 3pt;
+    page-break-inside: avoid;
   }
 
   .equipment-title {
     font-weight: bold;
-    font-size: 12pt;
-    margin-bottom: 5px;
+    font-size: 11pt;
+    margin-bottom: 6pt;
+    color: #28a745 !important;
   }
 
   /* Page breaks */
@@ -215,15 +489,47 @@
     page-break-after: always;
   }
 
-  /* Remove shadows and backgrounds */
-  * {
+  /* Safety and signature sections */
+  .safety-reminders {
+    margin: 12pt 0;
+    padding: 8pt;
+    border: 1px solid #dc3545 !important;
+    background: #fff5f5 !important;
+    border-radius: 3pt;
+    page-break-inside: avoid;
+  }
+  
+  .signature-section {
+    margin-top: 24pt;
+    page-break-inside: avoid;
+    border-top: 2pt solid #003366 !important;
+    padding-top: 12pt;
+  }
+  
+  .signature-line {
+    border-bottom: 1.5pt solid #333 !important;
+    height: 16pt;
+    margin-bottom: 4pt;
+  }
+  
+  /* Footer */
+  .print-footer {
+    margin-top: 16pt;
+    padding-top: 8pt;
+    border-top: 1pt solid #003366 !important;
+    text-align: center;
+    font-size: 9pt;
+    color: #666 !important;
+  }
+
+  /* Remove default shadows but keep essential backgrounds */
+  .printable-practice-plan * {
     box-shadow: none !important;
-    background: transparent !important;
     text-shadow: none !important;
   }
 
-  /* Ensure text is black */
-  h1, h2, h3, h4, h5, h6, p, div, span, li {
+  /* Ensure readability */
+  h1, h2, h3, h4, h5, h6, p, span, li {
     color: #000 !important;
   }
 
@@ -249,5 +555,29 @@
   th {
     background: #f5f5f5 !important;
     font-weight: bold;
+  }
+  
+  /* Responsive print layout */
+  @media print and (max-width: 5in) {
+    .practice-info .grid {
+      grid-template-columns: 1fr !important;
+    }
+    
+    .equipment-list .grid {
+      grid-template-columns: 1fr !important;
+    }
+    
+    .signature-section .grid {
+      grid-template-columns: 1fr !important;
+    }
+    
+    .timeline-drill {
+      padding-left: 8pt !important;
+      border-left-width: 2pt !important;
+    }
+    
+    body {
+      font-size: 9pt !important;
+    }
   }
 }

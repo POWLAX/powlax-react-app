@@ -1,0 +1,106 @@
+# PRD-Style Contract Template
+# Contracts define WHAT MUST EXIST on a page/feature, not single tasks
+
+contractTemplate:
+  type: PRD_REQUIREMENTS
+  version: 2.0.0
+  
+  # This is a REQUIREMENTS CHECKLIST, not a task list
+  approach: "Contract defines what the page MUST HAVE, agents ensure it's all there"
+  
+  parameters:
+    page: ""              # e.g., "Practice Planner"
+    component: ""         # e.g., "Modal System"
+    
+  # Requirements Checklist - "Does the page have these?"
+  requirements:
+    
+    # Functional Requirements - "Can users do these things?"
+    functional:
+      - name: "Open Video Modal"
+        description: "Users can click video icon and modal opens"
+        testable: "Click video icon → modal appears"
+        status: NOT_IMPLEMENTED | BROKEN | WORKING
+        
+      - name: "View Drill Videos"
+        description: "Videos load and play in modal"
+        testable: "Video content displays and plays"
+        status: NOT_IMPLEMENTED | BROKEN | WORKING
+        
+      - name: "Close Modals"
+        description: "All modals close on ESC or click outside"
+        testable: "Press ESC → modal closes"
+        status: NOT_IMPLEMENTED | BROKEN | WORKING
+    
+    # Data Requirements - "Is the right data available?"
+    data:
+      - name: "Real Drill Data"
+        description: "Drills come from powlax_drills table"
+        testable: "No mock data, real database queries"
+        status: NOT_CONNECTED | PARTIAL | CONNECTED
+        
+      - name: "Video URLs"
+        description: "Video URLs from drill records"
+        testable: "drill.video_url populates modal"
+        status: NOT_CONNECTED | PARTIAL | CONNECTED
+    
+    # UI Requirements - "Does it look/work right?"
+    ui:
+      - name: "Mobile Responsive"
+        description: "Works on 375px+ screens"
+        testable: "Test at 375px viewport"
+        status: BROKEN | PARTIAL | RESPONSIVE
+        
+      - name: "Touch Targets"
+        description: "Buttons are 44px+ for fingers"
+        testable: "Measure touch target size"
+        status: TOO_SMALL | ACCEPTABLE | OPTIMAL
+    
+    # Performance Requirements - "Is it fast enough?"
+    performance:
+      - name: "Modal Open Speed"
+        description: "Opens within 300ms"
+        testable: "Time from click to visible"
+        status: SLOW | ACCEPTABLE | FAST
+        
+      - name: "Video Load Time"
+        description: "Video loads within 2 seconds"
+        testable: "Time from modal open to playable"
+        status: SLOW | ACCEPTABLE | FAST
+    
+    # Quality Requirements - "Is the code good?"
+    quality:
+      - name: "No Console Errors"
+        description: "Zero errors in browser console"
+        testable: "Check console during all interactions"
+        status: ERRORS | WARNINGS | CLEAN
+        
+      - name: "Tests Coverage"
+        description: "80%+ test coverage"
+        testable: "Run coverage report"
+        status: LOW | ACCEPTABLE | HIGH
+  
+  # Success = ALL requirements met
+  successCriteria:
+    functional: "ALL items status: WORKING"
+    data: "ALL items status: CONNECTED"
+    ui: "ALL items status: RESPONSIVE or OPTIMAL"
+    performance: "ALL items status: ACCEPTABLE or FAST"
+    quality: "ALL items status: CLEAN or HIGH"
+  
+  # How agents work with this contract
+  agentInstructions:
+    approach: |
+      1. Check each requirement's current status
+      2. Fix anything that's NOT meeting requirements
+      3. Test to verify requirement is met
+      4. Move to next requirement
+      5. When ALL requirements met, contract complete
+    
+    example: |
+      Agent checks: "Can users open video modal?"
+      Status: BROKEN
+      Agent fixes: Makes modal open on click
+      Agent tests: Clicks icon, modal opens
+      Status: WORKING ✅
+      Agent moves to next requirement...
