@@ -1,0 +1,296 @@
+# Skills Academy Complete Implementation — Master Contract
+# Version 2.0 - Enhanced with User Feedback
+
+contract:
+  id: skills-academy-complete-002
+  type: MASTER_CONTRACT
+  owner: powlax-master-controller
+  created: 2025-08-08
+  status: ACTIVE
+  priority: CRITICAL
+
+# Current State Analysis
+currentState:
+  completedFeatures:
+    - Basic workout selection UI exists
+    - 41 series cards display correctly
+    - Workout size selector modal works
+    - Video player component implemented
+    - Points system partially integrated
+    - Completion screens created
+  
+  criticalIssues:
+    - Drills NOT connected to real data (using placeholder IDs)
+    - Modal has dark background (needs white bg + dark text)
+    - Video URLs not properly mapped from database
+    - No real progress tracking
+    - Points not persisting to database
+    - Workout flow disconnected from main hub
+  
+  qualityIssues:
+    - Inconsistent styling across components
+    - Mobile responsiveness incomplete
+    - No loading states for data fetching
+    - Error handling missing
+    - Accessibility not implemented
+
+# Target State Requirements
+targetState:
+  core:
+    description: "Fully functional Skills Academy with real drill data and persistence"
+    
+  dataIntegration:
+    - Connect to skills_academy_drill_library table
+    - Map Vimeo IDs from database
+    - Persist progress to skills_academy_user_progress
+    - Track points in user_points_balance_powlax
+    - Store workout completions with timestamps
+    
+  uiRequirements:
+    - White background modals with dark text
+    - Consistent POWLAX brand colors
+    - Mobile-first responsive design (375px+)
+    - Touch targets minimum 60px for workout buttons
+    - High contrast for outdoor field use
+    
+  workflowRequirements:
+    - Seamless flow: Series → Size Selection → Workout → Completion
+    - Auto-advance after drill completion
+    - Points awarded and persisted
+    - Streak tracking implementation
+    - Return to main hub after completion
+
+# Phased Implementation Plan
+phases:
+  phase1:
+    name: "Data Foundation & UI Fixes"
+    duration: "4 hours"
+    agent: powlax-backend-architect
+    priority: CRITICAL
+    
+    tasks:
+      - task: "Fix drill data connections"
+        description: "Connect skills_academy_workout_drills to skills_academy_drill_library"
+        acceptance:
+          - Real drill names display
+          - Vimeo IDs properly extracted
+          - All workout sizes have correct drill counts
+          
+      - task: "Fix modal styling"
+        description: "White background, dark text for all modals"
+        acceptance:
+          - WorkoutSizeSelector has white bg
+          - All text clearly readable
+          - Consistent with POWLAX design system
+          
+      - task: "Implement data persistence"
+        description: "Save progress and points to database"
+        acceptance:
+          - Progress saves to skills_academy_user_progress
+          - Points update in user_points_balance_powlax
+          - Completion timestamps recorded
+    
+    qualityGates:
+      - Database queries return real data
+      - No console errors
+      - Build passes: npm run build:verify
+      - Modal contrast ratio > 7:1
+  
+  phase2:
+    name: "Workout Flow Integration"
+    duration: "3 hours"
+    agent: powlax-frontend-developer
+    priority: HIGH
+    
+    tasks:
+      - task: "Integrate workout runner with main hub"
+        description: "Seamless navigation through entire flow"
+        acceptance:
+          - Click series → Opens size selector modal
+          - Select size → Navigates to workout runner
+          - Complete workout → Returns to hub with success message
+          
+      - task: "Implement loading states"
+        description: "Show loading indicators during data fetch"
+        acceptance:
+          - Skeleton screens while loading
+          - Error states for failures
+          - Retry mechanisms
+          
+      - task: "Add progress indicators"
+        description: "Visual feedback throughout workout"
+        acceptance:
+          - Progress bar updates per drill
+          - Drill counter shows X of Y
+          - Time tracking display
+    
+    qualityGates:
+      - Full E2E flow works without page refreshes
+      - Loading states < 3 seconds
+      - Mobile navigation works smoothly
+      - Playwright tests pass
+  
+  phase3:
+    name: "Gamification & Polish"
+    duration: "2 hours"
+    agent: powlax-ux-researcher
+    priority: MEDIUM
+    
+    tasks:
+      - task: "Implement points animation"
+        description: "Visual feedback for points earned"
+        acceptance:
+          - Points animate on completion
+          - Bonus multiplier clearly shown
+          - Total points display updates
+          
+      - task: "Add streak tracking"
+        description: "Track consecutive workout days"
+        acceptance:
+          - Streak counter visible
+          - Streak bonus calculation
+          - Streak persistence in database
+          
+      - task: "Polish mobile experience"
+        description: "Optimize for field use"
+        acceptance:
+          - Large touch targets (60px+)
+          - High contrast outdoors
+          - Swipe gestures work
+          - Portrait orientation optimized
+    
+    qualityGates:
+      - Animations smooth (60fps)
+      - Mobile Lighthouse score > 90
+      - Accessibility audit passes
+      - User can complete workout one-handed
+
+# Success Criteria
+successCriteria:
+  functional:
+    - ALL drills show real names from database
+    - ALL videos play from correct Vimeo IDs
+    - Progress saves and persists across sessions
+    - Points accumulate correctly
+    - Workouts can be repeated
+    - Navigation flow is seamless
+    
+  performance:
+    - Page load < 2 seconds
+    - Video starts < 3 seconds
+    - No janky animations
+    - Smooth scroll on mobile
+    
+  quality:
+    - Zero console errors
+    - Build passes all checks
+    - 80% test coverage
+    - Lighthouse score > 85
+    
+  ux:
+    - Players can complete workout outdoors
+    - One-handed operation possible
+    - Clear visual feedback throughout
+    - Motivating completion experience
+
+# Quality Gates (Universal)
+qualityGates:
+  required:
+    - npm run lint -- --max-warnings=0
+    - npm run typecheck
+    - npm run build
+    - npx playwright test skills-academy
+  
+  metrics:
+    buildTime: "< 30 seconds"
+    bundleSize: "< 500kb"
+    testCoverage: "> 80%"
+    lighthouseScore: "> 85"
+
+# Agent Coordination
+agentRoles:
+  powlaxMasterController:
+    responsibilities:
+      - Contract negotiation and lock
+      - Phase orchestration
+      - Quality gate enforcement
+      - User communication
+      - Final sign-off
+    
+  powlaxBackendArchitect:
+    responsibilities:
+      - Database schema optimization
+      - Query performance tuning
+      - Data persistence layer
+      - API endpoint creation
+    
+  powlaxFrontendDeveloper:
+    responsibilities:
+      - Component implementation
+      - State management
+      - UI/UX polish
+      - Mobile optimization
+    
+  powlaxUxResearcher:
+    responsibilities:
+      - User flow validation
+      - Accessibility audit
+      - Performance testing
+      - Field usability verification
+
+# Risk Mitigation
+risks:
+  - risk: "Database schema changes break existing data"
+    mitigation: "Create migrations, test on staging first"
+    
+  - risk: "Video URLs are inconsistent format"
+    mitigation: "Create URL parser that handles multiple formats"
+    
+  - risk: "Mobile performance degrades with videos"
+    mitigation: "Implement lazy loading, optimize video settings"
+    
+  - risk: "Points system conflicts with existing gamification"
+    mitigation: "Coordinate with gamification team, use transactions"
+
+# Acceptance & Sign-off
+acceptance:
+  demoCriteria:
+    - Complete full workout flow end-to-end
+    - Show real drill names and videos
+    - Demonstrate points accumulation
+    - Verify mobile experience
+    - Check data persistence
+    
+  userAcceptance:
+    - User can select any workout
+    - Videos play without buffering
+    - Points feel rewarding
+    - Mobile experience is smooth
+    - Data saves correctly
+    
+  finalChecklist:
+    - [ ] All phases complete
+    - [ ] Quality gates passed
+    - [ ] Playwright tests green
+    - [ ] Mobile field-tested
+    - [ ] User approved UX
+    - [ ] Documentation updated
+
+# Notes for Implementation
+notes:
+  - Start with Phase 1 immediately (critical data fixes)
+  - Modal styling is quick win - do first
+  - Test with real workout IDs from database
+  - Ensure backward compatibility with existing data
+  - Coordinate with Patrick on video URL formats
+  - Mobile experience is critical for field use
+
+# Contract Sign-off
+signoff:
+  masterController: PENDING
+  user: PENDING
+  timestamp: null
+  
+---
+# This contract supersedes skills-academy-complete-001
+# All agents must reference this contract when working on Skills Academy
