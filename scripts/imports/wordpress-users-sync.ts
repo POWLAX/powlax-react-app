@@ -12,7 +12,12 @@ const WP_BASE_RAW = process.env.WORDPRESS_API_URL
   || process.env.NEXT_PUBLIC_WORDPRESS_URL
   || process.env.WP_API_BASE
   || 'https://powlax.com/wp-json'
-const WP_BASE = WP_BASE_RAW.includes('/wp-json') ? WP_BASE_RAW : `${WP_BASE_RAW.replace(/\/$/, '')}/wp-json`
+const WP_BASE = (() => {
+  const trimmed = WP_BASE_RAW.replace(/\/$/, '')
+  const idx = trimmed.indexOf('/wp-json')
+  if (idx >= 0) return trimmed.slice(0, idx + '/wp-json'.length)
+  return `${trimmed}/wp-json`
+})()
 const WP_USER = process.env.WORDPRESS_USERNAME || process.env.WP_API_USER || ''
 const WP_APP_PASSWORD = process.env.WORDPRESS_APP_PASSWORD || process.env.WP_API_APP_PASSWORD || ''
 

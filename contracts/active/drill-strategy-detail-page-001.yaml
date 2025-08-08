@@ -1,0 +1,116 @@
+# Drill & Strategy Detail Page — Contract
+
+contract:
+  id: drill-strategy-detail-page-001
+  type: ENHANCED_CONTRACT
+  owner: powlax-master-controller
+  created: 2025-08-08
+  page:
+    routePattern: "/(authenticated)/details/[type]/[id]"  # type: drill|strategy
+    dashboardSearchLink: true
+    examples:
+      - "/teams/1/dashboard?search=sidewinders"
+      - "/(authenticated)/details/drill/123"
+      - "/(authenticated)/details/strategy/42"
+
+parameters:
+  component: "DrillStrategyDetailPage"
+  currentIssue: "No unified page to view full drill/strategy details from dashboard search"
+
+intent:
+  goal: "Create a real-data, well-designed page that displays all elements of a drill or strategy and can be opened from dashboard search"
+  scope:
+    - "Define route and load by [type]=drill|strategy and [id]"
+    - "Use real Supabase data (no mock) from powlax_drills / powlax_strategies and related tables"
+    - "Show key elements: title, media (video), description/steps, equipment, tags, related links, related strategies/drills"
+    - "Provide CTA: Add to practice plan (if drill), View related (if strategy)"
+    - "Responsive design for mobile field use (375px)"
+    - "Integrate with dashboard search results via link"
+  outOfScope:
+    - "Authoring/editing drills or strategies"
+    - "Admin-only metadata editing"
+  assumptions:
+    - "`powlax_drills` and `powlax_strategies` tables contain required fields referenced in `docs/EXACT_DATA_STRUCTURE_GUIDE.md`"
+    - "User has permission to view the content"
+  risks:
+    - "Missing media URLs or inconsistent schema across records"
+    - "Performance on mobile if excessive related content fetched"
+
+deliverables:
+  code:
+    files:
+      - "src/app/(authenticated)/details/[type]/[id]/page.tsx"
+      - "src/components/details/DrillDetails.tsx"
+      - "src/components/details/StrategyDetails.tsx"
+      - "src/hooks/details/useDrillDetails.ts"
+      - "src/hooks/details/useStrategyDetails.ts"
+    functions:
+      - "buildDetailsBreadcrumbs(type, entity)"
+      - "fetchDrillWithRelations(id)"
+      - "fetchStrategyWithRelations(id)"
+  tests:
+    e2e:
+      - "tests/e2e/details-page.spec.ts"
+  documentation:
+    - "docs/agent-instructions/C4A - Frontend + Architect - 2025-08-08 - Drill & Strategy Detail Page Plan.md"
+
+successCriteria:
+  functional:
+    - "Route renders with title, media, description/steps, equipment, tags"
+    - "Links to related items render and navigate"
+    - "Dashboard search links open correct detail page"
+  performance:
+    - "Initial content visible <2.5s on mobile network"
+  quality:
+    - "Zero console errors"
+    - "Passes `npm run build:verify`"
+  testing:
+    - "E2E covers drill and strategy paths with real data"
+
+qualityGates:
+  buildMustPass: true
+  lintMaxErrors: 0
+  testCoverage: 80
+  mobileResponsive: true
+  performanceTarget: 3
+
+processRequirements:
+  serverPolicy:
+    - "Never auto-start/stop servers; smoke against existing server only"
+  signOffPolicy:
+    - "Master Controller centralizes user-facing sign-off"
+
+prdRequirements:
+  description: "Required content blocks on detail page"
+  mustHave:
+    - name: "Hero section with title and primary metadata"
+      exists: false
+      tested: false
+    - name: "Media block (video if available)"
+      exists: false
+      tested: false
+    - name: "Description / Steps / Coaching points"
+      exists: false
+      tested: false
+    - name: "Equipment list and tags"
+      exists: false
+      tested: false
+    - name: "Related drills/strategies links"
+      exists: false
+      tested: false
+    - name: "CTA (Add to practice plan or View related)"
+      exists: false
+      tested: false
+  verificationMethod:
+    manual:
+      - "Open details URL and verify all blocks are present"
+    automated:
+      - "Run E2E spec with sample IDs"
+
+tracking:
+  lastChecked: ""
+  checkedBy: ""
+  completionPercentage: 0
+  blockers: []
+
+

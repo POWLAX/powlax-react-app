@@ -25,11 +25,11 @@ export default function VideoModal({ isOpen, onClose, drill }: VideoModalProps) 
   const [videoError, setVideoError] = useState(false)
   const [embedUrl, setEmbedUrl] = useState('')
 
-  // Get the video URL from either field
-  const videoUrl = drill.videoUrl || drill.drill_video_url
+  // Get the video URL from either field (with null safety)
+  const videoUrl = drill?.videoUrl || drill?.drill_video_url
 
   useEffect(() => {
-    if (!videoUrl) {
+    if (!drill || !videoUrl) {
       setVideoError(true)
       return
     }
@@ -85,7 +85,7 @@ export default function VideoModal({ isOpen, onClose, drill }: VideoModalProps) 
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Video className="h-5 w-5" />
-            {drill.name} - Video
+            {drill?.name || 'Drill'} - Video
           </DialogTitle>
           <DialogDescription>
             Watch the drill demonstration video

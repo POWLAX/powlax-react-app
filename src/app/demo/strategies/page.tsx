@@ -360,7 +360,10 @@ export default function StrategiesPage() {
         <VideoModal
           isOpen={showVideoModal}
           onClose={() => setShowVideoModal(false)}
-          videoUrl={currentVideoUrl}
+          drill={{
+            name: 'Strategy Video',
+            videoUrl: currentVideoUrl
+          }}
         />
       )}
 
@@ -368,7 +371,10 @@ export default function StrategiesPage() {
         <LacrosseLabModal
           isOpen={showLabModal}
           onClose={() => setShowLabModal(false)}
-          labUrl={currentLabUrl}
+          drill={{
+            name: 'Strategy Lab',
+            lab_urls: [currentLabUrl]
+          }}
         />
       )}
     </div>

@@ -104,12 +104,14 @@ export default function SavePracticeModal({
             variant="outline"
             onClick={onClose}
             disabled={saving}
+            className="border-gray-300 text-gray-700 hover:bg-gray-50"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSave}
             disabled={saving || !title.trim()}
+            className="bg-[#003366] text-white hover:bg-[#002244]"
           >
             {saving ? (
               <>

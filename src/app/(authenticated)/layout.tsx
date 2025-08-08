@@ -8,6 +8,7 @@ import TourOverlay from '@/components/onboarding/TourOverlay'
 import WelcomeModal from '@/components/onboarding/WelcomeModal'
 import OfflineIndicator from '@/components/common/OfflineIndicator'
 import { useState, useEffect } from 'react'
+import '../globals.css'
 
 export default function AuthenticatedLayout({
   children,

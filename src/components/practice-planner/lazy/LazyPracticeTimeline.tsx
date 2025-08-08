@@ -17,9 +17,22 @@ const PracticeTimelineWithParallel = dynamic(() => import('../PracticeTimelineWi
   ssr: false
 })
 
+type Drill = {
+  id: string
+  name?: string
+  duration: number
+  [key: string]: unknown
+}
+
+interface TimeSlot {
+  id: string
+  drills: Drill[]
+  duration: number
+}
+
 interface LazyPracticeTimelineProps {
-  drills: any[]
-  setDrills: (drills: any[]) => void
+  drills: TimeSlot[]
+  setDrills: (drills: TimeSlot[]) => void
   startTime: string
   setupTime: number
 }

@@ -1,0 +1,519 @@
+'use client'
+
+import { useState, useMemo, useEffect } from 'react'
+import { Filter, Plus, Star, ChevronDown, ChevronRight, Video, Link, Beaker, User, Search } from 'lucide-react'
+import { useDrills } from '@/hooks/useDrills'
+import { useFavorites } from '@/hooks/useFavorites'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import AddCustomDrillModal from './AddCustomDrillModal'
+import FilterDrillsModal from './FilterDrillsModal'
+import VideoModal from './modals/VideoModal'
+import LinksModal from './modals/LinksModal'
+import StrategiesModal from './modals/StrategiesModal'
+import LacrosseLabModal, { hasLabUrls } from './modals/LacrosseLabModal'
+import StrategiesTab from './StrategiesTab'
+
+interface Drill {
+  id: string
+  name: string
+  duration: number
+  category: string
+  drill_types?: string
+  strategies?: string[]
+  concepts?: string[]
+  skills?: string[]
+  videoUrl?: string
+  isFavorite?: boolean
+  notes?: string
+  coach_instructions?: string
+  custom_url?: string
+  lab_urls?: string[] | string
+  lacrosse_lab_urls?: string[]
+  drill_lab_url_1?: string
+  drill_lab_url_2?: string
+  drill_lab_url_3?: string
+  drill_lab_url_4?: string
+  drill_lab_url_5?: string
+  source?: 'powlax' | 'user'
+  user_id?: string
+  is_public?: boolean
+}
+
+interface DrillLibraryProps {
+  onAddDrill: (drill: Drill) => void
+  onSelectStrategy?: (strategy: any) => void
+  selectedStrategies?: string[]
+  isMobile?: boolean
+}
+
+export default function DrillLibraryTabbed({ 
+  onAddDrill, 
+  onSelectStrategy,
+  selectedStrategies = [],
+  isMobile = false
+}: DrillLibraryProps) {
+  const { drills: supabaseDrills, loading, error, refreshDrills } = useDrills()
+  const { toggleFavorite, isFavorite } = useFavorites()
+  const [searchTerm, setSearchTerm] = useState('')
+  const [expandedCategories, setExpandedCategories] = useState<string[]>(['favorites'])
+  const [showFilterModal, setShowFilterModal] = useState(false)
+  const [showAddDrillModal, setShowAddDrillModal] = useState(false)
+  
+  // Modal states for individual drills
+  const [showVideoModal, setShowVideoModal] = useState(false)
+  const [showLinksModal, setShowLinksModal] = useState(false)
+  const [showStrategiesModal, setShowStrategiesModal] = useState(false)
+  const [showLacrosseLabModal, setShowLacrosseLabModal] = useState(false)
+  const [selectedDrill, setSelectedDrill] = useState<Drill | null>(null)
+  
+  // Filter state
+  const [selectedGamePhases, setSelectedGamePhases] = useState<string[]>([])
+  const [selectedDrillTypes, setSelectedDrillTypes] = useState<string[]>([])
+  
+  // Mobile drill selection state
+  const [selectedDrillsForMobile, setSelectedDrillsForMobile] = useState<string[]>([])
+  const [currentTab, setCurrentTab] = useState('drills')
+
+  // Get unique drill types from drills
+  const drillTypes = useMemo(() => {
+    const types = new Set<string>()
+    supabaseDrills.forEach(drill => {
+      if (drill.drill_types) {
+        // Parse drill_types if it's a string
+        const drillTypesList = typeof drill.drill_types === 'string' 
+          ? drill.drill_types.split(',').map(t => t.trim())
+          : []
+        drillTypesList.forEach(type => types.add(type))
+      }
+    })
+    return Array.from(types).sort()
+  }, [supabaseDrills])
+
+  // Organize drills by type
+  const drillsByType = useMemo(() => {
+    const organized: Record<string, Drill[]> = {
+      'Favorites': [],
+      'Custom Drills': [],
+      'Admin': []
+    }
+    
+    // Add all drill types
+    drillTypes.forEach(type => {
+      organized[type] = []
+    })
+    
+    // Organize drills
+    supabaseDrills.forEach(drill => {
+      // Check if it's a favorite
+      if (isFavorite(drill.id)) {
+        organized['Favorites'].push(drill)
+      }
+      
+      // Check if it's a custom drill
+      if (drill.source === 'user') {
+        organized['Custom Drills'].push(drill)
+      }
+      
+      // Add to drill type categories
+      if (drill.drill_types) {
+        const types = typeof drill.drill_types === 'string'
+          ? drill.drill_types.split(',').map(t => t.trim())
+          : []
+        
+        types.forEach(type => {
+          if (organized[type]) {
+            organized[type].push(drill)
+          }
+        })
+      }
+      
+      // Add admin drills
+      if (drill.category === 'admin') {
+        organized['Admin'].push(drill)
+      }
+    })
+    
+    return organized
+  }, [supabaseDrills, drillTypes, isFavorite])
+
+  // Filter drills based on search and filters
+  const filteredDrillsByType = useMemo(() => {
+    const filtered: Record<string, Drill[]> = {}
+    
+    Object.entries(drillsByType).forEach(([type, drills]) => {
+      filtered[type] = drills.filter(drill => {
+        // Search filter
+        const matchesSearch = drill.name.toLowerCase().includes(searchTerm.toLowerCase())
+        
+        // Game phase filter
+        const matchesGamePhase = selectedGamePhases.length === 0 ||
+          (drill.strategies && drill.strategies.some(s => selectedGamePhases.includes(s)))
+        
+        // Drill type filter
+        const matchesDrillType = selectedDrillTypes.length === 0 ||
+          selectedDrillTypes.includes(type)
+        
+        return matchesSearch && matchesGamePhase && matchesDrillType
+      })
+    })
+    
+    return filtered
+  }, [drillsByType, searchTerm, selectedGamePhases, selectedDrillTypes])
+
+  const toggleCategory = (category: string) => {
+    if (expandedCategories.includes(category)) {
+      setExpandedCategories(expandedCategories.filter(c => c !== category))
+    } else {
+      setExpandedCategories([...expandedCategories, category])
+    }
+  }
+
+  const handleToggleFavorite = async (drill: Drill, e: React.MouseEvent) => {
+    e.stopPropagation()
+    await toggleFavorite(drill.id, drill)
+  }
+
+  const handleAddCustomDrill = (drill: Drill) => {
+    onAddDrill(drill)
+    setShowAddDrillModal(false)
+  }
+
+  const openVideoModal = (drill: Drill, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setSelectedDrill(drill)
+    setShowVideoModal(true)
+  }
+
+  const openLinksModal = (drill: Drill, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setSelectedDrill(drill)
+    setShowLinksModal(true)
+  }
+
+  const openStrategiesModal = (drill: Drill, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setSelectedDrill(drill)
+    setShowStrategiesModal(true)
+  }
+
+  const openLacrosseLabModal = (drill: Drill, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setSelectedDrill(drill)
+    setShowLacrosseLabModal(true)
+  }
+
+  const clearFilters = () => {
+    setSelectedGamePhases([])
+    setSelectedDrillTypes([])
+    setSearchTerm('')
+  }
+
+  const activeFilterCount = selectedGamePhases.length + selectedDrillTypes.length
+
+  // Handle mobile drill selection
+  const handleMobileDrillToggle = (drillId: string) => {
+    if (selectedDrillsForMobile.includes(drillId)) {
+      setSelectedDrillsForMobile(selectedDrillsForMobile.filter(id => id !== drillId))
+    } else {
+      setSelectedDrillsForMobile([...selectedDrillsForMobile, drillId])
+    }
+  }
+
+  const handleAddSelectedDrills = () => {
+    selectedDrillsForMobile.forEach(drillId => {
+      const drill = supabaseDrills.find(d => d.id === drillId)
+      if (drill) {
+        onAddDrill(drill)
+      }
+    })
+    setSelectedDrillsForMobile([])
+  }
+
+  // Handle tab switching with validation
+  const handleTabChange = (value: string) => {
+    if (isMobile && selectedDrillsForMobile.length > 0 && value !== currentTab) {
+      if (confirm('Please add the selected drills before switching tabs. Do you want to add them now?')) {
+        handleAddSelectedDrills()
+        setCurrentTab(value)
+      }
+    } else {
+      setCurrentTab(value)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading drills...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-center text-red-600">
+          <p>Error loading drills</p>
+          <p className="text-sm">{error}</p>
+        </div>
+      </div>
+    )
+  }
+
+  const renderDrillCard = (drill: Drill) => (
+    <div
+      key={drill.id}
+      className="p-3 bg-white border rounded-lg hover:bg-gray-50"
+    >
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          {/* Drill Title */}
+          <h4 className="font-medium text-sm">{drill.name}</h4>
+          
+          {/* Source Badge */}
+          {drill.source === 'user' && (
+            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full mt-1">
+              <User className="h-3 w-3" />
+              Custom
+            </span>
+          )}
+          
+          {/* Action Icons */}
+          <div className="flex items-center gap-2 mt-2">
+            <button
+              onClick={(e) => handleToggleFavorite(drill, e)}
+              className="p-1.5 hover:bg-gray-100 rounded"
+              title="Toggle Favorite"
+            >
+              <Star className={`h-4 w-4 ${isFavorite(drill.id) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'}`} />
+            </button>
+            
+            {drill.videoUrl && (
+              <button
+                onClick={(e) => openVideoModal(drill, e)}
+                className="p-1.5 hover:bg-gray-100 rounded"
+                title="View Video"
+              >
+                <Video className="h-4 w-4 text-gray-600" />
+              </button>
+            )}
+            
+            {drill.custom_url && (
+              <button
+                onClick={(e) => openLinksModal(drill, e)}
+                className="p-1.5 hover:bg-gray-100 rounded"
+                title="External Link"
+              >
+                <Link className="h-4 w-4 text-gray-600" />
+              </button>
+            )}
+            
+            {hasLabUrls(drill) && (
+              <button
+                onClick={(e) => openLacrosseLabModal(drill, e)}
+                className="p-1.5 hover:bg-gray-100 rounded"
+                title="Lacrosse Lab"
+              >
+                <Beaker className="h-4 w-4 text-gray-600" />
+              </button>
+            )}
+          </div>
+        </div>
+        
+        {/* Add/Select Button */}
+        <div>
+          {isMobile ? (
+            <input
+              type="checkbox"
+              checked={selectedDrillsForMobile.includes(drill.id)}
+              onChange={() => handleMobileDrillToggle(drill.id)}
+              className="mt-1"
+            />
+          ) : (
+            <button
+              onClick={() => onAddDrill(drill)}
+              className="p-1.5 hover:bg-gray-100 rounded text-blue-600"
+              title="Add to Practice"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="h-full flex flex-col">
+      <Tabs value={currentTab} onValueChange={handleTabChange} className="h-full flex flex-col">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="drills">Drills</TabsTrigger>
+          <TabsTrigger value="strategies">Strategies</TabsTrigger>
+        </TabsList>
+        
+        {/* Drills Tab */}
+        <TabsContent value="drills" className="flex-1 flex flex-col overflow-hidden">
+          <div className="p-4 border-b">
+            <h3 className="text-lg font-semibold mb-4">Drill Library</h3>
+            
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              <button
+                onClick={() => setShowFilterModal(true)}
+                className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-md relative"
+              >
+                <Filter className="h-4 w-4" />
+                Filter Drills
+                {activeFilterCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
+              <button 
+                onClick={() => setShowAddDrillModal(true)}
+                className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-md"
+              >
+                <Plus className="h-4 w-4" />
+                Add Custom Drill
+              </button>
+            </div>
+            
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search drills..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+          
+          {/* Drills List */}
+          <div className="flex-1 overflow-y-auto p-4">
+            {/* Mobile: Show selected drills accordion */}
+            {isMobile && selectedDrillsForMobile.length > 0 && (
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-medium text-sm">Drills to Add ({selectedDrillsForMobile.length})</h4>
+                  <button
+                    onClick={handleAddSelectedDrills}
+                    className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                  >
+                    Add to Plan
+                  </button>
+                </div>
+                <button
+                  onClick={() => setSelectedDrillsForMobile([])}
+                  className="text-xs text-blue-600 hover:text-blue-700"
+                >
+                  Clear Selection
+                </button>
+              </div>
+            )}
+            
+            {/* Drill Categories */}
+            <div className="space-y-2">
+              {Object.entries(filteredDrillsByType).map(([type, drills]) => {
+                if (drills.length === 0 && type !== 'Favorites') return null
+                
+                const isExpanded = expandedCategories.includes(type)
+                
+                return (
+                  <div key={type} className="border rounded-lg">
+                    <button
+                      onClick={() => toggleCategory(type)}
+                      className="w-full px-4 py-3 flex items-center justify-between bg-gray-50 hover:bg-gray-100 rounded-t-lg"
+                    >
+                      <div className="flex items-center gap-2">
+                        {isExpanded ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4" />
+                        )}
+                        <span className="font-medium">{type}</span>
+                        <span className="text-sm text-gray-500">({drills.length})</span>
+                      </div>
+                    </button>
+                    
+                    {isExpanded && (
+                      <div className="p-2 space-y-2">
+                        {drills.length === 0 ? (
+                          <p className="px-3 py-2 text-sm text-gray-500">No favorites yet</p>
+                        ) : (
+                          drills.map(renderDrillCard)
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </TabsContent>
+        
+        {/* Strategies Tab */}
+        <TabsContent value="strategies" className="flex-1 overflow-hidden">
+          <StrategiesTab
+            onSelectStrategy={onSelectStrategy || (() => {})}
+            selectedStrategies={selectedStrategies}
+            isMobile={isMobile}
+          />
+        </TabsContent>
+      </Tabs>
+      
+      {/* Modals */}
+      <AddCustomDrillModal
+        isOpen={showAddDrillModal}
+        onClose={() => setShowAddDrillModal(false)}
+        onDrillCreated={handleAddCustomDrill}
+      />
+      
+      <FilterDrillsModal
+        isOpen={showFilterModal}
+        onClose={() => setShowFilterModal(false)}
+        onApplyFilters={(filters) => {
+          setSelectedGamePhases(filters.gamePhases || [])
+          setSelectedDrillTypes(filters.drillTypes || [])
+          setShowFilterModal(false)
+        }}
+        gamePhases={['Offense', 'Defense', 'Transition', 'Ground Balls', 'Man Up', 'Man Down', 'Ride', 'Clear']}
+        drillTypes={drillTypes}
+      />
+      
+      {selectedDrill && (
+        <>
+          <VideoModal
+            isOpen={showVideoModal}
+            onClose={() => setShowVideoModal(false)}
+            drill={selectedDrill}
+          />
+          
+          <LinksModal
+            isOpen={showLinksModal}
+            onClose={() => setShowLinksModal(false)}
+            drill={selectedDrill}
+          />
+          
+          <StrategiesModal
+            isOpen={showStrategiesModal}
+            onClose={() => setShowStrategiesModal(false)}
+            drill={selectedDrill}
+          />
+          
+          <LacrosseLabModal
+            isOpen={showLacrosseLabModal}
+            onClose={() => setShowLacrosseLabModal(false)}
+            drill={selectedDrill}
+          />
+        </>
+      )}
+    </div>
+  )
+}

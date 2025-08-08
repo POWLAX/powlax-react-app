@@ -269,7 +269,10 @@ export default function WorkoutsPage() {
         <VideoModal
           isOpen={showVideoModal}
           onClose={() => setShowVideoModal(false)}
-          videoUrl={currentVideoUrl}
+          drill={{
+            name: 'Workout Video',
+            videoUrl: currentVideoUrl
+          }}
         />
       )}
     </div>

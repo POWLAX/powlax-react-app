@@ -3,9 +3,19 @@
 *Auto-updated: 2025-01-16*  
 *Purpose: Local context for Claude when working on POWLAX practice planning components*
 
-## ⚠️ **CRITICAL: READ FIRST**
-**BEFORE making ANY changes, read `MASTER_CONTRACT.md` in this directory.**
-**All modifications must follow the user-approved enhancement contract.**
+## 🚨 **CRITICAL: STABILITY REQUIREMENTS**
+**MUST READ BEFORE ANY CHANGES:**
+1. [`/docs/development/PRACTICE_PLANNER_STABILITY_GUIDE.md`](../../docs/development/PRACTICE_PLANNER_STABILITY_GUIDE.md) - **MANDATORY STABILITY RULES**
+2. `MASTER_CONTRACT.md` in this directory - User-approved enhancement contract
+
+**BREAKING THESE RULES WILL CAUSE TOTAL FAILURE OF THE PRACTICE PLANNER**
+
+## ❌ **ABSOLUTELY FORBIDDEN (Will Break Everything)**
+1. **NO LAZY LOADING** - No dynamic imports, no lazy(), no dynamic()
+2. **NO FRAMER-MOTION** - Will cause SSR errors and "Element type is invalid"
+3. **NO REMOVING 'use client'** - All components MUST be client components
+4. **NO COMPLEX IMPORTS** - Only direct imports allowed
+5. **NO SERVER COMPONENTS** - Everything must be client-side
 
 ## 🎯 **What This Area Does**
 Core practice planning functionality that enables coaches to create 15-minute practice sessions using POWLAX's drill library, with drag-and-drop timeline interface, parallel activities, and mobile-first design optimized for field usage.

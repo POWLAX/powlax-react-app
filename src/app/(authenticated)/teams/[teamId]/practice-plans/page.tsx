@@ -1,10 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'next/navigation'
-import { Calendar, Clock, MapPin, Save, Printer, RefreshCw, FolderOpen, Plus, Timer, Users, Target, Loader2 } from 'lucide-react'
-import LazyDrillLibrary from '@/components/practice-planner/lazy/LazyDrillLibrary'
-import LazyPracticeTimeline from '@/components/practice-planner/lazy/LazyPracticeTimeline'
+import { Calendar, Clock, MapPin, Save, Printer, RefreshCw, FolderOpen, Plus, Target, Loader2 } from 'lucide-react'
+import DrillLibraryTabbed from '@/components/practice-planner/DrillLibraryTabbed'
+import StrategyCard from '@/components/practice-planner/StrategyCard'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import PracticeTimelineWithParallel from '@/components/practice-planner/PracticeTimelineWithParallel'
 import PracticeDurationBar from '@/components/practice-planner/PracticeDurationBar'
 import SavePracticeModal from '@/components/practice-planner/modals/SavePracticeModal'
 import LoadPracticeModal from '@/components/practice-planner/modals/LoadPracticeModal'
@@ -12,7 +14,7 @@ import AddCustomStrategiesModal from '@/components/practice-planner/modals/AddCu
 import StrategiesListModal from '@/components/practice-planner/modals/StrategiesListModal'
 import PrintablePracticePlan from '@/components/practice-planner/PrintablePracticePlan'
 import PracticeTemplateSelector from '@/components/practice-planner/PracticeTemplateSelector'
-import { usePracticePlans } from '@/hooks/usePracticePlans'
+import { usePracticePlans, type TimeSlot as PracticePlanTimeSlot } from '@/hooks/usePracticePlans'
 import { useDrills } from '@/hooks/useDrills'
 import { usePrint } from '@/hooks/usePrint'
 import { useStrategies } from '@/hooks/useStrategies'
@@ -32,7 +34,7 @@ export default function PracticePlansPage() {
   const [addSetupTime, setAddSetupTime] = useState(false)
   const [setupDuration, setSetupDuration] = useState(15)
   const [practiceNotes, setPracticeNotes] = useState('')
-  const [timeSlots, setTimeSlots] = useState<any[]>([])
+  const [timeSlots, setTimeSlots] = useState<PracticePlanTimeSlot[]>([])
   const [showDrillLibrary, setShowDrillLibrary] = useState(false)
   const [showSaveModal, setShowSaveModal] = useState(false)
   const [showLoadModal, setShowLoadModal] = useState(false)
@@ -40,21 +42,88 @@ export default function PracticePlansPage() {
   const [showTemplateSelector, setShowTemplateSelector] = useState(false)
   const [showAddStrategiesModal, setShowAddStrategiesModal] = useState(false)
   const [showStrategiesListModal, setShowStrategiesListModal] = useState(false)
-  const [practiceStarted, setPracticeStarted] = useState(false)
-  const [currentDrillIndex, setCurrentDrillIndex] = useState(0)
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [selectedStrategies, setSelectedStrategies] = useState<any[]>([])
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // Calculate total drill time from all time slots
   const totalDrillTime = timeSlots.reduce((acc, slot) => acc + slot.duration, 0)
 
-  const handleAddDrill = (drill: any) => {
+  // Auto-save functionality
+  useEffect(() => {
+    if (typeof window === 'undefined') return // Skip during SSR
+    
+    // Clear existing timer
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current)
+    }
+
+    // Set new timer for auto-save
+    autoSaveTimerRef.current = setTimeout(() => {
+      const practiceData = {
+        practiceDate,
+        startTime,
+        duration,
+        field,
+        addSetupTime,
+        setupDuration,
+        practiceNotes,
+        timeSlots,
+        selectedStrategies
+      }
+      
+      // Save to localStorage
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem(`practice-plan-${teamId}`, JSON.stringify(practiceData))
+      }
+    }, 3000) // Save after 3 seconds of inactivity
+
+    // Cleanup on unmount
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current)
+      }
+    }
+  }, [practiceDate, startTime, duration, field, addSetupTime, setupDuration, practiceNotes, timeSlots, selectedStrategies, teamId])
+
+  // Load saved practice on mount
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.localStorage) return // Skip during SSR
+    
+    const savedData = localStorage.getItem(`practice-plan-${teamId}`)
+    if (savedData) {
+      try {
+        const data = JSON.parse(savedData)
+        setPracticeDate(data.practiceDate || new Date().toISOString().split('T')[0])
+        setStartTime(data.startTime || '07:00')
+        setDuration(data.duration || 90)
+        setField(data.field || 'Turf')
+        setAddSetupTime(data.addSetupTime || false)
+        setSetupDuration(data.setupDuration || 15)
+        setPracticeNotes(data.practiceNotes || '')
+        setTimeSlots(data.timeSlots || [])
+        setSelectedStrategies(data.selectedStrategies || [])
+        toast.success('Previous practice session restored')
+      } catch (error) {
+        // Silently fail if there's an error loading saved data
+      }
+    }
+  }, [teamId])
+
+  const handleAddDrill = (
+    drill: {
+      id: string
+      duration: number
+      [key: string]: unknown
+    }
+  ) => {
     const newDrill = {
       ...drill,
       id: `${drill.id}-${Date.now()}`, // Create unique ID
     }
     
     // Add as a new time slot
-    const newSlot = {
+    const newSlot: PracticePlanTimeSlot = {
       id: `slot-${Date.now()}`,
       drills: [newDrill],
       duration: newDrill.duration
@@ -148,7 +217,6 @@ export default function PracticePlansPage() {
         setIsRefreshing(false)
       }, 500) // Small delay to ensure state update
     } catch (error) {
-      console.error('Error refreshing drills:', error)
       toast.error('Failed to refresh drill library')
       setIsRefreshing(false)
     }
@@ -171,6 +239,28 @@ export default function PracticePlansPage() {
     toast.success(`Loaded template: ${template.name}`)
     setShowTemplateSelector(false)
   }
+
+  const handleSelectStrategy = (strategy: any) => {
+    // Toggle strategy selection
+    const exists = selectedStrategies.find(s => s.id === strategy.id)
+    if (exists) {
+      setSelectedStrategies(selectedStrategies.filter(s => s.id !== strategy.id))
+    } else {
+      setSelectedStrategies([...selectedStrategies, strategy])
+    }
+  }
+
+  const handleRemoveStrategy = (strategyId: string) => {
+    setSelectedStrategies(selectedStrategies.filter(s => s.id !== strategyId))
+  }
+
+  // Group strategies by game phase
+  const strategiesByPhase = selectedStrategies.reduce((acc, strategy) => {
+    const phase = strategy.strategy_categories || 'General'
+    if (!acc[phase]) acc[phase] = []
+    acc[phase].push(strategy)
+    return acc
+  }, {} as Record<string, any[]>)
 
   return (
     <div className="flex flex-col h-full">
@@ -248,16 +338,27 @@ export default function PracticePlansPage() {
       <div className="flex-1 flex overflow-hidden">
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto p-4">
-          {/* Practice Info */}
-          <div className="bg-white rounded-lg shadow-sm border p-4 mb-4">
-            <h2 className="font-semibold text-gray-900 mb-3">Practice Info and Goals</h2>
-            <textarea
-              placeholder="Add your practice goals and notes here..."
-              className="w-full p-2 border rounded resize-none h-20"
-              value={practiceNotes}
-              onChange={(e) => setPracticeNotes(e.target.value)}
-            />
-          </div>
+          {/* Selected Strategies Display */}
+          {selectedStrategies.length > 0 && (
+            <div className="bg-white rounded-lg shadow-sm border p-4 mb-4">
+              <h3 className="font-semibold text-gray-900 mb-3">Selected Strategies</h3>
+              <div className="space-y-2">
+                {Object.entries(strategiesByPhase).map(([phase, strategies]) => (
+                  <div key={phase} className="space-y-1">
+                    {strategies.map((strategy) => (
+                      <StrategyCard
+                        key={strategy.id}
+                        strategy={strategy}
+                        gamePhase={phase}
+                        onRemove={handleRemoveStrategy}
+                        isMobile={false}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Practice Schedule */}
           <div className="bg-white rounded-lg shadow-sm border p-4 mb-4">
@@ -351,42 +452,27 @@ export default function PracticePlansPage() {
               totalDuration={duration}
               usedDuration={totalDrillTime}
             />
+            
+            {/* Practice Info and Goals Accordion */}
+            <Accordion type="single" collapsible className="mt-4">
+              <AccordionItem value="practice-info">
+                <AccordionTrigger>Practice Info and Goals</AccordionTrigger>
+                <AccordionContent>
+                  <textarea
+                    placeholder="Add your practice goals and notes here..."
+                    className="w-full p-3 border rounded-md resize-none h-24"
+                    value={practiceNotes}
+                    onChange={(e) => setPracticeNotes(e.target.value)}
+                  />
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </div>
 
-          {/* Field Mode Quick Actions */}
-          {timeSlots.length > 0 && (
-            <div className="bg-blue-50 rounded-lg border border-blue-200 p-4 mb-4">
-              <h3 className="font-semibold text-blue-900 mb-3 flex items-center">
-                <Timer className="h-5 w-5 mr-2" />
-                Field Mode
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                <button 
-                  onClick={() => setPracticeStarted(!practiceStarted)}
-                  className={`px-4 py-2 rounded font-medium ${
-                    practiceStarted 
-                      ? 'bg-red-100 text-red-700 hover:bg-red-200' 
-                      : 'bg-green-100 text-green-700 hover:bg-green-200'
-                  }`}
-                >
-                  {practiceStarted ? 'End Practice' : 'Start Practice'}
-                </button>
-                <button 
-                  onClick={handlePrint}
-                  className="px-4 py-2 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded font-medium"
-                >
-                  Quick Print
-                </button>
-                <span className="px-3 py-2 bg-white rounded text-sm font-medium border">
-                  {timeSlots.length} Activities • {totalDrillTime}min
-                </span>
-              </div>
-            </div>
-          )}
 
           {/* Practice Timeline */}
           <div className="bg-white rounded-lg shadow-sm border p-4">
-            <LazyPracticeTimeline
+            <PracticeTimelineWithParallel
               drills={timeSlots}
               setDrills={setTimeSlots}
               startTime={startTime}
@@ -397,7 +483,12 @@ export default function PracticePlansPage() {
 
         {/* Drill Library Sidebar - Desktop/Tablet */}
         <div className="hidden md:block w-80 lg:w-96 border-l bg-white overflow-y-auto">
-          <LazyDrillLibrary onAddDrill={handleAddDrill} />
+          <DrillLibraryTabbed 
+            onAddDrill={handleAddDrill}
+            onSelectStrategy={handleSelectStrategy}
+            selectedStrategies={selectedStrategies.map(s => s.id)}
+            isMobile={false}
+          />
         </div>
       </div>
 
@@ -414,17 +505,23 @@ export default function PracticePlansPage() {
                 ✕
               </button>
             </div>
-            <LazyDrillLibrary onAddDrill={handleAddDrill} />
+            <DrillLibraryTabbed 
+              onAddDrill={handleAddDrill}
+              onSelectStrategy={handleSelectStrategy}
+              selectedStrategies={selectedStrategies.map(s => s.id)}
+              isMobile={true}
+            />
           </div>
         </div>
       )}
 
-      {/* Mobile Add Drills Button */}
+      {/* Mobile Add to Plan Button */}
       <button
         onClick={() => setShowDrillLibrary(true)}
-        className="fixed bottom-20 right-4 bg-blue-600 text-white rounded-full p-4 shadow-lg md:hidden"
+        className="fixed bottom-16 left-4 right-4 bg-blue-600 text-white rounded-lg py-3 shadow-lg md:hidden z-40"
       >
-        <Plus className="h-6 w-6" />
+        <Plus className="h-5 w-5 inline mr-2" />
+        Add to Plan
       </button>
 
       {/* Save Practice Modal */}

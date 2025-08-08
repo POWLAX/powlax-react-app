@@ -1,9 +1,6 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import dynamic from 'next/dynamic'
-const motion = dynamic(() => import('framer-motion').then(m => ({ default: m.motion })), { ssr: false })
-const AnimatePresence = dynamic(() => import('framer-motion').then(m => ({ default: m.AnimatePresence })), { ssr: false })
 import { Filter, Plus, Star, ChevronDown, ChevronRight, X, Video, Link, Edit3, Beaker, User } from 'lucide-react'
 import { useDrills } from '@/hooks/useDrills'
 import { useFavorites } from '@/hooks/useFavorites'
@@ -297,22 +294,11 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
                   {categoryDrills.length === 0 ? (
                     <p className="px-6 py-3 text-sm text-gray-500">No drills found</p>
                   ) : (
-                    <AnimatePresence>
+                    <div>
                       {categoryDrills.map((drill, index) => (
-                        <motion.div
+                        <div
                           key={drill.id}
-                          className="px-6 py-3 border-t border-gray-200 hover:bg-gray-50"
-                          initial={index < 10 ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          transition={{ 
-                            duration: 0.15,
-                            delay: Math.min(index * 0.01, 0.1)
-                          }}
-                          whileHover={{ 
-                            scale: 1.005,
-                            transition: { duration: 0.1 }
-                          }}
+                          className="px-6 py-3 border-t border-gray-200 hover:bg-gray-50 transition-colors"
                         >
                         <div className="flex items-start justify-between">
                           <div className="flex-1 pr-4">
@@ -416,9 +402,9 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
                             </button>
                           </div>
                         </div>
-                        </motion.div>
+                        </div>
                       ))}
-                    </AnimatePresence>
+                    </div>
                   )}
                 </div>
               )}

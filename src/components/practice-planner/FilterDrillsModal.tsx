@@ -46,21 +46,21 @@ export default function FilterDrillsModal({
   setSelectedGameStates,
 }: FilterDrillsModalProps) {
   const { drills: allDrills } = useDrills()
-  const [tempStrategies, setTempStrategies] = useState<string[]>(selectedStrategies)
-  const [tempSkills, setTempSkills] = useState<string[]>(selectedSkills)
-  const [tempGamePhase, setTempGamePhase] = useState<string | null>(selectedGamePhase)
-  const [tempDuration, setTempDuration] = useState<{ min: number; max: number } | null>(selectedDuration)
-  const [tempGameStates, setTempGameStates] = useState<string[]>(selectedGameStates)
+  const [tempStrategies, setTempStrategies] = useState<string[]>(selectedStrategies || [])
+  const [tempSkills, setTempSkills] = useState<string[]>(selectedSkills || [])
+  const [tempGamePhase, setTempGamePhase] = useState<string | null>(selectedGamePhase || null)
+  const [tempDuration, setTempDuration] = useState<{ min: number; max: number } | null>(selectedDuration || null)
+  const [tempGameStates, setTempGameStates] = useState<string[]>(selectedGameStates || [])
   const [durationRange, setDurationRange] = useState<[number, number]>([5, 60])
 
   // Reset temp values when modal opens
   useEffect(() => {
     if (isOpen) {
-      setTempStrategies(selectedStrategies)
-      setTempSkills(selectedSkills)
-      setTempGamePhase(selectedGamePhase)
-      setTempDuration(selectedDuration)
-      setTempGameStates(selectedGameStates)
+      setTempStrategies(selectedStrategies || [])
+      setTempSkills(selectedSkills || [])
+      setTempGamePhase(selectedGamePhase || null)
+      setTempDuration(selectedDuration || null)
+      setTempGameStates(selectedGameStates || [])
       
       // Set duration range from current selection or defaults
       if (selectedDuration) {
@@ -89,24 +89,28 @@ export default function FilterDrillsModal({
   }, [isOpen])
 
   // Extract unique values from all drills in database, not just filtered ones
-  const sourceData = allDrills.length > 0 ? allDrills : drills
+  const sourceData = Array.isArray(allDrills) && allDrills.length > 0 
+    ? allDrills 
+    : Array.isArray(drills) 
+      ? drills 
+      : []
   
   const allStrategies = Array.from(new Set(
-    sourceData.flatMap(d => d.strategies || []).filter(Boolean)
+    (sourceData || []).flatMap(d => d?.strategies || []).filter(Boolean)
   )).sort()
 
   const allSkills = Array.from(new Set(
-    sourceData.flatMap(d => d.skills || []).filter(Boolean)
+    (sourceData || []).flatMap(d => d?.skills || []).filter(Boolean)
   )).sort()
 
   const allGamePhases = Array.from(new Set(
-    sourceData.map(d => d.game_phase).filter(Boolean)
+    (sourceData || []).map(d => d?.game_phase).filter(Boolean)
   )).sort()
 
   // Extract game states from the game_states column
   const allGameStates = Array.from(new Set(
-    sourceData
-      .map(d => d.game_states || '')
+    (sourceData || [])
+      .map(d => d?.game_states || '')
       .filter(Boolean)
       .flatMap(states => 
         typeof states === 'string' 
@@ -184,7 +188,11 @@ export default function FilterDrillsModal({
     setDurationRange([5, 60])
   }
 
-  const hasActiveFilters = tempStrategies.length > 0 || tempSkills.length > 0 || tempGamePhase || tempDuration || tempGameStates.length > 0
+  const hasActiveFilters = (tempStrategies?.length || 0) > 0 || 
+    (tempSkills?.length || 0) > 0 || 
+    tempGamePhase || 
+    tempDuration || 
+    (tempGameStates?.length || 0) > 0
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

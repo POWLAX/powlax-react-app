@@ -230,6 +230,80 @@ npm run dev
 
 ---
 
+### Error #8: All Routes Return 404 - Conflicting App Directories
+
+**Symptoms:**
+- ALL pages return 404 errors (not just specific routes)
+- Only `/_not-found` route available
+- Build output shows "Route (pages)" instead of "Route (app)"
+- Favicon serves correctly but no pages work
+- `curl http://localhost:3000/` returns 404
+
+**Root Cause:**
+- **Conflicting directory structure**: Having both `app/` directory at root level AND `src/app/` directory
+- Next.js App Router **prioritizes root-level `app/` over `src/app/`** when both exist
+- Even if root `app/` only contains `favicon.ico`, it causes Next.js to completely ignore `src/app/` where all actual pages live
+
+**Why This Happens:**
+Next.js directory precedence rules:
+1. If `app/` exists at root → Use it exclusively
+2. If only `src/app/` exists → Use it
+3. If both exist → Root `app/` wins, `src/app/` is COMPLETELY IGNORED
+
+**Fix Pattern:**
+1. **Check for conflicting directories:**
+```bash
+ls -la app/      # Check if root app/ exists
+ls -la src/app/  # Check if src/app/ exists
+```
+
+2. **Move any files from root `app/` to proper location:**
+```bash
+# Move favicon to src/app/ or public/
+mv app/favicon.ico src/app/favicon.ico
+# OR
+mv app/favicon.ico public/favicon.ico
+```
+
+3. **Remove the root-level `app/` directory:**
+```bash
+rm -rf app/
+```
+
+4. **Clear Next.js cache and restart:**
+```bash
+rm -rf .next
+npm run dev
+```
+
+5. **If auth issues appear after fix**, restore providers in layout:
+```tsx
+// src/app/layout.tsx
+import { JWTAuthProvider } from '@/contexts/JWTAuthContext'
+// Wrap children with <JWTAuthProvider>
+```
+
+**Verification:**
+```bash
+# All routes should now return 200
+curl -I http://localhost:3000/           # Should return 200
+curl -I http://localhost:3000/dashboard  # Should return 200
+curl -I http://localhost:3000/teams/1/practice-plans  # Should return 200
+```
+
+**Key Debugging Clues:**
+- Build output showing "Route (pages)" = Wrong router active
+- Build output showing "Route (app)" = Correct App Router active
+- ALL routes failing = Structural issue, not individual page problems
+- Check `package.json` scripts don't have custom directories
+
+**Prevention:**
+- Never create `app/` at root when using `src/app/`
+- Keep all App Router files in `src/app/` consistently
+- Put static assets like favicon in `public/` or `src/app/`
+
+---
+
 ## 🛠️ Standard Debugging Process
 
 ### Step 1: Identify Error Type

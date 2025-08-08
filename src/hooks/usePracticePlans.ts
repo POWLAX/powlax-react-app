@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useSupabase } from '@/hooks/useSupabase'
 
@@ -44,9 +44,9 @@ export function usePracticePlans(teamId?: string) {
     if (teamId) {
       fetchPracticePlans()
     }
-  }, [teamId, user])
+  }, [teamId, user, /* stable callback */])
 
-  const fetchPracticePlans = async () => {
+  const fetchPracticePlans = useCallback(async () => {
     try {
       setLoading(true)
       
@@ -74,7 +74,7 @@ export function usePracticePlans(teamId?: string) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [teamId, user?.id])
 
   const savePracticePlan = async (plan: Omit<PracticePlan, 'id' | 'created_at' | 'updated_at'>) => {
     try {

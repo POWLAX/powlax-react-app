@@ -48,22 +48,32 @@ export function useDrills() {
   const fetchDrills = async () => {
     try {
       setLoading(true)
-      console.log('Fetching drills from both powlax_drills and user_drills tables...')
       
-      // Fetch both POWLAX drills and user drills in parallel
+      // Add a network safety timeout (10s) to avoid indefinite loading UI
+      const withTimeout = <T,>(promise: Promise<T>, ms = 10000): Promise<T> => {
+        return new Promise((resolve, reject) => {
+          const id = setTimeout(() => reject(new Error('timeout')), ms)
+          promise
+            .then((value) => { clearTimeout(id); resolve(value) })
+            .catch((err) => { clearTimeout(id); reject(err) })
+        })
+      }
+      
+      // Fetch both POWLAX drills and user drills in parallel with timeout
       const [powlaxResponse, userResponse] = await Promise.allSettled([
-        // Fetch POWLAX drills
-        supabase
-          .from('powlax_drills')
-          .select('*')
-          .order('title')
-          .limit(200),
-        
-        // Fetch user drills (includes RLS filtering)
-        supabase
-          .from('user_drills')
-          .select('*')
-          .order('created_at', { ascending: false })
+        withTimeout(
+          supabase
+            .from('powlax_drills')
+            .select('*')
+            .order('title')
+            .limit(200)
+        ),
+        withTimeout(
+          supabase
+            .from('user_drills')
+            .select('*')
+            .order('created_at', { ascending: false })
+        )
       ])
 
       let powlaxDrills: any[] = []
@@ -74,30 +84,21 @@ export function useDrills() {
       // Process POWLAX drills response
       if (powlaxResponse.status === 'fulfilled') {
         if (powlaxResponse.value.error) {
-          console.error('Error fetching POWLAX drills:', powlaxResponse.value.error)
           errorMessages.push(`POWLAX drills: ${powlaxResponse.value.error.message}`)
           hasErrors = true
         } else {
           powlaxDrills = powlaxResponse.value.data || []
-          console.log(`Loaded ${powlaxDrills.length} POWLAX drills`)
         }
       } else {
-        console.error('Failed to fetch POWLAX drills:', powlaxResponse.reason)
         errorMessages.push(`POWLAX drills: ${powlaxResponse.reason}`)
         hasErrors = true
       }
 
       // Process user drills response
       if (userResponse.status === 'fulfilled') {
-        if (userResponse.value.error) {
-          // Don't treat user_drills errors as fatal - table might not exist yet
-          console.warn('Error fetching user drills (table may not exist):', userResponse.value.error)
-        } else {
+        if (!userResponse.value.error) {
           userDrills = userResponse.value.data || []
-          console.log(`Loaded ${userDrills.length} user drills`)
         }
-      } else {
-        console.warn('Failed to fetch user drills:', userResponse.reason)
       }
 
       // Transform POWLAX drills
@@ -213,7 +214,6 @@ export function useDrills() {
         return a.name.localeCompare(b.name)
       })
 
-      console.log(`Combined ${allDrills.length} drills total (${transformedPowlaxDrills.length} POWLAX + ${transformedUserDrills.length} user)`)
       setDrills(allDrills)
       
       // Set error only if POWLAX drills failed (user drills failure is not critical)
@@ -223,8 +223,7 @@ export function useDrills() {
         setError(null)
       }
     } catch (err: any) {
-      console.error('Error fetching drills:', err)
-      setError(err.message)
+      setError(err?.message === 'timeout' ? 'Timed out loading drills. Please check your connection and Supabase env settings.' : (err?.message || 'Failed to load drills'))
       setDrills([])
     } finally {
       setLoading(false)
@@ -408,8 +407,8 @@ function parseLacrosseLabUrls(labUrls: any): string[] {
       if (Array.isArray(parsed)) {
         return parsed.filter(url => url && typeof url === 'string' && url.trim() !== '')
       }
-    } catch (e) {
-      console.error('Failed to parse lab_urls:', e)
+    } catch {
+      // ignore parse errors and fall back to empty array
     }
   }
   

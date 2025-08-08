@@ -192,7 +192,13 @@ export default function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
               {results.map((result, index) => (
                 <Link
                   key={result.id}
-                  href={result.url}
+                  href={
+                    result.category === 'drill'
+                      ? `/details/drill/${encodeURIComponent(result.id)}`
+                      : result.category === 'strategy'
+                        ? `/details/strategy/${encodeURIComponent(result.id)}`
+                        : result.url
+                  }
                   onClick={onClose}
                   className={`block p-3 rounded-lg hover:bg-gray-50 transition-colors ${
                     index === selectedIndex ? 'bg-blue-50 border-l-4 border-blue-500' : ''

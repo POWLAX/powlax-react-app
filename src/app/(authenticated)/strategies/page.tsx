@@ -61,6 +61,7 @@ export default function StrategiesPage() {
   const [showLabModal, setShowLabModal] = useState(false)
   const [currentVideoUrl, setCurrentVideoUrl] = useState('')
   const [currentLabUrl, setCurrentLabUrl] = useState('')
+  const [currentStrategyName, setCurrentStrategyName] = useState('')
   const [showCreateModal, setShowCreateModal] = useState(false)
 
   useEffect(() => {
@@ -154,13 +155,15 @@ export default function StrategiesPage() {
     setSelectedStrategy(strategy)
   }
 
-  const handlePlayVideo = (url: string) => {
+  const handlePlayVideo = (url: string, name: string = 'Strategy Video') => {
     setCurrentVideoUrl(url)
+    setCurrentStrategyName(name)
     setShowVideoModal(true)
   }
 
-  const handleViewLab = (url: string) => {
+  const handleViewLab = (url: string, name: string = 'Strategy Lab') => {
     setCurrentLabUrl(url)
+    setCurrentStrategyName(name)
     setShowLabModal(true)
   }
 
@@ -340,7 +343,7 @@ export default function StrategiesPage() {
                     {selectedStrategy.video_url && (
                       <Button 
                         className="w-full" 
-                        onClick={() => handlePlayVideo(selectedStrategy.video_url!)}
+                        onClick={() => handlePlayVideo(selectedStrategy.video_url!, selectedStrategy.name)}
                       >
                         <PlayCircle className="w-4 h-4 mr-2" />
                         Watch Video
@@ -350,7 +353,7 @@ export default function StrategiesPage() {
                       <Button 
                         variant="outline" 
                         className="w-full"
-                        onClick={() => handleViewLab(selectedStrategy.lacrosse_lab_url!)}
+                        onClick={() => handleViewLab(selectedStrategy.lacrosse_lab_url!, selectedStrategy.name)}
                       >
                         <BookOpen className="w-4 h-4 mr-2" />
                         View in Lacrosse Lab
@@ -397,7 +400,10 @@ export default function StrategiesPage() {
         <VideoModal
           isOpen={showVideoModal}
           onClose={() => setShowVideoModal(false)}
-          videoUrl={currentVideoUrl}
+          drill={{
+            name: currentStrategyName,
+            videoUrl: currentVideoUrl
+          }}
         />
       )}
 
@@ -405,7 +411,10 @@ export default function StrategiesPage() {
         <LacrosseLabModal
           isOpen={showLabModal}
           onClose={() => setShowLabModal(false)}
-          labUrl={currentLabUrl}
+          drill={{
+            name: currentStrategyName,
+            lab_urls: [currentLabUrl]
+          }}
         />
       )}
       
