@@ -199,6 +199,35 @@ rm -rf .next
 npm run dev
 ```
 
+### Error #7: Login fails with correct WordPress password
+
+**Symptoms:**
+- Login form reports invalid credentials even when password is correct
+- Network shows `POST /api/auth/login` 401/500 or direct JWT call fails
+- Dev server logs show: `Found N users... REST API auth failed, trying XML-RPC fallback`
+
+**Root Cause:**
+- Direct WordPress JWT plugin flow or basic auth can fail in some environments (no App Password for user, plugin differences, CORS). We must authenticate via the internal proxy which verifies the user with admin app credentials and issues a session token for our app.
+
+**Fix Pattern (Easy Fix – implemented):**
+1. Use the internal proxy for authentication by default (already wired in `src/lib/jwt-auth.ts`).
+2. Ensure required env vars are set in `.env.local`:
+   - `WORDPRESS_API_URL` (e.g., `https://powlax.com/wp-json/wp/v2`)
+   - `WORDPRESS_USERNAME` (admin user)
+   - `WORDPRESS_APP_PASSWORD` (Application Password for the admin user)
+   - Optional: `NEXT_PUBLIC_AUTH_PROXY=true` (default; set `false` to bypass proxy)
+3. Restart dev server and hard-refresh.
+
+**How it works now:**
+- Client auth (`src/lib/jwt-auth.ts`) calls `POST /api/auth/login` → `/api/auth/proxy` verifies user and issues a session token.
+- Validation uses `POST /api/auth/validate`.
+- Authenticated WP requests go through `GET /api/auth/proxy?endpoint=/users/me` with `x-session-token` header.
+
+**Verification:**
+- In terminal you should see:
+  - `Found X users, looking for: <username>`
+  - `REST API auth failed, trying XML-RPC fallback` (acceptable) followed by `POST /api/auth/login 200`.
+
 ---
 
 ## 🛠️ Standard Debugging Process
