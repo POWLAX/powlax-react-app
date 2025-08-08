@@ -19,14 +19,19 @@ interface UserData {
   avatar?: string
 }
 
-class JWTAuth {
+ class JWTAuth {
   private baseUrl: string
+  private appOrigin: string
   private tokenKey = 'wp_jwt_token'
   private userKey = 'wp_user_data'
   private refreshTimer: NodeJS.Timeout | null = null
+  private useProxy: boolean
 
   constructor() {
     this.baseUrl = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://powlax.com'
+    this.appOrigin = typeof window !== 'undefined' ? window.location.origin : ''
+    // Default to proxy to avoid CORS and plugin dependency during development
+    this.useProxy = (process.env.NEXT_PUBLIC_AUTH_PROXY || 'true') === 'true'
   }
 
   /**
@@ -34,6 +39,32 @@ class JWTAuth {
    */
   async login(username: string, password: string): Promise<{ success: boolean; user?: UserData; error?: string }> {
     try {
+      if (this.useProxy && this.appOrigin) {
+        // Prefer the internal proxy API to authenticate against WordPress
+        const response = await fetch(`${this.appOrigin}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        })
+
+        const data = await response.json()
+        if (!response.ok || !data?.success) {
+          return {
+            success: false,
+            error: data?.error || 'Login failed'
+          }
+        }
+
+        // Store session token from proxy and user payload
+        this.storeToken(String(data.token))
+        if (data.user) {
+          localStorage.setItem(this.userKey, JSON.stringify(data.user as UserData))
+        }
+        this.setupTokenRefresh()
+        return { success: true, user: data.user as UserData }
+      }
+
+      // Fallback to WordPress JWT plugin direct login (if proxy disabled)
       const response = await fetch(`${this.baseUrl}/wp-json/jwt-auth/v1/token`, {
         method: 'POST',
         headers: {
@@ -51,31 +82,16 @@ class JWTAuth {
       }
 
       const data: JWTResponse = await response.json()
-      
-      // Store token
       this.storeToken(data.token)
-      
-      // Get full user data
       const userData = await this.getUserData(data.token)
-      
-      // Store user data
       if (userData) {
         localStorage.setItem(this.userKey, JSON.stringify(userData))
       }
-      
-      // Set up auto-refresh
       this.setupTokenRefresh()
-      
-      return { 
-        success: true, 
-        user: userData 
-      }
+      return { success: true, user: userData }
     } catch (error) {
       console.error('Login error:', error)
-      return { 
-        success: false, 
-        error: 'Connection error. Please try again.' 
-      }
+      return { success: false, error: 'Connection error. Please try again.' }
     }
   }
 
@@ -84,29 +100,35 @@ class JWTAuth {
    */
   async validateToken(): Promise<boolean> {
     const token = this.getToken()
-    
-    if (!token) {
-      return false
-    }
+    if (!token) return false
 
     try {
-      const response = await fetch(`${this.baseUrl}/wp-json/jwt-auth/v1/token/validate`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
+      if (this.useProxy && this.appOrigin) {
+        const response = await fetch(`${this.appOrigin}/api/auth/validate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token })
+        })
+        const data = await response.json()
+        if (response.ok && data?.valid) {
+          if (data.user) {
+            localStorage.setItem(this.userKey, JSON.stringify(data.user as UserData))
+          }
+          return true
         }
-      })
-
-      if (response.ok) {
-        // Token is valid, refresh user data if needed
-        const userData = await this.getUserData(token)
-        if (userData) {
-          localStorage.setItem(this.userKey, JSON.stringify(userData))
-        }
-        return true
+        this.clearAuth()
+        return false
       }
 
-      // Token invalid, clear it
+      const response = await fetch(`${this.baseUrl}/wp-json/jwt-auth/v1/token/validate`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      if (response.ok) {
+        const userData = await this.getUserData(token)
+        if (userData) localStorage.setItem(this.userKey, JSON.stringify(userData))
+        return true
+      }
       this.clearAuth()
       return false
     } catch (error) {
@@ -266,9 +288,20 @@ class JWTAuth {
    */
   async apiRequest(endpoint: string, options: RequestInit = {}): Promise<Response> {
     const token = this.getToken()
-    
     if (!token) {
       throw new Error('No authentication token')
+    }
+
+    if (this.useProxy && this.appOrigin) {
+      const url = `${this.appOrigin}/api/auth/proxy?endpoint=${encodeURIComponent(endpoint)}`
+      return fetch(url, {
+        ...options,
+        headers: {
+          ...(options.headers || {}),
+          'x-session-token': token,
+          'Content-Type': 'application/json'
+        }
+      })
     }
 
     return fetch(`${this.baseUrl}/wp-json${endpoint}`, {
