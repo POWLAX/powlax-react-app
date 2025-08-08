@@ -175,6 +175,30 @@ export default function AuthenticatedLayout({ children }) {
 }
 ```
 
+### Error #6: ChunkLoadError / Hydration error after changes (Dev only)
+
+**Symptoms:**
+- Console shows `ChunkLoadError: Loading chunk app/layout failed` or hydration errors after edits
+- Hard refresh sometimes helps but errors return; page blank under React overlay
+- DevTools Application tab shows an active Service Worker and PWA caches
+
+**Root Cause:**
+- A previously registered Service Worker cached stale chunks during development, causing Next.js App Router to load outdated JS bundles.
+
+**Fix Pattern (Easy Fix):**
+1. Ensure Service Worker only runs in production and is disabled on localhost.
+2. Auto-unregister existing SWs and clear caches in development.
+
+Implementation added in `src/hooks/useServiceWorker.ts`:
+- Only registers SW if `NODE_ENV === 'production'` AND `NEXT_PUBLIC_ENABLE_SW === 'true'` AND not localhost.
+- In dev, automatically unregisters any SW and clears `workbox-*` and `powlax-*` caches.
+
+No manual action needed—just restart the dev server after pulling this change. If issues persist:
+```bash
+rm -rf .next
+npm run dev
+```
+
 ---
 
 ## 🛠️ Standard Debugging Process

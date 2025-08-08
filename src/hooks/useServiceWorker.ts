@@ -23,7 +23,37 @@ export function useServiceWorker() {
     // Check if service workers are supported
     if ('serviceWorker' in navigator) {
       setState(prev => ({ ...prev, isSupported: true }))
-      registerServiceWorker()
+
+      // Only register the Service Worker in production when explicitly enabled.
+      // Dev SWs can cache old chunks and cause ChunkLoadError/hydration issues.
+      const isProd = process.env.NODE_ENV === 'production'
+      const enabledFlag = process.env.NEXT_PUBLIC_ENABLE_SW === 'true'
+      const isLocalhost = typeof window !== 'undefined' &&
+        /^(localhost|127\.0\.0\.1|\[::1\])$/i.test(window.location.hostname)
+
+      if (isProd && enabledFlag && !isLocalhost) {
+        registerServiceWorker()
+      } else {
+        // In development, aggressively unregister any existing SW and clear caches
+        // to prevent stale chunks from breaking the app router.
+        ;(async () => {
+          try {
+            const regs = await navigator.serviceWorker.getRegistrations()
+            await Promise.all(regs.map(reg => reg.unregister()))
+            if ('caches' in window) {
+              const cacheNames = await caches.keys()
+              await Promise.all(
+                cacheNames
+                  .filter(name => name.startsWith('powlax-') || name.startsWith('workbox-'))
+                  .map(name => caches.delete(name))
+              )
+            }
+            setState(prev => ({ ...prev, isRegistered: false, registration: null }))
+          } catch (err) {
+            console.error('POWLAX: Failed to unregister Service Worker in dev:', err)
+          }
+        })()
+      }
     }
 
     // Listen for online/offline events
