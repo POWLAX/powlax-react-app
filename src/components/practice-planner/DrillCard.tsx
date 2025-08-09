@@ -14,7 +14,8 @@ import {
   XCircle,
   Plus,
   User,
-  Star
+  Star,
+  Play
 } from 'lucide-react'
 import VideoModal from './modals/VideoModal'
 import LinksModal from './modals/LinksModal'
@@ -71,6 +72,7 @@ interface DrillCardProps {
   canMoveDown: boolean
   isParallel?: boolean
   parallelLane?: number
+  onStudyDrill?: (drill: any) => void
 }
 
 const DrillCard = memo(function DrillCard({
@@ -84,7 +86,8 @@ const DrillCard = memo(function DrillCard({
   onAddParallel,
   canMoveUp,
   canMoveDown,
-  isParallel = false
+  isParallel = false,
+  onStudyDrill
 }: DrillCardProps) {
   const [editingNotes, setEditingNotes] = useState(false)
   const [tempNotes, setTempNotes] = useState(drill.notes || '')
@@ -94,6 +97,7 @@ const DrillCard = memo(function DrillCard({
   const [showLinksModal, setShowLinksModal] = useState(false)
   const [showStrategiesModal, setShowStrategiesModal] = useState(false)
   const [showLacrosseLabModal, setShowLacrosseLabModal] = useState(false)
+  const [showStudyModal, setShowStudyModal] = useState(false)
   
   const isMobile = useIsMobile()
 
@@ -129,7 +133,7 @@ const DrillCard = memo(function DrillCard({
             >
               <ChevronUp className="h-4 w-4" />
             </button>
-            <span className="font-semibold text-[#003366]">{startTime}</span>
+            <span className="text-2xl font-bold text-blue-600">{startTime}</span>
           </div>
           
           <div className="flex items-center gap-2">
@@ -150,12 +154,24 @@ const DrillCard = memo(function DrillCard({
           </div>
         </div>
         
-        {/* Drill Name */}
-        <h4 className="font-medium text-[#003366] mb-2">{drill.name}</h4>
+        {/* Drill Name and Study Button */}
+        <div className="flex items-center gap-2 mb-2">
+          <h4 className="font-medium text-[#003366] flex-1">{drill.name}</h4>
+          <span className="text-gray-400">•</span>
+          <button 
+            onClick={() => setShowStudyModal(true)}
+            className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+          >
+            <Play className="h-4 w-4" />
+            Study Drill
+          </button>
+        </div>
         
-        {/* Notes */}
+        {/* Coaching Notes */}
         {drill.notes && (
-          <p className="text-sm text-gray-600 mb-2">{drill.notes}</p>
+          <div className="bg-blue-50 border border-blue-200 p-3 rounded mb-2">
+            <p className="text-sm text-blue-800">{drill.notes}</p>
+          </div>
         )}
         
         {/* Action Buttons */}
@@ -199,12 +215,12 @@ const DrillCard = memo(function DrillCard({
   
   // Desktop layout (original)
   return (
-    <div className={`bg-white rounded-lg field-border shadow-lg ${isParallel ? 'ml-4 border-l-4 border-l-blue-300' : ''}`}>
+    <div className={`bg-white rounded-lg field-border shadow-lg relative ${isParallel ? 'ml-4 border-l-4 border-l-blue-300' : ''}`}>
       <div className="flex">
         {/* Time Column - Only show for main drills, not parallel */}
         {!isParallel && (
           <div className="flex flex-col items-center justify-center px-4 py-3 field-time rounded-l-lg border-r">
-            <div className="text-lg font-bold">{startTime}</div>
+            <div className="text-2xl font-bold text-blue-600">{startTime}</div>
             <div className="flex items-center mt-1">
               <input
                 type="number"
@@ -236,13 +252,21 @@ const DrillCard = memo(function DrillCard({
         )}
 
         {/* Content Column */}
-        <div className={`flex-1 p-4 ${isParallel ? 'bg-blue-50' : ''}`}>
+        <div className={`flex-1 p-4 ${isParallel ? 'bg-white' : ''}`}>
           <div className="flex items-start justify-between mb-2">
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <h3 className={`field-drill-name ${isParallel ? 'text-base' : 'text-lg'}`}>
                   {drill.name}
                 </h3>
+                <span className="text-gray-400">•</span>
+                <button 
+                  onClick={() => setShowStudyModal(true)}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                >
+                  <Play className="h-4 w-4" />
+                  Study Drill
+                </button>
                 {drill.source === 'user' && (
                   <div className="flex items-center gap-1">
                     <User className="h-3 w-3 text-green-600" />
@@ -263,7 +287,7 @@ const DrillCard = memo(function DrillCard({
                 )}
               </div>
             </div>
-            {!isParallel && onAddParallel && (
+{!isParallel && onAddParallel && (
               <button
                 onClick={onAddParallel}
                 className="touch-target text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center font-semibold shadow-md"
@@ -273,6 +297,15 @@ const DrillCard = memo(function DrillCard({
                 Parallel
               </button>
             )}
+            
+            {/* Trash Icon - Positioned Absolute */}
+            <button
+              onClick={onRemove}
+              className="absolute top-4 right-4 touch-target p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors"
+              title="Remove Drill"
+            >
+              <Trash2 className="h-5 w-5" />
+            </button>
           </div>
 
           {/* Notes Section */}
@@ -306,9 +339,11 @@ const DrillCard = memo(function DrillCard({
           ) : (
             <div className="mb-3">
               {drill.notes ? (
-                <p className="text-sm field-notes p-3 rounded-lg">{drill.notes}</p>
+                <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
+                  <p className="text-sm text-blue-800">{drill.notes}</p>
+                </div>
               ) : (
-                <p className="text-sm field-text-secondary italic font-medium">Click edit to add notes</p>
+                <p className="text-sm field-text-secondary italic font-medium">Click edit to add coaching notes</p>
               )}
             </div>
           )}
@@ -366,22 +401,18 @@ const DrillCard = memo(function DrillCard({
               <Link className="h-6 w-6" />
             </button>
 
+            {onStudyDrill && (
+              <button
+                onClick={() => onStudyDrill(drill)}
+                className="touch-target flex items-center justify-center bg-[#003366] hover:bg-[#003366]/90 active:bg-[#003366]/80 text-white border-2 border-[#003366] rounded-xl shadow-md transition-all duration-200"
+                title="Study Drill"
+              >
+                <Star className="h-6 w-6" />
+              </button>
+            )}
 
-            <button
-              onClick={onRemove}
-              className="touch-target flex items-center justify-center bg-red-100 hover:bg-red-200 active:bg-red-300 text-red-600 border-2 border-red-300 rounded-xl shadow-md transition-all duration-200 col-span-3 sm:col-span-1 sm:ml-auto"
-              title="Remove Drill"
-            >
-              <Trash2 className="h-6 w-6" />
-            </button>
           </div>
 
-          {/* Hashtags */}
-          {formatHashtags() && (
-            <div className="text-sm text-blue-700 font-semibold">
-              {formatHashtags()}
-            </div>
-          )}
         </div>
       </div>
 

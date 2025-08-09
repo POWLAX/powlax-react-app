@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Search, X, FileText, Target, Dumbbell, Clock } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+// Removed framer-motion - using CSS animations instead
 import Link from 'next/link'
 
 interface SearchResult {
@@ -154,12 +154,8 @@ export default function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, y: -20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: -20, scale: 0.95 }}
-        transition={{ duration: 0.2 }}
-        className="bg-white rounded-xl shadow-2xl w-full max-w-2xl mt-16"
+      <div
+        className="bg-white rounded-xl shadow-2xl w-full max-w-2xl mt-16 animate-in fade-in zoom-in-95 duration-200"
       >
         {/* Search Header */}
         <div className="flex items-center p-4 border-b">
@@ -295,7 +291,7 @@ export default function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
             </div>
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   )
 }

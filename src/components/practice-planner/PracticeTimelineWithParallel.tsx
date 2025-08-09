@@ -32,6 +32,7 @@ interface PracticeTimelineProps {
   setupTime: number
   setupNotes?: string[]
   onSetupNotesChange?: (notes: string[]) => void
+  onStudyDrill?: (drill: Drill) => void
 }
 
 export default function PracticeTimelineWithParallel({ 
@@ -40,7 +41,8 @@ export default function PracticeTimelineWithParallel({
   startTime,
   setupTime,
   setupNotes = [],
-  onSetupNotesChange
+  onSetupNotesChange,
+  onStudyDrill
 }: PracticeTimelineProps) {
   const [showParallelPicker, setShowParallelPicker] = useState<number | null>(null)
   const [showSetupModal, setShowSetupModal] = useState(false)
@@ -220,17 +222,15 @@ export default function PracticeTimelineWithParallel({
                     canMoveUp={slotIndex > 0}
                     canMoveDown={slotIndex < timeSlots.length - 1}
                     isParallel={false}
+                    onStudyDrill={onStudyDrill}
                   />
                 ) : (
                   // Multiple drills - parallel layout with visual lanes
-                  <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-3">
+                  <div className="bg-gray-100 border-2 border-gray-200 rounded-lg p-3">
                     <div className="flex items-center gap-2 mb-3">
-                      <div className="bg-blue-600 text-white text-xs font-semibold px-2 py-1 rounded">
-                        PARALLEL
+                      <div className="bg-purple-600 text-white text-xs font-semibold px-2 py-1 rounded">
+                        PARALLEL - {slot.drills.length} activities
                       </div>
-                      <span className="text-sm font-medium text-blue-800">
-                        {slot.drills.length} activities running simultaneously
-                      </span>
                     </div>
                     
                     <div className={`grid gap-3 ${
@@ -241,12 +241,8 @@ export default function PracticeTimelineWithParallel({
                       {slot.drills.map((drill, drillIndex) => (
                         <div 
                           key={drill.id}
-                          className="relative"
+                          className="bg-white rounded-lg"
                         >
-                          {/* Lane indicator */}
-                          <div className="absolute -top-2 left-3 bg-blue-600 text-white text-xs font-bold px-2 py-0.5 rounded">
-                            Lane {drillIndex + 1}
-                          </div>
                           
                           <DrillCard
                             drill={drill}
@@ -265,6 +261,7 @@ export default function PracticeTimelineWithParallel({
                             canMoveDown={slotIndex < timeSlots.length - 1}
                             isParallel={true}
                             parallelLane={drillIndex + 1}
+                            onStudyDrill={onStudyDrill}
                           />
                         </div>
                       ))}

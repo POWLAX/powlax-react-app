@@ -3,7 +3,7 @@
 import { useRequireAuth } from '@/contexts/JWTAuthContext'
 import BottomNavigation from '@/components/navigation/BottomNavigation'
 import SidebarNavigation from '@/components/navigation/SidebarNavigation'
-import FloatingActionButton from '@/components/common/FloatingActionButton'
+// import FloatingActionButton from '@/components/common/FloatingActionButton' // Temporarily disabled - framer-motion issue
 import TourOverlay from '@/components/onboarding/TourOverlay'
 import WelcomeModal from '@/components/onboarding/WelcomeModal'
 import OfflineIndicator from '@/components/common/OfflineIndicator'
@@ -52,9 +52,9 @@ export default function AuthenticatedLayout({
         <BottomNavigation />
         
         {/* FAB - Only show on mobile */}
-        <div className="md:hidden">
+        {/* <div className="md:hidden">
           <FloatingActionButton />
-        </div>
+        </div> */}
         
         {/* Onboarding components */}
         <TourOverlay />

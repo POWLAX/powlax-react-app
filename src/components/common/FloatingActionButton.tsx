@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Plus, Calendar, Play, Clock, X } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+// Removed framer-motion - using CSS animations instead
 import Link from 'next/link'
 
 interface QuickAction {
@@ -59,24 +59,14 @@ export default function FloatingActionButton({ className = '' }: FloatingActionB
   return (
     <div className={`fixed bottom-24 right-4 z-50 ${className}`}>
       {/* Quick Action Items */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.2 }}
-            className="flex flex-col space-y-3 mb-4"
-          >
-            {quickActions.map((action, index) => (
-              <motion.div
-                key={action.id}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                transition={{ duration: 0.2, delay: index * 0.05 }}
-                className="flex items-center"
-              >
+      {isOpen && (
+        <div className="flex flex-col space-y-3 mb-4 animate-in fade-in zoom-in-95 duration-200">
+          {quickActions.map((action, index) => (
+            <div
+              key={action.id}
+              className="flex items-center animate-in slide-in-from-right-5 fade-in duration-200"
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
                 {/* Action Label */}
                 <div className="bg-black bg-opacity-75 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap mr-3">
                   {action.label}
@@ -99,40 +89,30 @@ export default function FloatingActionButton({ className = '' }: FloatingActionB
                     <action.icon className="h-6 w-6" />
                   </button>
                 )}
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Main FAB Button */}
-      <motion.button
+      <button
         onClick={toggleMenu}
-        className="bg-powlax-blue text-white rounded-full p-4 shadow-lg transition-all duration-200 transform hover:scale-110"
-        whileTap={{ scale: 0.95 }}
-        animate={{ rotate: isOpen ? 45 : 0 }}
-        transition={{ duration: 0.2 }}
+        className={`bg-powlax-blue text-white rounded-full p-4 shadow-lg transition-all duration-200 transform hover:scale-110 active:scale-95 ${isOpen ? 'rotate-45' : 'rotate-0'}`}
       >
         {isOpen ? (
           <X className="h-6 w-6" />
         ) : (
           <Plus className="h-6 w-6" />
         )}
-      </motion.button>
+      </button>
 
       {/* Backdrop */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black bg-opacity-20 -z-10"
-            onClick={() => setIsOpen(false)}
-          />
-        )}
-      </AnimatePresence>
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-20 -z-10 animate-in fade-in duration-200"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
     </div>
   )
 }

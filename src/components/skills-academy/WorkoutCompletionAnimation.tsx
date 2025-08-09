@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+// Removed framer-motion - using CSS animations instead
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -97,7 +97,7 @@ export function WorkoutCompletionAnimation({
       <div className="max-w-2xl w-full space-y-6">
         
         {/* Main Trophy Animation */}
-        <motion.div
+        <div
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ 
@@ -109,7 +109,7 @@ export function WorkoutCompletionAnimation({
           className="text-center"
         >
           <div className="relative inline-block">
-            <motion.div
+            <div
               animate={{ 
                 rotate: [0, 5, -5, 5, 0],
                 scale: [1, 1.1, 1]
@@ -122,11 +122,11 @@ export function WorkoutCompletionAnimation({
               className="w-32 h-32 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto shadow-2xl"
             >
               <Trophy className="w-16 h-16 text-white" />
-            </motion.div>
+            </div>
             
             {/* Sparkle effects */}
             {[...Array(6)].map((_, i) => (
-              <motion.div
+              <div
                 key={i}
                 className="absolute w-2 h-2 bg-yellow-300 rounded-full"
                 style={{
@@ -148,10 +148,10 @@ export function WorkoutCompletionAnimation({
               />
             ))}
           </div>
-        </motion.div>
+        </div>
 
         {/* Congratulations Text */}
-        <motion.div
+        <div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
@@ -161,12 +161,12 @@ export function WorkoutCompletionAnimation({
             Workout Complete!
           </h1>
           <p className="text-lg text-gray-600 mt-2">{workoutName}</p>
-        </motion.div>
+        </div>
 
         {/* Points Animation */}
-        <AnimatePresence>
+        <>
           {showPoints && (
-            <motion.div
+            <div
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: "spring", stiffness: 200 }}
@@ -175,18 +175,18 @@ export function WorkoutCompletionAnimation({
                 <div className="text-center">
                   <div className="flex items-center justify-center gap-2 mb-2">
                     <Zap className="w-8 h-8 text-yellow-500" />
-                    <motion.div
+                    <div
                       className="text-5xl font-bold text-green-600"
                       animate={{ scale: [1, 1.2, 1] }}
                       transition={{ duration: 0.5 }}
                     >
                       {animatedPoints}
-                    </motion.div>
+                    </div>
                     <span className="text-2xl font-bold text-gray-600">pts</span>
                   </div>
                   
                   {bonusMultiplier > 1 && (
-                    <motion.div
+                    <div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       className="mt-2"
@@ -194,18 +194,18 @@ export function WorkoutCompletionAnimation({
                       <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1">
                         {bonusMultiplier}x Bonus - Full Completion!
                       </Badge>
-                    </motion.div>
+                    </div>
                   )}
                 </div>
               </Card>
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
+        </>
 
         {/* Badge Earned Animation */}
-        <AnimatePresence>
+        <>
           {showBadge && (
-            <motion.div
+            <div
               initial={{ scale: 0, rotate: -360 }}
               animate={{ scale: 1, rotate: 0 }}
               exit={{ scale: 0 }}
@@ -213,7 +213,7 @@ export function WorkoutCompletionAnimation({
             >
               <Card className="p-6 bg-gradient-to-br from-purple-50 to-white border-2 border-purple-400">
                 <div className="flex items-center justify-center gap-4">
-                  <motion.div
+                  <div
                     animate={{ 
                       rotate: 360,
                       scale: [1, 1.2, 1]
@@ -224,19 +224,19 @@ export function WorkoutCompletionAnimation({
                     }}
                   >
                     <Award className="w-12 h-12 text-purple-600" />
-                  </motion.div>
+                  </div>
                   <div>
                     <h3 className="font-bold text-lg">New Badge Earned!</h3>
                     <p className="text-sm text-gray-600">Workout Warrior</p>
                   </div>
                 </div>
               </Card>
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
+        </>
 
         {/* Stats Grid */}
-        <motion.div
+        <div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
@@ -264,10 +264,10 @@ export function WorkoutCompletionAnimation({
               <div className="text-xs text-gray-600">Minutes</div>
             </Card>
           </div>
-        </motion.div>
+        </div>
 
         {/* Action Buttons */}
-        <motion.div
+        <div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
@@ -290,7 +290,7 @@ export function WorkoutCompletionAnimation({
               Back to Academy
             </Link>
           </Button>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

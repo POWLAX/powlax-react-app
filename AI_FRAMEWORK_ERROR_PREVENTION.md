@@ -187,6 +187,37 @@ export const viewport: Viewport = {
 
 **Prevention**: Keep `themeColor` in viewport export, not metadata export
 
+### 12. Framer Motion Vendor Chunk Errors ❌
+**Problem**: Missing vendor chunk errors when framer-motion causes build issues
+```bash
+# ❌ ERROR - Missing vendor chunk
+Error: Cannot find module './vendor-chunks/framer-motion.js'
+
+# Common framer-motion imports that cause issues:
+import { motion, AnimatePresence } from 'framer-motion'
+```
+
+**Solution**: Replace with CSS animations using Tailwind classes
+```typescript
+// ❌ WRONG - framer-motion causing vendor chunk errors
+import { motion, AnimatePresence } from 'framer-motion'
+
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  exit={{ opacity: 0, y: 20 }}
+>
+  Content
+</motion.div>
+
+// ✅ CORRECT - CSS animations with Tailwind
+<div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+  Content
+</div>
+```
+
+**Prevention**: Use CSS animations instead of framer-motion to avoid vendor chunk issues
+
 ## AI-Specific Guidelines
 
 ### For ChatGPT/GPT-4

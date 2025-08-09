@@ -1,95 +1,35 @@
 # Page snapshot
 
 ```yaml
-- alert
-- complementary:
-  - heading "POWLAX" [level=1]
-  - img
-  - text: Search drills, strategies... ⌘K
+- dialog "Unhandled Runtime Error":
   - navigation:
-    - link "Dashboard":
-      - /url: /dashboard
-      - img
-      - text: Dashboard
-    - link "Teams":
-      - /url: /teams
-      - img
-      - text: Teams
-    - link "Academy":
-      - /url: /skills-academy
-      - img
-      - text: Academy
-    - link "Resources":
-      - /url: /resources
-      - img
-      - text: Resources
-    - link "Community":
-      - /url: /community
-      - img
-      - text: Community
-- main:
-  - heading "Skills Academy" [level=1]
-  - paragraph: Progressive workout programs to master lacrosse fundamentals
-  - heading "Skills Academy" [level=2]
-  - paragraph: 167 Drills • 118 Workouts • 4 Series
-  - paragraph: Progressive skill development for all levels
-  - button "Start Training"
-  - heading "Quick Start" [level=3]
-  - paragraph: Get started with basic lacrosse skills
-  - text: Beginner • All Positions • 12 workouts
-  - button "Start"
-  - text: "Progress: 0/12 completed"
-  - img
-  - heading "Attack Training" [level=3]
-  - paragraph: Master offensive techniques and strategies
-  - text: Intermediate • All Positions • 18 workouts
-  - button "Start"
-  - text: "Progress: 0/18 completed"
-  - img
-  - heading "Defense Fundamentals" [level=3]
-  - paragraph: Build solid defensive skills
-  - text: Beginner • All Positions • 15 workouts
-  - button "Start"
-  - text: "Progress: 0/15 completed"
-  - img
-  - heading "Wall Ball Mastery" [level=3]
-  - paragraph: Perfect your stick skills
-  - text: All Levels • All Positions • 8 workouts
-  - button "Start"
-  - text: "Progress: 0/8 completed"
-  - img
-  - button "Favorites":
+    - button "previous" [disabled]:
+      - img "previous"
+    - button "next" [disabled]:
+      - img "next"
+    - text: 1 of 1 error Next.js (14.2.5) is outdated
+    - link "(learn more)":
+      - /url: https://nextjs.org/docs/messages/version-staleness
+  - button "Close"
+  - heading "Unhandled Runtime Error" [level=1]
+  - paragraph: "ChunkLoadError: Loading chunk app/(authenticated)/skills-academy/page failed. (error: http://localhost:3000/_next/static/chunks/app/(authenticated)/skills-academy/page.js)"
+  - heading "Call Stack" [level=2]
+  - group:
     - img
-    - text: Favorites
-  - button "Progress":
     - img
-    - text: Progress
-  - button "Schedule":
+    - text: Next.js
+  - heading "<unknown>" [level=3]
+  - text: file:///Users/patrickchapla/Development/POWLAX%20React%20App/React%20Code/powlax-react-app/.next/static/chunks/webpack.js (155:40)
+  - heading "Array.reduce" [level=3]
+  - text: <anonymous>
+  - group:
     - img
-    - text: Schedule
-- button:
-  - img
-- text: P
-- heading "Welcome to POWLAX!" [level=1]
-- paragraph: Let's customize your experience based on your role
-- heading "I am a..." [level=2]
-- button "Coach Plan practices, manage teams, and develop players":
-  - img
-  - heading "Coach" [level=3]
-  - paragraph: Plan practices, manage teams, and develop players
-- button "Player Improve skills, track progress, and complete workouts":
-  - img
-  - heading "Player" [level=3]
-  - paragraph: Improve skills, track progress, and complete workouts
-- button "Parent Support your child's lacrosse development":
-  - img
-  - heading "Parent" [level=3]
-  - paragraph: Support your child's lacrosse development
-- button "Skip for now"
-- button "Start Tour" [disabled]:
-  - text: Start Tour
-  - img
-- img
-- text: Online
-- region "Notifications alt+T"
+    - img
+    - text: Next.js
+  - heading "fn.e" [level=3]
+  - text: file:///Users/patrickchapla/Development/POWLAX%20React%20App/React%20Code/powlax-react-app/.next/static/chunks/webpack.js (391:50)
+  - group:
+    - img
+    - img
+    - text: React
 ```

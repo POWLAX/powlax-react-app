@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { X, ArrowLeft, ArrowRight, CheckCircle } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+// Removed framer-motion - using CSS animations instead
 import { useOnboarding } from '@/contexts/OnboardingContext'
 import { Button } from '@/components/ui/button'
 
@@ -107,18 +107,14 @@ export default function TourOverlay() {
       )}
 
       {/* Tooltip */}
-      <AnimatePresence>
-        <motion.div
-          ref={overlayRef}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
-          className="absolute bg-white rounded-xl shadow-2xl p-6 pointer-events-auto max-w-sm z-10"
-          style={{
-            top: tooltipPosition.top,
-            left: tooltipPosition.left
-          }}
-        >
+      <div
+        ref={overlayRef}
+        className="absolute bg-white rounded-xl shadow-2xl p-6 pointer-events-auto max-w-sm z-10 animate-in fade-in zoom-in-95 duration-300"
+        style={{
+          top: tooltipPosition.top,
+          left: tooltipPosition.left
+        }}
+      >
           {/* Arrow pointing to target */}
           <div
             className="absolute w-4 h-4 bg-white transform rotate-45 border"
@@ -217,8 +213,7 @@ export default function TourOverlay() {
               </div>
             </div>
           </div>
-        </motion.div>
-      </AnimatePresence>
+      </div>
 
       {/* CSS for highlighted element */}
       <style jsx global>{`

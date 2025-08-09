@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react'
 import { BookOpen, Clock, Target, Users, ChevronRight, X, Loader2, Star } from 'lucide-react'
 import dynamic from 'next/dynamic'
-const motion = dynamic(() => import('framer-motion').then(m => ({ default: m.motion })), { ssr: false })
-const AnimatePresence = dynamic(() => import('framer-motion').then(m => ({ default: m.AnimatePresence })), { ssr: false })
+// Removed framer-motion - using CSS animations instead
 import { usePracticeTemplates, PracticeTemplate } from '@/hooks/usePracticeTemplates'
 import { Button } from '@/components/ui/button'
 
@@ -60,12 +59,7 @@ export default function PracticeTemplateSelector({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden"
-      >
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div>
@@ -273,7 +267,7 @@ export default function PracticeTemplateSelector({
             </div>
           )}
         </div>
-      </motion.div>
+      </div>
     </div>
   )
 }

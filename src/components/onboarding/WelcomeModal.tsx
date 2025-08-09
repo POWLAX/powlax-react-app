@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+// Removed framer-motion - using CSS animations instead
 import { Users, GraduationCap, Heart, X, ArrowRight } from 'lucide-react'
 import { useOnboarding } from '@/contexts/OnboardingContext'
 import { Button } from '@/components/ui/button'
@@ -72,12 +72,7 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.9, y: 20 }}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto my-4"
-      >
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto my-4 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300">
         {/* Header */}
         <div className="relative bg-gradient-to-r from-blue-600 to-blue-800 text-white p-4 sm:p-8">
           <button
@@ -88,14 +83,9 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
           </button>
           
           <div className="text-center">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring" }}
-              className="w-12 h-12 sm:w-16 sm:h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4"
-            >
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 animate-in zoom-in duration-500 delay-200">
               <span className="text-xl sm:text-2xl font-bold text-blue-600">P</span>
-            </motion.div>
+            </div>
             <h1 className="text-2xl sm:text-3xl font-bold mb-2">Welcome to POWLAX!</h1>
             <p className="text-blue-100 text-sm sm:text-base">
               Let&apos;s customize your experience based on your role
@@ -145,13 +135,9 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                       </p>
                     </div>
                     {isSelected && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="text-blue-600"
-                      >
+                      <div className="text-blue-600 animate-in zoom-in duration-200">
                         <ArrowRight className="h-5 w-5" />
-                      </motion.div>
+                      </div>
                     )}
                   </div>
                 </button>
@@ -183,7 +169,7 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
             </Button>
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   )
 }

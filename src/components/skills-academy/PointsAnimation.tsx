@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+// Removed framer-motion - using CSS animations instead
 
 interface PointsAnimationProps {
   points: number;
@@ -40,7 +40,7 @@ export function PointsAnimation({ points, multiplier = 1, onComplete }: PointsAn
 
   return (
     <div className="relative">
-      <motion.div
+      <div
         initial={{ scale: 0.5, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.5, type: "spring" }}
@@ -50,9 +50,9 @@ export function PointsAnimation({ points, multiplier = 1, onComplete }: PointsAn
           {displayPoints}
         </div>
         
-        <AnimatePresence>
+        <>
           {showMultiplier && multiplier > 1 && (
-            <motion.div
+            <div
               initial={{ scale: 0, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0, opacity: 0 }}
@@ -60,18 +60,18 @@ export function PointsAnimation({ points, multiplier = 1, onComplete }: PointsAn
               className="mt-2"
             >
               <span className="inline-flex items-center px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 font-semibold">
-                <motion.span
+                <span
                   animate={{ rotate: [0, 10, -10, 0] }}
                   transition={{ duration: 0.5, repeat: 2 }}
                 >
                   ⭐
-                </motion.span>
+                </span>
                 <span className="ml-2">{multiplier}x Bonus!</span>
               </span>
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
-      </motion.div>
+        </>
+      </div>
     </div>
   );
 }
@@ -127,23 +127,23 @@ export function PointTypeAnimation({ pointsBreakdown }: PointTypeAnimationProps)
         const isVisible = visibleTypes.includes(type.key);
         
         return (
-          <motion.div
+          <div
             key={type.key}
             initial={{ scale: 0, opacity: 0 }}
             animate={isVisible ? { scale: 1, opacity: 1 } : {}}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
             className={`text-center p-3 rounded-lg border ${getColorClasses(type.color)}`}
           >
-            <motion.div
+            <div
               animate={isVisible ? { y: [0, -5, 0] } : {}}
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-2xl mb-1"
             >
               {type.icon}
-            </motion.div>
+            </div>
             <div className="text-2xl font-bold">{value}</div>
             <div className="text-xs">{type.label}</div>
-          </motion.div>
+          </div>
         );
       })}
     </div>

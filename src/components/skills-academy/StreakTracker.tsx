@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+// Removed framer-motion - using CSS animations instead
 import { Flame, Calendar, Trophy, TrendingUp } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
@@ -114,13 +114,13 @@ export function StreakTracker({ userId, onStreakUpdate }: StreakTrackerProps) {
         {/* Main Streak Display */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <motion.div
+            <div
               animate={{ scale: [1, 1.2, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
               className={`${getStreakColor()}`}
             >
               <Flame className="w-8 h-8" />
-            </motion.div>
+            </div>
             <div>
               <div className="text-2xl font-bold text-gray-900">
                 {streakData.currentStreak} Day Streak
@@ -131,13 +131,13 @@ export function StreakTracker({ userId, onStreakUpdate }: StreakTrackerProps) {
           
           {/* Streak Multiplier Badge */}
           {streakData.currentStreak >= 3 && (
-            <motion.div
+            <div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full font-bold"
             >
               {Math.min(Math.floor(streakData.currentStreak / 3) + 1, 5)}x Bonus
-            </motion.div>
+            </div>
           )}
         </div>
 
@@ -169,7 +169,7 @@ export function StreakTracker({ userId, onStreakUpdate }: StreakTrackerProps) {
             const isActive = day < streakData.currentStreak;
             
             return (
-              <motion.div
+              <div
                 key={i}
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -181,7 +181,7 @@ export function StreakTracker({ userId, onStreakUpdate }: StreakTrackerProps) {
                 }`}
               >
                 {day === 0 ? 'T' : `-${day}`}
-              </motion.div>
+              </div>
             );
           })}
         </div>
@@ -195,13 +195,13 @@ export function StreakBadge({ streak }: { streak: number }) {
   if (streak < 3) return null;
   
   return (
-    <motion.div
+    <div
       initial={{ scale: 0 }}
       animate={{ scale: 1 }}
       className="inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-orange-400 to-yellow-500 text-white rounded-full text-sm font-bold"
     >
       <Flame className="w-4 h-4" />
       {streak}
-    </motion.div>
+    </div>
   );
 }

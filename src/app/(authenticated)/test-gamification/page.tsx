@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { DifficultyIndicator } from '@/components/gamification/DifficultyIndicator'
 import { StreakCounter } from '@/components/gamification/StreakCounter'
 import { calculateWorkoutPoints } from '@/lib/gamification/point-calculator'
-import { motion, AnimatePresence } from 'framer-motion'
+// Removed framer-motion - using CSS animations instead
 
 export default function TestGamification() {
   const [showReward, setShowReward] = useState(false)
@@ -148,13 +148,13 @@ export default function TestGamification() {
       {/* Reward Animation */}
       <AnimatePresence>
         {showReward && (
-          <motion.div
+          <div
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}
             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50"
           >
-            <motion.div
+            <div
               animate={{ rotate: [0, 360] }}
               transition={{ duration: 1 }}
               className="bg-white rounded-full p-8 shadow-2xl"
@@ -164,8 +164,8 @@ export default function TestGamification() {
                 <div className="text-3xl font-bold text-blue-600">{points} Points!</div>
                 <div className="text-sm text-gray-600 mt-2">Great workout!</div>
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         )}
       </AnimatePresence>
     </div>

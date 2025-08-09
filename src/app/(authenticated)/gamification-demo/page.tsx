@@ -10,7 +10,7 @@ import { DifficultyIndicator, AverageDifficulty, DifficultyBadge } from '@/compo
 import { StreakCounter, MilestoneCelebration } from '@/components/gamification/StreakCounter'
 import { calculateWorkoutPoints, Drill, formatCategoryPoints } from '@/lib/gamification/point-calculator'
 import { Trophy, Zap, AlertCircle, Timer, CheckCircle2, X } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+// Removed framer-motion - using CSS animations instead
 
 // Mock drills for demonstration
 const DEMO_DRILLS: Drill[] = [
@@ -307,27 +307,27 @@ export default function GamificationDemo() {
           {/* Award Animation */}
           <AnimatePresence>
             {showAwardAnimation && lastScore && (
-              <motion.div
+              <div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
                 className="fixed inset-0 flex items-center justify-center z-50 bg-black/50"
                 onClick={() => setShowAwardAnimation(false)}
               >
-                <motion.div
+                <div
                   initial={{ y: 50 }}
                   animate={{ y: 0 }}
                   className="bg-white rounded-lg p-8 max-w-md w-full mx-4"
                 >
                   <div className="text-center">
-                    <motion.div
+                    <div
                       initial={{ rotate: 0 }}
                       animate={{ rotate: 360 }}
                       transition={{ duration: 0.5 }}
                       className="inline-block text-6xl mb-4"
                     >
                       🎉
-                    </motion.div>
+                    </div>
                     
                     <h2 className="text-2xl font-bold mb-4">Workout Complete!</h2>
                     
@@ -375,8 +375,8 @@ export default function GamificationDemo() {
                       Continue
                     </Button>
                   </div>
-                </motion.div>
-              </motion.div>
+                </div>
+              </div>
             )}
           </AnimatePresence>
         </TabsContent>
