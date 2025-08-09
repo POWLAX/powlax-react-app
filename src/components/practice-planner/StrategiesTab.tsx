@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { Filter, Plus, Video, Image, Beaker, ChevronDown, ChevronRight, Search } from 'lucide-react'
+import { useState, useMemo, Fragment } from 'react'
+import { Filter, Plus, Video, Image, Beaker, ChevronDown, ChevronRight, Search, Play } from 'lucide-react'
 import { useStrategies, getStrategiesByGamePhase, searchStrategies } from '@/hooks/useStrategies'
 import VideoModal from './modals/VideoModal'
 import LacrosseLabModal from './modals/LacrosseLabModal'
 import AddCustomStrategiesModal from './modals/AddCustomStrategiesModal'
+import StudyStrategyModal from './modals/StudyStrategyModal'
 
 interface Strategy {
   id: string
@@ -39,6 +40,7 @@ export default function StrategiesTab({
   // Modal states for individual strategies
   const [showVideoModal, setShowVideoModal] = useState(false)
   const [showLabModal, setShowLabModal] = useState(false)
+  const [showStudyStrategyModal, setShowStudyStrategyModal] = useState(false)
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(null)
 
   const togglePhase = (phase: string) => {
@@ -132,9 +134,9 @@ export default function StrategiesTab({
   }
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="p-4 border-b">
+    <>
+      {/* Header - matching Drill Library */}
+      <div className="px-4 pt-2 pb-4 border-b">
         <h3 className="text-lg font-semibold mb-4">Strategies Library</h3>
         
         {/* Action Buttons */}
@@ -198,22 +200,12 @@ export default function StrategiesTab({
                     {strategies.map((strategy) => (
                       <div
                         key={strategy.id}
-                        className="p-3 bg-white border rounded-md hover:bg-gray-50 cursor-pointer"
-                        onClick={() => handleStrategySelect(strategy)}
+                        className="p-3 bg-white border rounded-md hover:bg-gray-50"
                       >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h4 className="font-medium text-sm">{strategy.strategy_name}</h4>
-                            {strategy.source === 'user' && (
-                              <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
-                                Custom
-                              </span>
-                            )}
-                          </div>
-                          
-                          {/* Action Icons */}
-                          <div className="flex items-center gap-1">
-                            {isMobile && (
+                        <div className="flex flex-col gap-2">
+                          {/* Title row with Plus/checkbox on left */}
+                          <div className="flex items-center gap-2">
+                            {isMobile ? (
                               <input
                                 type="checkbox"
                                 checked={selectedStrategies.includes(strategy.id)}
@@ -221,60 +213,47 @@ export default function StrategiesTab({
                                   e.stopPropagation()
                                   handleStrategySelect(strategy)
                                 }}
-                                className="mr-2"
-                                onClick={(e) => e.stopPropagation()}
+                                className="flex-shrink-0"
                               />
-                            )}
-                            
-                            {hasVideo(strategy) && (
-                              <button
-                                onClick={(e) => openVideoModal(strategy, e)}
-                                className="p-1.5 hover:bg-gray-100 rounded"
-                                title="View Video"
-                              >
-                                <Video className="h-4 w-4 text-gray-600" />
-                              </button>
-                            )}
-                            
-                            {hasThumbnails(strategy) && (
-                              <button
-                                className="p-1.5 hover:bg-gray-100 rounded"
-                                title="View Images"
-                              >
-                                <Image className="h-4 w-4 text-gray-600" />
-                              </button>
-                            )}
-                            
-                            {hasLabUrls(strategy) && (
-                              <button
-                                onClick={(e) => openLabModal(strategy, e)}
-                                className="p-1.5 hover:bg-gray-100 rounded"
-                                title="Lacrosse Lab"
-                              >
-                                <Beaker className="h-4 w-4 text-gray-600" />
-                              </button>
-                            )}
-                            
-                            {!isMobile && (
+                            ) : (
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation()
                                   handleStrategySelect(strategy)
                                 }}
-                                className="p-1.5 hover:bg-gray-100 rounded text-blue-600"
+                                className="p-1 border border-gray-300 hover:bg-gray-50 rounded flex-shrink-0"
                                 title="Add to Practice"
                               >
-                                <Plus className="h-4 w-4" />
+                                <Plus className="h-4 w-4 text-gray-600" />
                               </button>
                             )}
+                            <h4 className="font-medium text-sm flex-1">{strategy.strategy_name}</h4>
+                          </div>
+                          
+                          {/* Source Badge and Study button */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              {strategy.source === 'user' && (
+                                <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+                                  Custom
+                                </span>
+                              )}
+                            </div>
+                            
+                            {/* Study button replacing all icons */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setSelectedStrategy(strategy)
+                                setShowStudyStrategyModal(true)
+                              }}
+                              className="inline-flex items-center gap-1 px-2 py-1 bg-gray-900 text-white text-xs rounded border border-gray-700 hover:bg-gray-800 transition-colors"
+                            >
+                              <Play className="h-3 w-3" fill="white" />
+                              Study
+                            </button>
                           </div>
                         </div>
-                        
-                        {strategy.description && (
-                          <p className="text-xs text-gray-600 mt-1 line-clamp-2">
-                            {strategy.description}
-                          </p>
-                        )}
                       </div>
                     ))}
                   </div>
@@ -311,8 +290,14 @@ export default function StrategiesTab({
               lab_urls: selectedStrategy.lacrosse_lab_links
             }}
           />
+          
+          <StudyStrategyModal
+            isOpen={showStudyStrategyModal}
+            onClose={() => setShowStudyStrategyModal(false)}
+            strategy={selectedStrategy}
+          />
         </>
       )}
-    </div>
+    </>
   )
 }

@@ -110,7 +110,10 @@ export function SkillsAcademyHubEnhanced({ userId }: SkillsAcademyHubEnhancedPro
             </p>
           </div>
           <div className="text-right">
-            <Button className="bg-powlax-blue hover:bg-powlax-blue/90 text-white">
+            <Button 
+              onClick={() => handleStartWorkout(1)}
+              className="bg-powlax-blue hover:bg-powlax-blue/90 text-white"
+            >
               Start Training
             </Button>
           </div>
@@ -174,15 +177,27 @@ export function SkillsAcademyHubEnhanced({ userId }: SkillsAcademyHubEnhancedPro
 
       {/* Quick Actions */}
       <div className="flex gap-4">
-        <Button variant="outline" className="flex-1">
+        <Button 
+          variant="outline" 
+          className="flex-1"
+          onClick={() => router.push('/skills-academy/favorites')}
+        >
           <Star className="w-4 h-4 mr-2" />
           Favorites
         </Button>
-        <Button variant="outline" className="flex-1">
+        <Button 
+          variant="outline" 
+          className="flex-1"
+          onClick={() => router.push('/skills-academy/progress')}
+        >
           <TrendingUp className="w-4 h-4 mr-2" />
           Progress
         </Button>
-        <Button variant="outline" className="flex-1">
+        <Button 
+          variant="outline" 
+          className="flex-1"
+          onClick={() => router.push('/skills-academy/schedule')}
+        >
           <Calendar className="w-4 h-4 mr-2" />
           Schedule
         </Button>

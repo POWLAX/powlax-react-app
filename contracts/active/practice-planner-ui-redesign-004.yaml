@@ -1,0 +1,363 @@
+---
+contractId: practice-planner-ui-redesign-004
+contractVersion: 2.0.0
+contractDate: 2025-01-09
+contractType: parallel-execution
+projectName: POWLAX Practice Planner Active Strategies Redesign
+clientContext: Redesign Active Strategies section with two-column layout and colored borders
+
+# EXECUTION STRATEGY
+executionStrategy:
+  type: parallel
+  agentCount: 3
+  ultraThinkCompleted: true
+  ultraThinkDuration: 10 # minutes minimum
+  estimatedDuration: 120 # minutes total
+  
+# ULTRA THINK PHASE (MANDATORY - 10 MINUTES MINIMUM)
+ultraThinkPhase:
+  completed: true
+  duration: 10
+  risksIdentified:
+    - "Strategy categorization by game phase requires accurate data"
+    - "Two-column layout needs responsive design for mobile"
+    - "Color coordination for different game phases"
+    - "Click handlers must not conflict with X button"
+    - "Modal state management in parent component"
+  mitigationStrategies:
+    - "Map strategies to correct offensive/defensive columns"
+    - "Implement mobile-first responsive design"
+    - "Define consistent color palette for borders"
+    - "Use event.stopPropagation for nested buttons"
+    - "Centralize modal state in practice-plans page"
+  commonErrorsReviewed:
+    - "NO lazy loading or dynamic imports"
+    - "ALL components must use 'use client' directive"
+    - "Proper event handling for nested interactive elements"
+    - "Consistent border colors across game phases"
+
+# PROJECT OVERVIEW
+projectOverview:
+  description: |
+    Complete redesign of the Active Strategies section with:
+    - Two-column layout: "With Ball" and "Defending Ball"
+    - Flat cards with colored borders and black text
+    - Game phase on left, strategy name on right
+    - Clickable strategies that open Study Strategy Modal
+    - Conditional display based on selected strategies
+    - Organized by offensive/defensive game phases
+  
+  businessValue: |
+    - Clear visual organization of offensive vs defensive strategies
+    - Quick strategy reference during practice
+    - Improved coaching workflow with grouped game phases
+    - Better field usability with clear visual hierarchy
+  
+  technicalScope: |
+    - Redesign ActiveStrategiesSection component
+    - Implement two-column responsive layout
+    - Add click handlers for Study modal
+    - Update strategy card styling
+    - Ensure strategies data structure supports game phases
+
+# REQUIREMENTS
+requirements:
+  functional:
+    - Two-column layout on desktop ("With Ball" and "Defending Ball")
+    - Single column on mobile
+    - Flat strategy cards with colored borders
+    - Black text throughout cards
+    - Game phase aligned left, strategy name aligned right
+    - Clickable cards open Study Strategy Modal
+    - X button for removal (doesn't trigger card click)
+    - Conditional display (only show sections with strategies)
+    
+  layout:
+    withBallColumn:
+      title: "With Ball"
+      gamePhases:
+        - Clear
+        - Offensive Transition
+        - Settled Offense
+        - Man Up
+    defendingBallColumn:
+      title: "Defending Ball"
+      gamePhases:
+        - Ride
+        - Defensive Transition
+        - Settled Defense
+        - Man Down
+    bottomSection:
+      gamePhases:
+        - Substitutions
+        - Face-Offs
+    
+  designSpecifications:
+    cardStyling:
+      text: "text-black"
+      background: "bg-white"
+      borders: "border-2"
+      layout: "flex justify-between items-center"
+      padding: "px-3 py-2"
+      hover: "hover:bg-gray-50 cursor-pointer"
+    borderColors:
+      clear: "border-blue-500"
+      offensiveTransition: "border-green-500"
+      settledOffense: "border-purple-500"
+      manUp: "border-indigo-500"
+      ride: "border-red-500"
+      defensiveTransition: "border-orange-500"
+      settledDefense: "border-yellow-500"
+      manDown: "border-pink-500"
+      substitutions: "border-gray-500"
+      faceOffs: "border-teal-500"
+
+# DATA VERIFICATION
+dataVerification:
+  strategyFields:
+    - strategy_name: "Display name of strategy"
+    - strategy_categories: "Game phase categorization"
+    - description: "Strategy description"
+    - complexity: "Difficulty level"
+    - vimeo_link: "Video URL"
+    - lacrosse_lab_links: "Diagram URLs"
+    - coaches_notes: "Coach-specific notes"
+  
+  requiredForDisplay:
+    - strategy_name: "REQUIRED"
+    - strategy_categories: "REQUIRED for correct column placement"
+
+# PARALLEL AGENTS DISTRIBUTION
+parallelAgents:
+  agent_1:
+    type: general-purpose
+    name: "Active Strategies Component Redesigner"
+    scope: "Redesign ActiveStrategiesSection with two-column layout"
+    responsibilities:
+      - Implement two-column layout structure
+      - Create "With Ball" and "Defending Ball" sections
+      - Add bottom section for Substitutions/Face-Offs
+      - Flat card design with colored borders
+      - Game phase left, name right alignment
+      - Click handlers for Study modal
+      - Conditional display logic
+    files:
+      modify:
+        - src/components/practice-planner/ActiveStrategiesSection.tsx
+      read:
+        - src/components/practice-planner/modals/StudyStrategyModal.tsx
+        - src/hooks/useStrategies.ts
+      noTouch:
+        - src/app/(authenticated)/teams/[teamId]/practice-plans/page.tsx
+    deliverables:
+      - Two-column responsive layout
+      - Colored border strategy cards
+      - Clickable cards with modal trigger
+      - Proper game phase categorization
+
+  agent_2:
+    type: general-purpose
+    name: "Page Integration Specialist"
+    scope: "Wire up Study Strategy Modal with Active Strategies clicks"
+    responsibilities:
+      - Add onStrategyClick handler to ActiveStrategiesSection
+      - Connect to existing StudyStrategyModal
+      - Manage modal state for selected strategy
+      - Ensure X button doesn't trigger modal
+      - Test click interactions
+    files:
+      modify:
+        - src/app/(authenticated)/teams/[teamId]/practice-plans/page.tsx
+      read:
+        - src/components/practice-planner/ActiveStrategiesSection.tsx
+        - src/components/practice-planner/modals/StudyStrategyModal.tsx
+      noTouch:
+        - src/components/practice-planner/DrillCard.tsx
+    deliverables:
+      - Working strategy click handlers
+      - Modal opens with correct strategy
+      - X button removes without opening modal
+
+  agent_3:
+    type: general-purpose
+    name: "Data Structure Validator"
+    scope: "Verify strategies library shows only strategies"
+    responsibilities:
+      - Check StrategiesTab component data
+      - Verify no drills mixed with strategies
+      - Validate strategy_categories field
+      - Document data structure findings
+      - Ensure proper categorization
+    files:
+      read:
+        - src/components/practice-planner/StrategiesTab.tsx
+        - src/hooks/useStrategies.ts
+        - src/types/database.types.ts
+      create:
+        - docs/data-structure-verification.md
+      noTouch:
+        - src/components/practice-planner/ActiveStrategiesSection.tsx
+    deliverables:
+      - Data structure documentation
+      - Verification of strategies-only content
+      - Game phase mapping confirmation
+
+# SHARED INTERFACES
+sharedInterfaces: |
+  interface Strategy {
+    id: string
+    strategy_name: string
+    strategy_categories?: string
+    description?: string
+    complexity?: string
+    age_group?: string
+    vimeo_link?: string
+    lacrosse_lab_links?: any
+    thumbnail_urls?: any
+    coaches_notes?: string[]
+    source?: 'powlax' | 'user'
+  }
+  
+  interface ActiveStrategiesSectionProps {
+    strategies: Strategy[]
+    onRemove: (id: string) => void
+    onStrategyClick: (strategy: Strategy) => void
+  }
+  
+  type GamePhase = 
+    | 'Clear'
+    | 'Offensive Transition'
+    | 'Settled Offense'
+    | 'Man Up'
+    | 'Ride'
+    | 'Defensive Transition'
+    | 'Settled Defense'
+    | 'Man Down'
+    | 'Substitutions'
+    | 'Face-Offs'
+
+# SUCCESS METRICS
+successMetrics:
+  required:
+    - Two-column layout displays correctly on desktop
+    - Single column on mobile (responsive)
+    - Strategy cards have colored borders
+    - Black text throughout cards
+    - Game phase left-aligned, name right-aligned
+    - Cards clickable and open Study modal
+    - X button removes without opening modal
+    - Only sections with strategies are shown
+    - No TypeScript errors
+    - No console errors
+  quality:
+    - Clear visual separation of offensive/defensive
+    - Proper color coding for game phases
+    - Smooth hover states
+    - Modal opens with correct strategy data
+    - Responsive breakpoint at 768px
+
+# INTEGRATION PLAN
+integrationPlan:
+  phase1:
+    duration: 40
+    agents: [agent_1]
+    description: "Redesign Active Strategies component"
+    
+  phase2:
+    duration: 40
+    agents: [agent_2]
+    description: "Wire up modal interactions"
+    
+  phase3:
+    duration: 20
+    agents: [agent_3]
+    description: "Verify data structure"
+    
+  testing:
+    duration: 20
+    description: "Test all interactions and responsive design"
+
+# TESTING REQUIREMENTS
+testingRequirements:
+  unitTests:
+    - Strategy cards render with correct borders
+    - Click handlers trigger modal
+    - X button removes strategy
+    - Conditional rendering works
+    
+  integrationTests:
+    - Modal receives correct strategy data
+    - Two-column layout responsive
+    - Game phases categorized correctly
+    
+  visualTests:
+    - Border colors match game phases
+    - Text is black throughout
+    - Alignment is correct (left/right)
+    - Mobile layout single column
+
+# COLOR PALETTE REFERENCE
+colorPalette:
+  offensive:
+    clear: "#3B82F6"           # blue-500
+    offensiveTransition: "#10B981"  # green-500
+    settledOffense: "#A855F7"  # purple-500
+    manUp: "#6366F1"           # indigo-500
+  defensive:
+    ride: "#EF4444"            # red-500
+    defensiveTransition: "#F97316"  # orange-500
+    settledDefense: "#EAB308"  # yellow-500
+    manDown: "#EC4899"         # pink-500
+  special:
+    substitutions: "#6B7280"   # gray-500
+    faceOffs: "#14B8A6"       # teal-500
+
+# ROLLBACK PLAN
+rollbackPlan:
+  triggers:
+    - Active Strategies section breaks
+    - Modal stops opening on click
+    - Layout becomes non-responsive
+  steps:
+    - Git revert to previous commit
+    - Clear .next cache
+    - Restart development server
+    - Document issues for resolution
+
+# CONTRACT STATUS
+status:
+  stage: ready_for_execution
+  lastUpdated: 2025-01-09T10:00:00Z
+  approvedBy: pending_user_approval
+  
+# AGENT PROGRESS TRACKING
+agentProgress:
+  agent_1:
+    status: not_started
+    startTime: null
+    completionTime: null
+    blockers: []
+    
+  agent_2:
+    status: not_started
+    startTime: null
+    completionTime: null
+    blockers: []
+    
+  agent_3:
+    status: not_started
+    startTime: null
+    completionTime: null
+    blockers: []
+
+# NOTES
+notes: |
+  - This contract focuses specifically on Active Strategies redesign
+  - Two-column layout is desktop-only (768px+)
+  - Mobile remains single column for usability
+  - Strategy cards must be clickable to open Study modal
+  - X button must not trigger card click (stopPropagation)
+  - Colors are predefined for consistent game phase identification
+  - Only display sections that have strategies selected
+  - Strategies Tab should only show strategies (no drills)
+  - Data structure verification needed to ensure proper categorization

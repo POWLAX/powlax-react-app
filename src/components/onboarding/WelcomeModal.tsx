@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-// Removed framer-motion - using CSS animations instead
 import { Users, GraduationCap, Heart, X, ArrowRight } from 'lucide-react'
 import { useOnboarding } from '@/contexts/OnboardingContext'
 import { Button } from '@/components/ui/button'

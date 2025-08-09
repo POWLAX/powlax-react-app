@@ -3,11 +3,6 @@
 import { useRequireAuth } from '@/contexts/JWTAuthContext'
 import BottomNavigation from '@/components/navigation/BottomNavigation'
 import SidebarNavigation from '@/components/navigation/SidebarNavigation'
-// import FloatingActionButton from '@/components/common/FloatingActionButton' // Temporarily disabled - framer-motion issue
-import TourOverlay from '@/components/onboarding/TourOverlay'
-import WelcomeModal from '@/components/onboarding/WelcomeModal'
-import OfflineIndicator from '@/components/common/OfflineIndicator'
-import { useState, useEffect } from 'react'
 import '../globals.css'
 
 export default function AuthenticatedLayout({
@@ -18,16 +13,6 @@ export default function AuthenticatedLayout({
   // Temporarily disable auth loading to fix dashboard
   // const { loading } = useRequireAuth()
   const loading = false // Force no loading
-  const [showWelcome, setShowWelcome] = useState(false)
-
-  useEffect(() => {
-    // Check if user has seen welcome modal
-    const hasSeenWelcome = localStorage.getItem('powlax-welcome-seen')
-    if (!hasSeenWelcome) {
-      // Small delay to ensure page is loaded
-      setTimeout(() => setShowWelcome(true), 1000)
-    }
-  }, [])
 
   if (loading) {
     return (
@@ -50,21 +35,7 @@ export default function AuthenticatedLayout({
         </main>
         
         <BottomNavigation />
-        
-        {/* FAB - Only show on mobile */}
-        {/* <div className="md:hidden">
-          <FloatingActionButton />
-        </div> */}
-        
-        {/* Onboarding components */}
-        <TourOverlay />
-        <WelcomeModal 
-          isOpen={showWelcome} 
-          onClose={() => setShowWelcome(false)} 
-        />
-        
-        {/* Offline support */}
-        <OfflineIndicator />
+
       </div>
     </div>
   )

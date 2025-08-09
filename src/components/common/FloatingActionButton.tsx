@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Plus, Calendar, Play, Clock, X } from 'lucide-react'
-// Removed framer-motion - using CSS animations instead
 import Link from 'next/link'
 
 interface QuickAction {

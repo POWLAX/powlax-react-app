@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useParams } from 'next/navigation'
-import { Calendar, Clock, MapPin, Save, Printer, RefreshCw, FolderOpen, Plus, Target, Loader2 } from 'lucide-react'
+import { useParams, useRouter, usePathname } from 'next/navigation'
+import { Calendar, Clock, MapPin, Save, Printer, RefreshCw, FolderOpen, Plus, Target, Loader2, ChevronUp, Home, Users, GraduationCap, BookOpen, MessageCircle } from 'lucide-react'
 import DrillLibraryTabbed from '@/components/practice-planner/DrillLibraryTabbed'
 import StrategyCard from '@/components/practice-planner/StrategyCard'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
@@ -27,6 +27,9 @@ import { toast } from 'sonner'
 export default function PracticePlansPage() {
   const params = useParams()
   const teamId = params.teamId as string
+  const router = useRouter()
+  const pathname = usePathname()
+  const [showNavigation, setShowNavigation] = useState(false)
   const { savePracticePlan, plans, loading: plansLoading } = usePracticePlans(teamId)
   const { drills: supabaseDrills, refreshDrills } = useDrills()
   const { isPrinting, printContent } = usePrint()
@@ -279,8 +282,8 @@ export default function PracticePlansPage() {
   }, {} as Record<string, any[]>)
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
+    <div className="flex flex-col min-h-screen">
+      {/* Header - Scrolls with content */}
       <div className="bg-white border-b px-4 py-3">
         {/* Mobile Layout */}
         <div className="md:hidden">
@@ -417,19 +420,24 @@ export default function PracticePlansPage() {
         </div>
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
-        {/* Main Content */}
-        <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 flex">
+        {/* Main Content - Scrolls naturally */}
+        <div className="flex-1 p-4">
           {/* Active Strategies Section */}
           {selectedStrategies.length > 0 && (
-            <ActiveStrategiesSection
-              strategies={selectedStrategies}
-              onRemoveStrategy={handleRemoveStrategy}
-              onAddStrategy={() => setShowStrategiesListModal(true)}
-            />
+            <div className="mb-4">
+              <ActiveStrategiesSection
+                strategies={selectedStrategies}
+                onRemove={handleRemoveStrategy}
+                onStrategyClick={(strategy) => {
+                  setSelectedStrategy(strategy)
+                  setShowStudyStrategyModal(true)
+                }}
+              />
+            </div>
           )}
 
-          {/* Practice Schedule Card */}
+          {/* Practice Schedule Card with Practice Info */}
           <div className="mb-4">
             <PracticeScheduleCard
               practiceDate={practiceDate}
@@ -444,35 +452,16 @@ export default function PracticePlansPage() {
               setAddSetupTime={setAddSetupTime}
               setupDuration={setupDuration}
               setSetupDuration={setSetupDuration}
+              practiceNotes={practiceNotes}
+              setPracticeNotes={setPracticeNotes}
             />
-            
-            {/* Duration Progress Bar */}
-            <div className="bg-white rounded-lg shadow-sm border p-4 mt-4">
-              <PracticeDurationBar 
-                totalDuration={duration}
-                usedDuration={totalDrillTime}
-              />
-              
-              {/* Practice Info and Goals Accordion */}
-              <Accordion type="single" collapsible className="mt-4">
-                <AccordionItem value="practice-info">
-                  <AccordionTrigger>Practice Info and Goals</AccordionTrigger>
-                  <AccordionContent>
-                    <textarea
-                      placeholder="Add your practice goals and notes here..."
-                      className="w-full p-3 border rounded-md resize-none h-24"
-                      value={practiceNotes}
-                      onChange={(e) => setPracticeNotes(e.target.value)}
-                    />
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </div>
           </div>
 
 
           {/* Practice Timeline */}
           <div className="bg-white rounded-lg shadow-sm border p-4">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Practice Timeline</h2>
+            
             <PracticeTimelineWithParallel
               drills={timeSlots}
               setDrills={setTimeSlots}
@@ -484,12 +473,14 @@ export default function PracticePlansPage() {
                 setSelectedDrill(drill)
                 setShowStudyDrillModal(true)
               }}
+              totalDuration={duration}
+              usedDuration={totalDrillTime}
             />
           </div>
         </div>
 
         {/* Drill Library Sidebar - Desktop/Tablet */}
-        <div className="hidden md:block w-80 lg:w-96 border-l bg-white overflow-y-auto">
+        <div className="hidden md:block w-80 lg:w-96 border-l bg-white sticky top-0 h-screen overflow-y-auto">
           <DrillLibraryTabbed 
             onAddDrill={handleAddDrill}
             onSelectStrategy={handleSelectStrategy}
@@ -499,15 +490,15 @@ export default function PracticePlansPage() {
         </div>
       </div>
 
-      {/* Mobile Drill Library Modal */}
+      {/* Mobile Drill Library Modal - Positioned at top */}
       {showDrillLibrary && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 md:hidden">
-          <div className="absolute inset-x-0 bottom-0 bg-white rounded-t-xl max-h-[80vh] overflow-y-auto">
+          <div className="absolute inset-x-0 top-0 bg-white rounded-b-xl max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Drill Library</h3>
+              <h3 className="text-lg font-semibold">Add to Plan</h3>
               <button
                 onClick={() => setShowDrillLibrary(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-gray-700 text-2xl"
               >
                 ✕
               </button>
@@ -522,14 +513,82 @@ export default function PracticePlansPage() {
         </div>
       )}
 
-      {/* Mobile Add to Plan Button */}
+      {/* Mobile Add to Plan Button - 3px above menu tab */}
       <button
         onClick={() => setShowDrillLibrary(true)}
-        className="fixed bottom-16 left-4 right-4 bg-blue-600 text-white rounded-lg py-3 shadow-lg md:hidden z-40"
+        className="fixed bottom-[25px] left-4 right-4 bg-blue-600 text-white rounded-lg py-3 shadow-lg md:hidden z-40"
       >
         <Plus className="h-5 w-5 inline mr-2" />
         Add to Plan
       </button>
+      
+      {/* Pull-up Navigation Menu for Mobile */}
+      <div className="md:hidden">
+        {/* Pull Tab - Full width across bottom */}
+        <button
+          onClick={() => setShowNavigation(!showNavigation)}
+          className="fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-[3px] z-50 flex items-center justify-center gap-2"
+        >
+          <ChevronUp className={`h-4 w-4 transform transition-transform ${showNavigation ? 'rotate-180' : ''}`} />
+          <span className="text-xs">Menu</span>
+        </button>
+        
+        {/* Navigation Menu */}
+        <div className={`fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 transform transition-transform duration-300 z-40 ${showNavigation ? 'translate-y-0' : 'translate-y-full'}`}>
+          <nav className="flex justify-around py-2">
+            <button
+              onClick={() => {
+                router.push('/dashboard')
+                setShowNavigation(false)
+              }}
+              className="flex flex-col items-center p-2 text-gray-600 hover:text-blue-600"
+            >
+              <Home className="h-6 w-6" />
+              <span className="text-xs mt-1">Dashboard</span>
+            </button>
+            <button
+              onClick={() => {
+                router.push('/teams')
+                setShowNavigation(false)
+              }}
+              className="flex flex-col items-center p-2 text-blue-600"
+            >
+              <Users className="h-6 w-6" />
+              <span className="text-xs mt-1">Teams</span>
+            </button>
+            <button
+              onClick={() => {
+                router.push('/academy')
+                setShowNavigation(false)
+              }}
+              className="flex flex-col items-center p-2 text-gray-600 hover:text-blue-600"
+            >
+              <GraduationCap className="h-6 w-6" />
+              <span className="text-xs mt-1">Academy</span>
+            </button>
+            <button
+              onClick={() => {
+                router.push('/resources')
+                setShowNavigation(false)
+              }}
+              className="flex flex-col items-center p-2 text-gray-600 hover:text-blue-600"
+            >
+              <BookOpen className="h-6 w-6" />
+              <span className="text-xs mt-1">Resources</span>
+            </button>
+            <button
+              onClick={() => {
+                router.push('/community')
+                setShowNavigation(false)
+              }}
+              className="flex flex-col items-center p-2 text-gray-600 hover:text-blue-600"
+            >
+              <MessageCircle className="h-6 w-6" />
+              <span className="text-xs mt-1">Community</span>
+            </button>
+          </nav>
+        </div>
+      </div>
 
       {/* Save Practice Modal */}
       <SavePracticeModal
@@ -574,6 +633,17 @@ export default function PracticePlansPage() {
           isOpen={showStudyDrillModal}
           onClose={() => setShowStudyDrillModal(false)}
           drill={selectedDrill}
+          onUpdateDrill={(updatedDrill) => {
+            // Update the drill in timeSlots
+            const newTimeSlots = timeSlots.map(slot => ({
+              ...slot,
+              drills: slot.drills.map(d => 
+                d.id === updatedDrill.id ? updatedDrill : d
+              )
+            }))
+            setTimeSlots(newTimeSlots)
+            setSelectedDrill(updatedDrill)
+          }}
         />
       )}
 

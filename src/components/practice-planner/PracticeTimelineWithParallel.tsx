@@ -3,6 +3,7 @@
 import DrillCard from './DrillCard'
 import ParallelDrillPicker from './ParallelDrillPicker'
 import SetupTimeModal from './modals/SetupTimeModal'
+import PracticeDurationBar from './PracticeDurationBar'
 import { useState } from 'react'
 import { Edit, Clock } from 'lucide-react'
 
@@ -32,7 +33,9 @@ interface PracticeTimelineProps {
   setupTime: number
   setupNotes?: string[]
   onSetupNotesChange?: (notes: string[]) => void
-  onStudyDrill?: (drill: Drill) => void
+  onStudyDrill?: (drill: any) => void
+  totalDuration: number
+  usedDuration: number
 }
 
 export default function PracticeTimelineWithParallel({ 
@@ -42,10 +45,14 @@ export default function PracticeTimelineWithParallel({
   setupTime,
   setupNotes = [],
   onSetupNotesChange,
-  onStudyDrill
+  onStudyDrill,
+  totalDuration,
+  usedDuration
 }: PracticeTimelineProps) {
   const [showParallelPicker, setShowParallelPicker] = useState<number | null>(null)
   const [showSetupModal, setShowSetupModal] = useState(false)
+  const [editingParallelDuration, setEditingParallelDuration] = useState<number | null>(null)
+  const [tempParallelDuration, setTempParallelDuration] = useState<string>('')
 
   const calculateTime = (baseTime: string, minutesToAdd: number): string => {
     const [hours, minutes] = baseTime.split(':').map(Number)
@@ -181,6 +188,14 @@ export default function PracticeTimelineWithParallel({
     <div>
       {getSetupTime()}
       
+      {/* Duration Progress Bar - Between setup time and drills */}
+      <div className="my-4">
+        <PracticeDurationBar 
+          totalDuration={totalDuration}
+          usedDuration={usedDuration}
+        />
+      </div>
+      
       {/* Setup Time Modal */}
       <SetupTimeModal
         isOpen={showSetupModal}
@@ -192,97 +207,157 @@ export default function PracticeTimelineWithParallel({
       
       <div className="space-y-4">
         {timeSlots.map((slot, slotIndex) => (
-          <div 
-            key={slot.id} 
-            className="relative"
-          >
-            <div className="flex items-start gap-2">
-              {/* Time indicator for the slot */}
-              <div className="text-lg font-semibold text-gray-700 mt-4 min-w-[80px]">
-                {getSlotStartTime(slotIndex)}
-              </div>
-              
-              {/* Drills in this time slot */}
-              <div className="flex-1">
-                {slot.drills.length === 1 ? (
-                  // Single drill - normal layout
-                  <DrillCard
-                    drill={slot.drills[0]}
-                    startTime={getSlotStartTime(slotIndex)}
-                    index={slotIndex}
-                    onUpdate={(updatedDrill) => handleUpdateDrill(slotIndex, 0, updatedDrill)}
-                    onRemove={() => handleRemoveDrill(slotIndex, 0)}
-                    onMoveUp={() => handleMoveSlot(slotIndex, 'up')}
-                    onMoveDown={() => handleMoveSlot(slotIndex, 'down')}
-                    onAddParallel={
-                      slot.drills.length < 4
-                        ? () => setShowParallelPicker(slotIndex)
-                        : undefined
-                    }
-                    canMoveUp={slotIndex > 0}
-                    canMoveDown={slotIndex < timeSlots.length - 1}
-                    isParallel={false}
-                    onStudyDrill={onStudyDrill}
-                  />
-                ) : (
-                  // Multiple drills - parallel layout with visual lanes
-                  <div className="bg-gray-100 border-2 border-gray-200 rounded-lg p-3">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="bg-purple-600 text-white text-xs font-semibold px-2 py-1 rounded">
-                        PARALLEL - {slot.drills.length} activities
-                      </div>
-                    </div>
-                    
-                    <div className={`grid gap-3 ${
-                      slot.drills.length === 2 ? 'md:grid-cols-2' : 
-                      slot.drills.length === 3 ? 'md:grid-cols-3' : 
-                      'md:grid-cols-2 lg:grid-cols-4'
-                    }`}>
-                      {slot.drills.map((drill, drillIndex) => (
-                        <div 
-                          key={drill.id}
-                          className="bg-white rounded-lg"
-                        >
-                          
-                          <DrillCard
-                            drill={drill}
-                            startTime={getSlotStartTime(slotIndex)}
-                            index={slotIndex}
-                            onUpdate={(updatedDrill) => handleUpdateDrill(slotIndex, drillIndex, updatedDrill)}
-                            onRemove={() => handleRemoveDrill(slotIndex, drillIndex)}
-                            onMoveUp={() => handleMoveSlot(slotIndex, 'up')}
-                            onMoveDown={() => handleMoveSlot(slotIndex, 'down')}
-                            onAddParallel={
-                              drillIndex === 0 && slot.drills.length < 4
-                                ? () => setShowParallelPicker(slotIndex)
-                                : undefined
-                            }
-                            canMoveUp={slotIndex > 0}
-                            canMoveDown={slotIndex < timeSlots.length - 1}
-                            isParallel={true}
-                            parallelLane={drillIndex + 1}
-                            onStudyDrill={onStudyDrill}
+          <div key={slot.id} className="relative">
+            {slot.drills.length === 1 ? (
+              // Single drill - normal layout (time is in the DrillCard)
+              <DrillCard
+                drill={slot.drills[0]}
+                startTime={getSlotStartTime(slotIndex)}
+                index={slotIndex}
+                onUpdate={(updatedDrill) => handleUpdateDrill(slotIndex, 0, updatedDrill)}
+                onRemove={() => handleRemoveDrill(slotIndex, 0)}
+                onMoveUp={() => handleMoveSlot(slotIndex, 'up')}
+                onMoveDown={() => handleMoveSlot(slotIndex, 'down')}
+                onAddParallel={
+                  slot.drills.length < 4
+                    ? () => setShowParallelPicker(slotIndex)
+                    : undefined
+                }
+                canMoveUp={slotIndex > 0}
+                canMoveDown={slotIndex < timeSlots.length - 1}
+                isParallel={false}
+                onStudyDrill={onStudyDrill}
+              />
+            ) : (
+              // Multiple drills - parallel layout stacked vertically
+              <div className="bg-gray-100 border border-gray-200 rounded-lg overflow-hidden">
+                {/* Dark Blue Header with Time and Navigation */}
+                <div className="bg-blue-900 text-white px-4 py-2 flex items-center justify-between">
+                  {/* Up Button - Left Aligned */}
+                  <button
+                    onClick={() => handleMoveSlot(slotIndex, 'up')}
+                    disabled={slotIndex === 0}
+                    className={`p-1 rounded border border-white/50 hover:bg-blue-800 hover:border-white transition-colors ${slotIndex === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
+                  >
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                    </svg>
+                  </button>
+
+                  {/* Time and Duration - Center Aligned */}
+                  <div className="flex items-center gap-3">
+                    <span className="text-lg font-bold">{getSlotStartTime(slotIndex)}</span>
+                    <div className="flex items-center gap-1">
+                      {editingParallelDuration === slotIndex ? (
+                        <>
+                          <input
+                            type="number"
+                            value={tempParallelDuration}
+                            onChange={(e) => setTempParallelDuration(e.target.value)}
+                            onBlur={() => {
+                              const duration = parseInt(tempParallelDuration)
+                              if (duration > 0 && duration <= 999) {
+                                const newTimeSlots = [...timeSlots]
+                                // Update all drills in this slot to the new duration
+                                newTimeSlots[slotIndex].drills = newTimeSlots[slotIndex].drills.map(d => ({...d, duration}))
+                                newTimeSlots[slotIndex].duration = duration
+                                setTimeSlots(newTimeSlots)
+                              } else {
+                                setTempParallelDuration(slot.duration.toString())
+                              }
+                              setEditingParallelDuration(null)
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                const duration = parseInt(tempParallelDuration)
+                                if (duration > 0 && duration <= 999) {
+                                  const newTimeSlots = [...timeSlots]
+                                  newTimeSlots[slotIndex].drills = newTimeSlots[slotIndex].drills.map(d => ({...d, duration}))
+                                  newTimeSlots[slotIndex].duration = duration
+                                  setTimeSlots(newTimeSlots)
+                                } else {
+                                  setTempParallelDuration(slot.duration.toString())
+                                }
+                                setEditingParallelDuration(null)
+                              }
+                              if (e.key === 'Escape') {
+                                setTempParallelDuration(slot.duration.toString())
+                                setEditingParallelDuration(null)
+                              }
+                            }}
+                            className="w-12 px-1 py-0.5 text-center text-black rounded text-sm"
+                            autoFocus
+                            min="1"
+                            max="999"
                           />
-                        </div>
-                      ))}
+                          <span className="text-sm">min</span>
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setEditingParallelDuration(slotIndex)
+                            setTempParallelDuration(slot.duration.toString())
+                          }}
+                          className="px-2 py-0.5 bg-white/20 rounded hover:bg-white/30 transition-colors text-sm font-semibold"
+                        >
+                          {slot.duration}m
+                        </button>
+                      )}
                     </div>
-                    
-                    {/* Add more parallel drill button */}
-                    {slot.drills.length < 4 && (
-                      <button
-                        onClick={() => setShowParallelPicker(slotIndex)}
-                        className="mt-3 w-full py-2 border-2 border-dashed border-blue-300 rounded-lg text-blue-600 hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        Add Another Parallel Activity
-                      </button>
-                    )}
                   </div>
-                )}
+
+                  {/* Down Button - Right Aligned */}
+                  <button
+                    onClick={() => handleMoveSlot(slotIndex, 'down')}
+                    disabled={slotIndex === timeSlots.length - 1}
+                    className={`p-1 rounded border border-white/50 hover:bg-blue-800 hover:border-white transition-colors ${slotIndex === timeSlots.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}`}
+                  >
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </div>
+                
+                {/* Stack drills vertically in gray container */}
+                <div className="p-3 space-y-3">
+                  {slot.drills.map((drill, drillIndex) => (
+                    <DrillCard
+                      key={drill.id}
+                      drill={drill}
+                      startTime={getSlotStartTime(slotIndex)}
+                      index={slotIndex}
+                      onUpdate={(updatedDrill) => handleUpdateDrill(slotIndex, drillIndex, updatedDrill)}
+                      onRemove={() => handleRemoveDrill(slotIndex, drillIndex)}
+                      onMoveUp={() => {}}
+                      onMoveDown={() => {}}
+                      onAddParallel={
+                        drillIndex === 0 && slot.drills.length < 4
+                          ? () => setShowParallelPicker(slotIndex)
+                          : undefined
+                      }
+                      canMoveUp={false}
+                      canMoveDown={false}
+                      isParallel={true}
+                      parallelLane={drillIndex + 1}
+                      onStudyDrill={onStudyDrill}
+                    />
+                  ))}
+                  
+                  {/* Add parallel activity button */}
+                  {slot.drills.length < 4 && (
+                    <button
+                      onClick={() => setShowParallelPicker(slotIndex)}
+                      className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center"
+                    >
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                      Add Another Parallel Activity
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         ))}
       </div>

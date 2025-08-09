@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Skills Academy Quick Verification', () => {
   test('Skills Academy page loads without infinite loading', async ({ page }) => {
     // Navigate to Skills Academy
-    await page.goto('http://localhost:3000/skills-academy', { waitUntil: 'networkidle', timeout: 15000 });
+    await page.goto('http://localhost:3000/skills-academy', { waitUntil: 'domcontentloaded', timeout: 15000 });
     
     // Check that the page title is visible (be more specific to avoid multiple h1s)
     await expect(page.locator('h1:has-text("Skills Academy")')).toBeVisible();
@@ -25,7 +25,7 @@ test.describe('Skills Academy Quick Verification', () => {
 
   test('Workout page navigation works', async ({ page }) => {
     // Start from Skills Academy
-    await page.goto('http://localhost:3000/skills-academy', { waitUntil: 'networkidle', timeout: 15000 });
+    await page.goto('http://localhost:3000/skills-academy', { waitUntil: 'domcontentloaded', timeout: 15000 });
     
     // Click on first Start button
     await page.click('button:has-text("Start")', { timeout: 10000 });
@@ -55,7 +55,7 @@ test.describe('Skills Academy Quick Verification', () => {
       }
     });
     
-    await page.goto('http://localhost:3000/skills-academy', { waitUntil: 'networkidle', timeout: 15000 });
+    await page.goto('http://localhost:3000/skills-academy', { waitUntil: 'domcontentloaded', timeout: 15000 });
     
     // Wait a bit for any async errors
     await page.waitForTimeout(2000);

@@ -238,15 +238,12 @@ export default function LacrosseLabModal({ isOpen, onClose, drill }: LacrosseLab
               </div>
             )}
 
-            {/* Iframe Container - Large display for better visibility */}
-            <div className="relative flex justify-center items-center bg-white" style={{ minHeight: '70vh' }}>
+            {/* Iframe Container - Square aspect ratio */}
+            <div className="relative flex justify-center items-center bg-white p-4">
               <iframe
                 key={labUrls[currentIndex]} // Force reload on URL change
                 src={getEmbedUrl(labUrls[currentIndex])}
-                width="100%"
-                height="100%"
-                style={{ minHeight: '70vh', pointerEvents: 'auto' }}
-                className="border-0"
+                className="aspect-square w-full max-w-[600px] border-0 rounded-lg"
                 onLoad={handleIframeLoad}
                 title={`Lacrosse Lab Diagram ${currentIndex + 1}`}
                 allow="fullscreen; autoplay"

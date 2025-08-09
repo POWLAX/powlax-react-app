@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { Filter, Plus, Star, ChevronDown, ChevronRight, Video, Link, Beaker, User, Search } from 'lucide-react'
+import { Filter, Plus, Star, ChevronDown, ChevronRight, Video, Link, Beaker, User, Search, Play } from 'lucide-react'
 import { useDrills } from '@/hooks/useDrills'
 import { useFavorites } from '@/hooks/useFavorites'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -11,6 +11,7 @@ import VideoModal from './modals/VideoModal'
 import LinksModal from './modals/LinksModal'
 import StrategiesModal from './modals/StrategiesModal'
 import LacrosseLabModal, { hasLabUrls } from './modals/LacrosseLabModal'
+import StudyDrillModal from './modals/StudyDrillModal'
 import StrategiesTab from './StrategiesTab'
 
 interface Drill {
@@ -64,6 +65,7 @@ export default function DrillLibraryTabbed({
   const [showLinksModal, setShowLinksModal] = useState(false)
   const [showStrategiesModal, setShowStrategiesModal] = useState(false)
   const [showLacrosseLabModal, setShowLacrosseLabModal] = useState(false)
+  const [showStudyDrillModal, setShowStudyDrillModal] = useState(false)
   const [selectedDrill, setSelectedDrill] = useState<Drill | null>(null)
   
   // Filter state
@@ -250,79 +252,51 @@ export default function DrillLibraryTabbed({
       key={drill.id}
       className="p-3 bg-white border rounded-lg hover:bg-gray-50"
     >
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          {/* Drill Title */}
-          <h4 className="font-medium text-sm">{drill.name}</h4>
-          
-          {/* Source Badge */}
-          {drill.source === 'user' && (
-            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full mt-1">
-              <User className="h-3 w-3" />
-              Custom
-            </span>
-          )}
-          
-          {/* Action Icons */}
-          <div className="flex items-center gap-2 mt-2">
-            <button
-              onClick={(e) => handleToggleFavorite(drill, e)}
-              className="p-1.5 hover:bg-gray-100 rounded"
-              title="Toggle Favorite"
-            >
-              <Star className={`h-4 w-4 ${isFavorite(drill.id) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'}`} />
-            </button>
-            
-            {drill.videoUrl && (
-              <button
-                onClick={(e) => openVideoModal(drill, e)}
-                className="p-1.5 hover:bg-gray-100 rounded"
-                title="View Video"
-              >
-                <Video className="h-4 w-4 text-gray-600" />
-              </button>
-            )}
-            
-            {drill.custom_url && (
-              <button
-                onClick={(e) => openLinksModal(drill, e)}
-                className="p-1.5 hover:bg-gray-100 rounded"
-                title="External Link"
-              >
-                <Link className="h-4 w-4 text-gray-600" />
-              </button>
-            )}
-            
-            {hasLabUrls(drill) && (
-              <button
-                onClick={(e) => openLacrosseLabModal(drill, e)}
-                className="p-1.5 hover:bg-gray-100 rounded"
-                title="Lacrosse Lab"
-              >
-                <Beaker className="h-4 w-4 text-gray-600" />
-              </button>
-            )}
-          </div>
-        </div>
-        
-        {/* Add/Select Button */}
-        <div>
+      <div className="flex flex-col gap-2">
+        {/* Title row with Plus button on left */}
+        <div className="flex items-center gap-2">
           {isMobile ? (
             <input
               type="checkbox"
               checked={selectedDrillsForMobile.includes(drill.id)}
               onChange={() => handleMobileDrillToggle(drill.id)}
-              className="mt-1"
+              className="flex-shrink-0"
             />
           ) : (
             <button
               onClick={() => onAddDrill(drill)}
-              className="p-1.5 hover:bg-gray-100 rounded text-blue-600"
+              className="p-1 border border-gray-300 hover:bg-gray-50 rounded flex-shrink-0"
               title="Add to Practice"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 text-gray-600" />
             </button>
           )}
+          <h4 className="font-medium text-sm flex-1">{drill.name}</h4>
+        </div>
+        
+        {/* Source Badge and Study button */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {drill.source === 'user' && (
+              <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+                <User className="h-3 w-3" />
+                Custom
+              </span>
+            )}
+          </div>
+          
+          {/* Study button replacing all icons */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setSelectedDrill(drill)
+              setShowStudyDrillModal(true)
+            }}
+            className="inline-flex items-center gap-1 px-2 py-1 bg-gray-900 text-white text-xs rounded border border-gray-700 hover:bg-gray-800 transition-colors"
+          >
+            <Play className="h-3 w-3" fill="white" />
+            Study
+          </button>
         </div>
       </div>
     </div>
@@ -331,14 +305,16 @@ export default function DrillLibraryTabbed({
   return (
     <div className="h-full flex flex-col">
       <Tabs value={currentTab} onValueChange={handleTabChange} className="h-full flex flex-col">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="drills">Drills</TabsTrigger>
-          <TabsTrigger value="strategies">Strategies</TabsTrigger>
-        </TabsList>
+        <div className="p-4 pb-0">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="drills">Drills</TabsTrigger>
+            <TabsTrigger value="strategies">Strategies</TabsTrigger>
+          </TabsList>
+        </div>
         
         {/* Drills Tab */}
-        <TabsContent value="drills" className="flex-1 flex flex-col overflow-hidden">
-          <div className="p-4 border-b">
+        <TabsContent value="drills" className="flex-1 flex flex-col overflow-hidden mt-0">
+          <div className="px-4 pt-2 pb-4 border-b">
             <h3 className="text-lg font-semibold mb-4">Drill Library</h3>
             
             {/* Action Buttons */}
@@ -441,7 +417,7 @@ export default function DrillLibraryTabbed({
         </TabsContent>
         
         {/* Strategies Tab */}
-        <TabsContent value="strategies" className="flex-1 overflow-hidden">
+        <TabsContent value="strategies" className="flex-1 flex flex-col overflow-hidden mt-0">
           <StrategiesTab
             onSelectStrategy={onSelectStrategy || (() => {})}
             selectedStrategies={selectedStrategies}
@@ -500,6 +476,12 @@ export default function DrillLibraryTabbed({
           <LacrosseLabModal
             isOpen={showLacrosseLabModal}
             onClose={() => setShowLacrosseLabModal(false)}
+            drill={selectedDrill}
+          />
+          
+          <StudyDrillModal
+            isOpen={showStudyDrillModal}
+            onClose={() => setShowStudyDrillModal(false)}
             drill={selectedDrill}
           />
         </>

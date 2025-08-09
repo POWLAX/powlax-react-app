@@ -1,10 +1,10 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Play, Star, Video, AlertCircle } from 'lucide-react'
+import { Star, BookOpen, Play, Target } from 'lucide-react'
 
 interface Drill {
   id: string
@@ -12,7 +12,10 @@ interface Drill {
   duration: number
   notes?: string
   videoUrl?: string
+  drill_video_url?: string
   labUrl?: string
+  lab_urls?: string[] | string
+  lacrosse_lab_urls?: string[]
   imageUrls?: string[]
   strategies?: string[]
   concepts?: string[]
@@ -22,199 +25,255 @@ interface Drill {
   category?: string
   complexity?: string
   age_group?: string
+  drill_type?: string
+  source?: string
 }
 
 interface StudyDrillModalProps {
   isOpen: boolean
   onClose: () => void
-  drill: Drill
+  drill: Drill | null
+  onUpdateDrill?: (drill: Drill) => void
 }
 
-export default function StudyDrillModal({ isOpen, onClose, drill }: StudyDrillModalProps) {
-  // Parse complexity level from string (e.g., "Level 3" -> "3")
-  const complexityLevel = drill.complexity?.match(/(\d+)/)?.[1] || '1'
+export default function StudyDrillModal({ isOpen, onClose, drill, onUpdateDrill }: StudyDrillModalProps) {
+  const [embedUrl, setEmbedUrl] = useState('')
+  const [editingNotes, setEditingNotes] = useState(false)
+  const [tempNotes, setTempNotes] = useState(drill?.notes || '')
   
-  // Parse coach instructions into bullet points
-  const coachNotes = drill.coach_instructions?.split('\n').filter(note => note.trim()) || []
+  useEffect(() => {
+    if (!drill) return
+    setTempNotes(drill.notes || '')
+    setEditingNotes(false)
+    
+    const videoUrl = drill.videoUrl || drill.drill_video_url
+    if (!videoUrl) {
+      setEmbedUrl('')
+      return
+    }
+    
+    // Convert YouTube URLs to embed format
+    if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+      let videoId = ''
+      if (videoUrl.includes('youtube.com/watch')) {
+        videoId = videoUrl.match(/[?&]v=([^&]+)/)?.[1] || ''
+      } else if (videoUrl.includes('youtu.be/')) {
+        videoId = videoUrl.match(/youtu\.be\/([^?]+)/)?.[1] || ''
+      }
+      if (videoId) {
+        setEmbedUrl(`https://www.youtube.com/embed/${videoId}?rel=0`)
+      }
+    } else if (videoUrl.includes('vimeo.com')) {
+      const vimeoId = videoUrl.match(/vimeo\.com\/(?:.*\/)?(\d+)/)?.[1]
+      if (vimeoId) {
+        setEmbedUrl(`https://player.vimeo.com/video/${vimeoId}`)
+      }
+    } else {
+      setEmbedUrl(videoUrl)
+    }
+  }, [drill])
+
+  if (!drill) return null
+
+  // Get Lab URLs
+  const getLabUrls = () => {
+    const urls: string[] = []
+    
+    if (drill.labUrl) urls.push(drill.labUrl)
+    if (drill.lacrosse_lab_urls && Array.isArray(drill.lacrosse_lab_urls)) {
+      urls.push(...drill.lacrosse_lab_urls.filter(Boolean))
+    }
+    if (typeof drill.lab_urls === 'string') {
+      try {
+        const parsed = JSON.parse(drill.lab_urls)
+        if (Array.isArray(parsed)) urls.push(...parsed.filter(Boolean))
+      } catch {}
+    }
+    
+    return urls.filter(url => url && url.trim())
+  }
+
+  const labUrls = getLabUrls()
+  const hasVideo = !!embedUrl
+  const hasDiagram = labUrls.length > 0
   
+  // Determine available tabs
+  const availableTabs = [
+    { value: 'overview', label: 'Overview', show: true },
+    { value: 'diagram', label: 'Diagram', show: hasDiagram },
+    { value: 'video', label: 'Video', show: hasVideo }
+  ].filter(tab => tab.show)
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[90vw] max-h-[85vh] bg-white overflow-hidden">
-        <DialogHeader>
-          <DialogTitle className="text-[#003366] text-lg font-semibold">
-            Study: {drill.name}
+      <DialogContent className="max-w-3xl max-h-[85vh] p-0 overflow-hidden bg-white">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b">
+          <DialogTitle className="flex items-center gap-2 text-xl">
+            <BookOpen className="h-5 w-5" />
+            {drill.name}
           </DialogTitle>
+          <button 
+            onClick={() => {/* TODO: Add favorite functionality */}}
+            className="absolute top-6 right-12 p-1 hover:bg-gray-100 rounded"
+          >
+            <Star className="h-5 w-5 text-gray-400" />
+          </button>
         </DialogHeader>
 
-        <Tabs defaultValue="overview" className="flex-1 overflow-hidden">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="diagram">Diagram</TabsTrigger>
-            <TabsTrigger value="video">Video</TabsTrigger>
+        <Tabs defaultValue="overview" className="flex-1">
+          <TabsList className={`grid w-full px-6 ${availableTabs.length === 3 ? 'grid-cols-3' : availableTabs.length === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            {availableTabs.map(tab => (
+              <TabsTrigger key={tab.value} value={tab.value}>
+                {tab.label}
+              </TabsTrigger>
+            ))}
           </TabsList>
 
-          <div className="mt-4 overflow-y-auto" style={{ maxHeight: 'calc(85vh - 150px)' }}>
-            <TabsContent value="overview" className="space-y-4">
-              {/* Drill Details Card */}
-              <Card className="bg-white border-gray-200">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-[#003366] font-semibold">Drill Details</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex flex-wrap gap-2">
-                    {drill.category && (
-                      <Badge variant="secondary" className="bg-blue-50 text-[#003366] border border-blue-200">
-                        {drill.category}
-                      </Badge>
-                    )}
-                    {drill.complexity && (
-                      <Badge variant="secondary" className="bg-orange-50 text-[#FF6600] border border-orange-200">
-                        Complexity: Level {complexityLevel}/5
-                      </Badge>
-                    )}
-                    {drill.age_group && (
-                      <Badge variant="secondary" className="bg-green-50 text-green-700 border border-green-200">
-                        Age Group: {drill.age_group}
-                      </Badge>
-                    )}
-                    <Badge variant="secondary" className="bg-purple-50 text-purple-700 border border-purple-200">
-                      Duration: {drill.duration} min
+          <div className="overflow-y-auto max-h-[calc(85vh-140px)]">
+            {/* Overview Tab */}
+            <TabsContent value="overview" className="px-6 py-4 space-y-4 mt-0">
+              {/* Strategy Details Card */}
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <h3 className="font-semibold text-gray-900 mb-3">Strategy Details</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Category</p>
+                    <Badge variant="secondary" className="bg-gray-900 text-white">
+                      {drill.category || drill.drill_type || 'Offense'}
                     </Badge>
                   </div>
-
-                  {/* Connected Strategies, Concepts, Skills */}
-                  {drill.strategies && drill.strategies.length > 0 && (
-                    <div>
-                      <h4 className="text-sm font-semibold text-[#003366] mb-2">Connected Strategies:</h4>
-                      <div className="flex flex-wrap gap-1">
-                        {drill.strategies.map((strategy, index) => (
-                          <Badge key={index} variant="outline" className="text-xs border-[#003366] text-[#003366]">
-                            {strategy}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {drill.concepts && drill.concepts.length > 0 && (
-                    <div>
-                      <h4 className="text-sm font-semibold text-[#003366] mb-2">Connected Concepts:</h4>
-                      <div className="flex flex-wrap gap-1">
-                        {drill.concepts.map((concept, index) => (
-                          <Badge key={index} variant="outline" className="text-xs border-[#FF6600] text-[#FF6600]">
-                            {concept}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {drill.skills && drill.skills.length > 0 && (
-                    <div>
-                      <h4 className="text-sm font-semibold text-[#003366] mb-2">Connected Skills:</h4>
-                      <div className="flex flex-wrap gap-1">
-                        {drill.skills.map((skill, index) => (
-                          <Badge key={index} variant="outline" className="text-xs border-green-600 text-green-600">
-                            {skill}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Description */}
-              {drill.description && (
-                <div className="space-y-2">
-                  <h3 className="text-[#003366] font-semibold">Description</h3>
-                  <p className="text-gray-700 text-sm leading-relaxed">{drill.description}</p>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Complexity</p>
+                    <p className="text-sm font-medium">
+                      <span className="text-yellow-600">Level {drill.complexity || '3'}/5</span>
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Age Group</p>
+                    <p className="text-sm font-medium">{drill.age_group || '14U+'}</p>
+                  </div>
                 </div>
-              )}
+              </div>
 
-              {/* Coach Notes */}
-              {coachNotes.length > 0 && (
-                <div className="space-y-2">
-                  <h3 className="text-[#003366] font-semibold">Coach Instructions</h3>
-                  <ul className="space-y-1">
-                    {coachNotes.map((note, index) => (
-                      <li key={index} className="flex items-start gap-2 text-sm text-gray-700">
-                        <div className="w-1 h-1 rounded-full bg-[#003366] mt-2 flex-shrink-0" />
-                        {note.trim()}
-                      </li>
-                    ))}
-                  </ul>
+              {/* Description Card */}
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <h3 className="font-semibold text-gray-900 mb-3">Description</h3>
+                <p className="text-sm text-gray-700">
+                  {drill.description || drill.notes || 
+                   'A balanced offensive formation with two attackmen, two midfielders, and two defenders positioned strategically for ball movement and scoring opportunities.'}
+                </p>
+              </div>
+
+              {/* Coaches Notes Card */}
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-gray-900">Coaches Notes</h3>
+                  {!editingNotes && (
+                    <button
+                      onClick={() => setEditingNotes(true)}
+                      className="text-xs text-blue-600 hover:text-blue-700"
+                    >
+                      Edit
+                    </button>
+                  )}
                 </div>
-              )}
+                {editingNotes ? (
+                  <div>
+                    <textarea
+                      value={tempNotes}
+                      onChange={(e) => setTempNotes(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-lg resize-none text-sm"
+                      rows={4}
+                      placeholder="Add coaching notes..."
+                      autoFocus
+                    />
+                    <div className="flex gap-2 mt-2">
+                      <button
+                        onClick={() => {
+                          if (onUpdateDrill && drill) {
+                            onUpdateDrill({ ...drill, notes: tempNotes })
+                          }
+                          setEditingNotes(false)
+                        }}
+                        className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => {
+                          setTempNotes(drill?.notes || '')
+                          setEditingNotes(false)
+                        }}
+                        className="px-3 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    {drill.notes ? (
+                      <p className="text-sm text-gray-700 whitespace-pre-wrap">{drill.notes}</p>
+                    ) : (
+                      <p className="text-sm text-gray-500 italic">+ Add Notes</p>
+                    )}
+                  </div>
+                )}
+              </div>
             </TabsContent>
 
-            <TabsContent value="diagram" className="space-y-4">
-              <Card className="bg-white border-gray-200">
-                <CardHeader>
-                  <CardTitle className="text-[#003366] font-semibold flex items-center gap-2">
-                    <Star className="w-5 h-5" />
-                    Interactive Drill Diagram
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {drill.labUrl ? (
-                    <div className="aspect-video bg-gray-50 rounded-lg overflow-hidden border">
-                      <iframe
-                        src={drill.labUrl}
-                        className="w-full h-full"
-                        frameBorder="0"
-                        title={`${drill.name} interactive diagram`}
-                      />
+            {/* Diagram Tab - Only show if content exists */}
+            {hasDiagram && (
+            <TabsContent value="diagram" className="px-6 py-4 mt-0">
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <h3 className="font-semibold text-gray-900 mb-3">Field Diagram</h3>
+                {labUrls.length > 0 ? (
+                  <div className="flex justify-center">
+                    <iframe
+                      src={labUrls[0]}
+                      className="aspect-square w-full max-w-[500px] rounded-lg border border-gray-200"
+                      title="Drill Diagram"
+                    />
+                  </div>
+                ) : (
+                  <div className="bg-green-50 rounded-lg p-12 text-center">
+                    <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
+                      <Target className="h-10 w-10 text-green-600" />
                     </div>
-                  ) : (
-                    <div className="aspect-video bg-gradient-to-br from-green-50 to-green-100 rounded-lg flex items-center justify-center border border-green-200">
-                      <div className="text-center space-y-2">
-                        <div className="w-12 h-12 bg-green-200 rounded-lg mx-auto flex items-center justify-center">
-                          <Star className="w-6 h-6 text-green-600" />
-                        </div>
-                        <p className="text-green-700 font-medium">Interactive Diagram Coming Soon</p>
-                        <p className="text-green-600 text-sm">3D field visualization will be available here</p>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                    <p className="text-green-800 font-medium">{drill.name} Diagram</p>
+                    <p className="text-green-600 text-sm mt-2">Interactive field diagram would load here</p>
+                  </div>
+                )}
+              </div>
             </TabsContent>
+            )}
 
-            <TabsContent value="video" className="space-y-4">
-              <Card className="bg-white border-gray-200">
-                <CardHeader>
-                  <CardTitle className="text-[#003366] font-semibold flex items-center gap-2">
-                    <Video className="w-5 h-5" />
-                    Drill Demonstration Video
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {drill.videoUrl ? (
-                    <div className="aspect-video bg-black rounded-lg overflow-hidden">
-                      <iframe
-                        src={drill.videoUrl.replace('watch?v=', 'embed/')}
-                        className="w-full h-full"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        title={`${drill.name} demonstration video`}
-                      />
+            {/* Video Tab - Only show if content exists */}
+            {hasVideo && (
+            <TabsContent value="video" className="px-6 py-4 mt-0">
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <h3 className="font-semibold text-gray-900 mb-3">Instructional Video</h3>
+                {embedUrl ? (
+                  <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                    <iframe
+                      src={embedUrl}
+                      className="absolute top-0 left-0 w-full h-full rounded-lg"
+                      allowFullScreen
+                      title="Drill Video"
+                    />
+                  </div>
+                ) : (
+                  <div className="bg-gray-900 rounded-lg p-12 text-center">
+                    <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-800 flex items-center justify-center">
+                      <Play className="h-10 w-10 text-white" />
                     </div>
-                  ) : (
-                    <div className="aspect-video bg-gray-900 rounded-lg flex items-center justify-center">
-                      <div className="text-center space-y-2">
-                        <div className="w-12 h-12 bg-gray-700 rounded-lg mx-auto flex items-center justify-center">
-                          <Play className="w-6 h-6 text-gray-300" />
-                        </div>
-                        <p className="text-gray-300 font-medium">Video Coming Soon</p>
-                        <p className="text-gray-400 text-sm">Drill demonstration video will be available here</p>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                    <p className="text-white font-medium">{drill.name}</p>
+                    <p className="text-gray-400 text-sm mt-2">Video demonstration</p>
+                  </div>
+                )}
+              </div>
             </TabsContent>
+            )}
           </div>
         </Tabs>
       </DialogContent>

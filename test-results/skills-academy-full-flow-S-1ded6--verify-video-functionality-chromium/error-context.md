@@ -89,7 +89,5 @@
 - button "Start Tour" [disabled]:
   - text: Start Tour
   - img
-- img
-- text: Online
 - region "Notifications alt+T"
 ```

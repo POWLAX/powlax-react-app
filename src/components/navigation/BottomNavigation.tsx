@@ -34,6 +34,11 @@ const navItems = [
 
 export default function BottomNavigation() {
   const pathname = usePathname()
+  
+  // Hide navigation on Practice Planner page
+  if (pathname?.includes('/practice-plans')) {
+    return null
+  }
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden z-40">

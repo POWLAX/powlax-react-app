@@ -18,20 +18,44 @@ import WorkoutErrorBoundary from '@/components/skills-academy/WorkoutErrorBounda
 import { useWorkoutSession } from '@/hooks/useSkillsAcademyWorkouts'
 import { supabase } from '@/lib/supabase'
 
-// Helper function to extract Vimeo ID from various URL formats
-function extractVimeoId(url: string | null): string | null {
-  if (!url) return null;
+// Helper function to extract Vimeo ID from drill data
+function extractVimeoId(drill: any): string | null {
+  console.log('🔍 extractVimeoId called with:', drill)
   
-  // Handle different Vimeo URL formats
-  const patterns = [
-    /vimeo\.com\/(\d+)/,           // https://vimeo.com/123456
-    /player\.vimeo\.com\/video\/(\d+)/, // https://player.vimeo.com/video/123456
-    /^(\d+)$/                        // Just the ID: 123456
-  ];
+  // First check various vimeo ID fields
+  if (drill?.both_hands_vimeo_id) {
+    console.log('✅ Found both_hands_vimeo_id:', drill.both_hands_vimeo_id)
+    return drill.both_hands_vimeo_id;
+  }
+  if (drill?.strong_hand_vimeo_id) {
+    console.log('✅ Found strong_hand_vimeo_id:', drill.strong_hand_vimeo_id)
+    return drill.strong_hand_vimeo_id;
+  }
+  if (drill?.off_hand_vimeo_id) {
+    console.log('✅ Found off_hand_vimeo_id:', drill.off_hand_vimeo_id)
+    return drill.off_hand_vimeo_id;
+  }
+  if (drill?.vimeo_id) {
+    console.log('✅ Found vimeo_id:', drill.vimeo_id)
+    return drill.vimeo_id;
+  }
   
-  for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match) return match[1];
+  // Fallback to URL extraction if needed
+  const url = drill?.video_url || drill?.both_hands_video_url || drill?.strong_hand_video_url || drill?.video_link;
+  if (url) {
+    // Handle different Vimeo URL formats
+    const patterns = [
+      /vimeo\.com\/(\d+)/,           // https://vimeo.com/123456
+      /player\.vimeo\.com\/video\/(\d+)/, // https://player.vimeo.com/video/123456
+      /^(\d+)$/                        // Just the ID: 123456
+    ];
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match) {
+        return match[1];
+      }
+    }
   }
   
   return null;
@@ -416,74 +440,53 @@ function WorkoutPageContent() {
 
           {/* Video Player - Mobile optimized */}
           <Card className="overflow-hidden">
-            <div className="aspect-video bg-black">
-              {(() => {
-                const drill = currentDrill?.drill
-                let vimeoId = null
-                let videoUrl = null
+            {(() => {
+              const drill = currentDrill?.drill
+              
+              // Debug logging
+              console.log('🎬 Video Player Debug:', {
+                currentDrill: currentDrill,
+                drill: drill,
+                drillKeys: drill ? Object.keys(drill) : 'no drill',
+                vimeo_id: drill?.vimeo_id,
+                both_hands_vimeo_id: drill?.both_hands_vimeo_id,
+                strong_hand_vimeo_id: drill?.strong_hand_vimeo_id,
+                off_hand_vimeo_id: drill?.off_hand_vimeo_id
+              })
+              
+              // Extract Vimeo ID from drill data
+              const vimeoId = extractVimeoId(drill)
+              console.log('🎯 Extracted Vimeo ID:', vimeoId)
 
-                // Check video type preference and get appropriate video
-                const videoType = currentDrill?.video_type || 'both_hands'
-                
-                if (videoType === 'strong_hand') {
-                  vimeoId = drill?.strong_hand_vimeo_id
-                  videoUrl = drill?.strong_hand_video_url
-                } else if (videoType === 'off_hand') {
-                  vimeoId = drill?.off_hand_vimeo_id
-                  videoUrl = drill?.off_hand_video_url
-                } else {
-                  vimeoId = drill?.both_hands_vimeo_id
-                  videoUrl = drill?.both_hands_video_url
-                }
-
-                // Extract Vimeo ID if we have a URL but no direct ID
-                if (!vimeoId && videoUrl) {
-                  vimeoId = extractVimeoId(videoUrl)
-                }
-
-                if (vimeoId) {
-                  return (
-                    <div className="relative w-full h-full bg-gray-100">
-                      {/* Loading state background */}
-                      <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                        <div className="text-center text-gray-500">
-                          <PlayCircle className="w-8 h-8 mx-auto mb-2 animate-pulse" />
-                          <p className="text-sm">Loading video...</p>
-                        </div>
-                      </div>
-                      {/* Vimeo iframe */}
-                      <iframe
-                        src={`https://player.vimeo.com/video/${vimeoId}?badge=0&autopause=0&player_id=0&app_id=58479`}
-                        className="w-full h-full relative z-10 bg-white"
-                        frameBorder="0"
-                        allow="autoplay; fullscreen; picture-in-picture"
-                        allowFullScreen
-                        title={drill?.drill_name || 'Drill Video'}
-                        onLoad={() => {
-                          // Hide loading state when video loads
-                          const loadingDiv = document.querySelector('.absolute.inset-0.flex') as HTMLElement;
-                          if (loadingDiv) loadingDiv.style.display = 'none';
-                        }}
-                      />
-                    </div>
-                  )
-                }
-
+              if (vimeoId) {
                 return (
-                  <div className="flex items-center justify-center h-full bg-gray-50 rounded-lg">
-                    <div className="text-center text-gray-600">
-                      <PlayCircle className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 md:mb-4" />
-                      <p className="text-base md:text-lg font-medium">Video not available</p>
-                      {drill?.drill_name && (
-                        <p className="text-sm mt-2 text-gray-500">{drill.drill_name}</p>
-                      )}
-                      <p className="text-xs mt-2 text-gray-400">No video content found for this drill</p>
-                    </div>
+                  <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                    <iframe
+                      src={`https://player.vimeo.com/video/${vimeoId}`}
+                      className="absolute top-0 left-0 w-full h-full rounded-lg"
+                      allowFullScreen
+                      title={drill?.title || drill?.drill_name || 'Drill Video'}
+                      frameBorder="0"
+                      allow="autoplay; fullscreen; picture-in-picture"
+                    />
                   </div>
                 )
-              })()
               }
-            </div>
+
+              return (
+                <div className="aspect-video bg-gray-50 flex items-center justify-center rounded-lg">
+                  <div className="text-center text-gray-600">
+                    <PlayCircle className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 md:mb-4" />
+                    <p className="text-base md:text-lg font-medium">Video not available</p>
+                    {(drill?.title || drill?.drill_name) && (
+                      <p className="text-sm mt-2 text-gray-500">{drill.title || drill.drill_name}</p>
+                    )}
+                    <p className="text-xs mt-2 text-gray-400">No video content found for this drill</p>
+                  </div>
+                </div>
+              )
+            })()
+            }
           </Card>
 
           {/* Drill Info & Controls - Mobile optimized with big captions */}
@@ -491,7 +494,7 @@ function WorkoutPageContent() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-2xl md:text-3xl font-bold text-gray-900" data-testid="drill-caption">
-                  {currentDrill?.drill?.drill_name || `Drill ${currentDrillIndex + 1}`}
+                  {currentDrill?.drill?.title || currentDrill?.drill?.drill_name || `Drill ${currentDrillIndex + 1}`}
                 </CardTitle>
                 <Badge variant="outline" className="ml-2 text-sm">
                   {currentDrillIndex + 1} / {drills.length}
