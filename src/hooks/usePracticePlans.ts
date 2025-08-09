@@ -7,14 +7,22 @@ import { useSupabase } from '@/hooks/useSupabase'
 export interface PracticePlan {
   id?: string
   title: string
-  coach_id?: string
+  user_id?: string
   team_id?: string
   practice_date: string
+  start_time?: string
   duration_minutes: number
+  field_type?: 'turf' | 'grass' | 'indoor' | 'other'
+  setup_time?: number
+  setup_notes?: string
+  practice_notes?: string
   drill_sequence: DrillSequence
-  strategies_focus?: string[]
-  notes?: string
-  shared_with?: string[]
+  selected_strategies?: string[]
+  template?: boolean
+  age_group?: '8-10' | '11-14' | '15+' | 'all'
+  version?: number
+  parent_id?: string
+  is_draft?: boolean
   created_at?: string
   updated_at?: string
 }
@@ -50,8 +58,16 @@ export function usePracticePlans(teamId?: string) {
     try {
       setLoading(true)
       
+      // Check if new table exists, fallback to old if not
+      const { error: checkError } = await supabase
+        .from('practice_plans')
+        .select('id')
+        .limit(1)
+      
+      const tableName = checkError?.code === '42P01' ? 'practice_plans_collaborative' : 'practice_plans'
+      
       let query = supabase
-        .from('practice_plans_collaborative')
+        .from(tableName)
         .select('*')
         .order('practice_date', { ascending: false })
 
@@ -60,7 +76,13 @@ export function usePracticePlans(teamId?: string) {
       }
 
       if (user?.id) {
-        query = query.or(`coach_id.eq.${user.id},shared_with.cs.{${user.id}}`)
+        if (tableName === 'practice_plans') {
+          // New table structure
+          query = query.or(`user_id.eq.${user.id}`)
+        } else {
+          // Old table structure
+          query = query.or(`coach_id.eq.${user.id},shared_with.cs.{${user.id}}`)
+        }
       }
 
       const { data, error } = await query
@@ -78,14 +100,28 @@ export function usePracticePlans(teamId?: string) {
 
   const savePracticePlan = async (plan: Omit<PracticePlan, 'id' | 'created_at' | 'updated_at'>) => {
     try {
-      const planData = {
-        ...plan,
-        coach_id: user?.id,
-        updated_at: new Date().toISOString()
-      }
+      // Check which table to use
+      const { error: checkError } = await supabase
+        .from('practice_plans')
+        .select('id')
+        .limit(1)
+      
+      const tableName = checkError?.code === '42P01' ? 'practice_plans_collaborative' : 'practice_plans'
+      
+      const planData = tableName === 'practice_plans' 
+        ? {
+            ...plan,
+            user_id: user?.id,
+            updated_at: new Date().toISOString()
+          }
+        : {
+            ...plan,
+            coach_id: user?.id,
+            updated_at: new Date().toISOString()
+          }
 
       const { data, error } = await supabase
-        .from('practice_plans_collaborative')
+        .from(tableName)
         .insert([planData])
         .select()
         .single()
@@ -104,8 +140,16 @@ export function usePracticePlans(teamId?: string) {
 
   const updatePracticePlan = async (id: string, updates: Partial<PracticePlan>) => {
     try {
+      // Check which table to use
+      const { error: checkError } = await supabase
+        .from('practice_plans')
+        .select('id')
+        .limit(1)
+      
+      const tableName = checkError?.code === '42P01' ? 'practice_plans_collaborative' : 'practice_plans'
+      
       const { data, error } = await supabase
-        .from('practice_plans_collaborative')
+        .from(tableName)
         .update({
           ...updates,
           updated_at: new Date().toISOString()
@@ -128,8 +172,16 @@ export function usePracticePlans(teamId?: string) {
 
   const deletePracticePlan = async (id: string) => {
     try {
+      // Check which table to use
+      const { error: checkError } = await supabase
+        .from('practice_plans')
+        .select('id')
+        .limit(1)
+      
+      const tableName = checkError?.code === '42P01' ? 'practice_plans_collaborative' : 'practice_plans'
+      
       const { error } = await supabase
-        .from('practice_plans_collaborative')
+        .from(tableName)
         .delete()
         .eq('id', id)
 
@@ -147,8 +199,16 @@ export function usePracticePlans(teamId?: string) {
 
   const loadPracticePlan = async (id: string) => {
     try {
+      // Check which table to use
+      const { error: checkError } = await supabase
+        .from('practice_plans')
+        .select('id')
+        .limit(1)
+      
+      const tableName = checkError?.code === '42P01' ? 'practice_plans_collaborative' : 'practice_plans'
+      
       const { data, error } = await supabase
-        .from('practice_plans_collaborative')
+        .from(tableName)
         .select('*')
         .eq('id', id)
         .single()

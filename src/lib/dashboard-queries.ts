@@ -272,7 +272,7 @@ async function fetchPlayerDashboard(
     },
     recentActivity: [],
     quickActions: [
-      { label: 'Skills Academy', href: '/academy' },
+      { label: 'Skills Academy', href: '/skills-academy' },
       { label: 'My Progress', href: '/my-progress' },
       { label: 'Team Schedule', href: '/team-schedule' }
     ]

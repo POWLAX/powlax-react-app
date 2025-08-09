@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, memo } from 'react'
+import { useState, memo, useEffect } from 'react'
 import { 
   Clock, 
   ChevronUp, 
@@ -20,6 +20,23 @@ import VideoModal from './modals/VideoModal'
 import LinksModal from './modals/LinksModal'
 import StrategiesModal from './modals/StrategiesModal'
 import LacrosseLabModal, { hasLabUrls } from './modals/LacrosseLabModal'
+
+// Hook to detect mobile viewport
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false)
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+  
+  return isMobile
+}
 
 interface DrillCardProps {
   drill: {
@@ -53,6 +70,7 @@ interface DrillCardProps {
   canMoveUp: boolean
   canMoveDown: boolean
   isParallel?: boolean
+  parallelLane?: number
 }
 
 const DrillCard = memo(function DrillCard({
@@ -76,6 +94,8 @@ const DrillCard = memo(function DrillCard({
   const [showLinksModal, setShowLinksModal] = useState(false)
   const [showStrategiesModal, setShowStrategiesModal] = useState(false)
   const [showLacrosseLabModal, setShowLacrosseLabModal] = useState(false)
+  
+  const isMobile = useIsMobile()
 
   const handleDurationChange = (newDuration: number) => {
     onUpdate({ ...drill, duration: newDuration })
@@ -95,6 +115,89 @@ const DrillCard = memo(function DrillCard({
     return tags.join(' ')
   }
 
+  // Mobile layout - compact card with time controls on top
+  if (isMobile && !isParallel) {
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm">
+        {/* Mobile Header with Time Controls */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onMoveUp}
+              disabled={!canMoveUp}
+              className={`p-1 rounded ${canMoveUp ? 'text-gray-600 hover:bg-gray-100' : 'text-gray-300'}`}
+            >
+              <ChevronUp className="h-4 w-4" />
+            </button>
+            <span className="font-semibold text-[#003366]">{startTime}</span>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              value={drill.duration}
+              onChange={(e) => handleDurationChange(parseInt(e.target.value) || 0)}
+              className="w-12 px-1 py-1 text-center border border-gray-300 rounded text-sm font-medium"
+            />
+            <span className="text-sm text-gray-600">min</span>
+            <button
+              onClick={onMoveDown}
+              disabled={!canMoveDown}
+              className={`p-1 rounded ${canMoveDown ? 'text-gray-600 hover:bg-gray-100' : 'text-gray-300'}`}
+            >
+              <ChevronDown className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+        
+        {/* Drill Name */}
+        <h4 className="font-medium text-[#003366] mb-2">{drill.name}</h4>
+        
+        {/* Notes */}
+        {drill.notes && (
+          <p className="text-sm text-gray-600 mb-2">{drill.notes}</p>
+        )}
+        
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => setEditingNotes(!editingNotes)}
+            className="p-1.5 rounded bg-gray-100 hover:bg-gray-200"
+          >
+            <Edit3 className="h-4 w-4 text-gray-600" />
+          </button>
+          {drill.videoUrl && (
+            <button
+              onClick={() => setShowVideoModal(true)}
+              className="p-1.5 rounded bg-red-100 hover:bg-red-200"
+            >
+              <Video className="h-4 w-4 text-red-600" />
+            </button>
+          )}
+          {hasLabUrls(drill) && (
+            <button
+              onClick={() => setShowLacrosseLabModal(true)}
+              className="p-1.5 rounded bg-blue-100 hover:bg-blue-200"
+            >
+              <Beaker className="h-4 w-4 text-blue-600" />
+            </button>
+          )}
+          <button
+            onClick={onRemove}
+            className="p-1.5 rounded bg-gray-100 hover:bg-red-100 ml-auto"
+          >
+            <Trash2 className="h-4 w-4 text-gray-600" />
+          </button>
+        </div>
+        
+        {/* Modals */}
+        <VideoModal isOpen={showVideoModal} onClose={() => setShowVideoModal(false)} drill={drill} />
+        <LacrosseLabModal isOpen={showLacrosseLabModal} onClose={() => setShowLacrosseLabModal(false)} drill={drill} />
+      </div>
+    )
+  }
+  
+  // Desktop layout (original)
   return (
     <div className={`bg-white rounded-lg field-border shadow-lg ${isParallel ? 'ml-4 border-l-4 border-l-blue-300' : ''}`}>
       <div className="flex">

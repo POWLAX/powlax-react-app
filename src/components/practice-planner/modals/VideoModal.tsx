@@ -24,13 +24,17 @@ interface VideoModalProps {
 export default function VideoModal({ isOpen, onClose, drill }: VideoModalProps) {
   const [videoError, setVideoError] = useState(false)
   const [embedUrl, setEmbedUrl] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
 
   // Get the video URL from either field (with null safety)
   const videoUrl = drill?.videoUrl || drill?.drill_video_url
 
   useEffect(() => {
+    setIsLoading(true)
+    
     if (!drill || !videoUrl) {
       setVideoError(true)
+      setIsLoading(false)
       return
     }
 
@@ -42,7 +46,7 @@ export default function VideoModal({ isOpen, onClose, drill }: VideoModalProps) 
       if (url.includes('vimeo.com')) {
         const vimeoId = url.match(/vimeo\.com\/(?:.*\/)?(\d+)/)?.[1]
         if (vimeoId) {
-          return `https://player.vimeo.com/video/${vimeoId}?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479`
+          return `https://player.vimeo.com/video/${vimeoId}?badge=0&autopause=0&player_id=0&app_id=58479`
         }
       }
       
@@ -71,7 +75,12 @@ export default function VideoModal({ isOpen, onClose, drill }: VideoModalProps) 
 
     const embed = convertToEmbedUrl(videoUrl)
     setEmbedUrl(embed)
-  }, [videoUrl])
+    
+    // Reset loading state when modal closes
+    if (!isOpen) {
+      setIsLoading(true)
+    }
+  }, [videoUrl, isOpen, drill])
 
   const handleOpenInNewTab = () => {
     if (videoUrl) {
@@ -81,13 +90,13 @@ export default function VideoModal({ isOpen, onClose, drill }: VideoModalProps) 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] z-50">
+      <DialogContent className="max-w-4xl max-h-[80vh] z-50 bg-white">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 text-[#003366]">
             <Video className="h-5 w-5" />
             {drill?.name || 'Drill'} - Video
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-gray-600">
             Watch the drill demonstration video
           </DialogDescription>
         </DialogHeader>
@@ -97,7 +106,7 @@ export default function VideoModal({ isOpen, onClose, drill }: VideoModalProps) 
             <div className="flex items-center justify-center p-8 text-center">
               <div className="space-y-2">
                 <AlertCircle className="h-8 w-8 mx-auto text-gray-400" />
-                <p className="text-gray-600">No video available for this drill</p>
+                <p className="text-[#003366]">No video available for this drill</p>
               </div>
             </div>
           ) : videoError ? (
@@ -105,12 +114,12 @@ export default function VideoModal({ isOpen, onClose, drill }: VideoModalProps) 
               <div className="flex items-center justify-center p-8 text-center">
                 <div className="space-y-2">
                   <AlertCircle className="h-8 w-8 mx-auto text-red-400" />
-                  <p className="text-gray-600">Unable to load video player</p>
+                  <p className="text-[#003366]">Unable to load video player</p>
                   <p className="text-sm text-gray-500">The video format may not be supported for embedding</p>
                 </div>
               </div>
               <div className="flex justify-center">
-                <Button onClick={handleOpenInNewTab} variant="outline">
+                <Button onClick={handleOpenInNewTab} variant="outline" className="bg-gray-100 hover:bg-gray-200 text-[#003366] border-gray-300">
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Open Video in New Tab
                 </Button>
@@ -119,6 +128,14 @@ export default function VideoModal({ isOpen, onClose, drill }: VideoModalProps) 
           ) : (
             <div className="space-y-4">
               <div className="relative aspect-video bg-black rounded-lg overflow-hidden z-40">
+                {isLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-50">
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
+                      <p className="text-white mt-2">Loading video...</p>
+                    </div>
+                  </div>
+                )}
                 <iframe
                   src={embedUrl}
                   className="absolute inset-0 w-full h-full z-50"
@@ -126,10 +143,15 @@ export default function VideoModal({ isOpen, onClose, drill }: VideoModalProps) 
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                   title={`${drill.name} drill video`}
+                  onLoad={() => setIsLoading(false)}
+                  onError={() => {
+                    setIsLoading(false)
+                    setVideoError(true)
+                  }}
                 />
               </div>
               <div className="flex justify-center">
-                <Button onClick={handleOpenInNewTab} variant="outline" size="sm">
+                <Button onClick={handleOpenInNewTab} variant="outline" size="sm" className="bg-gray-100 hover:bg-gray-200 text-[#003366] border-gray-300">
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Open in New Tab
                 </Button>

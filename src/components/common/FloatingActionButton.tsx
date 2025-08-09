@@ -26,7 +26,7 @@ const quickActions: QuickAction[] = [
     id: 'start-workout',
     label: 'Start Workout',
     icon: Play,
-    href: '/skills-academy/workouts',
+    href: '/skills-academy',
     color: 'bg-powlax-orange hover:bg-orange-700'
   },
   {

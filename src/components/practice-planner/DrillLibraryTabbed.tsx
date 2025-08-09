@@ -74,32 +74,27 @@ export default function DrillLibraryTabbed({
   const [selectedDrillsForMobile, setSelectedDrillsForMobile] = useState<string[]>([])
   const [currentTab, setCurrentTab] = useState('drills')
 
-  // Get unique drill types from drills
-  const drillTypes = useMemo(() => {
-    const types = new Set<string>()
+  // Get unique drill categories from drills (Concept Drills, Skill Development, Admin, Live Play)
+  const drillCategories = useMemo(() => {
+    const categories = new Set<string>()
     supabaseDrills.forEach(drill => {
-      if (drill.drill_types) {
-        // Parse drill_types if it's a string
-        const drillTypesList = typeof drill.drill_types === 'string' 
-          ? drill.drill_types.split(',').map(t => t.trim())
-          : []
-        drillTypesList.forEach(type => types.add(type))
+      if (drill.category) {
+        categories.add(drill.category)
       }
     })
-    return Array.from(types).sort()
+    return Array.from(categories).sort()
   }, [supabaseDrills])
 
-  // Organize drills by type
-  const drillsByType = useMemo(() => {
+  // Organize drills by category (Concept Drills, Skill Development, Admin, Live Play)
+  const drillsByCategory = useMemo(() => {
     const organized: Record<string, Drill[]> = {
       'Favorites': [],
-      'Custom Drills': [],
-      'Admin': []
+      'Custom Drills': []
     }
     
-    // Add all drill types
-    drillTypes.forEach(type => {
-      organized[type] = []
+    // Add all drill categories
+    drillCategories.forEach(category => {
+      organized[category] = []
     })
     
     // Organize drills
@@ -114,51 +109,38 @@ export default function DrillLibraryTabbed({
         organized['Custom Drills'].push(drill)
       }
       
-      // Add to drill type categories
-      if (drill.drill_types) {
-        const types = typeof drill.drill_types === 'string'
-          ? drill.drill_types.split(',').map(t => t.trim())
-          : []
-        
-        types.forEach(type => {
-          if (organized[type]) {
-            organized[type].push(drill)
-          }
-        })
-      }
-      
-      // Add admin drills
-      if (drill.category === 'admin') {
-        organized['Admin'].push(drill)
+      // Add to category
+      if (drill.category && organized[drill.category]) {
+        organized[drill.category].push(drill)
       }
     })
     
     return organized
-  }, [supabaseDrills, drillTypes, isFavorite])
+  }, [supabaseDrills, drillCategories, isFavorite])
 
   // Filter drills based on search and filters
-  const filteredDrillsByType = useMemo(() => {
+  const filteredDrillsByCategory = useMemo(() => {
     const filtered: Record<string, Drill[]> = {}
     
-    Object.entries(drillsByType).forEach(([type, drills]) => {
-      filtered[type] = drills.filter(drill => {
+    Object.entries(drillsByCategory).forEach(([category, drills]) => {
+      filtered[category] = drills.filter(drill => {
         // Search filter
         const matchesSearch = drill.name.toLowerCase().includes(searchTerm.toLowerCase())
         
-        // Game phase filter
+        // Game phase filter (if we still want this filter)
         const matchesGamePhase = selectedGamePhases.length === 0 ||
           (drill.strategies && drill.strategies.some(s => selectedGamePhases.includes(s)))
         
         // Drill type filter
         const matchesDrillType = selectedDrillTypes.length === 0 ||
-          selectedDrillTypes.includes(type)
+          selectedDrillTypes.includes(category)
         
         return matchesSearch && matchesGamePhase && matchesDrillType
       })
     })
     
     return filtered
-  }, [drillsByType, searchTerm, selectedGamePhases, selectedDrillTypes])
+  }, [drillsByCategory, searchTerm, selectedGamePhases, selectedDrillTypes])
 
   const toggleCategory = (category: string) => {
     if (expandedCategories.includes(category)) {
@@ -420,15 +402,15 @@ export default function DrillLibraryTabbed({
             
             {/* Drill Categories */}
             <div className="space-y-2">
-              {Object.entries(filteredDrillsByType).map(([type, drills]) => {
-                if (drills.length === 0 && type !== 'Favorites') return null
+              {Object.entries(filteredDrillsByCategory).map(([category, drills]) => {
+                if (drills.length === 0 && category !== 'Favorites') return null
                 
-                const isExpanded = expandedCategories.includes(type)
+                const isExpanded = expandedCategories.includes(category)
                 
                 return (
-                  <div key={type} className="border rounded-lg">
+                  <div key={category} className="border rounded-lg">
                     <button
-                      onClick={() => toggleCategory(type)}
+                      onClick={() => toggleCategory(category)}
                       className="w-full px-4 py-3 flex items-center justify-between bg-gray-50 hover:bg-gray-100 rounded-t-lg"
                     >
                       <div className="flex items-center gap-2">
@@ -437,7 +419,7 @@ export default function DrillLibraryTabbed({
                         ) : (
                           <ChevronRight className="h-4 w-4" />
                         )}
-                        <span className="font-medium">{type}</span>
+                        <span className="font-medium">{category}</span>
                         <span className="text-sm text-gray-500">({drills.length})</span>
                       </div>
                     </button>
@@ -472,19 +454,27 @@ export default function DrillLibraryTabbed({
       <AddCustomDrillModal
         isOpen={showAddDrillModal}
         onClose={() => setShowAddDrillModal(false)}
-        onDrillCreated={handleAddCustomDrill}
+        onAdd={(drill) => {
+          onAddDrill(drill)
+          setShowAddDrillModal(false)
+        }}
+        onDrillCreated={() => {}}
       />
       
       <FilterDrillsModal
         isOpen={showFilterModal}
         onClose={() => setShowFilterModal(false)}
-        onApplyFilters={(filters) => {
-          setSelectedGamePhases(filters.gamePhases || [])
-          setSelectedDrillTypes(filters.drillTypes || [])
-          setShowFilterModal(false)
-        }}
-        gamePhases={['Offense', 'Defense', 'Transition', 'Ground Balls', 'Man Up', 'Man Down', 'Ride', 'Clear']}
-        drillTypes={drillTypes}
+        drills={supabaseDrills}
+        selectedStrategies={selectedGamePhases}
+        setSelectedStrategies={setSelectedGamePhases}
+        selectedSkills={[]}
+        setSelectedSkills={() => {}}
+        selectedGamePhase={null}
+        setSelectedGamePhase={() => {}}
+        selectedDuration={null}
+        setSelectedDuration={() => {}}
+        selectedGameStates={[]}
+        setSelectedGameStates={() => {}}
       />
       
       {selectedDrill && (

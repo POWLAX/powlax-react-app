@@ -71,18 +71,18 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 overflow-y-auto">
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto my-4"
       >
         {/* Header */}
-        <div className="relative bg-gradient-to-r from-blue-600 to-blue-800 text-white p-8">
+        <div className="relative bg-gradient-to-r from-blue-600 to-blue-800 text-white p-4 sm:p-8">
           <button
             onClick={handleSkip}
-            className="absolute top-4 right-4 p-2 text-white/80 hover:text-white rounded-lg"
+            className="absolute top-2 right-2 sm:top-4 sm:right-4 p-2 text-white/80 hover:text-white rounded-lg"
           >
             <X className="h-5 w-5" />
           </button>
@@ -92,24 +92,24 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring" }}
-              className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4"
+              className="w-12 h-12 sm:w-16 sm:h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4"
             >
-              <span className="text-2xl font-bold text-blue-600">P</span>
+              <span className="text-xl sm:text-2xl font-bold text-blue-600">P</span>
             </motion.div>
-            <h1 className="text-3xl font-bold mb-2">Welcome to POWLAX!</h1>
-            <p className="text-blue-100">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2">Welcome to POWLAX!</h1>
+            <p className="text-blue-100 text-sm sm:text-base">
               Let&apos;s customize your experience based on your role
             </p>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6 text-center">
+        <div className="p-4 sm:p-8">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 text-center">
             I am a...
           </h2>
 
-          <div className="space-y-3 mb-8">
+          <div className="space-y-2 sm:space-y-3 mb-6 sm:mb-8">
             {roles.map((role) => {
               const Icon = role.icon
               const isSelected = selectedRole?.id === role.id
@@ -118,27 +118,27 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                 <button
                   key={role.id}
                   onClick={() => handleRoleSelect(role)}
-                  className={`w-full p-4 border-2 rounded-xl transition-all text-left ${
+                  className={`w-full p-3 sm:p-4 border-2 rounded-xl transition-all text-left ${
                     isSelected 
                       ? role.color.replace('hover:', '') 
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <div className="flex items-start space-x-4">
-                    <div className={`p-3 rounded-lg ${
+                  <div className="flex items-start space-x-3 sm:space-x-4">
+                    <div className={`p-2 sm:p-3 rounded-lg ${
                       isSelected 
                         ? role.color.split(' ')[0] + ' ' + role.color.split(' ')[1]
                         : 'bg-gray-100 text-gray-600'
                     }`}>
-                      <Icon className="h-6 w-6" />
+                      <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
                     </div>
                     <div className="flex-1">
-                      <h3 className={`font-semibold ${
+                      <h3 className={`font-semibold text-sm sm:text-base ${
                         isSelected ? 'text-gray-900' : 'text-gray-700'
                       }`}>
                         {role.title}
                       </h3>
-                      <p className={`text-sm mt-1 ${
+                      <p className={`text-xs sm:text-sm mt-1 ${
                         isSelected ? 'text-gray-600' : 'text-gray-500'
                       }`}>
                         {role.description}
@@ -160,11 +160,11 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-0">
             <Button
               variant="ghost"
               onClick={handleSkip}
-              className="text-gray-500"
+              className="text-gray-500 w-full sm:w-auto text-sm sm:text-base"
             >
               Skip for now
             </Button>
@@ -172,7 +172,7 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
             <Button
               onClick={handleStartTour}
               disabled={!selectedRole}
-              className={`${
+              className={`w-full sm:w-auto text-sm sm:text-base ${
                 selectedRole 
                   ? 'bg-blue-600 hover:bg-blue-700' 
                   : 'bg-gray-300 cursor-not-allowed'

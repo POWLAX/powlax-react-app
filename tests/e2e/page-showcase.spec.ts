@@ -23,7 +23,7 @@ test.describe('POWLAX Page Showcase', () => {
 
     // Authenticated pages (will show login or default state)
     await test.step('Skills Academy Workouts', async () => {
-      await page.goto('/skills-academy/workouts');
+      await page.goto('/skills-academy');
       await page.waitForLoadState('networkidle');
       await page.screenshot({ path: 'screenshots/new-pages/04-skills-workouts.png', fullPage: true });
     });

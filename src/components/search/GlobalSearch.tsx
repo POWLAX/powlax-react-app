@@ -50,7 +50,7 @@ const mockSearchData: SearchResult[] = [
     title: 'Stick Skills Daily Practice',
     description: 'Essential stick handling exercises for home practice',
     category: 'workout',
-    url: '/skills-academy/workouts/stick-skills',
+    url: '/skills-academy/stick-skills',
     metadata: {
       duration: 30,
       difficulty: 'All Levels',

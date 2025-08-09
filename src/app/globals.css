@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Skills Academy Workout Animations */
+@import '../styles/animations.css';
+
 /* Field Visibility Utilities for Outdoor Coaching */
 @layer utilities {
   /* High contrast text for field visibility */

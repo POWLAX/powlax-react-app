@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
-import { BookOpen, Clock, Target, Users, ChevronRight, X } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { BookOpen, Clock, Target, Users, ChevronRight, X, Loader2, Star } from 'lucide-react'
 import dynamic from 'next/dynamic'
 const motion = dynamic(() => import('framer-motion').then(m => ({ default: m.motion })), { ssr: false })
 const AnimatePresence = dynamic(() => import('framer-motion').then(m => ({ default: m.AnimatePresence })), { ssr: false })
-import { practiceTemplates, PracticeTemplate } from '@/data/practice-templates'
+import { usePracticeTemplates, PracticeTemplate } from '@/hooks/usePracticeTemplates'
 import { Button } from '@/components/ui/button'
 
 interface PracticeTemplateSelectorProps {
@@ -19,13 +19,21 @@ export default function PracticeTemplateSelector({
   onClose,
   onSelectTemplate
 }: PracticeTemplateSelectorProps) {
-  const [selectedAgeGroup, setSelectedAgeGroup] = useState<'8-10' | '11-14' | '15-18' | null>(null)
+  const [selectedAgeGroup, setSelectedAgeGroup] = useState<'8-10' | '11-14' | '15+' | null>(null)
   const [selectedTemplate, setSelectedTemplate] = useState<PracticeTemplate | null>(null)
+  
+  const { 
+    templates, 
+    loading, 
+    error, 
+    getTemplatesByAgeGroup,
+    incrementUsageCount 
+  } = usePracticeTemplates()
 
   const ageGroups = [
     { value: '8-10', label: '8-10 Years', description: 'Fun fundamentals and basic skills', color: 'bg-green-100 text-green-800' },
     { value: '11-14', label: '11-14 Years', description: 'Skill development and team play', color: 'bg-blue-100 text-blue-800' },
-    { value: '15-18', label: '15-18 Years', description: 'Advanced tactics and conditioning', color: 'bg-purple-100 text-purple-800' }
+    { value: '15+', label: '15+ Years', description: 'Advanced tactics and conditioning', color: 'bg-purple-100 text-purple-800' }
   ] as const
 
   const handleTemplateSelect = (template: PracticeTemplate) => {
@@ -94,7 +102,7 @@ export default function PracticeTemplateSelector({
                         </div>
                         <p className="text-gray-600">{group.description}</p>
                         <div className="mt-3 text-sm text-gray-500">
-                          {practiceTemplates.filter(t => t.ageGroup === group.value).length} templates available
+                          {getTemplatesByAgeGroup(group.value).length} templates available
                         </div>
                       </div>
                       <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-blue-500" />
@@ -121,56 +129,69 @@ export default function PracticeTemplateSelector({
               </div>
 
               <div className="space-y-4">
-                {practiceTemplates
-                  .filter(template => template.ageGroup === selectedAgeGroup)
-                  .map((template) => (
+                {loading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                  </div>
+                ) : error ? (
+                  <div className="text-center py-8 text-red-600">
+                    Error loading templates: {error}
+                  </div>
+                ) : (
+                  getTemplatesByAgeGroup(selectedAgeGroup)
+                    .map((template) => (
                     <div
                       key={template.id}
                       className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer"
                       onClick={() => setSelectedTemplate(template)}
                     >
                       <div className="flex items-start justify-between mb-3">
-                        <div>
+                        <div className="flex-1">
                           <h4 className="font-semibold text-gray-900">{template.name}</h4>
                           <p className="text-gray-600 text-sm mt-1">{template.description}</p>
                         </div>
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${getDifficultyColor(template.difficulty)}`}>
-                          {template.difficulty}
-                        </span>
+                        {template.is_official && (
+                          <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                        )}
                       </div>
 
                       <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
                         <div className="flex items-center space-x-1">
                           <Clock className="h-4 w-4" />
-                          <span>{template.duration} min</span>
+                          <span>{template.duration_minutes} min</span>
                         </div>
-                        <div className="flex items-center space-x-1">
-                          <BookOpen className="h-4 w-4" />
-                          <span>{template.timeSlots.length} activities</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Target className="h-4 w-4" />
-                          <span>{template.focus.length} focus areas</span>
-                        </div>
+                        {template.category && (
+                          <div className="flex items-center space-x-1">
+                            <BookOpen className="h-4 w-4" />
+                            <span>{template.category.replace('_', ' ')}</span>
+                          </div>
+                        )}
+                        {template.usage_count && template.usage_count > 0 && (
+                          <div className="flex items-center space-x-1">
+                            <Users className="h-4 w-4" />
+                            <span>Used {template.usage_count} times</span>
+                          </div>
+                        )}
                       </div>
 
                       <div className="flex flex-wrap gap-2">
-                        {template.focus.slice(0, 3).map((focus) => (
+                        {template.tags?.slice(0, 3).map((tag) => (
                           <span
-                            key={focus}
+                            key={tag}
                             className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs"
                           >
-                            {focus}
+                            {tag}
                           </span>
                         ))}
-                        {template.focus.length > 3 && (
+                        {template.tags && template.tags.length > 3 && (
                           <span className="px-2 py-1 bg-gray-50 text-gray-600 rounded text-xs">
-                            +{template.focus.length - 3} more
+                            +{template.tags.length - 3} more
                           </span>
                         )}
                       </div>
                     </div>
-                  ))}
+                  ))
+                )}
               </div>
             </div>
           )}

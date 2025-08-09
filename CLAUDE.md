@@ -2,6 +2,18 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 🚨 CRITICAL: Server Management Requirements
+
+**MANDATORY FOR ALL WORK:**
+- **ALWAYS run dev server on port 3000**: `npm run dev`
+- **Check if running first**: `lsof -ti:3000`
+- **Start if not running**: `npm run dev`
+- **NEVER turn off server** - Leave running for user review
+- **Reset during work if needed**, but **MUST be running after work**
+- **Server accessible at http://localhost:3000** for user review
+
+**⚠️ SERVER MUST BE RUNNING ON PORT 3000 WHEN WORK IS COMPLETE!**
+
 ## 🚨 Critical Error Prevention
 
 **MUST READ BEFORE ANY WORK:**
@@ -25,6 +37,33 @@ npm run lint             # Run ESLint checks
 npm run typecheck        # Run TypeScript type checking
 npm run build:verify     # Full validation: lint + typecheck + build
 ```
+
+### 🚨 CRITICAL: Server Management for Claude-to-Claude-Sub-Agent-Work-Flow Branch
+
+**MANDATORY REQUIREMENTS:**
+1. **ALWAYS run on port 3000**: `npm run dev` (default port)
+2. **Check if server is running first**: `lsof -ti:3000`
+3. **Start server if not running**: `npm run dev`
+4. **NEVER turn off the server** - Leave it running for user review
+5. **Reset during work if needed**, but **MUST be running after work**
+6. **Server must be accessible at http://localhost:3000** for user to review
+
+**Server Management Commands:**
+```bash
+# Check if server is running on 3000
+lsof -ti:3000
+
+# Start server on 3000 (if not running)
+npm run dev
+
+# Kill server on 3000 (only for reset during work)
+kill $(lsof -ti:3000)
+
+# Restart server on 3000 (after reset)
+npm run dev
+```
+
+**⚠️ REMINDER: Server MUST be running on 3000 when work is complete for user review!**
 
 ### Testing
 ```bash
@@ -85,6 +124,92 @@ Before using any specialized agent, Claude must evaluate:
 - Does this require specialized lacrosse domain expertise across multiple systems? ❓ Consider agents
 
 **Default approach: Direct implementation by Claude**
+
+## 🚀 Parallel Execution Strategy (Claude-to-Claude Multi-Agent)
+
+### Overview
+For large, multi-faceted tasks that can be parallelized, Claude can deploy multiple general-purpose agents to work simultaneously on different sections. This approach multiplies execution speed while maintaining full project context across all agents. These are NOT specialized agents - they are multiple instances of Claude working in parallel.
+
+### When to Use Parallel Execution:
+Use parallel general-purpose agents when:
+1. **Task has 3+ independent sections** that can execute simultaneously
+2. **Each section is substantial** (30+ minutes of work)
+3. **Sections have clear boundaries** with minimal file overlap
+4. **Time-critical delivery** requires faster completion
+5. **Contract specifies** parallel execution approach
+
+### When NOT to Use Parallel Execution:
+Avoid parallel agents when:
+1. **Sequential dependencies** exist between tasks
+2. **File conflicts likely** (multiple agents editing same files)
+3. **Task is simple** enough for single-threaded execution
+4. **Coordination overhead** exceeds time savings
+
+### Contract Requirements for Parallel Execution:
+**ALL parallel execution MUST be specified in contract with:**
+
+1. **Ultra Think Planning Phase** (MANDATORY):
+   - Minimum 5 minutes of deep thinking
+   - Evaluate all common errors from documentation
+   - Identify file collision risks
+   - Map clear agent boundaries
+
+2. **Agent Distribution in Contract**:
+   ```yaml
+   executionStrategy:
+     type: parallel  # or sequential (default)
+     agentCount: 5
+     ultraThinkCompleted: true  # REQUIRED
+     
+   parallelAgents:
+     agent_1:
+       type: general-purpose
+       scope: "Page routing fixes"
+       files: ["/app/skills-academy/workouts/page.tsx"]
+       noTouch: ["database", "components"]
+       
+     agent_2:
+       type: general-purpose
+       scope: "Database migration"
+       files: ["migrations/*.sql", "hooks/*.ts"]
+       noTouch: ["pages", "navigation"]
+   ```
+
+3. **Progress Documentation**:
+   - Each agent completion documented in contract
+   - Timestamps for each phase
+   - Blockers immediately reported
+   - Integration status tracked
+
+### Common Errors to Evaluate (Ultra Think):
+Before launching parallel agents, MUST evaluate:
+- **File collision risks** - Multiple agents editing same file
+- **Import conflicts** - Duplicate or conflicting imports
+- **State dependencies** - One agent needing another's output
+- **Database conflicts** - Concurrent schema modifications
+- **Git conflicts** - Merge conflicts from parallel commits
+- **Type definition conflicts** - Multiple agents modifying types
+
+### Testing Requirements:
+- **Each agent** runs Playwright tests for their section
+- **Claude** runs full Playwright suite after integration
+- **No merge** until all tests pass
+- **Document** any test failures in contract
+
+### Best Practices:
+1. **Clear boundaries** - Each agent gets exclusive file territories
+2. **Atomic commits** - Each agent commits separately
+3. **Error documentation** - Update common errors list
+4. **Progress tracking** - Real-time updates in contract
+5. **Final integration** - Claude reviews all outputs before merge
+
+### Success Metrics:
+- Time saved vs sequential execution
+- Number of conflicts encountered
+- Test pass rate after integration
+- Zero regressions in existing functionality
+
+**Remember:** Parallel execution is for BIG projects. Most tasks should still be handled directly by Claude without agents. The contract must specify if parallel execution is approved.
 
 ## Architecture Overview
 
@@ -171,10 +296,23 @@ useEffect(() => {
 
 ### Core Tables (33 Total)
 - **Practice Planning**: `drills`, `strategies`, `concepts`, `skills`, `practice_plans`
-- **Skills Academy**: `academy_drills`, `workouts`, `powlax_wall_ball_*` tables
+- **Skills Academy**: `skills_academy_series` (41), `skills_academy_workouts` (118), `skills_academy_drills` (167), `skills_academy_workout_drills` (0 - EMPTY)
+- **Wall Ball**: `powlax_wall_ball_collections`, `powlax_wall_ball_collection_drills`, `powlax_wall_ball_drill_library`
 - **User Management**: `user_profiles`, `teams`, `team_members`
 - **Gamification**: `points_ledger`, `badges`, `user_badges`
 - **Assessments**: `quizzes`, `quiz_questions`, `quiz_responses`
+
+### ⚠️ Skills Academy Connection Issue
+The `skills_academy_workout_drills` junction table is **EMPTY (0 records)**, causing:
+- Workout modals show "0 drills"
+- "Start Workout" leads to "Workout Not Found"
+- No drill-to-workout connections exist
+
+**Tables exist but need connection:**
+- ✅ `skills_academy_series` (41 series definitions)
+- ✅ `skills_academy_workouts` (118 workouts with drill_count but no actual drills)
+- ✅ `skills_academy_drills` (167 individual drills)
+- ❌ `skills_academy_workout_drills` (empty junction table)
 
 ### Taxonomy System
 4-tier bidirectional relationship:
@@ -186,6 +324,19 @@ Drills ↔ Strategies ↔ Concepts ↔ Skills
 - `powlax_wall_ball_collections` - Workout collections
 - `powlax_wall_ball_collection_drills` - Junction table
 - `powlax_wall_ball_drill_library` - Individual drills
+
+### Skills Academy System (Partial)
+**Correct Table Structure:**
+- `skills_academy_series` - Series definitions (41 records) ✅
+- `skills_academy_workouts` - Individual workouts (118 records) ✅
+- `skills_academy_drills` - Drill library (167 records) ✅
+- `skills_academy_workout_drills` - Junction table (0 records) ❌ EMPTY
+
+**Connection Method Needed:**
+Workouts need to connect to drills either through:
+1. Populating the junction table with workout_id + drill_id relationships
+2. Creating helper function to programmatically connect workouts to appropriate drills
+3. Using drill categories/tags to auto-associate drills with workouts
 
 ## Common Errors & Prevention
 

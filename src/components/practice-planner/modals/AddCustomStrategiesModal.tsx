@@ -103,15 +103,15 @@ export default function AddCustomStrategiesModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0">
-        <DialogHeader className="px-6 py-4 border-b">
-          <DialogTitle className="text-powlax-blue">Add Custom Strategy</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0 bg-white">
+        <DialogHeader className="px-6 py-4 border-b border-gray-200 bg-white">
+          <DialogTitle className="text-[#003366]">Add Custom Strategy</DialogTitle>
+          <DialogDescription className="text-gray-600">
             Create a custom strategy for your team and practice plans
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 px-6 py-4" style={{ maxHeight: 'calc(90vh - 180px)' }}>
+        <ScrollArea className="flex-1 px-6 py-4 bg-white" style={{ maxHeight: 'calc(90vh - 180px)' }}>
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Strategy Name */}
             <div>

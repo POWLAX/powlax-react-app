@@ -167,9 +167,13 @@ export interface SkillsAcademyWorkoutDrill {
   video_type: 'strong_hand' | 'off_hand' | 'both_hands';
   is_optional: boolean;
   points_value: number;
-  // Join data
+  // Join data - connects to skills_academy_drills table
   drill?: SkillsAcademyDrillNew;
 }
+
+// IMPORTANT: skills_academy_workout_drills junction table is currently EMPTY (0 records)
+// This means workouts have no drill connections, causing "0 drills" in modals
+// Need to populate this table or create helper function to connect workouts to drills
 
 export interface SkillsAcademyUserProgress {
   id: number;

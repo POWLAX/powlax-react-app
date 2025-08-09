@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { randomBytes, createHmac, timingSafeEqual } from 'crypto'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,8 +10,39 @@ function getAdminClient() {
   return createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } })
 }
 
+// Cryptographically secure token generation
+function generateSecureToken(): string {
+  return randomBytes(32).toString('base64url')
+}
+
+// Legacy function name for compatibility (redirects to secure version)
 function randomToken(): string {
-  return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)
+  return generateSecureToken()
+}
+
+// Verify webhook signature from MemberPress
+function verifyWebhookSignature(payload: string, signature: string | null): boolean {
+  if (!signature) return false
+  
+  const secret = process.env.MEMBERPRESS_WEBHOOK_SECRET
+  if (!secret) {
+    console.error('MEMBERPRESS_WEBHOOK_SECRET not configured')
+    return false
+  }
+  
+  try {
+    const expectedSig = createHmac('sha256', secret)
+      .update(payload)
+      .digest('hex')
+    
+    return timingSafeEqual(
+      Buffer.from(signature),
+      Buffer.from(expectedSig)
+    )
+  } catch (error) {
+    console.error('Signature verification error:', error)
+    return false
+  }
 }
 
 async function ensureUser(supabase: ReturnType<typeof createClient>, email?: string, wordpressId?: number, fullName?: string) {
@@ -80,25 +112,80 @@ async function createClubWithTeamsAndLinks(supabase: ReturnType<typeof createCli
 
 export async function POST(req: NextRequest) {
   try {
+    // Get raw body for signature verification
+    const rawBody = await req.text()
+    const signature = req.headers.get('x-memberpress-signature')
+    
+    // Verify webhook signature (temporarily allow bypass in dev for testing)
+    const isDevelopment = process.env.NODE_ENV === 'development'
+    if (!isDevelopment && !verifyWebhookSignature(rawBody, signature)) {
+      console.warn('Invalid webhook signature received')
+      return NextResponse.json(
+        { error: 'Invalid signature' },
+        { status: 401 }
+      )
+    }
+    
     const supabase = getAdminClient()
-    const payload = await req.json().catch(() => ({}))
+    const payload = JSON.parse(rawBody || '{}')
 
-    // Log raw event for troubleshooting
+    // Log raw event for troubleshooting with signature verification status
     try {
       const headersObj: Record<string, string> = {}
       req.headers.forEach((v, k) => (headersObj[k] = v))
-      await supabase.from('webhook_events').insert({ source: 'memberpress', headers: headersObj, payload })
+      const signatureValid = verifyWebhookSignature(rawBody, signature)
+      await supabase.from('webhook_events').insert({ 
+        source: 'memberpress', 
+        headers: headersObj, 
+        payload: {
+          ...payload,
+          _meta: { 
+            signature_valid: signatureValid,
+            signature_present: !!signature,
+            dev_mode: isDevelopment
+          }
+        }
+      })
     } catch {}
 
     // Basic payload expectations from MemberPress
     const event = payload?.event || payload?.type || ''
+    const webhookId = payload?.id || payload?.webhook_id || `${event}_${Date.now()}`
     const membershipId = Number(payload?.membership_id || payload?.product_id || 0)
+    
+    if (!event) {
+      return NextResponse.json({ ok: true, message: 'Ignored: missing event' })
+    }
+
+    // Queue webhook for processing (idempotent)
+    const { data: queueId, error: queueError } = await supabase.rpc('enqueue_webhook', {
+      p_webhook_id: webhookId,
+      p_event_type: event,
+      p_payload: payload,
+      p_source: 'memberpress'
+    })
+
+    if (queueError) {
+      console.error('Failed to queue webhook:', queueError)
+      // Fall back to direct processing for critical events
+      if (event.includes('subscription')) {
+        console.log('Attempting direct processing as fallback')
+        // Continue with original direct processing below
+      } else {
+        return NextResponse.json({ error: 'Failed to queue webhook' }, { status: 500 })
+      }
+    } else {
+      console.log(`Webhook ${webhookId} queued successfully with ID: ${queueId}`)
+      return NextResponse.json({ ok: true, queued: true, queue_id: queueId })
+    }
+
+    // FALLBACK: Direct processing (only if queueing fails)
     const wpUserId = Number(payload?.user_id || payload?.wordpress_user_id || 0)
     const email: string | undefined = payload?.email || payload?.user_email
     const fullName: string | undefined = payload?.full_name || payload?.user_name
-
-    if (!event || !membershipId) {
-      return NextResponse.json({ ok: true, message: 'Ignored: missing event/membershipId' })
+    
+    if (!membershipId) {
+      return NextResponse.json({ ok: true, message: 'Ignored: missing membershipId' })
     }
 
     // Lookup mapping

@@ -88,6 +88,70 @@ contractTemplate:
     performance: "ALL items status: ACCEPTABLE or FAST"
     quality: "ALL items status: CLEAN or HIGH"
   
+  # ===== EXECUTION STRATEGY (For Big Projects) =====
+  # For most projects, use sequential (default)
+  # For BIG projects with 3+ independent sections, consider parallel
+  executionStrategy:
+    type: sequential  # sequential (default) | parallel
+    
+    # Parallel execution option for big projects
+    parallelConfiguration:
+      # When to use parallel:
+      # - Project has 3+ major independent requirement sections
+      # - Each section would take 30+ minutes
+      # - Sections have minimal file overlap
+      # - Time is critical
+      
+      enabled: false  # Set true only for big projects
+      
+      # MANDATORY before parallel execution
+      ultraThinkPlanning:
+        completed: false  # MUST be true
+        duration: "5+ minutes minimum"
+        evaluated:
+          - [ ] Common errors from documentation
+          - [ ] File collision risks
+          - [ ] Import conflicts
+          - [ ] Database conflicts
+          - [ ] Type definition overlaps
+          
+      # How to distribute requirements across agents
+      agentAssignments:
+        agent_1:
+          type: general-purpose  # Always use general-purpose
+          requirements: []  # Which requirements from above
+          files: []         # Exclusive file access
+          noTouch: []       # Files/areas to avoid
+          
+        agent_2:
+          type: general-purpose
+          requirements: []
+          files: []
+          noTouch: []
+          
+      # Track parallel progress
+      parallelTracking:
+        agent_1:
+          status: not_started
+          requirementsMet: 0
+          testsPass: false
+          completedAt: ""
+          
+        agent_2:
+          status: not_started
+          requirementsMet: 0
+          testsPass: false
+          completedAt: ""
+          
+      # Final integration
+      integration:
+        - [ ] All agents complete
+        - [ ] No merge conflicts
+        - [ ] All tests pass
+        - [ ] Full Playwright suite passes
+        - [ ] No regressions
+        - [ ] Errors documented
+  
   # How agents work with this contract
   agentInstructions:
     approach: |

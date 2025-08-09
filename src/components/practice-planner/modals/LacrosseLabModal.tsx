@@ -194,15 +194,15 @@ export default function LacrosseLabModal({ isOpen, onClose, drill }: LacrosseLab
   if (labUrls.length === 0) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-4xl bg-white">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-[#003366]">
               <Beaker className="h-5 w-5" />
               {drill.name} - Lacrosse Lab
             </DialogTitle>
           </DialogHeader>
           <div className="flex items-center justify-center p-8">
-            <p className="text-gray-600">No Lacrosse Lab diagrams available for this drill</p>
+            <p className="text-[#003366]">No Lacrosse Lab diagrams available for this drill</p>
           </div>
         </DialogContent>
       </Dialog>
@@ -211,13 +211,13 @@ export default function LacrosseLabModal({ isOpen, onClose, drill }: LacrosseLab
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh]">
+      <DialogContent className="max-w-[95vw] md:max-w-6xl max-h-[95vh] bg-white">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Beaker className="h-5 w-5" />
             {drill.name} - Lacrosse Lab Diagrams
           </DialogTitle>
-          <DialogDescription className="flex items-center justify-between">
+          <DialogDescription className="flex items-center justify-between text-gray-600">
             <span>Interactive drill diagrams and field setups</span>
             <Badge variant="secondary">
               {currentIndex + 1} of {labUrls.length}
@@ -232,25 +232,26 @@ export default function LacrosseLabModal({ isOpen, onClose, drill }: LacrosseLab
             {isLoading && (
               <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10">
                 <div className="text-center">
-                  <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" />
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto text-[#003366]" />
                   <p className="text-sm text-gray-600 mt-2">Loading diagram...</p>
                 </div>
               </div>
             )}
 
-            {/* Iframe Container - 500x500 with max-width 100% */}
-            <div className="relative flex justify-center items-center bg-white" style={{ minHeight: '500px' }}>
+            {/* Iframe Container - Large display for better visibility */}
+            <div className="relative flex justify-center items-center bg-white" style={{ minHeight: '70vh' }}>
               <iframe
                 key={labUrls[currentIndex]} // Force reload on URL change
                 src={getEmbedUrl(labUrls[currentIndex])}
-                width="500"
-                height="500"
-                style={{ maxWidth: '100%' }}
+                width="100%"
+                height="100%"
+                style={{ minHeight: '70vh', pointerEvents: 'auto' }}
                 className="border-0"
                 onLoad={handleIframeLoad}
                 title={`Lacrosse Lab Diagram ${currentIndex + 1}`}
-                allow="fullscreen"
+                allow="fullscreen; autoplay"
                 allowFullScreen
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
               />
             </div>
 
@@ -284,7 +285,7 @@ export default function LacrosseLabModal({ isOpen, onClose, drill }: LacrosseLab
                   onClick={() => handleDotClick(index)}
                   className={`h-2 w-2 rounded-full transition-all ${
                     index === currentIndex
-                      ? 'bg-blue-600 w-8'
+                      ? 'bg-[#003366] w-8'
                       : 'bg-gray-300 hover:bg-gray-400'
                   }`}
                   aria-label={`Go to diagram ${index + 1}`}
@@ -298,7 +299,7 @@ export default function LacrosseLabModal({ isOpen, onClose, drill }: LacrosseLab
             <div className="text-sm text-gray-600">
               <p>Use arrow keys or click dots to navigate between diagrams</p>
             </div>
-            <Button onClick={handleOpenInNewTab} variant="outline" size="sm">
+            <Button onClick={handleOpenInNewTab} variant="outline" size="sm" className="bg-gray-100 hover:bg-gray-200 text-[#003366] border-gray-300">
               <ExternalLink className="h-4 w-4 mr-2" />
               Open in Lab Editor
             </Button>

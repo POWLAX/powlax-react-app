@@ -33,6 +33,7 @@ export default function PracticePlansPage() {
   const [field, setField] = useState('Turf')
   const [addSetupTime, setAddSetupTime] = useState(false)
   const [setupDuration, setSetupDuration] = useState(15)
+  const [setupNotes, setSetupNotes] = useState<string[]>([])
   const [practiceNotes, setPracticeNotes] = useState('')
   const [timeSlots, setTimeSlots] = useState<PracticePlanTimeSlot[]>([])
   const [showDrillLibrary, setShowDrillLibrary] = useState(false)
@@ -58,7 +59,7 @@ export default function PracticePlansPage() {
       clearTimeout(autoSaveTimerRef.current)
     }
 
-    // Set new timer for auto-save
+    // Set new timer for auto-save with optimized debouncing
     autoSaveTimerRef.current = setTimeout(() => {
       const practiceData = {
         practiceDate,
@@ -67,14 +68,20 @@ export default function PracticePlansPage() {
         field,
         addSetupTime,
         setupDuration,
+        setupNotes,
         practiceNotes,
         timeSlots,
         selectedStrategies
       }
       
-      // Save to localStorage
+      // Save to localStorage using try-catch for better error handling
       if (typeof window !== 'undefined' && window.localStorage) {
-        localStorage.setItem(`practice-plan-${teamId}`, JSON.stringify(practiceData))
+        try {
+          localStorage.setItem(`practice-plan-${teamId}`, JSON.stringify(practiceData))
+        } catch (e) {
+          // Silently handle quota exceeded errors
+          console.warn('Auto-save failed:', e)
+        }
       }
     }, 3000) // Save after 3 seconds of inactivity
 
@@ -84,7 +91,7 @@ export default function PracticePlansPage() {
         clearTimeout(autoSaveTimerRef.current)
       }
     }
-  }, [practiceDate, startTime, duration, field, addSetupTime, setupDuration, practiceNotes, timeSlots, selectedStrategies, teamId])
+  }, [practiceDate, startTime, duration, field, addSetupTime, setupDuration, setupNotes, practiceNotes, timeSlots, selectedStrategies, teamId])
 
   // Load saved practice on mount
   useEffect(() => {
@@ -100,6 +107,7 @@ export default function PracticePlansPage() {
         setField(data.field || 'Turf')
         setAddSetupTime(data.addSetupTime || false)
         setSetupDuration(data.setupDuration || 15)
+        setSetupNotes(data.setupNotes || [])
         setPracticeNotes(data.practiceNotes || '')
         setTimeSlots(data.timeSlots || [])
         setSelectedStrategies(data.selectedStrategies || [])
@@ -266,9 +274,75 @@ export default function PracticePlansPage() {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="bg-white border-b px-4 py-3">
-        <div className="flex items-center justify-between">
+        {/* Mobile Layout */}
+        <div className="md:hidden">
+          <h1 className="text-xl font-bold text-[#003366]">POWLAX PRACTICE PLANNER</h1>
+          <p className="text-sm text-gray-600 mt-1">Finally: A practice planner built by a lacrosse coach who actually gets it.</p>
+          <div className="flex gap-2 mt-3 flex-wrap">
+            <button 
+              onClick={() => setShowTemplateSelector(true)}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
+              title="Use Practice Template"
+            >
+              <Plus className="h-5 w-5" />
+            </button>
+            <button 
+              onClick={() => setShowLoadModal(true)}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
+              title="Open Practice Plan"
+            >
+              <FolderOpen className="h-5 w-5" />
+            </button>
+            <button 
+              onClick={() => setShowStrategiesListModal(true)}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
+              title="View Strategies"
+            >
+              <Target className="h-5 w-5" />
+            </button>
+            <button 
+              onClick={() => setShowAddStrategiesModal(true)}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
+              title="Add Custom Strategy"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+            <button 
+              onClick={() => setShowSaveModal(true)}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
+              title="Save Practice Plan"
+            >
+              <Save className="h-5 w-5" />
+            </button>
+            <button 
+              onClick={handlePrint}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
+              title="Print Practice Plan"
+              disabled={isPrinting || timeSlots.length === 0}
+            >
+              <Printer className={`h-5 w-5 ${isPrinting ? 'animate-pulse' : ''}`} />
+            </button>
+            <button 
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className={`p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors ${
+                isRefreshing ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+              title={isRefreshing ? 'Refreshing...' : 'Refresh Drill Library'}
+            >
+              {isRefreshing ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <RefreshCw className="h-5 w-5" />
+              )}
+            </button>
+          </div>
+        </div>
+        
+        {/* Desktop Layout */}
+        <div className="hidden md:flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-blue-600">POWLAX Practice Planner</h1>
+            <h1 className="text-2xl font-bold text-[#003366]">POWLAX Practice Planner</h1>
             <p className="text-sm text-gray-600">Finally: A practice planner built by a lacrosse coach who actually gets it.</p>
           </div>
           
@@ -477,6 +551,8 @@ export default function PracticePlansPage() {
               setDrills={setTimeSlots}
               startTime={startTime}
               setupTime={addSetupTime ? setupDuration : 0}
+              setupNotes={setupNotes}
+              onSetupNotesChange={setSetupNotes}
             />
           </div>
         </div>

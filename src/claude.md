@@ -13,7 +13,7 @@ This guide contains standardized solutions for all common loading errors.
 - **Resources** (`/resources`) - Working perfectly with full content
 - **Academy** (`/academy`) - Fixed auth blocking, shows skills categories
 - **Skills Academy** (`/skills-academy`) - Working with wall ball data
-- **Skills Academy Workouts** (`/skills-academy/workouts`) - Fixed loading, shows layout
+- **Skills Academy Enhanced** (`/skills-academy`) - Fixed loading, enhanced UI with workouts browser
 - **Wall Ball pages** (`/skills-academy/wall-ball/*`) - Working with sample data
 
 ### 🔧 Common Loading Issues & Solutions

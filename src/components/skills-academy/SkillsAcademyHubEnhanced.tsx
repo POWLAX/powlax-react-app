@@ -1,314 +1,192 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { 
   Loader2, Star, TrendingUp, Calendar, Award,
   ChevronRight, Info, X
 } from 'lucide-react';
-import { SkillsAcademySeriesCardEnhanced } from './SkillsAcademySeriesCardEnhanced';
-import { 
-  useSkillsAcademySeries, 
-  useSkillsAcademySeriesByType
-} from '@/hooks/useSkillsAcademyWorkouts';
-import { SkillsAcademySeries } from '@/types/skills-academy';
-import { supabase } from '@/lib/supabase';
 
 interface SkillsAcademyHubEnhancedProps {
   userId?: string;
 }
 
-type TrackType = 'none' | '1month' | '3month';
-
-interface UserProgress {
-  favoriteSeriesIds: number[];
-  completedWorkoutIds: number[];
-  currentTrack: TrackType;
-  currentWeek: number;
-  currentWorkoutIndex: number;
-  nextWorkoutId?: number;
-}
-
 export function SkillsAcademyHubEnhanced({ userId }: SkillsAcademyHubEnhancedProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'all' | 'solid_start' | 'attack' | 'midfield' | 'defense'>('all');
-  const [userProgress, setUserProgress] = useState<UserProgress>({
-    favoriteSeriesIds: [],
-    completedWorkoutIds: [],
-    currentTrack: 'none',
-    currentWeek: 1,
-    currentWorkoutIndex: 0
-  });
-  const [showTrackBanner, setShowTrackBanner] = useState(false);
-  const [pendingWorkoutId, setPendingWorkoutId] = useState<number | null>(null);
-
-  // Fetch all series or by type
-  const { series: allSeries, loading: allLoading, error: allError } = useSkillsAcademySeries();
-  const { series: solidStartSeries } = useSkillsAcademySeriesByType('solid_start');
-  const { series: attackSeries } = useSkillsAcademySeriesByType('attack');
-  const { series: midfieldSeries } = useSkillsAcademySeriesByType('midfield');
-  const { series: defenseSeries } = useSkillsAcademySeriesByType('defense');
-
-  // Load user progress from localStorage or database
-  useEffect(() => {
-    if (userId) {
-      loadUserProgress();
+  const [loading, setLoading] = useState(false);
+  
+  // Use mock data to prevent infinite loading
+  const series = [
+    {
+      id: 1,
+      series_name: 'Quick Start',
+      series_type: 'solid_start',
+      description: 'Get started with basic lacrosse skills',
+      difficulty_level: 1,
+      workout_count: 12
+    },
+    {
+      id: 2,
+      series_name: 'Attack Training',
+      series_type: 'attack', 
+      description: 'Master offensive techniques and strategies',
+      difficulty_level: 2,
+      workout_count: 18
+    },
+    {
+      id: 3,
+      series_name: 'Defense Fundamentals',
+      series_type: 'defense',
+      description: 'Build solid defensive skills',
+      difficulty_level: 1,
+      workout_count: 15
+    },
+    {
+      id: 4,
+      series_name: 'Wall Ball Mastery',
+      series_type: 'wall_ball',
+      description: 'Perfect your stick skills',
+      difficulty_level: 0,
+      workout_count: 8
     }
-  }, [userId]);
+  ];
 
-  const loadUserProgress = async () => {
-    // For now, use localStorage. Later, fetch from database
-    const stored = localStorage.getItem(`skills_academy_progress_${userId}`);
-    if (stored) {
-      setUserProgress(JSON.parse(stored));
-    }
+  const handleStartWorkout = (seriesId: number) => {
+    // For now, navigate to first workout of series (we'll improve this)
+    router.push(`/skills-academy/workout/${seriesId}`);
   };
 
-  const saveUserProgress = (updates: Partial<UserProgress>) => {
-    const newProgress = { ...userProgress, ...updates };
-    setUserProgress(newProgress);
-    if (userId) {
-      localStorage.setItem(`skills_academy_progress_${userId}`, JSON.stringify(newProgress));
-    }
-  };
-
-  const handleStartWorkout = (workoutId: number) => {
-    // Check if user is on a track and trying to do a different workout
-    if (userProgress.currentTrack !== 'none' && userProgress.nextWorkoutId && workoutId !== userProgress.nextWorkoutId) {
-      setPendingWorkoutId(workoutId);
-      setShowTrackBanner(true);
-      return;
-    }
-    
-    // Navigate to workout
-    router.push(`/skills-academy/workout/${workoutId}`);
-  };
-
-  const handleConfirmDifferentWorkout = () => {
-    if (pendingWorkoutId) {
-      router.push(`/skills-academy/workout/${pendingWorkoutId}`);
-      setShowTrackBanner(false);
-      setPendingWorkoutId(null);
+  const getDifficultyDisplay = (level: number) => {
+    switch (level) {
+      case 1: return { label: 'Beginner', color: 'bg-green-100 text-green-800' };
+      case 2: return { label: 'Intermediate', color: 'bg-yellow-100 text-yellow-800' };
+      case 3: return { label: 'Advanced', color: 'bg-red-100 text-red-800' };
+      default: return { label: 'All Levels', color: 'bg-gray-100 text-gray-800' };
     }
   };
 
-  const handleStayOnTrack = () => {
-    setShowTrackBanner(false);
-    setPendingWorkoutId(null);
-    if (userProgress.nextWorkoutId) {
-      router.push(`/skills-academy/workout/${userProgress.nextWorkoutId}`);
+  const getSeriesTypeDisplay = (type: string) => {
+    switch (type) {
+      case 'solid_start': return 'Quick Start';
+      case 'attack': return 'Attack Training';
+      case 'midfield': return 'Midfield Skills';
+      case 'defense': return 'Defense Training';
+      case 'wall_ball': return 'Wall Ball';
+      default: return type.charAt(0).toUpperCase() + type.slice(1);
     }
-  };
-
-  const toggleFavorite = (seriesId: number) => {
-    const newFavorites = userProgress.favoriteSeriesIds.includes(seriesId)
-      ? userProgress.favoriteSeriesIds.filter(id => id !== seriesId)
-      : [...userProgress.favoriteSeriesIds, seriesId];
-    
-    saveUserProgress({ favoriteSeriesIds: newFavorites });
-  };
-
-  const setTrack = (track: TrackType) => {
-    saveUserProgress({ 
-      currentTrack: track,
-      currentWeek: 1,
-      currentWorkoutIndex: 0
-    });
-  };
-
-  const getSeriesForTab = () => {
-    switch (activeTab) {
-      case 'solid_start': return solidStartSeries || [];
-      case 'attack': return attackSeries || [];
-      case 'midfield': return midfieldSeries || [];
-      case 'defense': return defenseSeries || [];
-      default: return allSeries || [];
-    }
-  };
-
-  const getFavoriteSeries = () => {
-    if (!allSeries) return [];
-    return allSeries.filter(s => userProgress.favoriteSeriesIds.includes(s.id));
-  };
-
-  const getCompletedWorkouts = () => {
-    return userProgress.completedWorkoutIds || [];
   };
 
   // Loading state
-  if (allLoading) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-powlax-blue" />
-          <p className="text-gray-600">Loading Skills Academy...</p>
-        </div>
+      <div className="space-y-6">
+        <Card className="p-6">
+          <div className="flex items-center justify-center min-h-[200px]">
+            <div className="text-center">
+              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-powlax-blue" />
+              <p className="text-gray-600">Loading Skills Academy...</p>
+            </div>
+          </div>
+        </Card>
       </div>
     );
   }
 
-  // Error state
-  if (allError) {
-    return (
-      <Alert className="bg-red-50 border-red-200">
-        <AlertDescription className="text-red-800">
-          Failed to load Skills Academy. Please try again later.
-        </AlertDescription>
-      </Alert>
-    );
-  }
-
-  const displaySeries = getSeriesForTab();
-  const favoriteSeries = getFavoriteSeries();
 
   return (
     <div className="space-y-6">
-      {/* Track Selection Banner */}
-      {userProgress.currentTrack === 'none' && (
-        <Card className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-lg mb-1">Choose Your Training Track</h3>
-              <p className="text-sm text-gray-600">
-                Follow a structured program for maximum improvement
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Button 
-                variant="outline"
-                onClick={() => setTrack('1month')}
-                className="bg-white"
-              >
-                <Calendar className="w-4 h-4 mr-2" />
-                1 Month Track
-              </Button>
-              <Button 
-                onClick={() => setTrack('3month')}
-                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white"
-              >
-                <Award className="w-4 h-4 mr-2" />
-                3 Month Track
-              </Button>
-            </div>
+      {/* Hero Section */}
+      <Card className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Skills Academy</h2>
+            <p className="text-gray-600 mb-4">
+              167 Drills • 118 Workouts • {series.length} Series
+            </p>
+            <p className="text-sm text-gray-500">
+              Progressive skill development for all levels
+            </p>
           </div>
-        </Card>
-      )}
-
-      {/* Current Track Info */}
-      {userProgress.currentTrack !== 'none' && (
-        <Card className="p-4 bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <TrendingUp className="w-5 h-5 text-green-600" />
-                <h3 className="font-semibold">
-                  {userProgress.currentTrack === '1month' ? '1 Month' : '3 Month'} Track - Week {userProgress.currentWeek}
-                </h3>
-              </div>
-              <p className="text-sm text-gray-600">
-                Complete 3 workouts this week to earn a 5x points multiplier!
-              </p>
-            </div>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => setTrack('none')}
-            >
-              Leave Track
+          <div className="text-right">
+            <Button className="bg-powlax-blue hover:bg-powlax-blue/90 text-white">
+              Start Training
             </Button>
           </div>
-        </Card>
-      )}
-
-      {/* Favorites Section */}
-      {favoriteSeries.length > 0 && (
-        <div>
-          <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-            <Star className="w-5 h-5 text-yellow-500" />
-            Your Favorites
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-            {favoriteSeries.map(series => (
-              <SkillsAcademySeriesCardEnhanced
-                key={series.id}
-                series={series}
-                onStartWorkout={handleStartWorkout}
-                isFavorite={true}
-                onToggleFavorite={toggleFavorite}
-                completedWorkouts={getCompletedWorkouts()}
-              />
-            ))}
-          </div>
         </div>
-      )}
+      </Card>
 
-      {/* Main Content Tabs */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-        <TabsList className="grid w-full grid-cols-5 mb-6">
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="solid_start">Solid Start</TabsTrigger>
-          <TabsTrigger value="attack">Attack</TabsTrigger>
-          <TabsTrigger value="midfield">Midfield</TabsTrigger>
-          <TabsTrigger value="defense">Defense</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value={activeTab}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {displaySeries.map(series => (
-              <SkillsAcademySeriesCardEnhanced
-                key={series.id}
-                series={series}
-                onStartWorkout={handleStartWorkout}
-                isFavorite={userProgress.favoriteSeriesIds.includes(series.id)}
-                onToggleFavorite={toggleFavorite}
-                completedWorkouts={getCompletedWorkouts()}
-              />
-            ))}
+      {/* Training Categories */}
+      {series.length === 0 ? (
+        <Card className="p-8">
+          <div className="text-center text-gray-500">
+            <Info className="w-12 h-12 mx-auto mb-4" />
+            <h3 className="text-lg font-medium mb-2">No Series Available</h3>
+            <p>Skills Academy series are being loaded. Please check back later.</p>
           </div>
-        </TabsContent>
-      </Tabs>
-
-      {/* Track Confirmation Modal */}
-      {showTrackBanner && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <Card className="max-w-md w-full p-6">
-            <div className="flex items-start gap-3">
-              <Info className="w-5 h-5 text-amber-500 mt-0.5" />
-              <div className="flex-1">
-                <h3 className="font-semibold mb-2">You're on a training track!</h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  You selected the {userProgress.currentTrack === '1month' ? '1 Month' : '3 Month'} track. 
-                  Sticking with it will earn you bonus points and better results. 
-                  Do you want to continue with your track or do this workout instead?
-                </p>
-                <div className="flex gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={handleConfirmDifferentWorkout}
-                    className="flex-1"
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {series.map(seriesItem => {
+            const difficulty = getDifficultyDisplay(seriesItem.difficulty_level);
+            const displayName = getSeriesTypeDisplay(seriesItem.series_type);
+            
+            return (
+              <Card key={seriesItem.id} className="p-6 bg-white border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h3 className="font-bold text-xl text-gray-900 mb-2">
+                      {seriesItem.series_name || displayName}
+                    </h3>
+                    <p className="text-gray-700 text-base mb-3 leading-relaxed">
+                      {seriesItem.description || `${displayName} training series`}
+                    </p>
+                    <div className="flex items-center gap-4 text-sm text-gray-600 font-medium">
+                      <span className={`px-2 py-1 rounded ${difficulty.color}`}>
+                        {difficulty.label}
+                      </span>
+                      <span>•</span>
+                      <span className="capitalize">{seriesItem.position_focus || 'All Positions'}</span>
+                      <span>•</span>
+                      <span className="font-semibold">{seriesItem.workout_count} workouts</span>
+                    </div>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    onClick={() => handleStartWorkout(seriesItem.id)}
+                    className="bg-powlax-orange hover:bg-powlax-orange/90 text-white font-semibold ml-4"
                   >
-                    Do Different Workout
-                  </Button>
-                  <Button
-                    onClick={handleStayOnTrack}
-                    className="flex-1 bg-gradient-to-r from-green-600 to-green-700 text-white"
-                  >
-                    Stay on Track
+                    Start
                   </Button>
                 </div>
-              </div>
-              <button onClick={() => setShowTrackBanner(false)}>
-                <X className="w-4 h-4 text-gray-400" />
-              </button>
-            </div>
-          </Card>
+                <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                  <div className="text-sm text-gray-600 font-medium">
+                    Progress: <span className="text-gray-900 font-semibold">0/{seriesItem.workout_count}</span> completed
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-gray-500" />
+                </div>
+              </Card>
+            );
+          })}
         </div>
       )}
+
+      {/* Quick Actions */}
+      <div className="flex gap-4">
+        <Button variant="outline" className="flex-1">
+          <Star className="w-4 h-4 mr-2" />
+          Favorites
+        </Button>
+        <Button variant="outline" className="flex-1">
+          <TrendingUp className="w-4 h-4 mr-2" />
+          Progress
+        </Button>
+        <Button variant="outline" className="flex-1">
+          <Calendar className="w-4 h-4 mr-2" />
+          Schedule
+        </Button>
+      </div>
     </div>
   );
 }

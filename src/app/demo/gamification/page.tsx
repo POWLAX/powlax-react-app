@@ -289,7 +289,7 @@ export default function PlayerGamificationPage() {
               and {playerStats.badges.bronze} bronze badges
             </p>
             <Button asChild>
-              <Link href="/skills-academy/workouts">
+              <Link href="/skills-academy">
                 Earn More Badges <ChevronRight className="w-4 h-4 ml-1" />
               </Link>
             </Button>

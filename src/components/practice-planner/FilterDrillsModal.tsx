@@ -196,20 +196,20 @@ export default function FilterDrillsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0">
-        <DialogHeader className="px-6 py-4 border-b">
-          <DialogTitle>Filter Drills</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0 bg-white">
+        <DialogHeader className="px-6 py-4 border-b border-gray-200 bg-white">
+          <DialogTitle className="text-[#003366]">Filter Drills</DialogTitle>
+          <DialogDescription className="text-gray-600">
             Select criteria to filter available drills
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 px-6 py-4" style={{ maxHeight: 'calc(90vh - 180px)' }}>
+        <ScrollArea className="flex-1 px-6 py-4 bg-white" style={{ maxHeight: 'calc(90vh - 180px)' }}>
           <div className="space-y-6">
             {/* Strategies */}
             {allStrategies.length > 0 && (
               <div>
-                <h3 className="font-semibold mb-3">Strategies</h3>
+                <h3 className="font-semibold mb-3 text-[#003366]">Strategies</h3>
                 <div className="flex flex-wrap gap-2">
                   {allStrategies.map(strategy => (
                     <button
@@ -217,8 +217,8 @@ export default function FilterDrillsModal({
                       onClick={() => toggleStrategy(strategy)}
                       className={`px-3 py-1.5 rounded-full text-sm transition-colors flex items-center gap-1 ${
                         tempStrategies.includes(strategy)
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-[#003366] text-white'
+                          : 'bg-gray-100 text-[#003366] hover:bg-gray-200'
                       }`}
                     >
                       {strategy}
@@ -234,7 +234,7 @@ export default function FilterDrillsModal({
             {/* Skills */}
             {allSkills.length > 0 && (
               <div>
-                <h3 className="font-semibold mb-3">Skills</h3>
+                <h3 className="font-semibold mb-3 text-[#003366]">Skills</h3>
                 <div className="flex flex-wrap gap-2">
                   {allSkills.map(skill => (
                     <button
@@ -242,8 +242,8 @@ export default function FilterDrillsModal({
                       onClick={() => toggleSkill(skill)}
                       className={`px-3 py-1.5 rounded-full text-sm transition-colors flex items-center gap-1 ${
                         tempSkills.includes(skill)
-                          ? 'bg-green-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-[#FF6600] text-white'
+                          : 'bg-gray-100 text-[#003366] hover:bg-gray-200'
                       }`}
                     >
                       {skill}
@@ -259,7 +259,7 @@ export default function FilterDrillsModal({
             {/* Game Phase */}
             {allGamePhases.length > 0 && (
               <div>
-                <h3 className="font-semibold mb-3">Game Phase</h3>
+                <h3 className="font-semibold mb-3 text-[#003366]">Game Phase</h3>
                 <div className="flex flex-wrap gap-2">
                   {allGamePhases.map(phase => (
                     <button
@@ -267,8 +267,8 @@ export default function FilterDrillsModal({
                       onClick={() => setTempGamePhase(tempGamePhase === phase ? null : phase)}
                       className={`px-3 py-1.5 rounded-full text-sm transition-colors flex items-center gap-1 ${
                         tempGamePhase === phase
-                          ? 'bg-purple-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-[#003366] text-white'
+                          : 'bg-gray-100 text-[#003366] hover:bg-gray-200'
                       }`}
                     >
                       {phase}
@@ -284,7 +284,7 @@ export default function FilterDrillsModal({
             {/* Game States */}
             {allGameStates.length > 0 && (
               <div>
-                <h3 className="font-semibold mb-3">Game States</h3>
+                <h3 className="font-semibold mb-3 text-[#003366]">Game States</h3>
                 <div className="flex flex-wrap gap-2">
                   {allGameStates.map(gameState => (
                     <button
@@ -292,8 +292,8 @@ export default function FilterDrillsModal({
                       onClick={() => toggleGameState(gameState)}
                       className={`px-3 py-1.5 rounded-full text-sm transition-colors flex items-center gap-1 ${
                         tempGameStates.includes(gameState)
-                          ? 'bg-orange-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-[#FF6600] text-white'
+                          : 'bg-gray-100 text-[#003366] hover:bg-gray-200'
                       }`}
                     >
                       {gameState}
@@ -308,9 +308,9 @@ export default function FilterDrillsModal({
 
             {/* Duration with Range Slider */}
             <div>
-              <h3 className="font-semibold mb-3">Duration Range</h3>
+              <h3 className="font-semibold mb-3 text-[#003366]">Duration Range</h3>
               <div className="space-y-4">
-                <div className="px-3 py-2 bg-gray-50 rounded-lg">
+                <div className="px-3 py-2 bg-gray-50 rounded-lg border border-gray-200">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-gray-600">Duration: {durationRange[0]}-{durationRange[1]} minutes</span>
                   </div>
@@ -358,8 +358,8 @@ export default function FilterDrillsModal({
                       }
                       className={`px-3 py-1.5 rounded-full text-sm transition-colors flex items-center gap-1 ${
                         tempDuration?.min === range.min && tempDuration?.max === range.max
-                          ? 'bg-orange-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-[#FF6600] text-white'
+                          : 'bg-gray-100 text-[#003366] hover:bg-gray-200'
                       }`}
                     >
                       {range.label}
@@ -374,7 +374,7 @@ export default function FilterDrillsModal({
           </div>
         </ScrollArea>
 
-        <DialogFooter className="px-6 py-4 border-t">
+        <DialogFooter className="px-6 py-4 border-t border-gray-200 bg-white">
           <div className="flex items-center justify-between w-full">
             <Button
               variant="ghost"
@@ -384,10 +384,10 @@ export default function FilterDrillsModal({
               Clear All
             </Button>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={onClose}>
+              <Button variant="outline" onClick={onClose} className="bg-gray-100 hover:bg-gray-200 text-[#003366] border-gray-300">
                 Cancel
               </Button>
-              <Button onClick={applyFilters}>
+              <Button onClick={applyFilters} className="bg-[#003366] hover:bg-[#003366]/90 text-white">
                 Apply Filters
               </Button>
             </div>

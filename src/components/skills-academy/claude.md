@@ -49,12 +49,17 @@ Skills Academy provides individual skill development through structured workouts
 ## 🔗 **Integration Points**
 
 **Database Tables:**
-- `skills_academy_drills` (167 items) - Individual drill library with point values
-- `skills_academy_workouts` (192 items) - Workout collections with variants
+- `skills_academy_series` (41 records) - Series definitions and organization
+- `skills_academy_workouts` (118 records) - Individual workout definitions
+- `skills_academy_drills` (167 records) - Complete drill library with point values
+- `skills_academy_workout_drills` (0 records) - **EMPTY** Junction table connecting workouts to drills
 - `user_points_balance_powlax` - Multi-type point balances per user
 - `workout_completions` - Completion tracking with multipliers
 - `user_streak_data` - Consistency and streak tracking
 - `coach_workout_assignments` - Coach-assigned workouts with bonuses
+
+**⚠️ CRITICAL CONNECTION ISSUE:**
+The `skills_academy_workout_drills` junction table is empty, so workouts currently have no drill associations. This is why modals show "0 drills" and workout pages show "Workout Not Found". A helper function or data population is needed to connect workouts to drills.
 
 **Point System Integration:**
 - **Lax Credits**: Universal currency (all drills/workouts)
@@ -92,11 +97,12 @@ Skills Academy provides individual skill development through structured workouts
 ## ⚠️ **Common Issues & Gotchas**
 
 **Known Problems:**
-- Current implementation uses mock data throughout
+- `skills_academy_workout_drills` junction table is EMPTY (critical - no workout-drill connections)
 - No quiz-style interface exists (needs to be built)
 - Point system not implemented (critical missing feature)
-- Video integration is basic placeholder
+- Video integration needs drill-specific Vimeo IDs from `skills_academy_drills.vimeo_id`
 - No real progress tracking or streak system
+- Workout modals show "0 drills" due to missing junction table data
 
 **Before Making Changes:**
 1. Read MASTER_CONTRACT.md for user requirements

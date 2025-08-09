@@ -63,7 +63,7 @@ test.describe('New POWLAX Pages Navigation Test', () => {
     
     // Test authenticated Skills Academy workouts
     await test.step('Visit Skills Academy Workouts', async () => {
-      await page.goto('/skills-academy/workouts');
+      await page.goto('/skills-academy');
       
       // Wait for page load
       await page.waitForLoadState('networkidle');

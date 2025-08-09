@@ -66,7 +66,7 @@ export function useDrills() {
             .from('powlax_drills')
             .select('*')
             .order('title')
-            .limit(200)
+            .limit(500)
         ),
         withTimeout(
           supabase
@@ -101,50 +101,50 @@ export function useDrills() {
         }
       }
 
-      // Transform POWLAX drills
+      // Transform POWLAX drills (mapping actual database columns)
       const transformedPowlaxDrills = powlaxDrills.map((drill: any) => ({
         id: drill.id?.toString() || `powlax-drill-${Date.now()}`,
         drill_id: drill.id?.toString(),
         name: drill.title || 'Unnamed Drill',
-        duration: parseDuration(drill.drill_duration) || 10,
-        category: mapDrillCategory(drill.drill_category || drill.drill_types),
-        subcategory: drill.drill_category,
+        duration: drill.duration_minutes || 10,
+        category: drill.category || 'Uncategorized', // Use the actual category from database
+        subcategory: drill.category,
+        drill_types: drill.tags || drill.category,
         
         // Extract strategies, concepts, and skills from drill data
         strategies: extractStrategiesFromDrill(drill),
         concepts: extractConceptsFromGameStates(parseArrayField(drill.game_states)),
-        skills: extractSkillsFromCategory(drill.drill_category || drill.drill_types || ''),
-        skill_ids: extractSkillsFromCategory(drill.drill_category || drill.drill_types || ''),
+        skills: extractSkillsFromCategory(drill.category || drill.tags || ''),
+        skill_ids: extractSkillsFromCategory(drill.category || drill.tags || ''),
         concept_ids: extractConceptsFromGameStates(parseArrayField(drill.game_states)),
-        game_phase_ids: parseArrayField(drill.game_phase),
+        game_phase_ids: parseArrayField(drill.game_states),
         
         // Video and media URLs
-        videoUrl: drill.vimeo_url,
-        drill_video_url: drill.drill_video_url,
-        vimeo_url: drill.vimeo_url,
-        featured_image: drill.featured_image,
+        videoUrl: drill.video_url,
+        drill_video_url: drill.video_url,
+        vimeo_url: drill.video_url,
+        custom_url: drill.custom_url,
         
         // Metadata extracted from drill fields
-        intensity_level: drill.drill_emphasis,
-        min_players: parseNumber(drill.do_it_ages),
-        max_players: parseNumber(drill.own_it_ages),
-        equipment_needed: parseArrayField(drill.drill_types),
+        intensity_level: drill.difficulty_level,
+        min_players: drill.min_players,
+        max_players: drill.max_players,
+        equipment_needed: parseArrayField(drill.equipment),
+        space_needed: drill.space_needed,
         
         // Coaching information
-        coach_instructions: drill.content || drill.drill_notes || '',
-        notes: drill.drill_notes || '',
+        coach_instructions: drill.content || drill.notes || '',
+        notes: drill.notes || '',
         content: drill.content,
-        
-        // Age-appropriate information
-        do_it_ages: drill.do_it_ages,
-        coach_it_ages: drill.coach_it_ages,
-        own_it_ages: drill.own_it_ages,
         
         // Additional drill metadata
         game_states: drill.game_states,
-        drill_emphasis: drill.drill_emphasis,
-        game_phase: drill.game_phase,
         status: drill.status,
+        tags: drill.tags,
+        
+        // Lacrosse Lab URLs
+        lab_urls: drill.lab_urls || drill.lacrosse_lab_urls,
+        lacrosse_lab_urls: drill.lacrosse_lab_urls,
         
         // Source indicator
         source: 'powlax' as const
@@ -154,10 +154,11 @@ export function useDrills() {
       const transformedUserDrills = userDrills.map((drill: any) => ({
         id: `user-${drill.id}`,
         drill_id: drill.id?.toString(),
-        name: drill.title || 'Unnamed Custom Drill',
+        name: drill.name || drill.title || 'Unnamed Custom Drill',
         duration: parseDuration(drill.drill_duration) || 10,
-        category: mapDrillCategory(drill.drill_category || drill.drill_types),
+        category: 'Custom Drills', // User drills always go in Custom Drills category
         subcategory: drill.drill_category,
+        drill_types: drill.drill_types,
         
         // Extract strategies, concepts, and skills from drill data
         strategies: extractStrategiesFromDrill(drill),

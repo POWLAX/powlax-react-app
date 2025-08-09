@@ -21,7 +21,7 @@ const navItems = [
   },
   {
     name: 'Academy',
-    href: '/academy',
+    href: '/skills-academy',
     icon: GraduationCap,
   },
   {

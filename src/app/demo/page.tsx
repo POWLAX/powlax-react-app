@@ -14,7 +14,7 @@ export default function DemoHomePage() {
       color: 'text-yellow-500',
       pages: [
         { name: 'Public Overview', href: '/skills-academy', description: 'Marketing page' },
-        { name: 'Workouts Browser', href: '/demo/skills-academy/workouts', description: 'Browse & start workouts' },
+        { name: 'Workouts Browser', href: '/demo/skills-academy', description: 'Browse & start workouts' },
         { name: 'Progress Tracker', href: '/demo/skills-academy/progress', description: 'View progress & badges' },
         { name: 'Interactive Workout', href: '/demo/skills-academy/interactive-workout', description: 'Full workout with drill navigation & animations' }
       ]

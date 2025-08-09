@@ -39,6 +39,62 @@ contractTemplate:
     mobileResponsive: true
     performanceTarget: 3
     
+  # ===== EXECUTION STRATEGY (For Big Projects) =====
+  executionStrategy:
+    type: sequential  # sequential (default) | parallel
+    
+    # If parallel execution (for big projects with 3+ independent sections)
+    parallelExecution:
+      enabled: false  # Set to true for parallel execution
+      agentCount: 1   # Number of parallel agents needed
+      
+      # MANDATORY for parallel execution
+      ultraThinkPlanning:
+        completed: false  # MUST be true before execution
+        duration: "5+ minutes"
+        commonErrorsEvaluated: false
+        fileCollisionRisksAssessed: false
+        
+      # Agent distribution (if parallel)
+      agentDistribution:
+        agent_1:
+          type: general-purpose
+          scope: ""
+          files: []
+          noTouch: []
+          deliverables: []
+          
+        agent_2:
+          type: general-purpose
+          scope: ""
+          files: []
+          noTouch: []
+          deliverables: []
+          
+      # Progress tracking for parallel execution
+      parallelProgress:
+        - agent: 1
+          task: ""
+          status: not_started
+          completedAt: ""
+          testsPass: false
+          
+        - agent: 2
+          task: ""
+          status: not_started
+          completedAt: ""
+          testsPass: false
+          
+      # Integration checklist (after all agents complete)
+      integrationChecklist:
+        - [ ] All agents completed their sections
+        - [ ] No file conflicts detected
+        - [ ] All individual agent tests pass
+        - [ ] Integrated code builds successfully
+        - [ ] Full Playwright test suite passes
+        - [ ] No regressions in existing functionality
+        - [ ] Common errors documented if found
+    
   # ===== NEW: PRD REQUIREMENTS SECTION =====
   prdRequirements:
     description: "What MUST EXIST on this page/feature when complete"

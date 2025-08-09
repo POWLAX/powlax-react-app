@@ -1,5 +1,13 @@
 # POWLAX - Modern Lacrosse Training Platform
 
+## 🚨 BRANCH-SPECIFIC REQUIREMENTS
+
+**Claude-to-Claude-Sub-Agent-Work-Flow Branch**: This branch must be run exclusively on port 3002 to avoid conflicts with other development branches.
+
+```bash
+npm run dev -- -p 3002
+```
+
 ## 🤖 AI Assistant Users - START HERE
 
 **CRITICAL**: If you're using ChatGPT, Cursor, GitHub Copilot, or any AI assistant:

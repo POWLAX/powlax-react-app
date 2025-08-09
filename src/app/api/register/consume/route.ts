@@ -9,7 +9,14 @@ function getAdminClient() {
   return createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } })
 }
 
-function randomId() { return Math.random().toString(36).slice(2) }
+// Helper to generate secure random IDs
+function randomId() { 
+  if (typeof window === 'undefined') {
+    const { randomBytes } = require('crypto')
+    return randomBytes(16).toString('hex')
+  }
+  return Math.random().toString(36).slice(2) 
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -27,17 +34,42 @@ export async function POST(req: NextRequest) {
     if (link.expires_at && new Date(link.expires_at) < new Date()) return NextResponse.json({ error: 'Link expired' }, { status: 400 })
     if (link.max_uses && link.used_count >= link.max_uses) return NextResponse.json({ error: 'Link exhausted' }, { status: 400 })
 
-    // Ensure user exists
-    const { data: existing } = await supabase.from('users').select('id').eq('email', email).maybeSingle()
-    let userId = existing?.id
-    if (!userId) {
-      const { data: ins } = await supabase
-        .from('users')
-        .insert({ email, full_name: fullName || null, created_at: new Date().toISOString() })
-        .select('id')
-        .single()
-      userId = ins?.id
+    // Register user with Supabase Auth integration (try RPC first)
+    let userId: string | undefined
+    let authUserId: string | undefined
+    let magicLink: string | undefined
+    
+    try {
+      const { data: registration, error: regError } = await supabase.rpc('register_user_with_auth', {
+        p_email: email,
+        p_full_name: fullName || null,
+        p_role: link.default_role
+      })
+
+      if (!regError && registration) {
+        const regData = Array.isArray(registration) ? registration[0] : registration
+        userId = regData?.user_id
+        authUserId = regData?.auth_user_id
+        magicLink = regData?.magic_link
+      }
+    } catch (rpcError) {
+      console.log('RPC not available yet, using fallback registration')
     }
+    
+    // Fallback to basic user creation if RPC fails
+    if (!userId) {
+      const { data: existing } = await supabase.from('users').select('id').eq('email', email).maybeSingle()
+      userId = existing?.id
+      if (!userId) {
+        const { data: ins } = await supabase
+          .from('users')
+          .insert({ email, full_name: fullName || null, created_at: new Date().toISOString() })
+          .select('id')
+          .single()
+        userId = ins?.id
+      }
+    }
+    
     if (!userId) return NextResponse.json({ error: 'User creation failed' }, { status: 500 })
 
     // Join team or club
@@ -60,7 +92,22 @@ export async function POST(req: NextRequest) {
     // Increment usage
     await supabase.from('registration_links').update({ used_count: (link.used_count || 0) + 1 }).eq('id', link.id)
 
-    return NextResponse.json({ ok: true })
+    // Generate login URL if we have a magic link
+    let loginUrl = null
+    if (magicLink) {
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `https://${req.headers.get('host')}`
+      loginUrl = `${baseUrl}/auth/magic-link?token=${magicLink}`
+    }
+
+    return NextResponse.json({ 
+      ok: true,
+      user_id: userId,
+      auth_user_id: authUserId,
+      login_url: loginUrl,
+      message: loginUrl 
+        ? 'Registration successful. Check your email for login link.'
+        : 'Registration successful.'
+    })
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || 'register error' }, { status: 500 })
   }

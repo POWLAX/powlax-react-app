@@ -7,7 +7,7 @@ export default function SkillsAcademyDemoPage() {
   const skillsAcademyPages = [
     {
       name: 'Workouts Browser',
-      href: '/demo/skills-academy/workouts',
+      href: '/skills-academy',
       description: 'Browse and start workout sessions',
       icon: Trophy,
       color: 'text-yellow-500'

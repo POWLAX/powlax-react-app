@@ -1,0 +1,95 @@
+# Page snapshot
+
+```yaml
+- alert
+- complementary:
+  - heading "POWLAX" [level=1]
+  - img
+  - text: Search drills, strategies... ⌘K
+  - navigation:
+    - link "Dashboard":
+      - /url: /dashboard
+      - img
+      - text: Dashboard
+    - link "Teams":
+      - /url: /teams
+      - img
+      - text: Teams
+    - link "Academy":
+      - /url: /skills-academy
+      - img
+      - text: Academy
+    - link "Resources":
+      - /url: /resources
+      - img
+      - text: Resources
+    - link "Community":
+      - /url: /community
+      - img
+      - text: Community
+- main:
+  - heading "Skills Academy" [level=1]
+  - paragraph: Progressive workout programs to master lacrosse fundamentals
+  - heading "Skills Academy" [level=2]
+  - paragraph: 167 Drills • 118 Workouts • 4 Series
+  - paragraph: Progressive skill development for all levels
+  - button "Start Training"
+  - heading "Quick Start" [level=3]
+  - paragraph: Get started with basic lacrosse skills
+  - text: Beginner • All Positions • 12 workouts
+  - button "Start"
+  - text: "Progress: 0/12 completed"
+  - img
+  - heading "Attack Training" [level=3]
+  - paragraph: Master offensive techniques and strategies
+  - text: Intermediate • All Positions • 18 workouts
+  - button "Start"
+  - text: "Progress: 0/18 completed"
+  - img
+  - heading "Defense Fundamentals" [level=3]
+  - paragraph: Build solid defensive skills
+  - text: Beginner • All Positions • 15 workouts
+  - button "Start"
+  - text: "Progress: 0/15 completed"
+  - img
+  - heading "Wall Ball Mastery" [level=3]
+  - paragraph: Perfect your stick skills
+  - text: All Levels • All Positions • 8 workouts
+  - button "Start"
+  - text: "Progress: 0/8 completed"
+  - img
+  - button "Favorites":
+    - img
+    - text: Favorites
+  - button "Progress":
+    - img
+    - text: Progress
+  - button "Schedule":
+    - img
+    - text: Schedule
+- button:
+  - img
+- text: P
+- heading "Welcome to POWLAX!" [level=1]
+- paragraph: Let's customize your experience based on your role
+- heading "I am a..." [level=2]
+- button "Coach Plan practices, manage teams, and develop players":
+  - img
+  - heading "Coach" [level=3]
+  - paragraph: Plan practices, manage teams, and develop players
+- button "Player Improve skills, track progress, and complete workouts":
+  - img
+  - heading "Player" [level=3]
+  - paragraph: Improve skills, track progress, and complete workouts
+- button "Parent Support your child's lacrosse development":
+  - img
+  - heading "Parent" [level=3]
+  - paragraph: Support your child's lacrosse development
+- button "Skip for now"
+- button "Start Tour" [disabled]:
+  - text: Start Tour
+  - img
+- img
+- text: Online
+- region "Notifications alt+T"
+```

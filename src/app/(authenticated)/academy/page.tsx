@@ -272,7 +272,7 @@ export default function AcademyPage() {
                       </div>
                     </div>
 
-                    <Link href={`/skills-academy/workouts?category=${category.id}`}>
+                    <Link href={`/skills-academy?category=${category.id}`}>
                       <Button variant="outline" className="w-full mt-4">
                         Start Training
                         <ChevronRight className="h-4 w-4 ml-2" />
