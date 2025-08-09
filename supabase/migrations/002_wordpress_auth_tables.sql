@@ -20,11 +20,11 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Index for performance
-CREATE INDEX idx_users_wordpress_id ON users(wordpress_id);
-CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_username ON users(username);
-CREATE INDEX idx_users_subscription_status ON users(subscription_status);
+-- Index for performance (commented out due to existing table structure differences)
+-- CREATE INDEX idx_users_wordpress_id ON users(wordpress_id);
+-- CREATE INDEX idx_users_email ON users(email);
+-- CREATE INDEX idx_users_username ON users(username); -- Commented out: column may not exist
+-- CREATE INDEX idx_users_subscription_status ON users(subscription_status);
 
 -- User subscriptions table for MemberPress data
 CREATE TABLE IF NOT EXISTS user_subscriptions (
