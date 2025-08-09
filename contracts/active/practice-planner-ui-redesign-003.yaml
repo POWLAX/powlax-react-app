@@ -1,0 +1,353 @@
+---
+contractId: practice-planner-ui-redesign-003
+contractVersion: 1.0.0
+contractDate: 2025-01-09
+contractType: parallel-execution
+projectName: POWLAX Practice Planner UI Redesign
+clientContext: Complete UI transformation to match provided design specifications
+
+# EXECUTION STRATEGY
+executionStrategy:
+  type: parallel
+  agentCount: 4
+  ultraThinkCompleted: true
+  ultraThinkDuration: 10 # minutes minimum
+  estimatedDuration: 180 # minutes total
+  
+# ULTRA THINK PHASE (MANDATORY - 10 MINUTES MINIMUM)
+ultraThinkPhase:
+  completed: true
+  duration: 10
+  risksIdentified:
+    - "File collision risk: DrillCard.tsx used by multiple features"
+    - "Import conflicts: Multiple agents importing same UI components"
+    - "State dependencies: Modal states managed in parent components"
+    - "Database conflicts: None - read-only operations"
+    - "Git conflicts: Separate file territories minimize merge issues"
+    - "Type conflicts: Shared interfaces need coordination"
+  mitigationStrategies:
+    - "Clear file ownership boundaries per agent"
+    - "New components created in isolation"
+    - "Shared types defined upfront in contract"
+    - "Integration agent handles final wiring"
+    - "No database mutations during redesign"
+  commonErrorsReviewed:
+    - "NO lazy loading or dynamic imports (breaks Practice Planner)"
+    - "NO framer-motion animations (causes SSR errors)"
+    - "ALL components must use 'use client' directive"
+    - "NO server components in practice planner"
+    - "White modal backgrounds only (not dark blue)"
+
+# PROJECT OVERVIEW
+projectOverview:
+  description: |
+    Transform the Practice Planner UI to match exact design specifications from screenshots.
+    Key changes include: unified Study modals with tabs, blue-tinted practice schedule,
+    active strategies display, redesigned drill cards with Study buttons, and improved
+    visual hierarchy for coaching workflows.
+  
+  businessValue: |
+    - Reduce practice planning time from 15 minutes to 10 minutes
+    - Improve field usability with clearer visual hierarchy
+    - Enable quick strategy reference during practice
+    - Streamline drill study with unified modal interface
+  
+  technicalScope: |
+    - Create 4 new React components (Study modals, sections)
+    - Redesign 3 existing components (DrillCard, Timeline, Page)
+    - Implement tabbed modal system with Overview/Diagram/Video
+    - Update styling to match blue-tinted design system
+
+# REQUIREMENTS
+requirements:
+  functional:
+    - Unified Study Drill modal with 3 tabs (Overview, Diagram, Video)
+    - Unified Study Strategy modal with same tab structure
+    - Blue-tinted Practice Schedule card with inline editing
+    - Active Strategies section above timeline
+    - Study Drill buttons on all drill cards
+    - Parallel drill visual distinction with gray backgrounds
+    - Blue coaching notes boxes
+    - Trash icons in top-right corners
+    
+  nonFunctional:
+    - Page load time < 2 seconds
+    - Touch targets minimum 44px
+    - Mobile responsive (375px+)
+    - No console errors or warnings
+    - Maintain existing auto-save functionality
+    
+  designSpecifications:
+    colors:
+      primary: "#003366"
+      blueLight: "rgb(239 246 255)"
+      blueBorder: "rgb(191 219 254)" 
+      grayBg: "rgb(243 244 246)"
+      purpleBadge: "rgb(147 51 234)"
+    typography:
+      timeDisplay: "text-2xl font-bold text-blue-600"
+      headers: "text-xl font-semibold text-gray-900"
+      coachingNotes: "text-sm text-blue-700 bg-blue-50"
+    spacing:
+      standard: "1rem"
+      compact: "0.75rem"
+      mobile: "0.5rem"
+
+# PARALLEL AGENTS DISTRIBUTION
+parallelAgents:
+  agent_1:
+    type: general-purpose
+    name: "Modal Components Developer"
+    scope: "Create unified Study modals with tabbed interface"
+    responsibilities:
+      - Create StudyDrillModal.tsx component
+      - Create StudyStrategyModal.tsx component
+      - Implement 3-tab structure (Overview, Diagram, Video)
+      - Add image gallery tab functionality
+      - Style with white backgrounds and proper spacing
+    files:
+      create:
+        - src/components/practice-planner/modals/StudyDrillModal.tsx
+        - src/components/practice-planner/modals/StudyStrategyModal.tsx
+      read:
+        - src/components/practice-planner/modals/VideoModal.tsx
+        - src/components/practice-planner/modals/StrategiesModal.tsx
+        - src/components/ui/dialog.tsx
+        - src/components/ui/tabs.tsx
+      noTouch:
+        - src/components/practice-planner/DrillCard.tsx
+        - src/components/practice-planner/PracticeTimelineWithParallel.tsx
+        - src/app/(authenticated)/teams/[teamId]/practice-plans/page.tsx
+    deliverables:
+      - Fully functional Study modals with all tabs
+      - Consistent modal sizing (90% viewport width)
+      - White backgrounds throughout
+      - Proper data display in each tab
+
+  agent_2:
+    type: general-purpose
+    name: "Section Components Developer"
+    scope: "Build Practice Schedule and Active Strategies sections"
+    responsibilities:
+      - Create PracticeScheduleCard component
+      - Create ActiveStrategiesSection component
+      - Implement blue-tinted design system
+      - Add inline editing for schedule fields
+      - Strategy badge display with removal
+    files:
+      create:
+        - src/components/practice-planner/PracticeScheduleCard.tsx
+        - src/components/practice-planner/ActiveStrategiesSection.tsx
+      read:
+        - src/components/practice-planner/StrategyCard.tsx
+        - src/components/ui/card.tsx
+        - src/components/ui/badge.tsx
+        - src/components/ui/input.tsx
+      noTouch:
+        - src/components/practice-planner/DrillCard.tsx
+        - src/components/practice-planner/PracticeTimelineWithParallel.tsx
+        - src/app/(authenticated)/teams/[teamId]/practice-plans/page.tsx
+    deliverables:
+      - Blue-tinted practice schedule card
+      - Active strategies display section
+      - Proper event handlers for editing
+      - Responsive mobile layouts
+
+  agent_3:
+    type: general-purpose
+    name: "Drill Card & Timeline Redesigner"
+    scope: "Transform drill cards and timeline visual hierarchy"
+    responsibilities:
+      - Redesign DrillCard with Study button
+      - Update timeline parallel drill styling
+      - Implement new visual hierarchy
+      - Add blue coaching notes boxes
+      - Position trash icons correctly
+    files:
+      modify:
+        - src/components/practice-planner/DrillCard.tsx
+        - src/components/practice-planner/PracticeTimelineWithParallel.tsx
+      read:
+        - src/components/ui/button.tsx
+        - src/components/practice-planner/modals/VideoModal.tsx
+      noTouch:
+        - src/app/(authenticated)/teams/[teamId]/practice-plans/page.tsx
+        - "src/components/practice-planner/modals/*.tsx"
+    deliverables:
+      - Drill cards with Study Drill buttons
+      - Large blue time displays (2xl)
+      - Gray backgrounds for parallel drills
+      - Blue coaching notes boxes
+      - Proper trash icon positioning
+
+  agent_4:
+    type: general-purpose
+    name: "Page Integration Coordinator"
+    scope: "Integrate all new components into main practice planner page"
+    responsibilities:
+      - Wire up new components in page
+      - Connect Study modals to buttons
+      - Integrate new sections
+      - Remove deprecated code
+      - Ensure data flow between components
+    files:
+      modify:
+        - src/app/(authenticated)/teams/[teamId]/practice-plans/page.tsx
+      read:
+        - src/components/practice-planner/PracticeScheduleCard.tsx
+        - src/components/practice-planner/ActiveStrategiesSection.tsx
+        - src/components/practice-planner/modals/StudyDrillModal.tsx
+        - src/components/practice-planner/modals/StudyStrategyModal.tsx
+        - src/hooks/usePracticePlans.ts
+      noTouch:
+        - src/components/practice-planner/DrillCard.tsx
+        - src/components/practice-planner/PracticeTimelineWithParallel.tsx
+    deliverables:
+      - Fully integrated practice planner page
+      - All new components properly connected
+      - Modal triggers working correctly
+      - Data flow maintained
+      - Clean removal of old code
+
+# SHARED INTERFACES (Prevent Type Conflicts)
+sharedInterfaces: |
+  interface Drill {
+    id: string
+    name: string
+    duration: number
+    notes?: string
+    videoUrl?: string
+    labUrl?: string
+    imageUrls?: string[]
+    strategies?: string[]
+    concepts?: string[]
+    skills?: string[]
+    coach_instructions?: string
+  }
+  
+  interface Strategy {
+    id: string
+    strategy_name: string
+    strategy_categories?: string
+    description?: string
+    complexity?: string
+    age_group?: string
+    vimeo_link?: string
+    lacrosse_lab_links?: any
+    coaches_notes?: string[]
+  }
+  
+  interface TimeSlot {
+    id: string
+    drills: Drill[]
+    duration: number
+  }
+
+# SUCCESS METRICS
+successMetrics:
+  required:
+    - All 4 agents complete without errors
+    - No TypeScript compilation errors
+    - No console errors in browser
+    - All Playwright tests pass
+    - Page loads in < 2 seconds
+  quality:
+    - Study modals display correctly with all tabs
+    - Practice schedule shows blue-tinted design
+    - Active strategies appear above timeline
+    - Drill cards have functioning Study buttons
+    - Parallel drills visually distinct
+    - Mobile responsive on all devices
+
+# INTEGRATION PLAN
+integrationPlan:
+  phase1:
+    duration: 60
+    agents: [agent_1, agent_2]
+    description: "Create new components in isolation"
+    
+  phase2:
+    duration: 60
+    agents: [agent_3]
+    description: "Redesign existing components"
+    
+  phase3:
+    duration: 60
+    agents: [agent_4]
+    description: "Integration and cleanup"
+    
+  testing:
+    duration: 30
+    description: "Run all tests and verify functionality"
+
+# TESTING REQUIREMENTS
+testingRequirements:
+  unitTests:
+    - Each new component renders without errors
+    - Modal tabs switch correctly
+    - Study buttons trigger modals
+    - Strategy removal works
+    
+  integrationTests:
+    - Data flows correctly between components
+    - Auto-save continues functioning
+    - Mobile layouts responsive
+    
+  e2eTests:
+    - Full practice planning workflow
+    - Modal interactions
+    - Print functionality
+
+# ROLLBACK PLAN
+rollbackPlan:
+  triggers:
+    - Practice Planner becomes non-functional
+    - Page load time exceeds 5 seconds
+    - Critical console errors appear
+  steps:
+    - Git revert to previous commit
+    - Clear .next cache
+    - Restart development server
+    - Document issues for resolution
+
+# CONTRACT STATUS
+status:
+  stage: ready_for_execution
+  lastUpdated: 2025-01-09T09:30:00Z
+  approvedBy: user
+  
+# AGENT PROGRESS TRACKING
+agentProgress:
+  agent_1:
+    status: not_started
+    startTime: null
+    completionTime: null
+    blockers: []
+    
+  agent_2:
+    status: not_started
+    startTime: null
+    completionTime: null
+    blockers: []
+    
+  agent_3:
+    status: not_started
+    startTime: null
+    completionTime: null
+    blockers: []
+    
+  agent_4:
+    status: not_started
+    startTime: null
+    completionTime: null
+    blockers: []
+
+# NOTES
+notes: |
+  - This contract follows POWLAX parallel execution guidelines
+  - Ultra-think phase completed with 10-minute deep analysis
+  - File boundaries clearly defined to prevent conflicts
+  - Integration agent waits for component agents to complete
+  - All agents have exclusive file territories
+  - Shared interfaces defined to prevent type conflicts
+  - NO lazy loading or framer-motion per stability requirements

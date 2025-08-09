@@ -161,6 +161,32 @@ import Image from 'next/image'
 
 **Prevention**: Use Next.js Image component for optimization
 
+### 11. Deprecated Metadata Configuration ❌
+**Problem**: Using deprecated `themeColor` in metadata export (Next.js 14+)
+```typescript
+// ❌ WRONG - Deprecated configuration
+export const metadata: Metadata = {
+  themeColor: '#003366',  // Deprecated!
+  viewport: { width: 'device-width' }
+}
+
+// ✅ CORRECT - Move to viewport export
+import type { Metadata, Viewport } from 'next'
+
+export const metadata: Metadata = {
+  title: 'App Title',
+  description: 'App description'
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  themeColor: '#003366',  // Move here
+  initialScale: 1
+}
+```
+
+**Prevention**: Keep `themeColor` in viewport export, not metadata export
+
 ## AI-Specific Guidelines
 
 ### For ChatGPT/GPT-4
