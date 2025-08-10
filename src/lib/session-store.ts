@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/client'
+import { supabase as createClient } from '@/lib/supabase'
 
 interface Session {
   user: any
@@ -12,8 +12,7 @@ class SessionStore {
 
   async get(token: string): Promise<Session | null> {
     if (this.useSupabase) {
-      const supabase = createClient()
-      const { data, error } = await supabase
+      const { data, error } = await createClient
         .from('user_sessions')
         .select('*')
         .eq('token', token)
@@ -48,8 +47,7 @@ class SessionStore {
 
   async set(token: string, session: Session): Promise<void> {
     if (this.useSupabase) {
-      const supabase = createClient()
-      await supabase.from('user_sessions').upsert({
+      await createClient.from('user_sessions').upsert({
         token,
         user_data: session.user,
         wp_credentials: session.wpCredentials,
@@ -63,8 +61,7 @@ class SessionStore {
 
   async delete(token: string): Promise<void> {
     if (this.useSupabase) {
-      const supabase = createClient()
-      await supabase.from('user_sessions').delete().eq('token', token)
+      await createClient.from('user_sessions').delete().eq('token', token)
     } else {
       this.memoryStore.delete(token)
     }
@@ -72,8 +69,7 @@ class SessionStore {
 
   async cleanup(): Promise<void> {
     if (this.useSupabase) {
-      const supabase = createClient()
-      await supabase
+      await createClient
         .from('user_sessions')
         .delete()
         .lt('expires_at', new Date().toISOString())

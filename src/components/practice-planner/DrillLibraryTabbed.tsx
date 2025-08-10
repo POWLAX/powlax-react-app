@@ -419,7 +419,7 @@ export default function DrillLibraryTabbed({
         </TabsContent>
         
         {/* Strategies Tab */}
-        <TabsContent value="strategies" className="flex-1 flex flex-col overflow-hidden mt-0">
+        <TabsContent value="strategies" className="flex-1 overflow-hidden mt-0">
           <StrategiesTab
             onSelectStrategy={onSelectStrategy || (() => {})}
             selectedStrategies={selectedStrategies}

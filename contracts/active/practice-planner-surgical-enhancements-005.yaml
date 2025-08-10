@@ -1,0 +1,496 @@
+---
+contractId: practice-planner-surgical-enhancements-005
+contractVersion: 1.0.0
+contractDate: 2025-01-10
+contractType: parallel-execution-surgical
+projectName: POWLAX Practice Planner Surgical Enhancements
+clientContext: Surgical precision enhancements to world-class Practice Planner without breaking existing functionality
+
+# EXECUTION STRATEGY
+executionStrategy:
+  type: parallel
+  agentCount: 5
+  ultraThinkCompleted: true
+  ultraThinkDuration: 15 # minutes minimum - CRITICAL for precision
+  estimatedDuration: 360 # 6 hours total (reduced without age band system)
+  approach: "surgical" # Minimal, precise changes only
+  
+# ULTRA THINK PHASE (MANDATORY - 15 MINUTES MINIMUM)
+ultraThinkPhase:
+  completed: true
+  duration: 15
+  criticalAnalysis: |
+    The Practice Planner has undergone 92+ changes across 11 sessions and is currently 
+    functioning at world-class level. ANY changes risk breaking the delicate ecosystem.
+    
+  risksIdentified:
+    - "File collision: Multiple agents touching same modal files"
+    - "State management: Modal state changes affecting parent components"  
+    - "CSS positioning: Layout changes cascading to other components"
+    - "Database schema: New tables affecting existing relationships"
+    - "Auto-save conflicts: New functionality interfering with 3-second auto-save"
+    - "Modal z-index: New modals conflicting with existing modal stack"
+    - "Import conflicts: New components importing same hooks/utilities"
+    
+  surgicalApproach: |
+    Each agent operates on isolated functionality with ZERO file overlap.
+    Changes are minimal, tested in isolation, and backward compatible.
+    NO agent touches files that other agents are modifying.
+    ALL changes preserve existing state management and auto-save functionality.
+    
+  commonErrorsReviewed:
+    - "NO lazy loading or dynamic imports (kills Practice Planner)"
+    - "NO framer-motion animations (SSR errors)"
+    - "ALL components must keep 'use client' directive"
+    - "NO changes to auto-save functionality (lines 54-94 in page.tsx)"
+    - "NO changes to existing modal state management"
+    - "NO modifications to working drill card layouts"
+    - "PRESERVE all existing functionality while adding new features"
+
+# PROJECT OVERVIEW
+projectOverview:
+  description: |
+    Surgical enhancement of the world-class Practice Planner with precision fixes
+    and advanced features. Each change is minimal, isolated, and preserves existing
+    functionality. Focus on incremental improvements without risk to core features.
+  
+  businessValue: |
+    - Fix critical UX issues (Strategies Library positioning)
+    - Remove visual inconsistencies (double X buttons)    
+    - Enable admin content editing for library maintenance
+    - Provide team playbook system for player strategy access
+    - Verify all core functionality works flawlessly
+  
+  technicalScope: |
+    - Surgical CSS fixes for positioning issues
+    - Modal header cleanup (duplicate button removal)
+    - Admin editing interface as separate modal
+    - Team playbook as standalone feature
+    - Comprehensive verification testing
+
+# PARALLEL AGENTS DISTRIBUTION
+parallelAgents:
+  agent_1:
+    type: general-purpose
+    name: "Surgical Positioning Specialist"
+    scope: "Fix Strategies Library positioning with minimal CSS changes"
+    responsibilities:
+      - ONLY fix StrategiesTab positioning issue
+      - Ensure library appears directly under tabs  
+      - NO changes to any other functionality
+      - Test positioning on all screen sizes
+      - Preserve all existing styling and behavior
+    files:
+      read:
+        - src/components/practice-planner/StrategiesTab.tsx
+        - src/components/practice-planner/DrillLibraryTabbed.tsx
+      modify:
+        - src/components/practice-planner/StrategiesTab.tsx (CSS ONLY)
+      noTouch:
+        - "ALL modal files"
+        - "ALL other Practice Planner components"
+        - "src/app/(authenticated)/teams/[teamId]/practice-plans/page.tsx"
+        - "ANY database files"
+        - "ANY hook files"
+    deliverables:
+      - Strategies Library positioned directly under tabs
+      - Zero functional changes to anything else
+      - CSS-only modifications with surgical precision
+      - All existing behavior preserved exactly
+
+  agent_2:
+    type: general-purpose  
+    name: "Modal Header Surgeon"
+    scope: "Remove duplicate X buttons from modals with precision"
+    responsibilities:
+      - Remove ONLY duplicate close buttons from modal headers
+      - Ensure single, properly positioned X button remains
+      - Verify all modal functionality preserved
+      - Test modal open/close behavior unchanged
+      - Maintain all existing modal styling
+    files:
+      read:
+        - src/components/ui/dialog.tsx
+        - src/components/practice-planner/modals/VideoModal.tsx
+      modify:
+        - src/components/practice-planner/modals/StudyDrillModal.tsx
+        - src/components/practice-planner/modals/StudyStrategyModal.tsx
+      noTouch:
+        - "ALL other modal files"
+        - "src/components/practice-planner/StrategiesTab.tsx"
+        - "Main practice planner page"
+        - "ANY drill card components"
+    deliverables:
+      - Clean modal headers with single X button
+      - All modal functionality preserved
+      - No changes to modal content or behavior
+      - Consistent header styling maintained
+
+
+  agent_4:
+    type: general-purpose
+    name: "Admin Interface Developer"
+    scope: "Build admin editing system as separate feature"
+    responsibilities:
+      - Create AdminEditModal as new component
+      - Build admin-only editing interface
+      - Add permission checking utilities  
+      - Create admin toolbar for drill/strategy editing
+      - NO modifications to existing modals or workflows
+    files:
+      create:
+        - src/components/practice-planner/modals/AdminEditModal.tsx
+        - src/components/practice-planner/AdminToolbar.tsx
+        - src/lib/adminPermissions.ts
+        - src/hooks/useAdminEdit.ts
+      read:
+        - src/hooks/useDrills.ts
+        - src/hooks/useStrategies.ts
+        - src/lib/supabase.ts
+      noTouch:
+        - "Existing modal components"  
+        - "Study modals"
+        - "Main practice planner components"
+    deliverables:
+      - Complete admin editing interface
+      - Permission-based access control
+      - Direct Supabase table editing for admins
+      - Rich text editing capabilities
+      - Isolated from existing user workflows
+
+  agent_5:
+    type: general-purpose
+    name: "Team Playbook System Developer"  
+    scope: "Build team playbook system as standalone feature using shadcn/ui"
+    responsibilities:
+      - Create TeamPlaybook component suite using shadcn/ui components
+      - Design database schema for team playbooks
+      - Build strategy save-to-playbook functionality
+      - Create player access interface linking to existing Study modals
+      - Ensure team page can open same Study modals as practice planner
+      - Use existing StudyStrategyModal component without modification
+    files:
+      create:
+        - src/components/team-playbook/TeamPlaybook.tsx
+        - src/components/team-playbook/PlaybookCard.tsx
+        - src/components/team-playbook/SaveToPlaybookModal.tsx
+        - src/hooks/useTeamPlaybook.ts
+        - supabase/migrations/team_playbooks.sql
+        - src/types/teamPlaybook.ts
+      read:
+        - src/hooks/useStrategies.ts
+        - src/lib/supabase.ts
+        - src/components/practice-planner/modals/StudyStrategyModal.tsx
+        - src/components/ui/card.tsx
+        - src/components/ui/button.tsx
+        - src/components/ui/dialog.tsx
+        - src/components/ui/badge.tsx
+      noTouch:
+        - "Practice planner components"
+        - "Existing modal components (reuse, don't modify)"
+        - "Admin editing components"  
+    deliverables:
+      - Complete team playbook system built with shadcn/ui
+      - Database schema and migration
+      - Strategy saving functionality
+      - Player access interface that opens existing Study modals
+      - Team page integration with full modal functionality
+
+  agent_6:
+    type: general-purpose
+    name: "Integration & Testing Coordinator"
+    scope: "Integrate new features and verify everything works"
+    responsibilities:
+      - Wire admin toolbar to appropriate locations
+      - Add team playbook access points
+      - Run comprehensive testing
+      - Verify all existing functionality preserved
+    files:
+      modify:
+        - src/app/(authenticated)/teams/[teamId]/practice-plans/page.tsx
+        - src/components/practice-planner/DrillLibraryTabbed.tsx
+        - src/components/practice-planner/StrategiesTab.tsx
+      read:
+        - ALL components created by other agents
+        - src/hooks/usePracticePlans.ts
+      noTouch:
+        - "Modal components (already handled by agent_2)"
+        - "Core drill/strategy card layouts"
+        - "Auto-save functionality"
+    deliverables:
+      - Seamless integration of all new features
+      - Comprehensive testing verification
+      - All existing functionality preserved
+      - Performance maintained at current levels
+      - Clean, documented integration points
+
+# SURGICAL PRECISION SPECIFICATIONS
+
+# Agent 1: Strategies Library Positioning Fix
+strategiesPositioningFix:
+  problem: |
+    Desktop "Strategies Library" appears halfway down page instead of directly under tabs
+    
+  surgicalSolution: |
+    // ONLY modify CSS positioning in StrategiesTab.tsx
+    // Find the container div and adjust margin/padding
+    // NO functional changes, NO new features, NO import changes
+    
+  exactChanges: |
+    1. Locate scrollable content container in StrategiesTab
+    2. Adjust margin-top or padding-top to position under tabs
+    3. Test on desktop viewport (1024px+) 
+    4. Verify mobile layout unchanged
+    5. Ensure sticky headers still work
+    
+  testingCriteria:
+    - Strategies library appears directly under "Strategies" tab
+    - No gap between tab and content  
+    - Mobile layout completely unchanged
+    - All existing functionality preserved
+    - Sticky headers work exactly as before
+
+# Agent 2: Modal Header Cleanup
+modalHeaderCleanup:
+  problem: |
+    Double X buttons appearing in Study modal headers
+    
+  surgicalSolution: |
+    // Remove duplicate DialogClose buttons
+    // Keep single X in top-right corner
+    // NO other modal changes
+    
+  exactChanges: |
+    1. In StudyDrillModal.tsx - remove duplicate X button elements
+    2. In StudyStrategyModal.tsx - remove duplicate X button elements  
+    3. Ensure single X remains properly positioned
+    4. Test modal open/close behavior unchanged
+    5. Verify all tabs work exactly as before
+    
+  testingCriteria:
+    - Single X button in top-right of each modal
+    - All modal functionality identical to current
+    - No visual changes except button removal
+    - Modal state management unchanged
+
+
+# Agent 4: Admin Editing Interface (NEW FEATURE)  
+adminEditingSystem:
+  requirements: |
+    Create admin-only interface for editing drills/strategies directly in Supabase
+    
+  permissions: |
+    // Check user role before showing admin features
+    const canEdit = user?.role === 'admin' || user?.email === 'admin@powlax.com'
+    
+    if (canEdit) {
+      // Show edit buttons and admin toolbar
+      // Enable direct Supabase table updates
+    } else {
+      // Normal user workflow unchanged
+    }
+    
+  interface: |
+    AdminEditModal features:
+    - Rich text editing for descriptions
+    - Video URL field with preview  
+    - Category dropdown selection
+    - Age range sliders (8-18 years)
+    - Complexity rating (1-5 scale)
+    - Save directly to production tables
+    - Delete confirmation dialogs
+    
+  dataFlow: |
+    Admin edits → Direct Supabase update → Refresh local cache → UI updates
+    Regular users → Create custom entries in user_* tables (existing behavior)
+
+# Agent 5: Team Playbook System (NEW FEATURE)
+teamPlaybookSystem:
+  requirements: |
+    Create team-specific strategy collections for player access using shadcn/ui components
+    
+  database: |
+    CREATE TABLE team_playbooks (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      team_id UUID REFERENCES teams(id) ON DELETE CASCADE,
+      strategy_id UUID REFERENCES strategies_powlax(id),
+      custom_name TEXT,
+      team_notes TEXT,
+      added_by UUID REFERENCES user_profiles(id),
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+    
+  shadcnComponents: |
+    // Use these shadcn/ui components for consistency
+    import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+    import { Button } from "@/components/ui/button"
+    import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+    import { Badge } from "@/components/ui/badge"
+    import { Input } from "@/components/ui/input"
+    import { Textarea } from "@/components/ui/textarea"
+    import { ScrollArea } from "@/components/ui/scroll-area"
+    
+  components: |
+    TeamPlaybook.tsx - Main playbook interface using Card components
+    PlaybookCard.tsx - Strategy cards with Badge for game phases
+    SaveToPlaybookModal.tsx - Dialog modal for adding strategies
+    
+  studyModalIntegration: |
+    // Reuse existing StudyStrategyModal without modification
+    import StudyStrategyModal from '@/components/practice-planner/modals/StudyStrategyModal'
+    
+    // Team playbook cards should open the same Study modal
+    // Pass strategy data to existing modal component
+    // Maintain all existing functionality (tabs, diagrams, videos)
+    
+  workflow: |
+    Coach selects strategies → "Save to Team Playbook" → Modal opens
+    → Choose team → Add custom notes → Save → Available on team page
+    Players access team page → View playbook → Click strategy card → Opens StudyStrategyModal
+    Same modal experience as practice planner, just accessed from team page
+
+# Agent 6: Integration Coordinator
+integrationCoordination:
+  responsibilities: |
+    Carefully integrate all new features without breaking existing functionality
+    
+  integrationPoints: |
+    2. Admin toolbar shows conditionally for admin users
+    3. "Save to Playbook" button in Active Strategies section
+    4. All new components properly imported and configured
+    
+  testingProtocol: |
+    1. Verify all existing functionality unchanged
+    2. Test new features in isolation first
+    4. Performance testing - maintain <2 second load times
+    5. Mobile testing - all features work on touch devices
+    6. Cross-browser testing - Chrome, Safari, Firefox
+
+# SHARED INTERFACES (Prevent Type Conflicts)
+sharedInterfaces: |
+  
+  // Admin Editing Types
+  interface AdminEditRequest {
+    table: 'drills_powlax' | 'strategies_powlax'
+    id: string
+    updates: Record<string, any>
+    userId: string
+  }
+  
+  // Team Playbook Types
+  interface TeamPlaybookEntry {
+    id: string
+    team_id: string
+    strategy_id: string
+    custom_name?: string
+    team_notes?: string
+    added_by: string
+    created_at: string
+  }
+
+# SUCCESS METRICS
+successMetrics:
+  required:
+    - Strategies Library appears directly under tabs
+    - No duplicate X buttons in any modal 
+    - Admin users can edit production database tables
+    - Team playbook saves strategies successfully
+    - ALL existing functionality preserved exactly
+    - Zero console errors or performance degradation
+    - Playwright tests complete in <5 seconds
+    
+  quality:
+    - Admin interface intuitive and efficient
+    - Team playbook enhances player experience
+    - All features work seamlessly together
+    - Mobile optimization maintained
+    - Print functionality unchanged
+
+# INTEGRATION PLAN
+integrationPlan:
+  phase1: # Agents 1-5 work in parallel (NO dependencies)
+    duration: 240 # 4 hours
+    agents: [agent_1, agent_2, agent_4, agent_5]
+    description: "All agents work independently on isolated features"
+    
+  phase2: # Agent 6 integrates everything  
+    duration: 90 # 1.5 hours
+    agents: [agent_6]
+    description: "Integration and comprehensive testing"
+    dependencies: [agent_1, agent_2, agent_4, agent_5]
+    
+  testing:
+    duration: 30 # 30 minutes
+    description: "Final verification and user acceptance testing"
+
+# ROLLBACK PLAN
+rollbackPlan:
+  triggers:
+    - Any existing Practice Planner functionality breaks
+    - Page load time exceeds 3 seconds  
+    - Console errors appear during normal operation
+    - Auto-save functionality stops working
+    - Modal system becomes unreliable
+    
+  steps:
+    - Immediately stop all development
+    - Git revert to last stable commit
+    - Clear .next cache completely
+    - Restart development server
+    - Document what broke for future reference
+    
+  preventiveMeasures:
+    - Each agent tests in isolation before integration
+    - Integration agent tests incrementally
+    - Feature flags for all new functionality
+    - Staged rollout capability
+
+# TESTING REQUIREMENTS  
+testingRequirements:
+  isolatedTesting:
+    - Each agent tests their changes independently
+    - New components tested without affecting existing
+    - CSS changes verified on multiple screen sizes
+    - Modal changes tested with all interaction paths
+    
+  integrationTesting:
+    - All features work together harmoniously
+    - Performance maintained at current levels
+    - Mobile experience preserved and enhanced
+    - Print functionality unaffected
+    
+  regressionTesting:
+    - All existing drill card functionality
+    - Auto-save triggers every 3 seconds
+    - Strategy selection and display
+    - Parallel drill creation and editing
+    - Study modal opening and navigation
+    - Print preview and generation
+
+# CONTRACT STATUS
+status:
+  stage: ready_for_execution
+  lastUpdated: 2025-01-10T11:15:00Z
+  approvedBy: pending_user_review
+  
+  agentReadiness:
+    agent_1: ready # Positioning fix
+    agent_2: ready # Modal cleanup  
+    agent_4: ready # Admin editing
+    agent_5: ready # Team playbook
+    agent_6: ready # Integration
+
+# NOTES
+notes: |
+  This contract uses surgical precision to enhance the world-class Practice Planner
+  without risking the incredible functionality already achieved.
+  
+  Key principles:
+  1. MINIMAL changes - only what's absolutely necessary
+  2. ISOLATED development - agents work independently 
+  3. SURGICAL precision - exact specifications prevent errors
+  4. COMPREHENSIVE testing - verify nothing breaks
+  5. INCREMENTAL integration - step-by-step verification
+  
+  The Practice Planner is currently exceptional. These enhancements will make it
+  legendary while preserving everything that works perfectly today.

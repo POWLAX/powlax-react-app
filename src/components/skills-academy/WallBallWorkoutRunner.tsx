@@ -58,22 +58,35 @@ interface WorkoutProgress {
 }
 
 interface WallBallWorkoutRunnerProps {
-  workout: WallBallWorkout
+  workout: WallBallWorkout | any // Allow both structures for now
 }
 
 export default function WallBallWorkoutRunner({ workout }: WallBallWorkoutRunnerProps) {
   const router = useRouter()
+  
+  // Handle both WallBallWorkout and WallBallVariant structures
+  const drillsCount = workout.drills?.length || workout.total_drills || 0
+  const durationMinutes = workout.duration_minutes || 10
+  const workoutName = workout.name || workout.variant_name || workout.series?.series_name || 'Wall Ball Workout'
+  
   const [progress, setProgress] = useState<WorkoutProgress>({
     currentDrillIndex: 0,
-    totalDrills: workout.drills.length,
+    totalDrills: drillsCount,
     isPlaying: false,
     drillTimeRemaining: 0,
-    totalTime: (workout.duration_minutes || 10) * 60,
+    totalTime: durationMinutes * 60,
     startTime: new Date()
   })
   const [isCompleted, setIsCompleted] = useState(false)
 
-  const currentDrill = workout.drills[progress.currentDrillIndex]
+  // Handle both structures - create mock drill if using WallBallVariant
+  const currentDrill = workout.drills?.[progress.currentDrillIndex] || {
+    id: progress.currentDrillIndex + 1,
+    name: `Wall Ball Drill ${progress.currentDrillIndex + 1}`,
+    description: `Wall Ball exercise ${progress.currentDrillIndex + 1}`,
+    duration_seconds: 60,
+    video_type: 'both_hands'
+  }
   const isLastDrill = progress.currentDrillIndex === progress.totalDrills - 1
   const progressPercentage = ((progress.currentDrillIndex + 1) / progress.totalDrills) * 100
 
@@ -103,7 +116,7 @@ export default function WallBallWorkoutRunner({ workout }: WallBallWorkoutRunner
   // Initialize drill time when drill changes
   useEffect(() => {
     if (currentDrill) {
-      const drillDuration = currentDrill.duration_seconds || 30 // Default 30 seconds
+      const drillDuration = currentDrill?.duration_seconds || 30 // Default 30 seconds
       setProgress(prev => ({
         ...prev,
         drillTimeRemaining: drillDuration,
@@ -149,9 +162,9 @@ export default function WallBallWorkoutRunner({ workout }: WallBallWorkoutRunner
   const handleRestart = useCallback(() => {
     setProgress({
       currentDrillIndex: 0,
-      totalDrills: workout.drills.length,
+      totalDrills: drillsCount,
       isPlaying: false,
-      drillTimeRemaining: workout.drills[0]?.duration_seconds || 30,
+      drillTimeRemaining: workout.drills?.[0]?.duration_seconds || 30,
       totalTime: (workout.duration_minutes || 10) * 60,
       startTime: new Date()
     })
@@ -206,7 +219,7 @@ export default function WallBallWorkoutRunner({ workout }: WallBallWorkoutRunner
           </div>
           <div>
             <h1 className="text-2xl font-bold">Wall Ball Complete!</h1>
-            <p className="text-muted-foreground">Excellent work on {workout.name}</p>
+            <p className="text-muted-foreground">Excellent work on {workoutName}</p>
           </div>
         </div>
 
@@ -279,7 +292,7 @@ export default function WallBallWorkoutRunner({ workout }: WallBallWorkoutRunner
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{workout.name}</h1>
+          <h1 className="text-2xl font-bold">{workoutName}</h1>
           <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
             {workout.workout_type && (
               <Badge variant="outline">{workout.workout_type}</Badge>
@@ -325,25 +338,25 @@ export default function WallBallWorkoutRunner({ workout }: WallBallWorkoutRunner
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Target className="w-5 h-5 text-orange-500" />
-              {currentDrill.drill.name}
+              {currentDrill.drill?.name || currentDrill.name}
             </div>
             <Badge 
               variant="outline" 
               className={cn(
                 "capitalize",
-                currentDrill.video_type === 'strong_hand' && "border-blue-500 text-blue-700",
-                currentDrill.video_type === 'off_hand' && "border-red-500 text-red-700",
-                currentDrill.video_type === 'both_hands' && "border-green-500 text-green-700"
+                currentDrill?.video_type === 'strong_hand' && "border-blue-500 text-blue-700",
+                currentDrill?.video_type === 'off_hand' && "border-red-500 text-red-700",
+                currentDrill?.video_type === 'both_hands' && "border-green-500 text-green-700"
               )}
             >
-              {currentDrill.video_type.replace('_', ' ')}
+              {currentDrill?.video_type?.replace('_', ' ')}
             </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Description */}
-          {currentDrill.drill.description && (
-            <p className="text-muted-foreground">{currentDrill.drill.description}</p>
+          {currentDrill?.drill?.description && (
+            <p className="text-muted-foreground">{currentDrill?.drill?.description}</p>
           )}
 
           {/* Timer Display */}
@@ -366,7 +379,7 @@ export default function WallBallWorkoutRunner({ workout }: WallBallWorkoutRunner
               <div className="text-center space-y-2">
                 <Play className="w-12 h-12 mx-auto text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">
-                  Video: {currentDrill.drill.name} ({currentDrill.video_type.replace('_', ' ')})
+                  Video: {currentDrill?.drill?.name || currentDrill?.name} ({currentDrill?.video_type?.replace('_', ' ')})
                 </p>
               </div>
             </div>

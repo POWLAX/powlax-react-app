@@ -2,8 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Sidebar animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out 0.1s both;
+}
+
 /* Skills Academy Workout Animations */
 @import '../styles/animations.css';
+
+/* Hide scrollbar for horizontal drill list */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
 
 /* Field Visibility Utilities for Outdoor Coaching */
 @layer utilities {

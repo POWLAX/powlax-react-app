@@ -218,6 +218,52 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 **Prevention**: Use CSS animations instead of framer-motion to avoid vendor chunk issues
 
+### 13. Unsafe Property Access ❌
+**Problem**: Accessing properties without checking if object exists first
+```typescript
+// ❌ WRONG - Runtime error if currentDrill is undefined
+{currentDrill.drill.description && (
+  <p>{currentDrill.drill.description}</p>
+)}
+
+// ❌ WRONG - Runtime error: "Cannot read properties of undefined (reading 'description')"
+const drillDuration = currentDrill.duration_seconds || 30
+
+// ✅ CORRECT - Safe property access with optional chaining
+{currentDrill?.drill?.description && (
+  <p>{currentDrill.drill.description}</p>
+)}
+
+// ✅ CORRECT - Safe property access
+const drillDuration = currentDrill?.duration_seconds || 30
+```
+
+**Common Error Messages**:
+- `TypeError: Cannot read properties of undefined (reading 'description')`
+- `TypeError: Cannot read properties of null (reading 'name')`
+- `TypeError: Cannot read property 'X' of undefined`
+
+**Prevention**: Always use optional chaining (`?.`) when accessing nested properties from API data or props that might be undefined during loading states
+
+### 14. Component Data Loading States ❌
+**Problem**: Not handling loading/undefined states properly in components
+```typescript
+// ❌ WRONG - Component renders before data loads
+function WorkoutRunner({ workout }) {
+  return <h1>{workout.name}</h1> // Error if workout is undefined
+}
+
+// ✅ CORRECT - Handle loading states
+function WorkoutRunner({ workout }) {
+  if (!workout) {
+    return <div>Loading workout...</div>
+  }
+  return <h1>{workout.name}</h1>
+}
+```
+
+**Prevention**: Always check if data exists before rendering components that depend on it
+
 ## AI-Specific Guidelines
 
 ### For ChatGPT/GPT-4

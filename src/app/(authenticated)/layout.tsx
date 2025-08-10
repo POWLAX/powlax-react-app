@@ -1,6 +1,7 @@
 'use client'
 
 import { useRequireAuth } from '@/contexts/JWTAuthContext'
+import { SidebarProvider } from '@/contexts/SidebarContext'
 import BottomNavigation from '@/components/navigation/BottomNavigation'
 import SidebarNavigation from '@/components/navigation/SidebarNavigation'
 import '../globals.css'
@@ -26,17 +27,19 @@ export default function AuthenticatedLayout({
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <SidebarNavigation />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 pb-16 md:pb-0">
-          {children}
-        </main>
+    <SidebarProvider>
+      <div className="flex h-screen bg-gray-100">
+        <SidebarNavigation />
         
-        <BottomNavigation />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 pb-16 md:pb-0">
+            {children}
+          </main>
+          
+          <BottomNavigation />
 
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   )
 }

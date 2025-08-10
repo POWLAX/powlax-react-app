@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { 
-  ArrowLeft, CheckCircle, Trophy, Activity, Home, Target,
-  ChevronDown, Award, PlayCircle, Check, Users, BookOpen, Compass, MessageSquare
+  ArrowLeft, CheckCircle, Trophy, Activity,
+  ChevronDown, Award, PlayCircle, Check
 } from 'lucide-react'
 import Link from 'next/link'
 import { useWorkoutProgressTracking } from '@/hooks/useProgressTracking'
@@ -46,67 +46,6 @@ function extractVimeoId(drill: any): string | null {
 // Test user ID for development  
 const TEST_USER_ID = 'test-user-12345'
 
-// Mobile Bottom Navigation Component
-function MobileBottomNav() {
-  const [isVisible, setIsVisible] = useState(true);
-  const [startY, setStartY] = useState(0);
-
-  useEffect(() => {
-    const handleTouchStart = (e: TouchEvent) => {
-      setStartY(e.touches[0].clientY);
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      const currentY = e.touches[0].clientY;
-      const diff = currentY - startY;
-
-      if (Math.abs(diff) > 50) {
-        setIsVisible(diff > 0);
-      }
-    };
-
-    window.addEventListener('touchstart', handleTouchStart);
-    window.addEventListener('touchmove', handleTouchMove);
-
-    return () => {
-      window.removeEventListener('touchstart', handleTouchStart);
-      window.removeEventListener('touchmove', handleTouchMove);
-    };
-  }, [startY]);
-
-  return (
-    <div 
-      className={`md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 transition-transform duration-300 ${
-        isVisible ? 'translate-y-0' : 'translate-y-full'
-      }`}
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-    >
-      <div className="h-16 flex items-center justify-around">
-        <Link href="/dashboard" className="flex flex-col items-center justify-center p-2 text-gray-600">
-          <Home className="w-6 h-6" />
-          <span className="text-xs mt-1">Dashboard</span>
-        </Link>
-        <Link href="/teams" className="flex flex-col items-center justify-center p-2 text-gray-600">
-          <Users className="w-6 h-6" />
-          <span className="text-xs mt-1">Teams</span>
-        </Link>
-        <Link href="/skills-academy" className="flex flex-col items-center justify-center p-2 text-powlax-blue">
-          <Target className="w-6 h-6" />
-          <span className="text-xs mt-1">Academy</span>
-        </Link>
-        <Link href="/resources" className="flex flex-col items-center justify-center p-2 text-gray-600">
-          <BookOpen className="w-6 h-6" />
-          <span className="text-xs mt-1">Resources</span>
-        </Link>
-        <Link href="/community" className="flex flex-col items-center justify-center p-2 text-gray-600">
-          <MessageSquare className="w-6 h-6" />
-          <span className="text-xs mt-1">Community</span>
-        </Link>
-      </div>
-    </div>
-  );
-}
-
 function WorkoutPageContent() {
   const params = useParams()
   const workoutId = params?.id ? parseInt(params.id as string) : 1
@@ -116,26 +55,41 @@ function WorkoutPageContent() {
   const [showDrillsDropdown, setShowDrillsDropdown] = useState(false)
   
   useEffect(() => {
-    async function getUser() {
+    const fetchUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       setUserId(user?.id || TEST_USER_ID)
     }
-    getUser()
+    fetchUser()
   }, [])
+
+  // Get workout data
+  const { session, loading, error } = useWorkoutSession(workoutId)
+  const workout = session?.workout
+  const drills = session?.drills || []
   
-  // Fetch real workout data using the drill_ids implementation
-  const { session: workoutSession, loading: sessionLoading, error: sessionError } = useWorkoutSession(workoutId, userId || undefined)
+  // Get series information for better workout naming
+  const [seriesInfo, setSeriesInfo] = useState<any>(null)
   
-  // Use real workout data
-  const workout = workoutSession?.workout || null
-  const drills = workoutSession?.drills || []
+  useEffect(() => {
+    const fetchSeriesInfo = async () => {
+      if (workout?.series_id) {
+        const { data } = await supabase
+          .from('skills_academy_series')
+          .select('*')
+          .eq('id', workout.series_id)
+          .single()
+        setSeriesInfo(data)
+      }
+    }
+    fetchSeriesInfo()
+  }, [workout?.series_id])
   
-  // Use local mode only for better performance and reliability
+  // Local drill index state
   const [localCurrentDrillIndex, setLocalCurrentDrillIndex] = useState(0)
-  const [localTotalPoints, setLocalTotalPoints] = useState(0)
-  
-  // Always use local state for predictable performance
   const currentDrillIndex = localCurrentDrillIndex
+  
+  // Points tracking
+  const [localTotalPoints, setLocalTotalPoints] = useState(0)
   const totalPoints = localTotalPoints
   
   // Local state for UI
@@ -228,25 +182,94 @@ function WorkoutPageContent() {
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
-  if (sessionLoading) {
+  // Loading state
+  if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <Activity className="w-8 h-8 animate-spin text-powlax-blue" />
+      <div className="h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-powlax-blue mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading workout...</p>
+        </div>
       </div>
     )
   }
 
-  if (!sessionLoading && (!workout || drills.length === 0)) {
+  // Error state
+  if (error || !workout) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Workout Not Found</h1>
-          <p className="text-gray-600 mb-4">This workout doesn&apos;t exist or has no drills configured.</p>
+          <h2 className="text-2xl font-bold mb-4">Workout Not Found</h2>
+          <p className="text-gray-600 mb-8">This workout could not be loaded.</p>
           <Button asChild>
-            <Link href="/skills-academy">Back to Skills Academy</Link>
+            <Link href="/skills-academy/workouts">Back to Workouts</Link>
           </Button>
         </div>
       </div>
+    )
+  }
+
+  // No drills state
+  if (drills.length === 0) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">No Drills Available</h2>
+          <p className="text-gray-600 mb-8">This workout doesn't have any drills yet.</p>
+          <Button asChild>
+            <Link href="/skills-academy/workouts">Back to Workouts</Link>
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  // Completion screen
+  if (isCompleted && showCelebration) {
+    return (
+      <>
+        {showCelebration && (
+          <CelebrationAnimation 
+            points={totalPoints}
+            isVisible={showCelebration}
+            onAnimationEnd={() => setShowCelebration(false)}
+          />
+        )}
+        <div className="h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50">
+          <div className="text-center max-w-md mx-auto p-8">
+            <Trophy className="w-24 h-24 text-yellow-500 mx-auto mb-6 animate-bounce" />
+            <h1 className="text-4xl font-bold mb-4">Workout Complete!</h1>
+            <div className="space-y-4 mb-8">
+              <Card className="bg-white/90">
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold text-powlax-blue">{totalPoints}</div>
+                  <div className="text-sm text-gray-600">Points Earned</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-white/90">
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold text-green-600">{drills.length}</div>
+                  <div className="text-sm text-gray-600">Drills Completed</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-white/90">
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold text-blue-600">{formatTime(drillTimer)}</div>
+                  <div className="text-sm text-gray-600">Total Time</div>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="flex gap-4">
+              <Button asChild className="flex-1">
+                <Link href="/skills-academy/workouts">More Workouts</Link>
+              </Button>
+              <Button asChild variant="outline" className="flex-1">
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </>
     )
   }
 
@@ -263,67 +286,58 @@ function WorkoutPageContent() {
     }
     
     return (
-      <>
-        <CelebrationAnimation 
-          points={finalPoints}
-          isVisible={showCelebration}
-          onAnimationEnd={() => setShowCelebration(false)}
-        />
-        
-        <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex flex-col">
-          <div className="flex-1 container mx-auto px-4 py-4">
-            <div className="max-w-2xl mx-auto space-y-4">
-              {/* Celebration Header */}
-              <div className="text-center space-y-4 px-4">
-                <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto">
-                  <Trophy className="w-10 h-10 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">Workout Complete!</h1>
-                  <p className="text-lg text-gray-600 mt-2">{workout?.workout_name || 'Workout'}</p>
-                </div>
+      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex flex-col">
+        <div className="flex-1 container mx-auto px-4 py-4">
+          <div className="max-w-2xl mx-auto space-y-4">
+            {/* Celebration Header */}
+            <div className="text-center space-y-4 px-4">
+              <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto">
+                <Trophy className="w-10 h-10 text-white" />
               </div>
-
-              {/* Points Card */}
-              <Card className="border-2 border-green-500">
-                <CardHeader className="text-center pb-2">
-                  <CardTitle className="flex items-center justify-center gap-2">
-                    <Award className="w-6 h-6 text-yellow-500" />
-                    Points Earned
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="text-center">
-                    <div className="text-4xl font-bold text-green-600">{finalPoints}</div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="text-center p-2 bg-blue-50 rounded-lg">
-                      <div className="text-lg font-bold text-blue-600">{pointsBreakdown.lax_credits}</div>
-                      <div className="text-xs text-gray-600">Lax Credits</div>
-                    </div>
-                    <div className="text-center p-2 bg-red-50 rounded-lg">
-                      <div className="text-lg font-bold text-red-600">{pointsBreakdown.attack_tokens}</div>
-                      <div className="text-xs text-gray-600">Attack Tokens</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Action Buttons */}
-              <div className="flex gap-2">
-                <Button asChild className="flex-1">
-                  <Link href="/skills-academy/workouts">More Workouts</Link>
-                </Button>
-                <Button asChild variant="outline" className="flex-1">
-                  <Link href="/dashboard">Dashboard</Link>
-                </Button>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Workout Complete!</h1>
+                <p className="text-lg text-gray-600 mt-2">{workout?.workout_name || 'Workout'}</p>
               </div>
             </div>
+
+            {/* Points Card */}
+            <Card className="border-2 border-green-500">
+              <CardHeader className="text-center pb-2">
+                <CardTitle className="flex items-center justify-center gap-2">
+                  <Award className="w-6 h-6 text-yellow-500" />
+                  Points Earned
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-green-600">{finalPoints}</div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="text-center p-2 bg-blue-50 rounded-lg">
+                    <div className="text-lg font-bold text-blue-600">{pointsBreakdown.lax_credits}</div>
+                    <div className="text-xs text-gray-600">Lax Credits</div>
+                  </div>
+                  <div className="text-center p-2 bg-red-50 rounded-lg">
+                    <div className="text-lg font-bold text-red-600">{pointsBreakdown.attack_tokens}</div>
+                    <div className="text-xs text-gray-600">Attack Tokens</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2">
+              <Button asChild className="flex-1">
+                <Link href="/skills-academy/workouts">More Workouts</Link>
+              </Button>
+              <Button asChild variant="outline" className="flex-1">
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+            </div>
           </div>
-          <MobileBottomNav />
         </div>
-      </>
+      </div>
     )
   }
 
@@ -333,59 +347,85 @@ function WorkoutPageContent() {
   return (
     <WorkoutErrorBoundary>
       <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
-        {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-4 py-3">
+        {/* Mobile optimization: Ensure no scrolling */}
+        {/* Compact Header with Workout Name - Mobile Optimized */}
+        <div className="bg-white border-b border-gray-200 px-4 py-2 flex-shrink-0">
           <div className="flex items-center justify-between">
             <Link href="/skills-academy/workouts">
-              <ArrowLeft className="w-6 h-6 text-gray-600" />
+              <ArrowLeft className="w-5 h-5 text-gray-600" />
             </Link>
-            <div className="text-center flex-1">
-              <h1 className="text-lg font-bold">{workout?.workout_name || 'Loading...'}</h1>
-              <div className="text-sm text-gray-600">
+            <div className="text-center flex-1 px-2">
+              <h1 className="text-lg md:text-xl font-bold text-powlax-blue truncate">
+                {seriesInfo?.series_name && workout?.workout_size 
+                  ? `${seriesInfo.series_name.replace(/^SS\d+\s*-?\s*/, '').trim()} - ${workout.workout_size.charAt(0).toUpperCase() + workout.workout_size.slice(1)}` 
+                  : workout?.workout_name || 'Loading...'}
+              </h1>
+              <div className="text-xs md:text-sm text-gray-600">
                 Drill {currentDrillIndex + 1} of {drills.length}
               </div>
             </div>
-            <div className="text-sm font-semibold text-powlax-blue">
+            <div className="text-xs md:text-sm font-semibold text-powlax-blue">
               {formatTime(drillTimer)}
             </div>
           </div>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="bg-white px-4 py-2 border-b border-gray-200">
-          <Progress value={progress} className="h-2" />
-        </div>
-
-        {/* Drill Dropdown Menu */}
-        <div className="bg-white px-4 py-2 border-b border-gray-200">
-          <button
-            onClick={() => setShowDrillsDropdown(!showDrillsDropdown)}
-            className="w-full flex items-center justify-between px-3 py-2 bg-gray-100 rounded-lg"
-          >
-            <span className="text-sm font-medium">
-              {currentDrill?.drill?.title || `Drill ${currentDrillIndex + 1}`}
-            </span>
-            <ChevronDown className={`w-4 h-4 transition-transform ${showDrillsDropdown ? 'rotate-180' : ''}`} />
-          </button>
           
-          {showDrillsDropdown && (
-            <div className="absolute left-4 right-4 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
-              {drills.map((drill, index) => (
+          {/* Progress Bar - Integrated into header for mobile */}
+          <div className="mt-2">
+            <Progress value={progress} className="h-1.5" />
+          </div>
+        </div>
+
+        {/* Compact Drill Navigation - Mobile Optimized */}
+        <div className="bg-white px-3 py-2 border-b border-gray-200 flex-shrink-0">
+          <div className="overflow-x-auto scrollbar-hide">
+            <div className="flex space-x-2">
+              {drills.map((drill: any, index: number) => (
                 <button
                   key={index}
                   onClick={() => handleDrillSelect(index)}
-                  className={`w-full flex items-center justify-between px-3 py-2 hover:bg-gray-50 ${
-                    completedDrills.has(index) ? 'bg-green-50' : index === currentDrillIndex ? 'bg-blue-50' : ''
+                  className={`relative flex-shrink-0 px-2 py-2 rounded-lg border-2 transition-all duration-300 text-left ${
+                    completedDrills.has(index) 
+                      ? 'border-green-500 bg-green-50' 
+                      : index === currentDrillIndex 
+                      ? 'border-powlax-blue bg-blue-50' 
+                      : 'border-gray-300 bg-white hover:border-gray-400'
                   }`}
+                  style={{ minWidth: '180px' }}
                 >
-                  <span className={`text-sm ${completedDrills.has(index) ? 'text-green-700' : ''}`}>
-                    {drill?.drill?.title || `Drill ${index + 1}`}
-                  </span>
-                  {completedDrills.has(index) && <Check className="w-4 h-4 text-green-600" />}
+                  {/* Celebration animation for completed drills */}
+                  {completedDrills.has(index) && (
+                    <div className="absolute -top-1 -right-1">
+                      <div className="bg-green-500 text-white rounded-full p-0.5">
+                        <Check className="w-2.5 h-2.5" />
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center space-x-1.5">
+                    <span className={`text-xs font-semibold whitespace-nowrap ${
+                      completedDrills.has(index) 
+                        ? 'text-green-700' 
+                        : index === currentDrillIndex 
+                        ? 'text-powlax-blue' 
+                        : 'text-gray-500'
+                    }`}>
+                      Drill {index + 1}
+                    </span>
+                    <span className="text-xs text-gray-400">-</span>
+                    <span className={`text-xs font-medium truncate ${
+                      completedDrills.has(index) 
+                        ? 'text-green-700' 
+                        : index === currentDrillIndex 
+                        ? 'text-powlax-blue' 
+                        : 'text-gray-700'
+                    }`}>
+                      {drill?.drill?.drill_name || drill?.drill?.title || `Exercise ${index + 1}`}
+                    </span>
+                  </div>
                 </button>
               ))}
             </div>
-          )}
+          </div>
         </div>
 
         {/* Main Content Area */}
@@ -404,7 +444,7 @@ function WorkoutPageContent() {
                     frameBorder="0"
                     allow="autoplay; fullscreen; picture-in-picture"
                     allowFullScreen
-                    title={drill?.title || 'Drill Video'}
+                    title={drill?.drill_name || 'Drill Video'}
                   />
                 )
               } else {
@@ -413,6 +453,7 @@ function WorkoutPageContent() {
                     <div className="text-center">
                       <PlayCircle className="w-16 h-16 mx-auto mb-4 text-gray-400" />
                       <p className="text-gray-400">Video coming soon</p>
+                      <p className="text-sm text-gray-500 mt-2">{drill?.drill_name || drill?.title}</p>
                     </div>
                   </div>
                 )
@@ -420,49 +461,45 @@ function WorkoutPageContent() {
             })()}
           </div>
 
-          {/* Drill Info Card */}
-          <div className="bg-gray-800 text-white p-4">
-            <h2 className="text-xl font-bold mb-2">
-              {currentDrill?.drill?.title || `Drill ${currentDrillIndex + 1}`}
-            </h2>
-            
-            <div className="flex space-x-4 text-black">
-              {currentDrill?.drill_duration_seconds && (
-                <div className="bg-white/90 px-3 py-1 rounded">
-                  <span className="font-bold">{currentDrill.drill_duration_seconds}s</span>
-                  <span className="text-xs ml-1">Duration</span>
-                </div>
-              )}
-              {currentDrill?.repetitions && (
-                <div className="bg-white/90 px-3 py-1 rounded">
-                  <span className="font-bold">{currentDrill.repetitions}</span>
-                  <span className="text-xs ml-1">Reps</span>
-                </div>
-              )}
+          {/* Compact Drill Info and Action - Mobile Optimized */}
+          <div className="bg-gray-800 text-white px-4 py-3 flex-shrink-0">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg font-bold flex-1 pr-4">
+                {currentDrill?.drill?.drill_name || currentDrill?.drill?.title || `Drill ${currentDrillIndex + 1}`}
+              </h2>
+              
+              <div className="flex space-x-2 text-black">
+                {currentDrill?.drill_duration_seconds && (
+                  <div className="bg-white/90 px-2 py-1 rounded text-xs">
+                    <span className="font-bold">{currentDrill.drill_duration_seconds}s</span>
+                  </div>
+                )}
+                {currentDrill?.repetitions && (
+                  <div className="bg-white/90 px-2 py-1 rounded text-xs">
+                    <span className="font-bold">{currentDrill.repetitions} reps</span>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-
-          {/* Action Button */}
-          <div className="bg-white p-4 border-t border-gray-200">
+            
+            {/* Action Button - Integrated into info card */}
             <Button 
               onClick={handleMarkComplete}
-              className="w-full h-14 text-lg font-bold bg-powlax-blue hover:bg-powlax-blue/90"
+              className="w-full h-12 text-base font-bold bg-powlax-blue hover:bg-powlax-blue/90 text-white"
               disabled={completedDrills.has(currentDrillIndex)}
             >
               {completedDrills.has(currentDrillIndex) ? (
                 <>
-                  <CheckCircle className="w-6 h-6 mr-2" />
-                  Completed
+                  <CheckCircle className="w-5 h-5 mr-2 text-white" />
+                  <span className="text-white">Completed</span>
                 </>
               ) : (
-                'Did It!'
+                <span className="text-white">Did It!</span>
               )}
             </Button>
           </div>
         </div>
 
-        {/* Mobile Bottom Navigation */}
-        <MobileBottomNav />
       </div>
     </WorkoutErrorBoundary>
   )

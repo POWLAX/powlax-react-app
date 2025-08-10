@@ -37,8 +37,8 @@ export default function BottomNavigation() {
   const pathname = usePathname()
   const [isExpanded, setIsExpanded] = useState(false)
   
-  // Special collapsible behavior for Practice Planner page
-  if (pathname?.includes('/practice-plans')) {
+  // Special collapsible behavior for Practice Planner and Skills Academy Workout pages
+  if (pathname?.includes('/practice-plans') || pathname?.includes('/skills-academy/workout/')) {
     return (
       <div className="fixed bottom-0 left-0 right-0 md:hidden z-50">
         {/* Navigation items - shown when expanded */}
@@ -46,7 +46,9 @@ export default function BottomNavigation() {
           <nav className="bg-white border-t border-gray-200">
             <div className="flex justify-around py-2">
               {navItems.map((item) => {
-                const isActive = item.href === '/teams'
+                const isActive = pathname?.includes('/practice-plans') 
+                  ? item.href === '/teams'
+                  : pathname?.includes('/skills-academy') && item.href === '/skills-academy'
                 const Icon = item.icon
                 
                 return (

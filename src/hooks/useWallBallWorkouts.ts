@@ -108,17 +108,72 @@ export function useWallBallVariant(variantId: number | null) {
     async function fetchVariant() {
       try {
         setLoading(true);
-        const { data, error } = await supabase
-          .from('wall_ball_workout_variants')
-          .select(`
-            *,
-            series:wall_ball_workout_series(*)
-          `)
+        
+        // Fetch from actual wall ball collection table
+        const { data: collection, error: collectionError } = await supabase
+          .from('powlax_wall_ball_collections')
+          .select('*')
           .eq('id', variantId)
           .single();
 
-        if (error) throw error;
-        setVariant(data);
+        if (collectionError) throw collectionError;
+
+        // Fetch drills for this collection
+        const { data: drills, error: drillsError } = await supabase
+          .from('powlax_wall_ball_collection_drills')
+          .select(`
+            *,
+            drill:powlax_wall_ball_drill_library(*)
+          `)
+          .eq('collection_id', variantId)
+          .order('sequence_order', { ascending: true });
+
+        if (drillsError) throw drillsError;
+
+        // Map to expected WallBallVariant format with drills attached
+        const mappedVariant: WallBallVariant & { drills: any[] } = {
+          id: collection.id,
+          series_id: collection.id,
+          variant_name: collection.name,
+          duration_minutes: collection.duration_minutes,
+          has_coaching: collection.has_coaching || false,
+          full_workout_video_url: collection.video_url || '',
+          full_workout_vimeo_id: collection.vimeo_id,
+          drill_sequence: null,
+          drill_ids: drills?.map(d => d.drill_id) || [],
+          total_drills: drills?.length || 0,
+          wp_post_id: collection.wp_post_id,
+          original_csv_column: null,
+          times_completed: 0,
+          is_active: true,
+          created_at: collection.created_at,
+          updated_at: collection.updated_at,
+          drills: drills || [],
+          series: {
+            id: collection.id,
+            series_name: collection.name,
+            series_slug: collection.workout_type?.toLowerCase().replace(/\s+/g, '-') || '',
+            description: collection.description,
+            skill_focus: null,
+            difficulty_level: collection.difficulty_level,
+            target_audience: null,
+            thumbnail_url: null,
+            preview_video_url: null,
+            is_featured: false,
+            display_order: collection.id,
+            available_durations: [collection.duration_minutes],
+            has_coaching_version: collection.has_coaching || false,
+            has_no_coaching_version: !collection.has_coaching,
+            total_variants: 1,
+            times_accessed: 0,
+            average_rating: null,
+            is_active: true,
+            created_at: collection.created_at,
+            updated_at: collection.updated_at
+          }
+        };
+
+        setVariant(mappedVariant);
       } catch (err) {
         console.error('Error fetching wall ball variant:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch variant');

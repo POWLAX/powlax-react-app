@@ -1,0 +1,297 @@
+---
+contractId: practice-planner-final-fixes-004
+contractVersion: 1.0.0
+contractDate: 2025-01-10
+contractType: sequential-execution
+projectName: POWLAX Practice Planner Final Fixes & Enhancements
+clientContext: Address critical issues and implement remaining features for 100% completion
+
+# EXECUTION STRATEGY
+executionStrategy:
+  type: sequential # Critical fixes first, then features
+  phases: 3
+  estimatedDuration: 480 # 8 hours total across 3 phases
+  
+# PROJECT OVERVIEW  
+projectOverview:
+  description: |
+    Complete the Practice Planner by fixing critical positioning issues, verifying core 
+    functionality, and implementing advanced features including age band system, admin 
+    editing capabilities, and team playbook system.
+  
+  businessValue: |
+    - Fix critical UX issues preventing optimal coaching workflow
+    - Verify all core features work reliably for production use  
+    - Enable age-appropriate drill/strategy selection for better coaching
+    - Allow admin content editing to maintain high-quality drill library
+    - Provide team playbook system for player strategy access
+  
+  technicalScope: |
+    - Fix Strategies Library positioning issue  
+    - Remove duplicate modal close buttons
+    - Verify save/load/print functionality
+    - Implement age band filtering system
+    - Create admin editing interface for Supabase updates
+    - Build team playbook system with database integration
+
+# PHASE 1: CRITICAL FIXES (2-3 hours)
+phase1:
+  name: "Critical Issues Resolution"
+  duration: 180 # 3 hours
+  priority: "HIGH"
+  
+  requirements:
+    critical:
+      - Fix Strategies Library positioning (showing halfway down page)
+      - Remove double X buttons from all modals  
+      - Audit and fix modal color contrast issues
+      - Resolve Playwright test timeouts (page loading issues)
+      - Ensure all existing functionality works
+      
+  deliverables:
+    - Strategies Library appears directly under tabs
+    - Clean modal headers with single close button
+    - All buttons meet WCAG AA contrast requirements (4.5:1)
+    - Playwright tests complete in <5 seconds
+    - Zero console errors in browser
+    
+  files:
+    modify:
+      - src/components/practice-planner/StrategiesTab.tsx
+      - src/components/practice-planner/modals/StudyDrillModal.tsx  
+      - src/components/practice-planner/modals/StudyStrategyModal.tsx
+      - src/app/(authenticated)/teams/[teamId]/practice-plans/page.tsx
+    test:
+      - tests/e2e/practice-planner-smoke.spec.ts
+      - tests/e2e/practice-planner.spec.ts
+
+# PHASE 2: FUNCTIONALITY VERIFICATION (3-4 hours)  
+phase2:
+  name: "Core Feature Verification"
+  duration: 240 # 4 hours
+  priority: "HIGH"
+  
+  requirements:
+    functional:
+      - Verify save practice plans to Supabase database
+      - Verify load practice plans with all elements
+      - Test print functionality on all devices
+      - Confirm auto-save triggers every 3 seconds
+      - Validate drill library search and selection
+      - Test parallel drill creation and editing
+      - Verify strategy selection and active display
+      
+  deliverables:
+    - Save/load practice plans working 100%
+    - Print layouts optimized for field use
+    - Auto-save prevents data loss
+    - All drill operations functional
+    - Strategy system fully operational
+    
+  testingRequirements:
+    - Manual testing on phone, tablet, desktop
+    - Playwright test suite passes completely
+    - Performance testing (<2 second load times)
+    - Cross-browser compatibility verification
+
+# PHASE 3: ADVANCED FEATURES (8-12 hours)
+phase3:
+  name: "Advanced Feature Implementation"  
+  duration: 600 # 10 hours
+  priority: "MEDIUM"
+  
+  requirements:
+    features:
+      - Age band system for drill/strategy filtering
+      - Admin editing interface for direct Supabase updates
+      - Custom drill/strategy builder
+      - Team playbook system for player access
+      - Enhanced mobile optimization
+      
+  components:
+    new:
+      - AgeBandSelector.tsx - Team age configuration
+      - AdminEditModal.tsx - In-place editing for admins
+      - TeamPlaybook.tsx - Strategy collection for teams
+      - CustomDrillBuilder.tsx - Create new drills/strategies
+    
+    modify:
+      - DrillLibraryTabbed.tsx - Age band filtering
+      - StrategiesTab.tsx - Age band filtering  
+      - practice-plans/page.tsx - Age band integration
+      
+  database:
+    tables:
+      - team_playbooks (new) - Strategy collections per team
+      - drills_powlax - Add age_min, age_max columns
+      - strategies_powlax - Add age_min, age_max columns
+    
+    migrations:
+      - Add age band fields to existing tables
+      - Create team playbook schema
+      - Add admin permission checks
+
+# DETAILED REQUIREMENTS
+
+# Age Band System Implementation
+ageBandSystem:
+  interface: |
+    interface AgeBandConfig {
+      teamAgeGroup: number // Average team age
+      teamLevel: 'beginner' | 'intermediate' | 'advanced'
+    }
+    
+    // Age bands calculated as:
+    // Do_It: ages 8-10, complexity 1-2
+    // Coach_It: ages 11-14, complexity 3-4  
+    // Own_It: ages 15+, any complexity
+    
+  visualDesign: |
+    Color-coded badges:
+    - Do_It: Green gradient (#10B981 to #34D399)
+    - Coach_It: Yellow gradient (#F59E0B to #FBBF24)
+    - Own_It: Red gradient (#EF4444 to #F87171)
+    
+  filterLogic: |
+    Filter drills/strategies based on:
+    1. Team average age ± age band range
+    2. Team skill level vs complexity rating
+    3. Show appropriate difficulty recommendations
+
+# Admin Editing System  
+adminEditingSystem:
+  permissions: |
+    // Admin users can edit Supabase tables directly
+    // Regular users create custom entries in user_* tables
+    if (user.role === 'admin') {
+      // Direct updates to drills_powlax, strategies_powlax
+      await supabase.from('drills_powlax').update(changes).eq('id', id)
+    } else {
+      // Create user-specific versions
+      await supabase.from('user_drills').insert(customDrill)
+    }
+    
+  interface: |
+    Rich text editing for:
+    - Drill/strategy names and descriptions
+    - Coaching notes and instructions  
+    - Video URL embedding with preview
+    - Lacrosse Lab diagram linking
+    - Category and tag assignment
+    - Age range and complexity settings
+    
+# Team Playbook System
+teamPlaybookSystem:
+  database: |
+    CREATE TABLE team_playbooks (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      team_id UUID REFERENCES teams(id) ON DELETE CASCADE,
+      strategy_id UUID REFERENCES strategies_powlax(id),
+      added_by UUID REFERENCES user_profiles(id),
+      custom_name TEXT, -- Optional custom name for team
+      notes TEXT, -- Team-specific notes
+      created_at TIMESTAMP DEFAULT NOW(),
+      updated_at TIMESTAMP DEFAULT NOW()
+    );
+    
+  playerAccess: |
+    // Players can view team playbook on team page
+    // Quick reference cards for game situations
+    // Mobile-optimized for sideline use
+    // Search and filter by game situation
+
+# SUCCESS CRITERIA
+successCriteria:
+  phase1:
+    - Strategies Library positioned correctly under tabs
+    - No duplicate close buttons in any modal
+    - All modal buttons pass contrast testing (4.5:1 ratio)
+    - Playwright tests complete successfully in <5 seconds
+    - Zero console errors during normal operation
+    
+  phase2:  
+    - Save practice plan creates proper database record
+    - Load practice plan restores all elements accurately
+    - Print functionality works on mobile, tablet, desktop
+    - Auto-save triggers reliably every 3 seconds
+    - All existing features verified and documented
+    
+  phase3:
+    - Age band selector filters content appropriately
+    - Admin users can edit and save to production tables
+    - Custom drill/strategy builder fully functional
+    - Team playbook system allows saving and player access
+    - All new features tested across devices
+
+# TESTING REQUIREMENTS
+testingRequirements:
+  automated:
+    - All Playwright tests pass in <5 seconds
+    - Performance tests show <2 second load times
+    - Cross-browser compatibility (Chrome, Safari, Firefox)
+    
+  manual:
+    - Touch testing on actual mobile devices
+    - Print testing with real printers
+    - Admin workflow testing with database verification
+    - Player access testing for team playbooks
+    
+  accessibility:
+    - Color contrast compliance (WCAG AA)
+    - Keyboard navigation functionality
+    - Screen reader compatibility
+    - Mobile touch target sizing (44px minimum)
+
+# ROLLBACK PLAN
+rollbackPlan:
+  branch: practice-planner-final-fixes-004
+  stagingDeployment: true
+  featureFlags: 
+    - age_band_system
+    - admin_editing  
+    - team_playbooks
+  
+  triggers:
+    - Practice Planner becomes non-functional
+    - Database corruption or data loss
+    - Performance degrades beyond acceptable limits
+    - Critical accessibility issues discovered
+    
+  steps:
+    - Git revert to last stable commit
+    - Database migration rollback if needed
+    - Feature flag disable for new functionality
+    - Clear Next.js cache and restart server
+
+# CONTRACT STATUS
+status:
+  stage: ready_for_execution
+  lastUpdated: 2025-01-10T09:45:00Z
+  approvedBy: user
+  
+  phases:
+    phase1:
+      status: not_started
+      estimatedStart: 2025-01-10T10:00:00Z
+      
+    phase2: 
+      status: pending_phase1
+      dependencies: [phase1]
+      
+    phase3:
+      status: pending_phase2  
+      dependencies: [phase1, phase2]
+
+# NOTES
+notes: |
+  This contract completes the Practice Planner development with focus on:
+  1. Critical UX fixes that are blocking optimal user experience
+  2. Verification that all existing features work reliably
+  3. Advanced features that transform coaching workflow efficiency
+  
+  The sequential approach ensures stability throughout implementation.
+  Each phase must be fully completed and tested before proceeding.
+  
+  Special attention to admin editing capabilities - this feature allows
+  the product owner to maintain high-quality drill/strategy content
+  directly through the interface rather than database management tools.

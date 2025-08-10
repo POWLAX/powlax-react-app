@@ -160,7 +160,7 @@ export default function StrategiesTab({
   }
 
   return (
-    <>
+    <div className="h-full flex flex-col">
       {/* Header - matching Drill Library */}
       <div className="px-4 pt-2 pb-4 border-b">
         <h3 className="text-lg font-semibold mb-4">Strategies Library</h3>
@@ -343,6 +343,6 @@ export default function StrategiesTab({
           />
         </>
       )}
-    </>
+    </div>
   )
 }
