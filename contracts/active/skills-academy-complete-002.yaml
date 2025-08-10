@@ -20,13 +20,13 @@ currentState:
     - Completion screens created
   
   criticalIssues:
-    - Working on 2 pages - /skills-academy should replace /skills-academy/workouts - /skills-academy will be used for user card, progress tracking, etc. However, the current /skills-academy is the better workout page.  Replace immediately!
-    - Drills NOT connected to real data (using placeholder IDs)
-    - Modal has dark background (needs white bg + dark text)
-    - Video URLs not properly mapped from database
-    - No real progress tracking
-    - Points not persisting to database
-    - Workout flow disconnected from main hub
+    - RESOLVED: drill_ids column in skills_academy_workouts table contains all drill connections!
+    - RESOLVED: All 118 workouts have populated drill_ids arrays (no junction table needed)
+    - RESOLVED: Videos now playing correctly with real Vimeo IDs
+    - NEW: Created /skills-academy/workouts page with position-based track cards
+    - REMAINING: Points not persisting to database
+    - REMAINING: No real progress tracking
+    - REMAINING: Workout flow needs enhancement
   
   qualityIssues:
     - Inconsistent styling across components

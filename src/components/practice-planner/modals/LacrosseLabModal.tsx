@@ -246,9 +246,10 @@ export default function LacrosseLabModal({ isOpen, onClose, drill }: LacrosseLab
                 className="aspect-square w-full max-w-[600px] border-0 rounded-lg"
                 onLoad={handleIframeLoad}
                 title={`Lacrosse Lab Diagram ${currentIndex + 1}`}
-                allow="fullscreen; autoplay"
+                allow="fullscreen; autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
-                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation allow-pointer-lock"
+                style={{ pointerEvents: 'auto' }}
               />
             </div>
 

@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useParams, useRouter, usePathname } from 'next/navigation'
-import { Calendar, Clock, MapPin, Save, Printer, RefreshCw, FolderOpen, Plus, Target, Loader2, ChevronUp, Home, Users, GraduationCap, BookOpen, MessageCircle } from 'lucide-react'
+import { useParams } from 'next/navigation'
+import { Calendar, Clock, MapPin, Save, Printer, RefreshCw, FolderOpen, Plus, Target, Loader2 } from 'lucide-react'
 import DrillLibraryTabbed from '@/components/practice-planner/DrillLibraryTabbed'
 import StrategyCard from '@/components/practice-planner/StrategyCard'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
@@ -27,9 +27,6 @@ import { toast } from 'sonner'
 export default function PracticePlansPage() {
   const params = useParams()
   const teamId = params.teamId as string
-  const router = useRouter()
-  const pathname = usePathname()
-  const [showNavigation, setShowNavigation] = useState(false)
   const { savePracticePlan, plans, loading: plansLoading } = usePracticePlans(teamId)
   const { drills: supabaseDrills, refreshDrills } = useDrills()
   const { isPrinting, printContent } = usePrint()
@@ -53,9 +50,9 @@ export default function PracticePlansPage() {
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [selectedStrategies, setSelectedStrategies] = useState<any[]>([])
   const [showStudyDrillModal, setShowStudyDrillModal] = useState(false)
-  const [selectedDrill, setSelectedDrill] = useState(null)
+  const [selectedDrill, setSelectedDrill] = useState<any>(null)
   const [showStudyStrategyModal, setShowStudyStrategyModal] = useState(false)
-  const [selectedStrategy, setSelectedStrategy] = useState(null)
+  const [selectedStrategy, setSelectedStrategy] = useState<any>(null)
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // Calculate total drill time from all time slots
@@ -130,11 +127,7 @@ export default function PracticePlansPage() {
   }, [teamId])
 
   const handleAddDrill = (
-    drill: {
-      id: string
-      duration: number
-      [key: string]: unknown
-    }
+    drill: any
   ) => {
     const newDrill = {
       ...drill,
@@ -172,7 +165,7 @@ export default function PracticePlansPage() {
       practice_date: practiceDate,
       duration_minutes: duration,
       drill_sequence: drillSequence,
-      notes: notes || practiceNotes || undefined
+      practice_notes: notes || practiceNotes || undefined
     })
 
     if (error) {
@@ -513,82 +506,14 @@ export default function PracticePlansPage() {
         </div>
       )}
 
-      {/* Mobile Add to Plan Button - 3px above menu tab */}
+      {/* Mobile Add to Plan Button - positioned above the Menu button */}
       <button
         onClick={() => setShowDrillLibrary(true)}
-        className="fixed bottom-[25px] left-4 right-4 bg-blue-600 text-white rounded-lg py-3 shadow-lg md:hidden z-40"
+        className="fixed bottom-14 left-4 right-4 bg-blue-600 text-white rounded-lg py-3 shadow-lg md:hidden z-40"
       >
         <Plus className="h-5 w-5 inline mr-2" />
         Add to Plan
       </button>
-      
-      {/* Pull-up Navigation Menu for Mobile */}
-      <div className="md:hidden">
-        {/* Pull Tab - Full width across bottom */}
-        <button
-          onClick={() => setShowNavigation(!showNavigation)}
-          className="fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-[3px] z-50 flex items-center justify-center gap-2"
-        >
-          <ChevronUp className={`h-4 w-4 transform transition-transform ${showNavigation ? 'rotate-180' : ''}`} />
-          <span className="text-xs">Menu</span>
-        </button>
-        
-        {/* Navigation Menu */}
-        <div className={`fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 transform transition-transform duration-300 z-40 ${showNavigation ? 'translate-y-0' : 'translate-y-full'}`}>
-          <nav className="flex justify-around py-2">
-            <button
-              onClick={() => {
-                router.push('/dashboard')
-                setShowNavigation(false)
-              }}
-              className="flex flex-col items-center p-2 text-gray-600 hover:text-blue-600"
-            >
-              <Home className="h-6 w-6" />
-              <span className="text-xs mt-1">Dashboard</span>
-            </button>
-            <button
-              onClick={() => {
-                router.push('/teams')
-                setShowNavigation(false)
-              }}
-              className="flex flex-col items-center p-2 text-blue-600"
-            >
-              <Users className="h-6 w-6" />
-              <span className="text-xs mt-1">Teams</span>
-            </button>
-            <button
-              onClick={() => {
-                router.push('/academy')
-                setShowNavigation(false)
-              }}
-              className="flex flex-col items-center p-2 text-gray-600 hover:text-blue-600"
-            >
-              <GraduationCap className="h-6 w-6" />
-              <span className="text-xs mt-1">Academy</span>
-            </button>
-            <button
-              onClick={() => {
-                router.push('/resources')
-                setShowNavigation(false)
-              }}
-              className="flex flex-col items-center p-2 text-gray-600 hover:text-blue-600"
-            >
-              <BookOpen className="h-6 w-6" />
-              <span className="text-xs mt-1">Resources</span>
-            </button>
-            <button
-              onClick={() => {
-                router.push('/community')
-                setShowNavigation(false)
-              }}
-              className="flex flex-col items-center p-2 text-gray-600 hover:text-blue-600"
-            >
-              <MessageCircle className="h-6 w-6" />
-              <span className="text-xs mt-1">Community</span>
-            </button>
-          </nav>
-        </div>
-      </div>
 
       {/* Save Practice Modal */}
       <SavePracticeModal
@@ -603,7 +528,7 @@ export default function PracticePlansPage() {
         isOpen={showLoadModal}
         onClose={() => setShowLoadModal(false)}
         onLoad={handleLoadPracticePlan}
-        plans={plans}
+        plans={plans as any}
         loading={plansLoading}
       />
 

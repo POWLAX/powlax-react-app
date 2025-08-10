@@ -174,6 +174,7 @@ export function useWorkoutSession(workoutId: number | null, userId?: string) {
     async function fetchSession() {
       try {
         setLoading(true);
+        console.log(`🚀 Starting fetchSession for workout ${workoutId}`);
 
         // Fetch workout with series info
         const { data: workout, error: workoutError } = await supabase
@@ -185,30 +186,51 @@ export function useWorkoutSession(workoutId: number | null, userId?: string) {
           .eq('id', workoutId)
           .single();
 
-        if (workoutError) throw workoutError;
+        console.log('📦 Workout fetch result:', { workout, workoutError });
+        if (workoutError) {
+          console.error('❌ Workout fetch error:', workoutError);
+          throw workoutError;
+        }
 
         // Fetch drills using the new drill_ids array approach
         let drillsToUse: any[] = [];
+        
+        console.log('🔍 Checking workout.drill_ids:', workout?.drill_ids);
+        console.log('🔍 Is array?', Array.isArray(workout?.drill_ids));
+        console.log('🔍 Length:', workout?.drill_ids?.length);
         
         if (workout?.drill_ids && workout.drill_ids.length > 0) {
           console.log(`🎯 Workout "${workout.workout_name}" has ${workout.drill_ids.length} drill IDs: [${workout.drill_ids.join(', ')}]`);
           
           // Fetch drills using the drill_ids array
+          console.log('📡 Fetching drills with IDs:', workout.drill_ids);
           const { data: drills, error: drillsError } = await supabase
             .from('skills_academy_drills')
             .select('*')
             .in('id', workout.drill_ids);
           
+          console.log('📡 Drills query result:', { drills, drillsError, drillsLength: drills?.length });
+          
           if (drillsError) {
-            console.error('Error fetching drills:', drillsError);
+            console.error('❌ Error fetching drills:', drillsError);
+            console.log('⚠️ Using fallback drills due to error');
             // Use fallback drills
             drillsToUse = createFallbackDrills(workout.drill_ids, workoutId);
           } else if (drills && drills.length > 0) {
             console.log(`✅ Found ${drills.length} drill records in database`);
+            console.log('📊 Full drills data:', JSON.stringify(drills, null, 2));
+            console.log('🎯 First drill video_url:', drills[0]?.video_url);
+            console.log('🎯 First drill vimeo_id:', drills[0]?.vimeo_id);
+            
             // Create drill objects in the correct order
             drillsToUse = workout.drill_ids.map((drillId, index) => {
               const drill = drills.find(d => d.id === drillId);
-              if (!drill) return null;
+              if (!drill) {
+                console.log(`⚠️ No drill found for ID ${drillId}`);
+                return null;
+              }
+              
+              console.log(`📹 Drill ${drill.id} video_url: ${drill.video_url}`);
               
               return {
                 id: `${workoutId}-${index}`,
@@ -222,15 +244,22 @@ export function useWorkoutSession(workoutId: number | null, userId?: string) {
                   drill_name: drill.title || `Drill ${index + 1}`,
                   title: drill.title,
                   description: drill.description || '',
+                  video_url: drill.video_url, // NEW: Use the complete video URL
+                  vimeo_id: drill.vimeo_id,
                   both_hands_vimeo_id: drill.vimeo_id,
                   strong_hand_vimeo_id: drill.vimeo_id,
                   off_hand_vimeo_id: drill.vimeo_id,
-                  both_hands_video_url: drill.vimeo_id ? `https://vimeo.com/${drill.vimeo_id}` : null,
-                  strong_hand_video_url: drill.vimeo_id ? `https://vimeo.com/${drill.vimeo_id}` : null,
-                  off_hand_video_url: drill.vimeo_id ? `https://vimeo.com/${drill.vimeo_id}` : null
+                  both_hands_video_url: drill.video_url || (drill.vimeo_id ? `https://vimeo.com/${drill.vimeo_id}` : null),
+                  strong_hand_video_url: drill.video_url || (drill.vimeo_id ? `https://vimeo.com/${drill.vimeo_id}` : null),
+                  off_hand_video_url: drill.video_url || (drill.vimeo_id ? `https://vimeo.com/${drill.vimeo_id}` : null)
                 }
               };
             }).filter(Boolean);
+            
+            console.log(`✅ Created ${drillsToUse.length} drill objects with video URLs`);
+            if (drillsToUse.length > 0) {
+              console.log('🎬 First drill object video_url:', drillsToUse[0]?.drill?.video_url);
+            }
           } else {
             console.log('⚠️  Skills Academy drills table is empty, using fallback drills from documentation');
             // Use fallback drills based on documentation
@@ -267,12 +296,22 @@ export function useWorkoutSession(workoutId: number | null, userId?: string) {
           isLocked: index > currentIndex
         }));
 
-        setSession({
+        const sessionData = {
           workout,
           drills: drillsWithProgress,
           progress,
           currentDrillIndex: currentIndex
+        };
+        
+        console.log('📝 Setting session with:', {
+          workoutName: workout?.workout_name,
+          drillCount: drillsWithProgress.length,
+          firstDrill: drillsWithProgress[0]?.drill?.title,
+          firstDrillVideoUrl: drillsWithProgress[0]?.drill?.video_url,
+          firstDrillVimeoId: drillsWithProgress[0]?.drill?.vimeo_id
         });
+        
+        setSession(sessionData);
       } catch (err) {
         console.error('Error fetching workout session:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch session');

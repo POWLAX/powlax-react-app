@@ -2,11 +2,12 @@
 
 import { useState, useMemo, Fragment } from 'react'
 import { Filter, Plus, Video, Image, Beaker, ChevronDown, ChevronRight, Search, Play } from 'lucide-react'
-import { useStrategies, getStrategiesByGamePhase, searchStrategies } from '@/hooks/useStrategies'
+import { useStrategies, getStrategiesByActualCategory, searchStrategies } from '@/hooks/useStrategies'
 import VideoModal from './modals/VideoModal'
 import LacrosseLabModal from './modals/LacrosseLabModal'
 import AddCustomStrategiesModal from './modals/AddCustomStrategiesModal'
 import StudyStrategyModal from './modals/StudyStrategyModal'
+import FilterStrategiesModal from './modals/FilterStrategiesModal'
 
 interface Strategy {
   id: string
@@ -33,9 +34,10 @@ export default function StrategiesTab({
 }: StrategiesTabProps) {
   const { strategies, loading, error, refreshStrategies } = useStrategies()
   const [searchTerm, setSearchTerm] = useState('')
-  const [expandedPhases, setExpandedPhases] = useState<string[]>(['Face-Off'])
+  const [expandedCategories, setExpandedCategories] = useState<string[]>(['Face Off', 'Face Offs'])
   const [showAddModal, setShowAddModal] = useState(false)
   const [showFilterModal, setShowFilterModal] = useState(false)
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   
   // Modal states for individual strategies
   const [showVideoModal, setShowVideoModal] = useState(false)
@@ -43,19 +45,43 @@ export default function StrategiesTab({
   const [showStudyStrategyModal, setShowStudyStrategyModal] = useState(false)
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(null)
 
-  const togglePhase = (phase: string) => {
-    if (expandedPhases.includes(phase)) {
-      setExpandedPhases(expandedPhases.filter(p => p !== phase))
+  const toggleCategory = (category: string) => {
+    if (expandedCategories.includes(category)) {
+      setExpandedCategories(expandedCategories.filter(c => c !== category))
     } else {
-      setExpandedPhases([...expandedPhases, phase])
+      setExpandedCategories([...expandedCategories, category])
     }
   }
 
-  // Filter and organize strategies
+  // Get all available categories
+  const availableCategories = useMemo(() => {
+    const categories = new Set<string>()
+    strategies.forEach(s => {
+      if (s.strategy_categories) {
+        categories.add(s.strategy_categories)
+      }
+    })
+    return Array.from(categories).sort()
+  }, [strategies])
+
+  // Filter and organize strategies by actual category
   const filteredStrategies = useMemo(() => {
-    const searched = searchStrategies(strategies, searchTerm)
-    return getStrategiesByGamePhase(searched)
-  }, [strategies, searchTerm])
+    let filtered = strategies
+    
+    // Apply search filter
+    if (searchTerm) {
+      filtered = searchStrategies(filtered, searchTerm)
+    }
+    
+    // Apply category filter
+    if (selectedCategories.length > 0) {
+      filtered = filtered.filter(s => 
+        s.strategy_categories && selectedCategories.includes(s.strategy_categories)
+      )
+    }
+    
+    return getStrategiesByActualCategory(filtered)
+  }, [strategies, searchTerm, selectedCategories])
 
   const handleStrategySelect = (strategy: Strategy) => {
     onSelectStrategy(strategy)
@@ -143,10 +169,15 @@ export default function StrategiesTab({
         <div className="flex flex-wrap gap-2 mb-4">
           <button
             onClick={() => setShowFilterModal(true)}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-md"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-md relative"
           >
             <Filter className="h-4 w-4" />
             Filter Strategies
+            {selectedCategories.length > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                {selectedCategories.length}
+              </span>
+            )}
           </button>
           <button
             onClick={() => setShowAddModal(true)}
@@ -171,31 +202,36 @@ export default function StrategiesTab({
       </div>
 
       {/* Strategies List */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto relative">
         {filteredStrategies.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             No strategies found
           </div>
         ) : (
-          <div className="space-y-2">
-            {filteredStrategies.map(({ phase, strategies }) => (
-              <div key={phase} className="border rounded-lg">
-                <button
-                  onClick={() => togglePhase(phase)}
-                  className="w-full px-4 py-3 flex items-center justify-between bg-gray-50 hover:bg-gray-100 rounded-t-lg"
-                >
-                  <div className="flex items-center gap-2">
-                    {expandedPhases.includes(phase) ? (
-                      <ChevronDown className="h-4 w-4" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4" />
-                    )}
-                    <span className="font-medium">{phase}</span>
-                    <span className="text-sm text-gray-500">({strategies.length})</span>
-                  </div>
-                </button>
-                
-                {expandedPhases.includes(phase) && (
+          <div className="px-4 pt-4 pb-4 space-y-2">
+            {filteredStrategies.map(({ category, strategies }) => {
+              const isExpanded = expandedCategories.includes(category)
+              
+              return (
+                <div key={category} className="border rounded-lg">
+                  <button
+                    onClick={() => toggleCategory(category)}
+                    className={`w-full px-4 py-3 flex items-center justify-between bg-gray-50 hover:bg-gray-100 rounded-t-lg transition-all ${
+                      isExpanded ? 'sticky top-0 -mx-4 px-8 z-20 shadow-md border-b bg-white' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      {isExpanded ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                      <span className="font-medium">{category}</span>
+                      <span className="text-sm text-gray-500">({strategies.length})</span>
+                    </div>
+                  </button>
+                  
+                  {isExpanded && (
                   <div className="p-2 space-y-2">
                     {strategies.map((strategy) => (
                       <div
@@ -259,7 +295,8 @@ export default function StrategiesTab({
                   </div>
                 )}
               </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>
@@ -269,6 +306,14 @@ export default function StrategiesTab({
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         onStrategyCreated={refreshStrategies}
+      />
+      
+      <FilterStrategiesModal
+        isOpen={showFilterModal}
+        onClose={() => setShowFilterModal(false)}
+        availableCategories={availableCategories}
+        selectedCategories={selectedCategories}
+        onApplyFilters={setSelectedCategories}
       />
 
       {selectedStrategy && (

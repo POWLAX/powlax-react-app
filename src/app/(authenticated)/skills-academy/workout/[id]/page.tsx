@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { 
   ArrowLeft, CheckCircle, Trophy, Activity, Home, Target,
-  ChevronLeft, ChevronRight, Award, PlayCircle
+  ChevronDown, Award, PlayCircle, Check, Users, BookOpen, Compass, MessageSquare
 } from 'lucide-react'
 import Link from 'next/link'
 import { useWorkoutProgressTracking } from '@/hooks/useProgressTracking'
@@ -20,42 +20,24 @@ import { supabase } from '@/lib/supabase'
 
 // Helper function to extract Vimeo ID from drill data
 function extractVimeoId(drill: any): string | null {
-  console.log('🔍 extractVimeoId called with:', drill)
-  
-  // First check various vimeo ID fields
-  if (drill?.both_hands_vimeo_id) {
-    console.log('✅ Found both_hands_vimeo_id:', drill.both_hands_vimeo_id)
-    return drill.both_hands_vimeo_id;
-  }
-  if (drill?.strong_hand_vimeo_id) {
-    console.log('✅ Found strong_hand_vimeo_id:', drill.strong_hand_vimeo_id)
-    return drill.strong_hand_vimeo_id;
-  }
-  if (drill?.off_hand_vimeo_id) {
-    console.log('✅ Found off_hand_vimeo_id:', drill.off_hand_vimeo_id)
-    return drill.off_hand_vimeo_id;
-  }
-  if (drill?.vimeo_id) {
-    console.log('✅ Found vimeo_id:', drill.vimeo_id)
-    return drill.vimeo_id;
-  }
-  
-  // Fallback to URL extraction if needed
-  const url = drill?.video_url || drill?.both_hands_video_url || drill?.strong_hand_video_url || drill?.video_link;
-  if (url) {
-    // Handle different Vimeo URL formats
+  const videoUrl = drill?.video_url;
+  if (videoUrl) {
     const patterns = [
-      /vimeo\.com\/(\d+)/,           // https://vimeo.com/123456
-      /player\.vimeo\.com\/video\/(\d+)/, // https://player.vimeo.com/video/123456
-      /^(\d+)$/                        // Just the ID: 123456
+      /vimeo\.com\/(\d+)/,
+      /player\.vimeo\.com\/video\/(\d+)/,
+      /^(\d+)$/
     ];
     
     for (const pattern of patterns) {
-      const match = url.match(pattern);
+      const match = videoUrl.match(pattern);
       if (match) {
         return match[1];
       }
     }
+  }
+  
+  if (drill?.vimeo_id) {
+    return drill.vimeo_id;
   }
   
   return null;
@@ -64,12 +46,74 @@ function extractVimeoId(drill: any): string | null {
 // Test user ID for development  
 const TEST_USER_ID = 'test-user-12345'
 
+// Mobile Bottom Navigation Component
+function MobileBottomNav() {
+  const [isVisible, setIsVisible] = useState(true);
+  const [startY, setStartY] = useState(0);
+
+  useEffect(() => {
+    const handleTouchStart = (e: TouchEvent) => {
+      setStartY(e.touches[0].clientY);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      const currentY = e.touches[0].clientY;
+      const diff = currentY - startY;
+
+      if (Math.abs(diff) > 50) {
+        setIsVisible(diff > 0);
+      }
+    };
+
+    window.addEventListener('touchstart', handleTouchStart);
+    window.addEventListener('touchmove', handleTouchMove);
+
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, [startY]);
+
+  return (
+    <div 
+      className={`md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 transition-transform duration-300 ${
+        isVisible ? 'translate-y-0' : 'translate-y-full'
+      }`}
+      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+    >
+      <div className="h-16 flex items-center justify-around">
+        <Link href="/dashboard" className="flex flex-col items-center justify-center p-2 text-gray-600">
+          <Home className="w-6 h-6" />
+          <span className="text-xs mt-1">Dashboard</span>
+        </Link>
+        <Link href="/teams" className="flex flex-col items-center justify-center p-2 text-gray-600">
+          <Users className="w-6 h-6" />
+          <span className="text-xs mt-1">Teams</span>
+        </Link>
+        <Link href="/skills-academy" className="flex flex-col items-center justify-center p-2 text-powlax-blue">
+          <Target className="w-6 h-6" />
+          <span className="text-xs mt-1">Academy</span>
+        </Link>
+        <Link href="/resources" className="flex flex-col items-center justify-center p-2 text-gray-600">
+          <BookOpen className="w-6 h-6" />
+          <span className="text-xs mt-1">Resources</span>
+        </Link>
+        <Link href="/community" className="flex flex-col items-center justify-center p-2 text-gray-600">
+          <MessageSquare className="w-6 h-6" />
+          <span className="text-xs mt-1">Community</span>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 function WorkoutPageContent() {
   const params = useParams()
   const workoutId = params?.id ? parseInt(params.id as string) : 1
   
   // Get current user
   const [userId, setUserId] = useState<string | null>(null)
+  const [showDrillsDropdown, setShowDrillsDropdown] = useState(false)
   
   useEffect(() => {
     async function getUser() {
@@ -162,36 +206,20 @@ function WorkoutPageContent() {
     const isLastDrill = currentDrillIndex === drills.length - 1
     if (isLastDrill) {
       await saveProgress(true) // Mark as complete
+      setIsCompleted(true)
+      setTimeout(() => setShowCelebration(true), 500)
     } else {
       await saveProgress(false) // Still in progress
-    }
-    
-    // Auto-advance after a short delay
-    setTimeout(() => {
-      if (currentDrillIndex < drills.length - 1) {
+      // Auto-advance after a short delay
+      setTimeout(() => {
         setLocalCurrentDrillIndex(prev => prev + 1)
-      } else {
-        setIsCompleted(true)
-        // Trigger celebration animation
-        setTimeout(() => setShowCelebration(true), 500)
-      }
-    }, 1000)
-  }
-
-  const handleNext = () => {
-    if (currentDrillIndex < drills.length - 1) {
-      setLocalCurrentDrillIndex(prev => prev + 1)
-    } else {
-      setIsCompleted(true)
-      // Trigger celebration animation
-      setTimeout(() => setShowCelebration(true), 500)
+      }, 1000)
     }
   }
 
-  const handlePrevious = () => {
-    if (currentDrillIndex > 0) {
-      setLocalCurrentDrillIndex(prev => prev - 1)
-    }
+  const handleDrillSelect = (index: number) => {
+    setLocalCurrentDrillIndex(index)
+    setShowDrillsDropdown(false)
   }
 
   const formatTime = (seconds: number) => {
@@ -202,22 +230,15 @@ function WorkoutPageContent() {
 
   if (sessionLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Card>
-          <CardContent className="py-12">
-            <div className="text-center">
-              <Activity className="w-8 h-8 animate-spin mx-auto mb-4 text-powlax-blue" />
-              <p className="text-muted-foreground">Loading workout...</p>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="flex items-center justify-center h-screen">
+        <Activity className="w-8 h-8 animate-spin text-powlax-blue" />
       </div>
     )
   }
 
   if (!sessionLoading && (!workout || drills.length === 0)) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="flex items-center justify-center h-screen">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Workout Not Found</h1>
           <p className="text-gray-600 mb-4">This workout doesn&apos;t exist or has no drills configured.</p>
@@ -230,23 +251,8 @@ function WorkoutPageContent() {
   }
 
   if (isCompleted) {
-    // Local session stats for fast performance
-    const sessionStats = {
-      currentDrillIndex,
-      completedDrills: completedDrills.size,
-      totalDrills: drills.length,
-      totalPoints,
-      perfectDrills: 0,
-      totalTimeSeconds: drillTimer,
-      completionPercentage: drills.length > 0 ? (completedDrills.size / drills.length) * 100 : 0,
-      averageTimePerDrill: completedDrills.size > 0 ? drillTimer / completedDrills.size : 0,
-      isComplete: true,
-      lastSyncTime: Date.now()
-    }
-    
     const finalPoints = totalPoints * (completedDrills.size === drills.length ? 2 : 1)
     
-    // Local points breakdown
     const pointsBreakdown = {
       lax_credits: Math.floor(finalPoints * 0.3),
       attack_tokens: Math.floor(finalPoints * 0.15),
@@ -258,127 +264,66 @@ function WorkoutPageContent() {
     
     return (
       <>
-        {/* Celebration Animation Overlay */}
         <CelebrationAnimation 
           points={finalPoints}
           isVisible={showCelebration}
           onAnimationEnd={() => setShowCelebration(false)}
         />
         
-        <div className="min-h-screen bg-gradient-to-b from-green-50 to-white" data-testid="completion-screen">
-          <div className="container mx-auto px-4 py-4">
+        <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex flex-col">
+          <div className="flex-1 container mx-auto px-4 py-4">
             <div className="max-w-2xl mx-auto space-y-4">
-              {/* Celebration Header - Mobile optimized with animations */}
-              <div className="text-center space-y-4 px-4 animate-slide-in-down">
-                <div className="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto animate-trophy-bounce animate-pulse-glow">
-                  <Trophy className="w-10 h-10 md:w-12 md:h-12 text-white" />
+              {/* Celebration Header */}
+              <div className="text-center space-y-4 px-4">
+                <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto">
+                  <Trophy className="w-10 h-10 text-white" />
                 </div>
-                <div className="animate-bounce-in">
-                  <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Workout Complete!</h1>
-                  <p className="text-lg md:text-xl text-gray-600 mt-2">{workout?.workout_name || 'Workout'}</p>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">Workout Complete!</h1>
+                  <p className="text-lg text-gray-600 mt-2">{workout?.workout_name || 'Workout'}</p>
                 </div>
               </div>
 
-            {/* Points Card - All 6 types */}
-            <Card className="border-2 border-green-500 bg-gradient-to-br from-green-50 to-white">
-              <CardHeader className="text-center pb-2">
-                <CardTitle className="flex items-center justify-center gap-2">
-                  <Award className="w-6 h-6 text-yellow-500" />
-                  Points Earned
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-center">
-                  <div className="text-4xl md:text-5xl font-bold text-green-600">{finalPoints}</div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    {completedDrills.size === drills.length && (
-                      <span className="text-green-600 font-semibold">Perfect completion bonus!</span>
-                    )}
+              {/* Points Card */}
+              <Card className="border-2 border-green-500">
+                <CardHeader className="text-center pb-2">
+                  <CardTitle className="flex items-center justify-center gap-2">
+                    <Award className="w-6 h-6 text-yellow-500" />
+                    Points Earned
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-green-600">{finalPoints}</div>
                   </div>
-                </div>
-                
-                {/* 6 Point Types Grid - Mobile optimized */}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 pt-4 text-xs">
-                  <div className="text-center p-2 bg-blue-50 rounded-lg animate-scale-in animate-stagger-1" data-testid="points-lax-credits">
-                    <div className="text-lg font-bold text-blue-600">{pointsBreakdown.lax_credits}</div>
-                    <div className="text-xs text-gray-600">Lax Credits</div>
+                  
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="text-center p-2 bg-blue-50 rounded-lg">
+                      <div className="text-lg font-bold text-blue-600">{pointsBreakdown.lax_credits}</div>
+                      <div className="text-xs text-gray-600">Lax Credits</div>
+                    </div>
+                    <div className="text-center p-2 bg-red-50 rounded-lg">
+                      <div className="text-lg font-bold text-red-600">{pointsBreakdown.attack_tokens}</div>
+                      <div className="text-xs text-gray-600">Attack Tokens</div>
+                    </div>
                   </div>
-                  <div className="text-center p-2 bg-red-50 rounded-lg animate-scale-in animate-stagger-2" data-testid="points-attack-tokens">
-                    <div className="text-lg font-bold text-red-600">{pointsBreakdown.attack_tokens}</div>
-                    <div className="text-xs text-gray-600">Attack Tokens</div>
-                  </div>
-                  <div className="text-center p-2 bg-green-50 rounded-lg animate-scale-in animate-stagger-3" data-testid="points-defense-dollars">
-                    <div className="text-lg font-bold text-green-600">{pointsBreakdown.defense_dollars}</div>
-                    <div className="text-xs text-gray-600">Defense Dollars</div>
-                  </div>
-                  <div className="text-center p-2 bg-purple-50 rounded-lg animate-scale-in animate-stagger-4" data-testid="points-midfield-medals">
-                    <div className="text-lg font-bold text-purple-600">{pointsBreakdown.midfield_medals}</div>
-                    <div className="text-xs text-gray-600">Midfield Medals</div>
-                  </div>
-                  <div className="text-center p-2 bg-orange-50 rounded-lg animate-scale-in animate-stagger-5" data-testid="points-rebound-rewards">
-                    <div className="text-lg font-bold text-orange-600">{pointsBreakdown.rebound_rewards}</div>
-                    <div className="text-xs text-gray-600">Rebound Rewards</div>
-                  </div>
-                  <div className="text-center p-2 bg-gray-50 rounded-lg animate-scale-in animate-stagger-6" data-testid="points-flex-points">
-                    <div className="text-lg font-bold text-gray-600">{pointsBreakdown.flex_points}</div>
-                    <div className="text-xs text-gray-600">Flex Points</div>
-                  </div>
-                </div>
-                
-                {/* Workout Stats */}
-                <div className="grid grid-cols-3 gap-3 pt-4">
-                  <div className="text-center p-3 bg-blue-100 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">{completedDrills.size}</div>
-                    <div className="text-xs text-gray-600">Drills Done</div>
-                  </div>
-                  <div className="text-center p-3 bg-purple-100 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-600">{drills.length}</div>
-                    <div className="text-xs text-gray-600">Total Drills</div>
-                  </div>
-                  <div className="text-center p-3 bg-orange-100 rounded-lg">
-                    <div className="text-2xl font-bold text-orange-600">{Math.floor(drillTimer / 60)}</div>
-                    <div className="text-xs text-gray-600">Minutes</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            {/* Action Buttons - 60px touch targets */}
-            <Card>
-              <CardContent className="py-6 space-y-4">
-                <div className="flex gap-3">
-                  <Button 
-                    onClick={() => {
-                      setIsCompleted(false)
-                      setLocalCurrentDrillIndex(0)
-                      setCompletedDrills(new Set())
-                      setLocalTotalPoints(0)
-                      setDrillTimer(0)
-                      setShowCelebration(false)
-                    }} 
-                    variant="outline" 
-                    className="flex-1 h-16 text-lg"
-                    data-testid="do-again-button"
-                  >
-                    Do Again
-                  </Button>
-                  <Button 
-                    asChild 
-                    className="flex-1 h-16 text-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
-                    data-testid="back-to-academy-button"
-                  >
-                    <Link href="/skills-academy">
-                      <Home className="w-6 h-6 mr-2" />
-                      Back to Academy
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                <Button asChild className="flex-1">
+                  <Link href="/skills-academy/workouts">More Workouts</Link>
+                </Button>
+                <Button asChild variant="outline" className="flex-1">
+                  <Link href="/dashboard">Dashboard</Link>
+                </Button>
+              </div>
+            </div>
           </div>
+          <MobileBottomNav />
         </div>
-      </div>
-    </>
+      </>
     )
   }
 
@@ -386,218 +331,143 @@ function WorkoutPageContent() {
   const progress = drills.length > 0 ? (completedDrills.size / drills.length) * 100 : 0
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-2 md:px-4 py-2 md:py-4">
-        <div className="max-w-4xl mx-auto space-y-3 md:space-y-4">
-          {/* Header - Mobile optimized */}
-          <div className="bg-white rounded-lg shadow-sm p-3 md:p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 md:gap-4">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  asChild
-                  className="h-12 w-12"
-                  data-testid="back-button"
-                >
-                  <Link href="/skills-academy">
-                    <ArrowLeft className="w-5 h-5" />
-                  </Link>
-                </Button>
-                <div>
-                  <h1 className="text-lg md:text-xl font-bold">{workout?.workout_name || 'Loading...'}</h1>
-                  <div className="text-sm text-gray-600">
-                    Drill {currentDrillIndex + 1} of {drills.length} - {completedDrills.size} completed
-                  </div>
-                </div>
+    <WorkoutErrorBoundary>
+      <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+        {/* Header */}
+        <div className="bg-white border-b border-gray-200 px-4 py-3">
+          <div className="flex items-center justify-between">
+            <Link href="/skills-academy/workouts">
+              <ArrowLeft className="w-6 h-6 text-gray-600" />
+            </Link>
+            <div className="text-center flex-1">
+              <h1 className="text-lg font-bold">{workout?.workout_name || 'Loading...'}</h1>
+              <div className="text-sm text-gray-600">
+                Drill {currentDrillIndex + 1} of {drills.length}
               </div>
-              <Badge className="bg-green-100 text-green-700 text-sm md:text-base px-2 py-1">
-                {totalPoints} pts
-              </Badge>
+            </div>
+            <div className="text-sm font-semibold text-powlax-blue">
+              {formatTime(drillTimer)}
             </div>
           </div>
+        </div>
 
-          {/* Enhanced Progress Bar - Mobile optimized */}
-          <div className="bg-white rounded-lg shadow-sm p-3 md:p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm md:text-base font-medium text-gray-700">
-                Progress: {completedDrills.size} of {drills.length} drills
-              </span>
-              <span className="text-sm md:text-base font-bold text-green-600">
-                {Math.round(progress)}%
-              </span>
-            </div>
-            <Progress value={progress} className="h-4 md:h-3" data-testid="progress-bar" />
-            <div className="flex justify-between mt-2">
-              <span className="text-xs md:text-sm text-gray-500">
-                Time: {formatTime(drillTimer)}
-              </span>
-              <span className="text-xs md:text-sm text-gray-500">
-                Points: {totalPoints}
-              </span>
-            </div>
-          </div>
+        {/* Progress Bar */}
+        <div className="bg-white px-4 py-2 border-b border-gray-200">
+          <Progress value={progress} className="h-2" />
+        </div>
 
-          {/* Video Player - Mobile optimized */}
-          <Card className="overflow-hidden">
+        {/* Drill Dropdown Menu */}
+        <div className="bg-white px-4 py-2 border-b border-gray-200">
+          <button
+            onClick={() => setShowDrillsDropdown(!showDrillsDropdown)}
+            className="w-full flex items-center justify-between px-3 py-2 bg-gray-100 rounded-lg"
+          >
+            <span className="text-sm font-medium">
+              {currentDrill?.drill?.title || `Drill ${currentDrillIndex + 1}`}
+            </span>
+            <ChevronDown className={`w-4 h-4 transition-transform ${showDrillsDropdown ? 'rotate-180' : ''}`} />
+          </button>
+          
+          {showDrillsDropdown && (
+            <div className="absolute left-4 right-4 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
+              {drills.map((drill, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleDrillSelect(index)}
+                  className={`w-full flex items-center justify-between px-3 py-2 hover:bg-gray-50 ${
+                    completedDrills.has(index) ? 'bg-green-50' : index === currentDrillIndex ? 'bg-blue-50' : ''
+                  }`}
+                >
+                  <span className={`text-sm ${completedDrills.has(index) ? 'text-green-700' : ''}`}>
+                    {drill?.drill?.title || `Drill ${index + 1}`}
+                  </span>
+                  {completedDrills.has(index) && <Check className="w-4 h-4 text-green-600" />}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-hidden flex flex-col">
+          {/* Video Player */}
+          <div className="flex-1 bg-black">
             {(() => {
               const drill = currentDrill?.drill
-              
-              // Debug logging
-              console.log('🎬 Video Player Debug:', {
-                currentDrill: currentDrill,
-                drill: drill,
-                drillKeys: drill ? Object.keys(drill) : 'no drill',
-                vimeo_id: drill?.vimeo_id,
-                both_hands_vimeo_id: drill?.both_hands_vimeo_id,
-                strong_hand_vimeo_id: drill?.strong_hand_vimeo_id,
-                off_hand_vimeo_id: drill?.off_hand_vimeo_id
-              })
-              
-              // Extract Vimeo ID from drill data
               const vimeoId = extractVimeoId(drill)
-              console.log('🎯 Extracted Vimeo ID:', vimeoId)
-
+              
               if (vimeoId) {
                 return (
-                  <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-                    <iframe
-                      src={`https://player.vimeo.com/video/${vimeoId}`}
-                      className="absolute top-0 left-0 w-full h-full rounded-lg"
-                      allowFullScreen
-                      title={drill?.title || drill?.drill_name || 'Drill Video'}
-                      frameBorder="0"
-                      allow="autoplay; fullscreen; picture-in-picture"
-                    />
+                  <iframe
+                    src={`https://player.vimeo.com/video/${vimeoId}?badge=0&autopause=0&player_id=0&app_id=58479`}
+                    className="w-full h-full"
+                    frameBorder="0"
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowFullScreen
+                    title={drill?.title || 'Drill Video'}
+                  />
+                )
+              } else {
+                return (
+                  <div className="flex items-center justify-center h-full bg-gray-900">
+                    <div className="text-center">
+                      <PlayCircle className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                      <p className="text-gray-400">Video coming soon</p>
+                    </div>
                   </div>
                 )
               }
+            })()}
+          </div>
 
-              return (
-                <div className="aspect-video bg-gray-50 flex items-center justify-center rounded-lg">
-                  <div className="text-center text-gray-600">
-                    <PlayCircle className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 md:mb-4" />
-                    <p className="text-base md:text-lg font-medium">Video not available</p>
-                    {(drill?.title || drill?.drill_name) && (
-                      <p className="text-sm mt-2 text-gray-500">{drill.title || drill.drill_name}</p>
-                    )}
-                    <p className="text-xs mt-2 text-gray-400">No video content found for this drill</p>
-                  </div>
+          {/* Drill Info Card */}
+          <div className="bg-gray-800 text-white p-4">
+            <h2 className="text-xl font-bold mb-2">
+              {currentDrill?.drill?.title || `Drill ${currentDrillIndex + 1}`}
+            </h2>
+            
+            <div className="flex space-x-4 text-black">
+              {currentDrill?.drill_duration_seconds && (
+                <div className="bg-white/90 px-3 py-1 rounded">
+                  <span className="font-bold">{currentDrill.drill_duration_seconds}s</span>
+                  <span className="text-xs ml-1">Duration</span>
                 </div>
-              )
-            })()
-            }
-          </Card>
-
-          {/* Drill Info & Controls - Mobile optimized with big captions */}
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-2xl md:text-3xl font-bold text-gray-900" data-testid="drill-caption">
-                  {currentDrill?.drill?.title || currentDrill?.drill?.drill_name || `Drill ${currentDrillIndex + 1}`}
-                </CardTitle>
-                <Badge variant="outline" className="ml-2 text-sm">
-                  {currentDrillIndex + 1} / {drills.length}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {currentDrill?.drill?.description && (
-                <p className="text-gray-600 text-lg leading-relaxed">{currentDrill.drill.description}</p>
               )}
-              
-              <div className="grid grid-cols-3 gap-2 md:gap-3">
-                {currentDrill?.drill_duration_seconds && (
-                  <div className="text-center p-3 bg-gray-50 rounded">
-                    <div className="text-xl md:text-2xl font-bold">{currentDrill.drill_duration_seconds}s</div>
-                    <div className="text-sm text-gray-500">Duration</div>
-                  </div>
-                )}
-                {currentDrill?.repetitions && (
-                  <div className="text-center p-3 bg-gray-50 rounded">
-                    <div className="text-xl md:text-2xl font-bold">{currentDrill.repetitions}</div>
-                    <div className="text-sm text-gray-500">Reps</div>
-                  </div>
-                )}
-                <div className="text-center p-3 bg-gray-50 rounded">
-                  <div className="text-xl md:text-2xl font-bold">
-                    {formatTime(drillTimer)}
-                  </div>
-                  <div className="text-sm text-gray-500">Time</div>
+              {currentDrill?.repetitions && (
+                <div className="bg-white/90 px-3 py-1 rounded">
+                  <span className="font-bold">{currentDrill.repetitions}</span>
+                  <span className="text-xs ml-1">Reps</span>
                 </div>
-              </div>
+              )}
+            </div>
+          </div>
 
-              {/* Progress Dots - Larger for mobile */}
-              <div className="flex justify-center gap-2 mb-4">
-                {drills.map((_: any, index: number) => (
-                  <div
-                    key={index}
-                    className={`h-3 w-3 md:h-2 md:w-2 rounded-full transition-all duration-300 ${
-                      completedDrills.has(index)
-                        ? 'bg-green-500 w-4 md:w-3'
-                        : index === currentDrillIndex
-                        ? 'bg-blue-500 w-4 md:w-3'
-                        : 'bg-gray-300'
-                    }`}
-                  />
-                ))}
-              </div>
-
-              {/* Action Buttons - 60px touch targets */}
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  onClick={handlePrevious}
-                  disabled={currentDrillIndex === 0}
-                  className="h-16 w-16"
-                  data-testid="previous-button"
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </Button>
-
-                {!completedDrills.has(currentDrillIndex) ? (
-                  <Button 
-                    onClick={handleMarkComplete}
-                    className="flex-1 h-16 text-lg md:text-base bg-green-600 hover:bg-green-700 font-bold"
-                    data-testid="did-it-button"
-                  >
-                    <CheckCircle className="w-6 h-6 mr-2" />
-                    Did It!
-                  </Button>
-                ) : (
-                  <Button
-                    variant="outline" 
-                    disabled
-                    className="flex-1 h-16 text-lg md:text-base"
-                    data-testid="did-it-button"
-                  >
-                    <CheckCircle className="w-6 h-6 mr-2" />
-                    Completed!
-                  </Button>
-                )}
-
-                <Button
-                  variant="outline"
-                  onClick={handleNext}
-                  disabled={currentDrillIndex === drills.length - 1}
-                  className="h-16 w-16"
-                  data-testid="next-drill-button"
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Action Button */}
+          <div className="bg-white p-4 border-t border-gray-200">
+            <Button 
+              onClick={handleMarkComplete}
+              className="w-full h-14 text-lg font-bold bg-powlax-blue hover:bg-powlax-blue/90"
+              disabled={completedDrills.has(currentDrillIndex)}
+            >
+              {completedDrills.has(currentDrillIndex) ? (
+                <>
+                  <CheckCircle className="w-6 h-6 mr-2" />
+                  Completed
+                </>
+              ) : (
+                'Did It!'
+              )}
+            </Button>
+          </div>
         </div>
+
+        {/* Mobile Bottom Navigation */}
+        <MobileBottomNav />
       </div>
-    </div>
+    </WorkoutErrorBoundary>
   )
 }
 
 export default function WorkoutPage() {
-  return (
-    <WorkoutErrorBoundary>
-      <WorkoutPageContent />
-    </WorkoutErrorBoundary>
-  )
+  return <WorkoutPageContent />
 }

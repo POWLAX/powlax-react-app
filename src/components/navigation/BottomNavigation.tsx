@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Users, GraduationCap, BookOpen, MessageCircle } from 'lucide-react'
+import { useState } from 'react'
+import { Home, Users, GraduationCap, BookOpen, MessageCircle, ChevronUp, ChevronDown } from 'lucide-react'
 
 const navItems = [
   {
@@ -34,12 +35,56 @@ const navItems = [
 
 export default function BottomNavigation() {
   const pathname = usePathname()
+  const [isExpanded, setIsExpanded] = useState(false)
   
-  // Hide navigation on Practice Planner page
+  // Special collapsible behavior for Practice Planner page
   if (pathname?.includes('/practice-plans')) {
-    return null
+    return (
+      <div className="fixed bottom-0 left-0 right-0 md:hidden z-50">
+        {/* Navigation items - shown when expanded */}
+        {isExpanded && (
+          <nav className="bg-white border-t border-gray-200">
+            <div className="flex justify-around py-2">
+              {navItems.map((item) => {
+                const isActive = item.href === '/teams'
+                const Icon = item.icon
+                
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`flex flex-col items-center py-2 px-3 text-xs ${
+                      isActive
+                        ? 'text-blue-600'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    <Icon className="h-6 w-6 mb-1" />
+                    <span>{item.name}</span>
+                  </Link>
+                )
+              })}
+            </div>
+          </nav>
+        )}
+        
+        {/* Menu toggle button - always visible */}
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full bg-gray-800 text-white py-3 flex items-center justify-center gap-2"
+        >
+          {isExpanded ? (
+            <ChevronDown className="h-5 w-5" />
+          ) : (
+            <ChevronUp className="h-5 w-5" />
+          )}
+          <span className="text-sm font-medium">Menu</span>
+        </button>
+      </div>
+    )
   }
 
+  // Regular navigation for other pages
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden z-40">
       <div className="flex justify-around">

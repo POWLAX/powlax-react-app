@@ -170,7 +170,7 @@ export default function ActiveStrategiesSection({
       {/* Accordion Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors"
+        className={`w-full flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors ${isExpanded ? 'border-b border-gray-300' : ''}`}
       >
         {/* Conditional blue dot - only show when strategies exist */}
         {strategies.length > 0 && (

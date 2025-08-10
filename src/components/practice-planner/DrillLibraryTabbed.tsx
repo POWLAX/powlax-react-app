@@ -354,10 +354,10 @@ export default function DrillLibraryTabbed({
           </div>
           
           {/* Drills List */}
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto relative">
             {/* Mobile: Show selected drills accordion */}
             {isMobile && selectedDrillsForMobile.length > 0 && (
-              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="mx-4 mt-4 mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-medium text-sm">Drills to Add ({selectedDrillsForMobile.length})</h4>
                   <button
@@ -377,7 +377,7 @@ export default function DrillLibraryTabbed({
             )}
             
             {/* Drill Categories */}
-            <div className="space-y-2">
+            <div className="px-4 pt-4 pb-4 space-y-2">
               {Object.entries(filteredDrillsByCategory).map(([category, drills]) => {
                 if (drills.length === 0 && category !== 'Favorites') return null
                 
@@ -387,7 +387,9 @@ export default function DrillLibraryTabbed({
                   <div key={category} className="border rounded-lg">
                     <button
                       onClick={() => toggleCategory(category)}
-                      className="w-full px-4 py-3 flex items-center justify-between bg-gray-50 hover:bg-gray-100 rounded-t-lg"
+                      className={`w-full px-4 py-3 flex items-center justify-between bg-gray-50 hover:bg-gray-100 rounded-t-lg transition-all ${
+                        isExpanded ? 'sticky top-0 -mx-4 px-8 z-20 shadow-md border-b bg-white' : ''
+                      }`}
                     >
                       <div className="flex items-center gap-2">
                         {isExpanded ? (

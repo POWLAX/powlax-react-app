@@ -227,3 +227,50 @@ export function searchStrategies(strategies: Strategy[], searchTerm: string): St
     strategy.target_audience?.toLowerCase().includes(term)
   )
 }
+
+// Helper function to organize strategies by their actual category values
+export function getStrategiesByActualCategory(strategies: Strategy[]) {
+  // Group strategies by their strategy_categories value
+  const categoryMap = new Map<string, Strategy[]>()
+  
+  strategies.forEach(strategy => {
+    const category = strategy.strategy_categories || 'Uncategorized'
+    if (!categoryMap.has(category)) {
+      categoryMap.set(category, [])
+    }
+    categoryMap.get(category)!.push(strategy)
+  })
+  
+  // Convert to array and sort by category name
+  return Array.from(categoryMap.entries())
+    .map(([category, strategies]) => ({
+      category,
+      strategies: strategies.sort((a, b) => a.strategy_name.localeCompare(b.strategy_name))
+    }))
+    .sort((a, b) => {
+      // Sort with special ordering for common categories
+      const orderMap: Record<string, number> = {
+        'Face Off': 1,
+        'Face Offs': 1,
+        'Clearing': 2,
+        'Riding': 3,
+        'Transition Offense': 4,
+        'Zone Offense': 5,
+        'Set Plays': 6,
+        '2 Man Ideas': 7,
+        'Defense': 8,
+        'Box': 9,
+        'Man Up': 10,
+        'Man Down': 11,
+        'Man Up & Man Down': 12,
+        'Substitutions': 13,
+        'Uncategorized': 99
+      }
+      
+      const aOrder = orderMap[a.category] || 50
+      const bOrder = orderMap[b.category] || 50
+      
+      if (aOrder !== bOrder) return aOrder - bOrder
+      return a.category.localeCompare(b.category)
+    })
+}
