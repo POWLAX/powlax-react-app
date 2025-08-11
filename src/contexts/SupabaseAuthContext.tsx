@@ -4,6 +4,8 @@ import { createContext, useContext, useState, useEffect, useCallback, ReactNode 
 import { useRouter } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
+import { useModalAuth } from '@/hooks/useModalAuth'
+import AuthModal from '@/components/auth/AuthModal'
 
 // User interface for Supabase Auth
 interface User {
@@ -26,6 +28,10 @@ interface AuthContextType {
   checkAuth: () => Promise<boolean>
   validateSession: () => Promise<boolean>
   supabase: typeof supabase
+  // Modal auth methods
+  showAuthModal: (returnUrl?: string) => void
+  hideAuthModal: () => void
+  isAuthModalOpen: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -36,6 +42,9 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
+  
+  // Modal auth integration
+  const modalAuth = useModalAuth()
 
   // Prevent hydration mismatch
   useEffect(() => {
@@ -256,6 +265,63 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     return () => subscription?.unsubscribe()
   }, [checkAuth, mounted])
 
+  // Listen for auth modal requests
+  useEffect(() => {
+    const handleAuthRequest = (event: CustomEvent) => {
+      modalAuth.showAuthModal(event.detail?.returnUrl)
+    }
+
+    window.addEventListener('request-auth', handleAuthRequest as EventListener)
+    
+    return () => {
+      window.removeEventListener('request-auth', handleAuthRequest as EventListener)
+    }
+  }, [modalAuth])
+
+  // Cross-domain authentication detection
+  useEffect(() => {
+    if (!mounted || loading) return
+    
+    // Check if user is coming from powlax.com or has auto_auth parameter
+    const checkCrossDomainAuth = () => {
+      // Skip if user is already authenticated
+      if (user) return
+      
+      const referrer = document.referrer
+      const urlParams = new URLSearchParams(window.location.search)
+      const autoAuth = urlParams.get('auto_auth')
+      const fromPowlax = urlParams.get('from_powlax')
+      
+      // Check if coming from powlax.com domain
+      const isFromPowlax = referrer.includes('powlax.com') || 
+                          referrer.includes('powlax.') ||
+                          fromPowlax === 'true' ||
+                          autoAuth === 'true'
+      
+      if (isFromPowlax) {
+        console.log('[Auth] Detected cross-domain visit from POWLAX')
+        console.log('[Auth] Referrer:', referrer)
+        console.log('[Auth] Auto-auth params:', { autoAuth, fromPowlax })
+        
+        // Show auth modal automatically with current path as return URL
+        const returnUrl = window.location.pathname + window.location.search
+        modalAuth.showAuthModal(returnUrl)
+        
+        // Remove the URL parameters to clean up the URL
+        if (autoAuth || fromPowlax) {
+          urlParams.delete('auto_auth')
+          urlParams.delete('from_powlax')
+          const newUrl = window.location.pathname + 
+                        (urlParams.toString() ? '?' + urlParams.toString() : '')
+          window.history.replaceState({}, '', newUrl)
+        }
+      }
+    }
+    
+    // Small delay to ensure everything is mounted
+    setTimeout(checkCrossDomainAuth, 100)
+  }, [mounted, loading, user, modalAuth])
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -265,9 +331,20 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       logout,
       checkAuth,
       validateSession,
-      supabase
+      supabase,
+      // Modal auth methods
+      showAuthModal: modalAuth.showAuthModal,
+      hideAuthModal: modalAuth.hideAuthModal,
+      isAuthModalOpen: modalAuth.isAuthModalOpen
     }}>
       {children}
+      
+      {/* Auth Modal */}
+      <AuthModal
+        open={modalAuth.isAuthModalOpen}
+        onClose={modalAuth.hideAuthModal}
+        returnUrl={modalAuth.authReturnUrl}
+      />
     </AuthContext.Provider>
   )
 }
@@ -284,8 +361,8 @@ export function useAuth() {
 }
 
 export function useRequireAuth() {
-  const { user, loading } = useAuth()
-  const [redirected, setRedirected] = useState(false)
+  const { user, loading, showAuthModal } = useAuth()
+  const [modalShown, setModalShown] = useState(false)
   const [initialCheck, setInitialCheck] = useState(true)
   
   useEffect(() => {
@@ -299,27 +376,32 @@ export function useRequireAuth() {
   }, [initialCheck])
   
   useEffect(() => {
-    console.log('[useRequireAuth] State:', { loading, hasUser: !!user, redirected, initialCheck })
+    console.log('[useRequireAuth] State:', { loading, hasUser: !!user, modalShown, initialCheck })
     
-    // Don't redirect during initial check or while loading
+    // Don't show modal during initial check or while loading
     if (initialCheck || loading) {
       return
     }
     
-    // Only redirect once and only if we're not already on a login/auth page
-    if (!user && !redirected && typeof window !== 'undefined') {
+    // Show auth modal instead of redirecting
+    if (!user && !modalShown && typeof window !== 'undefined') {
       const currentPath = window.location.pathname
       const isAuthPage = currentPath.includes('/auth/') || currentPath.includes('/login') || currentPath.includes('/direct-login') || currentPath.includes('/debug-auth')
       
       console.log('[useRequireAuth] No user found, checking path:', currentPath, 'isAuthPage:', isAuthPage)
       
       if (!isAuthPage) {
-        console.log('[useRequireAuth] Redirecting to login - no user found')
-        setRedirected(true)
-        window.location.href = '/auth/login'
+        console.log('[useRequireAuth] Showing auth modal - no user found')
+        setModalShown(true)
+        showAuthModal(currentPath)
       }
     }
-  }, [user, loading, redirected, initialCheck])
+    
+    // Reset modal shown flag when user is authenticated
+    if (user && modalShown) {
+      setModalShown(false)
+    }
+  }, [user, loading, modalShown, initialCheck, showAuthModal])
   
   return { user, loading: loading || initialCheck }
 }

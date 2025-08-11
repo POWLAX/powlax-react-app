@@ -309,7 +309,7 @@ export default function WallBallWorkoutRunner({ workout }: WallBallWorkoutRunner
           </div>
         </div>
         <Button variant="outline" size="sm" asChild>
-          <Link href="/skills-academy/wall-ball">
+          <Link href="/skills-academy">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Exit
           </Link>

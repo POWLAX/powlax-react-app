@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { useUserDrills } from '@/hooks/useUserDrills'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
 import { toast } from 'sonner'
 
 interface AddCustomDrillModalProps {
@@ -22,26 +23,60 @@ interface AddCustomDrillModalProps {
 
 export default function AddCustomDrillModal({ isOpen, onClose, onAdd, onDrillCreated }: AddCustomDrillModalProps) {
   const { createUserDrill, loading: creating } = useUserDrills()
-  const [name, setName] = useState('')
-  const [duration, setDuration] = useState(10)
-  const [notes, setNotes] = useState('')
+  const { user } = useAuth()
+  
+  // Form state - essential fields only
+  const [title, setTitle] = useState('')
+  const [durationMinutes, setDurationMinutes] = useState(10)
+  const [category, setCategory] = useState('custom')
+  const [content, setContent] = useState('')
+  const [videoUrl, setVideoUrl] = useState('')
+  const [drillLabUrl1, setDrillLabUrl1] = useState('')
+  const [drillLabUrl2, setDrillLabUrl2] = useState('')
+  const [drillLabUrl3, setDrillLabUrl3] = useState('')
+  const [drillLabUrl4, setDrillLabUrl4] = useState('')
+  const [drillLabUrl5, setDrillLabUrl5] = useState('')
+  const [equipment, setEquipment] = useState('')
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault()
     
-    if (!name.trim()) {
-      toast.error('Please enter a drill name')
+    if (!title.trim()) {
+      toast.error('Please enter a drill title')
+      return
+    }
+
+    if (!user) {
+      toast.error('You must be logged in to create custom drills')
       return
     }
 
     try {
-      // Create drill in database first
+      // Create drill in database with essential fields only
       const drillData = {
-        title: name.trim(),
-        drill_category: 'custom',
-        drill_duration: `${duration} minutes`,
-        drill_notes: notes,
-        content: `Custom drill: ${notes}`
+        title: title.trim(),
+        duration_minutes: durationMinutes,
+        category: category,
+        content: content.trim() || `Custom drill: ${title.trim()}`,
+        notes: '', // Empty for simplified version
+        coach_instructions: '', // Empty for simplified version
+        video_url: videoUrl.trim() || null,
+        drill_lab_url_1: drillLabUrl1.trim() || null,
+        drill_lab_url_2: drillLabUrl2.trim() || null,
+        drill_lab_url_3: drillLabUrl3.trim() || null,
+        drill_lab_url_4: drillLabUrl4.trim() || null,
+        drill_lab_url_5: drillLabUrl5.trim() || null,
+        equipment: equipment.trim() ? equipment.split(',').map(e => e.trim()).filter(Boolean) : [],
+        tags: '', // Empty for simplified version
+        game_states: [], // Empty for simplified version
+        user_id: user.id,
+        is_public: false, // Default to private for simplified version
+        team_share: undefined,
+        club_share: undefined,
+        drill_category: category,
+        drill_duration: `${durationMinutes} minutes`,
+        drill_notes: '',
+        drill_video_url: videoUrl.trim() || null
       }
 
       const createdDrill = await createUserDrill(drillData)
@@ -49,10 +84,19 @@ export default function AddCustomDrillModal({ isOpen, onClose, onAdd, onDrillCre
       // Also add to practice planner immediately
       const practiceReadyDrill = {
         id: `user-${createdDrill.id}`,
-        name: name.trim(),
-        duration,
-        category: 'custom',
-        notes,
+        title: title.trim(),
+        name: title.trim(), // Legacy compatibility
+        duration_minutes: durationMinutes,
+        duration: durationMinutes, // Legacy compatibility
+        category: 'Custom Drills',
+        notes: '',
+        coach_instructions: '',
+        video_url: videoUrl.trim() || undefined,
+        drill_lab_url_1: drillLabUrl1.trim() || undefined,
+        drill_lab_url_2: drillLabUrl2.trim() || undefined,
+        drill_lab_url_3: drillLabUrl3.trim() || undefined,
+        drill_lab_url_4: drillLabUrl4.trim() || undefined,
+        drill_lab_url_5: drillLabUrl5.trim() || undefined,
         isCustom: true,
         source: 'user' as const,
         user_id: createdDrill.user_id
@@ -66,23 +110,33 @@ export default function AddCustomDrillModal({ isOpen, onClose, onAdd, onDrillCre
       }
       
       // Reset form
-      setName('')
-      setDuration(10)
-      setNotes('')
+      resetForm()
       onClose()
       
       toast.success('Custom drill created and added to practice!')
     } catch (error) {
       console.error('Error creating custom drill:', error)
-      toast.error('Failed to create custom drill')
+      toast.error('Failed to create custom drill: ' + (error instanceof Error ? error.message : 'Unknown error'))
     }
+  }
+
+  const resetForm = () => {
+    setTitle('')
+    setDurationMinutes(10)
+    setCategory('custom')
+    setContent('')
+    setVideoUrl('')
+    setDrillLabUrl1('')
+    setDrillLabUrl2('')
+    setDrillLabUrl3('')
+    setDrillLabUrl4('')
+    setDrillLabUrl5('')
+    setEquipment('')
   }
 
   const handleClose = () => {
     // Reset form when closing
-    setName('')
-    setDuration(10)
-    setNotes('')
+    resetForm()
     onClose()
   }
 
@@ -92,52 +146,151 @@ export default function AddCustomDrillModal({ isOpen, onClose, onAdd, onDrillCre
         <DialogHeader>
           <DialogTitle className="text-[#003366] font-semibold">Add Custom Drill</DialogTitle>
           <DialogDescription className="text-gray-600">
-            Create a simple custom drill for your practice plan
+            Create a custom drill with essential details
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Drill Name */}
+        <form onSubmit={handleSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto">
+          {/* Basic Info */}
+          <div className="space-y-4">
+            {/* Drill Title */}
+            <div>
+              <label className="block text-sm font-medium text-[#003366] mb-1">
+                Drill Title *
+              </label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#003366] bg-white text-[#003366]"
+                placeholder="e.g., 3v2 Ground Ball to Clear"
+                required
+              />
+            </div>
+
+            {/* Duration and Category */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-[#003366] mb-1">
+                  Duration (minutes) *
+                </label>
+                <input
+                  type="number"
+                  value={durationMinutes}
+                  onChange={(e) => setDurationMinutes(parseInt(e.target.value) || 10)}
+                  min="1"
+                  max="60"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#003366] bg-white text-[#003366]"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#003366] mb-1">
+                  Category
+                </label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#003366] bg-white text-[#003366]"
+                >
+                  <option value="custom">Custom</option>
+                  <option value="skill">Skill Development</option>
+                  <option value="concept">Concept Drills</option>
+                  <option value="admin">Admin</option>
+                  <option value="1v1">1v1 Drills</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Content/Description */}
           <div>
             <label className="block text-sm font-medium text-[#003366] mb-1">
-              Drill Name *
+              Drill Description
+            </label>
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#003366] resize-none bg-white text-[#003366]"
+              placeholder="Detailed description of how to run this drill..."
+            />
+          </div>
+
+          {/* Media URLs */}
+          <div className="space-y-4">
+            <h4 className="font-medium text-[#003366]">Media & Resources</h4>
+            
+            {/* Video URL */}
+            <div>
+              <label className="block text-sm font-medium text-[#003366] mb-1">
+                Video URL
+              </label>
+              <input
+                type="url"
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#003366] bg-white text-[#003366]"
+                placeholder="https://vimeo.com/..."
+              />
+            </div>
+
+            {/* Lacrosse Lab URLs */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-[#003366] mb-1">
+                Lacrosse Lab URLs (up to 5)
+              </label>
+              <div className="space-y-2">
+                <input
+                  type="url"
+                  value={drillLabUrl1}
+                  onChange={(e) => setDrillLabUrl1(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#003366] bg-white text-[#003366]"
+                  placeholder="Lacrosse Lab URL #1"
+                />
+                <input
+                  type="url"
+                  value={drillLabUrl2}
+                  onChange={(e) => setDrillLabUrl2(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#003366] bg-white text-[#003366]"
+                  placeholder="Lacrosse Lab URL #2"
+                />
+                <input
+                  type="url"
+                  value={drillLabUrl3}
+                  onChange={(e) => setDrillLabUrl3(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#003366] bg-white text-[#003366]"
+                  placeholder="Lacrosse Lab URL #3"
+                />
+                <input
+                  type="url"
+                  value={drillLabUrl4}
+                  onChange={(e) => setDrillLabUrl4(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#003366] bg-white text-[#003366]"
+                  placeholder="Lacrosse Lab URL #4"
+                />
+                <input
+                  type="url"
+                  value={drillLabUrl5}
+                  onChange={(e) => setDrillLabUrl5(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#003366] bg-white text-[#003366]"
+                  placeholder="Lacrosse Lab URL #5"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Equipment */}
+          <div>
+            <label className="block text-sm font-medium text-[#003366] mb-1">
+              Equipment Needed
             </label>
             <input
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={equipment}
+              onChange={(e) => setEquipment(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#003366] bg-white text-[#003366]"
-              placeholder="e.g., 3v2 Ground Ball to Clear"
-              required
-            />
-          </div>
-
-          {/* Duration */}
-          <div>
-            <label className="block text-sm font-medium text-[#003366] mb-1">
-              Duration (minutes)
-            </label>
-            <input
-              type="number"
-              value={duration}
-              onChange={(e) => setDuration(parseInt(e.target.value) || 10)}
-              min="1"
-              max="60"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#003366] bg-white text-[#003366]"
-            />
-          </div>
-
-          {/* Notes */}
-          <div>
-            <label className="block text-sm font-medium text-[#003366] mb-1">
-              Notes (optional)
-            </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#003366] resize-none bg-white text-[#003366]"
-              placeholder="Any additional notes or instructions for this drill..."
+              placeholder="cones, balls, goals (comma-separated)"
             />
           </div>
         </form>

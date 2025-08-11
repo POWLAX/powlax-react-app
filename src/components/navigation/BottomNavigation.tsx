@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
-import { Home, Users, GraduationCap, BookOpen, MessageCircle, ChevronUp, ChevronDown, Trophy } from 'lucide-react'
+import { Home, Users, GraduationCap, BookOpen, ChevronUp, ChevronDown } from 'lucide-react'
 
 const navItems = [
   {
@@ -18,13 +18,8 @@ const navItems = [
   },
   {
     name: 'Academy',
-    href: '/skills-academy',
+    href: '/skills-academy/workouts',
     icon: GraduationCap,
-  },
-  {
-    name: 'Rewards',
-    href: '/gamification-showcase',
-    icon: Trophy,
   },
   {
     name: 'Resources',
@@ -38,7 +33,7 @@ export default function BottomNavigation() {
   const [isExpanded, setIsExpanded] = useState(false)
   
   // Special collapsible behavior for Practice Planner and Skills Academy Workout pages
-  if (pathname?.includes('/practice-plans') || pathname?.includes('/skills-academy/workout/')) {
+  if (pathname?.includes('/practiceplan') || pathname?.includes('/skills-academy/workout/')) {
     return (
       <div className="fixed bottom-0 left-0 right-0 md:hidden z-50">
         {/* Navigation items - shown when expanded */}
@@ -46,7 +41,7 @@ export default function BottomNavigation() {
           <nav className="bg-white border-t border-gray-200">
             <div className="flex justify-around py-2">
               {navItems.map((item) => {
-                const isActive = pathname?.includes('/practice-plans') 
+                const isActive = pathname?.includes('/practiceplan') 
                   ? item.href === '/teams'
                   : pathname?.includes('/skills-academy') && item.href === '/skills-academy'
                 const Icon = item.icon

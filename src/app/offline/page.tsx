@@ -44,10 +44,10 @@ export default function OfflinePage() {
           </button>
           
           <Link
-            href="/demo/practice-planner"
+            href="/dashboard"
             className="block w-full bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors text-center"
           >
-            Go to Practice Planner
+            Go to Dashboard
           </Link>
         </div>
 

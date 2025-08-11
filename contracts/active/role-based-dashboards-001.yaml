@@ -1,0 +1,286 @@
+# Claude-to-Claude Sub Agent Contract: Role-Based Dashboards
+# Contract ID: role-based-dashboards-001
+# Created: January 11, 2025
+# Status: ACTIVE
+# Priority: HIGH (Core MVP Feature)
+
+metadata:
+  contract_id: "role-based-dashboards-001"
+  title: "Implement Role-Based Dashboard Views"
+  created_date: "2025-01-11"
+  created_by: "User Request"
+  priority: "HIGH"
+  status: "ACTIVE"
+  estimated_effort: "2 hours"
+  target_completion: "Immediate"
+
+# =============================================================================
+# CONTRACT SCOPE
+# =============================================================================
+
+objective: |
+  Create role-specific dashboard experiences that show relevant information
+  based on user type: logged out, player, coach, parent, club director, admin.
+  Each dashboard should display appropriate widgets, actions, and data for
+  that user role.
+
+deliverables:
+  - 6 role-specific dashboard components
+  - Role-based routing in main dashboard
+  - Mock data for demonstration
+  - Responsive design for all dashboards
+  - Consistent styling with POWLAX brand
+
+# =============================================================================
+# TECHNICAL REQUIREMENTS
+# =============================================================================
+
+user_roles:
+  mapping:
+    logged_out: "user === null"
+    player: "user.role === 'player'"
+    coach: "user.role === 'team_coach'"
+    parent: "user.role === 'parent'"
+    director: "user.role === 'club_director'"
+    admin: "user.role === 'administrator'"
+
+dashboard_components:
+  PlayerDashboard:
+    file: "src/components/dashboards/PlayerDashboard.tsx"
+    sections:
+      - title: "My Progress"
+        content: "Workout streak, completion stats, skill development"
+      - title: "Points Balance"
+        content: "Attack Tokens, Defense Dollars, Midfield Medals, etc."
+      - title: "Team Workouts"
+        content: "Coach-assigned workouts with bonuses"
+      - title: "Upcoming"
+        content: "Next practice, scheduled workouts"
+    
+  CoachDashboard:
+    file: "src/components/dashboards/CoachDashboard.tsx"
+    sections:
+      - title: "Team Overview"
+        content: "Active players, attendance, recent activity"
+      - title: "Today's Practice"
+        content: "Current plan or quick create button"
+      - title: "Player Progress"
+        content: "Top performers, needs attention, streaks"
+      - title: "Quick Actions"
+        content: "Create practice, assign workout, send announcement"
+    
+  ParentDashboard:
+    file: "src/components/dashboards/ParentDashboard.tsx"
+    sections:
+      - title: "My Children"
+        content: "Progress cards for each child"
+      - title: "Schedule"
+        content: "Upcoming practices and events"
+      - title: "Communications"
+        content: "Recent coach messages and announcements"
+      - title: "Account"
+        content: "Membership status, payments due"
+    
+  DirectorDashboard:
+    file: "src/components/dashboards/DirectorDashboard.tsx"
+    sections:
+      - title: "Club Statistics"
+        content: "Total players, teams, engagement metrics"
+      - title: "Teams Overview"
+        content: "Team performance, coach activity"
+      - title: "Financial"
+        content: "Revenue, membership trends"
+      - title: "System Health"
+        content: "Platform usage, feature adoption"
+    
+  AdminDashboard:
+    file: "src/components/dashboards/AdminDashboard.tsx"
+    sections:
+      - title: "System Status"
+        content: "Database, authentication, API health"
+      - title: "User Management"
+        content: "Recent registrations, role changes"
+      - title: "Content"
+        content: "Drill library, workout stats"
+      - title: "Admin Tools"
+        content: "Quick links to admin functions"
+    
+  PublicDashboard:
+    file: "src/components/dashboards/PublicDashboard.tsx"
+    sections:
+      - title: "Welcome to POWLAX"
+        content: "Hero section with value proposition"
+      - title: "Features"
+        content: "Skills Academy, Practice Planner, Teams"
+      - title: "Get Started"
+        content: "Login and registration CTAs"
+      - title: "Success Stories"
+        content: "Testimonials and metrics"
+
+# =============================================================================
+# IMPLEMENTATION SPECIFICATIONS
+# =============================================================================
+
+component_structure:
+  shared_components:
+    - StatCard: "Reusable stat display widget"
+    - ActionCard: "Quick action buttons"
+    - ProgressCard: "Progress bars and metrics"
+    - ScheduleCard: "Upcoming events display"
+  
+  styling:
+    - Use Shadcn/UI components from src/components/ui/
+    - POWLAX colors: blue (#003366), orange (#FF6600), gray (#4A4A4A)
+    - Consistent card styling with shadow-sm
+    - Responsive grid layouts
+    - Mobile-first approach
+
+dashboard_page_update:
+  file: "src/app/(authenticated)/dashboard/page.tsx"
+  logic: |
+    ```tsx
+    export default function DashboardPage() {
+      const { user, loading } = useAuth()
+      
+      if (loading) return <LoadingSpinner />
+      
+      // Route to appropriate dashboard based on role
+      if (!user) return <PublicDashboard />
+      
+      switch (user.role) {
+        case 'player':
+          return <PlayerDashboard user={user} />
+        case 'team_coach':
+          return <CoachDashboard user={user} />
+        case 'parent':
+          return <ParentDashboard user={user} />
+        case 'club_director':
+          return <DirectorDashboard user={user} />
+        case 'administrator':
+          return <AdminDashboard user={user} />
+        default:
+          return <PlayerDashboard user={user} />
+      }
+    }
+    ```
+
+# =============================================================================
+# MOCK DATA REQUIREMENTS
+# =============================================================================
+
+mock_data:
+  player_data:
+    - Current streak: 7 days
+    - Points: { attack: 450, defense: 320, midfield: 280 }
+    - Recent workouts: 3 completed this week
+    - Team: "Varsity Eagles"
+    
+  coach_data:
+    - Team: "Varsity Eagles"
+    - Players: 18 active
+    - Today's practice: "Offensive Drills - 3:30 PM"
+    - Top performer: "Sarah Johnson - 12 day streak"
+    
+  parent_data:
+    - Children: ["Tommy Smith - U12", "Emma Smith - U10"]
+    - Next practice: "Tomorrow 4:00 PM"
+    - Unread messages: 2
+    - Payment due: "Next month"
+    
+  director_data:
+    - Total players: 156
+    - Active teams: 8
+    - Monthly revenue: "$12,450"
+    - Engagement rate: "78%"
+    
+  admin_data:
+    - System uptime: "99.9%"
+    - New users today: 5
+    - Total drills: 167
+    - Active sessions: 42
+
+# =============================================================================
+# QUALITY REQUIREMENTS
+# =============================================================================
+
+acceptance_criteria:
+  functionality:
+    - Each role sees appropriate dashboard content
+    - Logged out users see public dashboard
+    - All dashboards load without errors
+    - Mock data displays correctly
+    - Responsive on mobile and desktop
+    
+  user_experience:
+    - Clean, professional design
+    - Consistent styling across dashboards
+    - Clear visual hierarchy
+    - Appropriate information density
+    - Intuitive navigation
+    
+  technical:
+    - TypeScript types for all props
+    - No console errors
+    - Builds successfully
+    - Components are reusable
+    - Follows existing patterns
+
+# =============================================================================
+# TESTING CHECKLIST
+# =============================================================================
+
+test_requirements:
+  role_switching:
+    - [ ] Test each role displays correct dashboard
+    - [ ] Verify logged out shows public dashboard
+    - [ ] Check default case handles unknown roles
+    
+  responsive_design:
+    - [ ] Mobile view (375px)
+    - [ ] Tablet view (768px)
+    - [ ] Desktop view (1024px+)
+    
+  content_display:
+    - [ ] All sections render properly
+    - [ ] Mock data appears correctly
+    - [ ] No broken layouts
+    - [ ] Images and icons load
+
+# =============================================================================
+# SUCCESS METRICS
+# =============================================================================
+
+success_definition: |
+  ✅ Contract Complete When:
+  - 6 dashboard components created and functional
+  - Main dashboard routes to correct component by role
+  - Each dashboard shows role-appropriate content
+  - All dashboards responsive and styled consistently
+  - Mock data demonstrates functionality
+  - Build succeeds without errors
+  - Dev server running on port 3000
+
+# =============================================================================
+# AGENT INSTRUCTIONS
+# =============================================================================
+
+agent_instructions: |
+  CRITICAL REMINDERS:
+  1. Use general-purpose sub-agent only
+  2. Create components in src/components/dashboards/
+  3. Use existing Shadcn/UI components from src/components/ui/
+  4. Follow POWLAX brand colors and styling
+  5. Include TypeScript interfaces for all props
+  6. Use mock data to demonstrate functionality
+  7. Ensure mobile responsiveness
+  8. Keep server running on port 3000
+  
+  IMPLEMENTATION ORDER:
+  1. Create dashboards directory
+  2. Build shared dashboard components (StatCard, etc.)
+  3. Create each role dashboard component
+  4. Update main dashboard page with routing
+  5. Test all roles
+  6. Verify build succeeds
+
+contract_end: true

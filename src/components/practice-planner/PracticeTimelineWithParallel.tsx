@@ -170,7 +170,7 @@ export default function PracticeTimelineWithParallel({
     return calculateTime(startTime, accumulatedTime)
   }
 
-  if (timeSlots.length === 0) {
+  if (!timeSlots || timeSlots.length === 0) {
     return (
       <div className="text-center py-12">
         {getSetupTime()}

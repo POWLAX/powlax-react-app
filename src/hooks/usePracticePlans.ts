@@ -4,28 +4,22 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/SupabaseAuthContext'
 
-// CORRECTED: Practice interface now matches actual database schema!
+// 🚨 FIXED: Practice interface now matches ACTUAL database schema from practices table!
 export interface PracticePlan {
   id?: string
-  title?: string
-  name?: string // Legacy compatibility alias for title
-  coach_id?: string // 🚨 FIXED: Database uses 'coach_id', not 'user_id'
-  user_id?: string // Legacy compatibility alias
-  team_id?: string // Can be null in database
-  practice_date: string
-  start_time?: string
-  duration_minutes: number
-  field_type?: 'turf' | 'grass' | 'indoor' | 'other'
-  setup_time?: number
-  setup_notes?: string
-  practice_notes?: string
-  drill_sequence: DrillSequence
-  selected_strategies?: string[]
-  template?: boolean
-  age_group?: '8-10' | '11-14' | '15+' | 'all'
-  version?: number
-  parent_id?: string
-  is_draft?: boolean
+  wp_post_id?: number
+  coach_id?: string
+  team_id?: string | null
+  name?: string // Database uses 'name' not 'title'
+  title?: string // For compatibility - will map to 'name'
+  practice_date?: string | null
+  start_time?: string | null
+  duration_minutes?: number
+  field_location?: string // Database uses 'field_location' not 'field_type'
+  goals?: any // JSON field in database
+  notes?: string | null
+  raw_wp_data?: any // JSON field containing drill data
+  drill_sequence?: DrillSequence // For compatibility - will map to raw_wp_data
   created_at?: string
   updated_at?: string
 }
@@ -60,6 +54,7 @@ export function usePracticePlans(teamId?: string) {
   const fetchPracticePlans = useCallback(async () => {
     try {
       setLoading(true)
+      setError(null)
       
       // Use 'practices' table as specified in database contract
       const tableName = 'practices'
@@ -67,7 +62,7 @@ export function usePracticePlans(teamId?: string) {
       let query = supabase
         .from(tableName)
         .select('*')
-        .order('practice_date', { ascending: false })
+        .order('created_at', { ascending: false }) // Use created_at since practice_date can be null
 
       if (teamId) {
         query = query.eq('team_id', teamId)
@@ -75,14 +70,46 @@ export function usePracticePlans(teamId?: string) {
 
       if (user?.id) {
         // Use coach_id for filtering (practices table structure)
-        query = query.or(`coach_id.eq.${user.id}`)
+        query = query.eq('coach_id', user.id) // Fixed: use .eq instead of .or for single user
       }
 
       const { data, error } = await query
 
       if (error) throw error
 
-      setPlans(data || [])
+      // 🚨 CRITICAL FIX: Convert database format to expected format
+      const convertedPlans = (data || []).map(record => ({
+        ...record,
+        title: record.name, // Map name to title for compatibility
+        // Convert raw_wp_data back to drill_sequence format
+        drill_sequence: record.raw_wp_data?.drills ? {
+          timeSlots: [{
+            id: `slot-${record.id}`,
+            drills: record.raw_wp_data.drills.map((drill, index) => ({
+              ...drill,
+              id: `drill-${record.id}-${index}`,
+              title: drill.name,
+              duration: drill.duration || 0,
+              video_url: drill.videoUrl,
+              drill_lab_url_1: drill.labUrl || drill.customUrl
+            })),
+            duration: record.raw_wp_data.drills.reduce((acc, drill) => acc + (drill.duration || 0), 0)
+          }],
+          practiceInfo: {
+            startTime: record.raw_wp_data.startTime || record.start_time || '07:00',
+            setupTime: undefined,
+            field: record.raw_wp_data.field || record.field_location || 'Turf'
+          }
+        } : {
+          timeSlots: [],
+          practiceInfo: {
+            startTime: record.start_time || '07:00',
+            field: record.field_location || 'Turf'
+          }
+        }
+      }))
+
+      setPlans(convertedPlans)
     } catch (err: any) {
       console.error('Error fetching practice plans:', err)
       setError(err.message)
@@ -96,9 +123,33 @@ export function usePracticePlans(teamId?: string) {
       // Use 'practices' table as specified in database contract
       const tableName = 'practices'
       
+      // 🚨 CRITICAL FIX: Map data structure to match actual database schema
       const planData = {
-        ...plan,
+        name: plan.title || plan.name, // Map title to name (database column)
         coach_id: user?.id,
+        created_by: user?.id, // Add created_by field with user ID
+        team_id: plan.team_id || null,
+        practice_date: plan.practice_date || null,
+        start_time: plan.start_time || null,
+        duration_minutes: plan.duration_minutes || 0,
+        field_location: plan.field_location || '',
+        goals: plan.goals || {},
+        notes: plan.notes || null,
+        // Store drill sequence in raw_wp_data to match existing structure
+        raw_wp_data: plan.drill_sequence ? {
+          drills: plan.drill_sequence.timeSlots?.map(slot => 
+            slot.drills.map(drill => ({
+              name: drill.title || drill.name,
+              duration: drill.duration || slot.duration,
+              notes: drill.notes || '',
+              videoUrl: drill.video_url || '',
+              labUrl: drill.drill_lab_url_1 || '',
+              customUrl: drill.drill_lab_url_1 || ''
+            }))
+          ).flat() || [],
+          startTime: plan.drill_sequence.practiceInfo?.startTime || '07:00',
+          field: plan.drill_sequence.practiceInfo?.field || plan.field_location || 'Turf'
+        } : {},
         updated_at: new Date().toISOString()
       }
 
@@ -110,10 +161,27 @@ export function usePracticePlans(teamId?: string) {
 
       if (error) throw error
 
+      // Convert back to expected format for local state
+      const convertedData = {
+        ...data,
+        title: data.name, // Map name back to title for compatibility
+        drill_sequence: data.raw_wp_data?.drills ? {
+          timeSlots: [{
+            id: 'converted-slot',
+            drills: data.raw_wp_data.drills,
+            duration: data.raw_wp_data.drills.reduce((acc, drill) => acc + (drill.duration || 0), 0)
+          }],
+          practiceInfo: {
+            startTime: data.raw_wp_data.startTime || '07:00',
+            field: data.raw_wp_data.field || data.field_location || 'Turf'
+          }
+        } : { timeSlots: [], practiceInfo: { startTime: '07:00', field: 'Turf' } }
+      }
+
       // Update local state
-      setPlans([data, ...plans])
+      setPlans([convertedData, ...plans])
       
-      return { data, error: null }
+      return { data: convertedData, error: null }
     } catch (err: any) {
       console.error('Error saving practice plan:', err)
       return { data: null, error: err.message }
@@ -125,22 +193,67 @@ export function usePracticePlans(teamId?: string) {
       // Use 'practices' table as specified in database contract
       const tableName = 'practices'
       
+      // 🚨 CRITICAL FIX: Map updates to match database schema
+      const dbUpdates = {
+        ...(updates.title && { name: updates.title }),
+        ...(updates.name && { name: updates.name }),
+        ...(updates.team_id !== undefined && { team_id: updates.team_id }),
+        ...(updates.practice_date !== undefined && { practice_date: updates.practice_date }),
+        ...(updates.start_time !== undefined && { start_time: updates.start_time }),
+        ...(updates.duration_minutes !== undefined && { duration_minutes: updates.duration_minutes }),
+        ...(updates.field_location && { field_location: updates.field_location }),
+        ...(updates.goals && { goals: updates.goals }),
+        ...(updates.notes !== undefined && { notes: updates.notes }),
+        // Update raw_wp_data if drill_sequence is provided
+        ...(updates.drill_sequence && {
+          raw_wp_data: {
+            drills: updates.drill_sequence.timeSlots?.map(slot => 
+              slot.drills.map(drill => ({
+                name: drill.title || drill.name,
+                duration: drill.duration || slot.duration,
+                notes: drill.notes || '',
+                videoUrl: drill.video_url || '',
+                labUrl: drill.drill_lab_url_1 || '',
+                customUrl: drill.drill_lab_url_1 || ''
+              }))
+            ).flat() || [],
+            startTime: updates.drill_sequence.practiceInfo?.startTime || '07:00',
+            field: updates.drill_sequence.practiceInfo?.field || updates.field_location || 'Turf'
+          }
+        }),
+        updated_at: new Date().toISOString()
+      }
+      
       const { data, error } = await supabase
         .from(tableName)
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString()
-        })
+        .update(dbUpdates)
         .eq('id', id)
         .select()
         .single()
 
       if (error) throw error
 
+      // Convert back to expected format
+      const convertedData = {
+        ...data,
+        title: data.name,
+        drill_sequence: data.raw_wp_data?.drills ? {
+          timeSlots: [{
+            id: 'updated-slot',
+            drills: data.raw_wp_data.drills,
+            duration: data.raw_wp_data.drills.reduce((acc, drill) => acc + (drill.duration || 0), 0)
+          }],
+          practiceInfo: {
+            startTime: data.raw_wp_data.startTime || '07:00',
+            field: data.raw_wp_data.field || data.field_location || 'Turf'
+          }
+        } : { timeSlots: [], practiceInfo: { startTime: '07:00', field: 'Turf' } }
+      }
+
       // Update local state
-      setPlans(plans.map(p => p.id === id ? data : p))
+      setPlans(plans.map(p => p.id === id ? convertedData : p))
       
-      return { data, error: null }
+      return { data: convertedData, error: null }
     } catch (err: any) {
       console.error('Error updating practice plan:', err)
       return { data: null, error: err.message }
@@ -182,7 +295,38 @@ export function usePracticePlans(teamId?: string) {
 
       if (error) throw error
 
-      return { data, error: null }
+      // Convert database format to expected format
+      const convertedData = {
+        ...data,
+        title: data.name,
+        drill_sequence: data.raw_wp_data?.drills ? {
+          timeSlots: [{
+            id: `slot-${data.id}`,
+            drills: data.raw_wp_data.drills.map((drill, index) => ({
+              ...drill,
+              id: `drill-${data.id}-${index}`,
+              title: drill.name,
+              duration: drill.duration || 0,
+              video_url: drill.videoUrl,
+              drill_lab_url_1: drill.labUrl || drill.customUrl
+            })),
+            duration: data.raw_wp_data.drills.reduce((acc, drill) => acc + (drill.duration || 0), 0)
+          }],
+          practiceInfo: {
+            startTime: data.raw_wp_data.startTime || data.start_time || '07:00',
+            setupTime: undefined,
+            field: data.raw_wp_data.field || data.field_location || 'Turf'
+          }
+        } : {
+          timeSlots: [],
+          practiceInfo: {
+            startTime: data.start_time || '07:00',
+            field: data.field_location || 'Turf'
+          }
+        }
+      }
+
+      return { data: convertedData, error: null }
     } catch (err: any) {
       console.error('Error loading practice plan:', err)
       return { data: null, error: err.message }

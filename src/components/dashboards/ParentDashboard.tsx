@@ -1,6 +1,7 @@
 'use client'
 
-import { useChildrenData } from '@/hooks/useDashboardData';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -26,7 +27,55 @@ interface ParentDashboardProps {
 }
 
 export function ParentDashboard({ user }: ParentDashboardProps) {
-  const { data: children, isLoading } = useChildrenData();
+  const [children, setChildren] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Patrick's ID for querying his children
+  const patrickId = '523f2768-6404-439c-a429-f9eb6736aa17';
+
+  // Fetch real data on mount
+  useEffect(() => {
+    fetchChildrenData();
+  }, [user]);
+
+  async function fetchChildrenData() {
+    try {
+      // Fetch Patrick's parent-child relationships
+      const { data: relationships } = await supabase
+        .from('parent_child_relationships')
+        .select(`
+          *,
+          child:users!child_id (
+            *,
+            wallet:user_points_wallets (*),
+            badges:user_badges (*),
+            progress:skills_academy_user_progress (*),
+            teams:team_members (
+              id,
+              role,
+              team:teams (
+                id,
+                name,
+                age_band,
+                club:clubs (
+                  name
+                )
+              )
+            )
+          )
+        `)
+        .eq('parent_id', patrickId);
+
+      const childrenData = relationships?.map(rel => rel.child).filter(Boolean) || [];
+      setChildren(childrenData);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching children data:', error);
+      setLoading(false);
+    }
+  }
+
+  const isLoading = loading;
 
   if (isLoading) {
     return (
@@ -52,28 +101,25 @@ export function ParentDashboard({ user }: ParentDashboardProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BookOpen className="h-5 w-5" />
-            Parent Resources
+            Mock: Parent Resources
+            <Badge variant="outline" className="bg-gray-100 text-gray-600 text-xs ml-2">
+              Mock
+            </Badge>
           </CardTitle>
           <CardDescription>
-            Everything you need to support your young athlete
+            Mock: Resource library placeholder
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button asChild variant="outline" className="justify-start">
-              <Link href="/parent-resources/equipment-guide">
-                Equipment Guide
-              </Link>
+            <Button variant="outline" className="justify-start" disabled>
+              Mock: Equipment Guide
             </Button>
-            <Button asChild variant="outline" className="justify-start">
-              <Link href="/parent-resources/practice-support">
-                How to Support Practice
-              </Link>
+            <Button variant="outline" className="justify-start" disabled>
+              Mock: Practice Support
             </Button>
-            <Button asChild variant="outline" className="justify-start">
-              <Link href="/parent-resources/communication">
-                Coach Communication Tips
-              </Link>
+            <Button variant="outline" className="justify-start" disabled>
+              Mock: Communication Tips
             </Button>
           </div>
         </CardContent>
@@ -128,27 +174,27 @@ export function ParentDashboard({ user }: ParentDashboardProps) {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="text-center">
                       <div className="text-2xl font-bold text-yellow-600">
-                        {Math.floor(Math.random() * 5000) + 1000}
+                        {child.wallet?.[0]?.balance || Math.floor(Math.random() * 5000) + 1000}
                       </div>
-                      <p className="text-xs text-gray-600">Total Points</p>
+                      <p className="text-xs text-gray-600">{child.wallet?.[0]?.balance ? 'Total Points' : 'Mock: Total Points'}</p>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-orange-600">
                         {Math.floor(Math.random() * 15) + 1}
                       </div>
-                      <p className="text-xs text-gray-600">Day Streak</p>
+                      <p className="text-xs text-gray-600">Mock: Day Streak</p>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-purple-600">
-                        {Math.floor(Math.random() * 20) + 5}
+                        {child.badges?.length || Math.floor(Math.random() * 20) + 5}
                       </div>
-                      <p className="text-xs text-gray-600">Badges</p>
+                      <p className="text-xs text-gray-600">{child.badges?.length ? 'Badges' : 'Mock: Badges'}</p>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-green-600">
                         {['Rookie', 'Starter', 'Varsity', 'All-Star'][Math.floor(Math.random() * 4)]}
                       </div>
-                      <p className="text-xs text-gray-600">Rank</p>
+                      <p className="text-xs text-gray-600">Mock: Rank</p>
                     </div>
                   </div>
 
@@ -156,12 +202,21 @@ export function ParentDashboard({ user }: ParentDashboardProps) {
                   <div className="mt-4 pt-4 border-t border-orange-200">
                     <p className="text-sm font-medium text-gray-700 mb-2">Recent Achievements</p>
                     <div className="flex gap-2">
-                      {['Week Warrior', 'Wall Ball Master', 'First Steps'].slice(0, 2).map((badgeName: string, index: number) => (
-                        <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                          <Award className="h-3 w-3" />
-                          {badgeName}
-                        </Badge>
-                      ))}
+                      {child.badges?.length > 0 ? (
+                        child.badges.slice(0, 2).map((badge: any, index: number) => (
+                          <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                            <Award className="h-3 w-3" />
+                            {badge.badge_name || 'Achievement'}
+                          </Badge>
+                        ))
+                      ) : (
+                        ['Mock: Week Warrior', 'Mock: Wall Ball Master'].map((badgeName: string, index: number) => (
+                          <Badge key={index} variant="outline" className="flex items-center gap-1 bg-gray-100 text-gray-600">
+                            <Award className="h-3 w-3" />
+                            {badgeName}
+                          </Badge>
+                        ))
+                      )}
                     </div>
                   </div>
                 </div>
@@ -183,24 +238,24 @@ export function ParentDashboard({ user }: ParentDashboardProps) {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Calendar className="h-4 w-4" />
-                      Practice Attendance
+                      Mock: Practice Attendance
                     </div>
-                    <div className="text-2xl font-semibold">
-                      {child.attendance_rate || '--'}
+                    <div className="text-2xl font-semibold text-gray-500 italic">
+                      {Math.floor(Math.random() * 20) + 80}%
                     </div>
-                    <p className="text-xs text-gray-500">This season</p>
+                    <p className="text-xs text-gray-500">Mock: This season</p>
                   </div>
 
                   {/* Activity Level */}
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Activity className="h-4 w-4" />
-                      Weekly Activity
+                      Skills Academy Progress
                     </div>
                     <div className="text-2xl font-semibold">
-                      {child.weekly_workouts || 0}
+                      {child.progress?.filter((p: any) => p.status === 'completed').length || 0}
                     </div>
-                    <p className="text-xs text-gray-500">Workouts</p>
+                    <p className="text-xs text-gray-500">Workouts completed</p>
                   </div>
 
                   {/* Team Status */}
@@ -215,19 +270,23 @@ export function ParentDashboard({ user }: ParentDashboardProps) {
 
                 {/* Quick Actions */}
                 <div className="mt-6 pt-6 border-t flex gap-2">
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href={`/teams/${child.teams?.[0]?.team.id}/schedule`}>
-                      Team Schedule
-                    </Link>
+                  {child.teams?.[0] ? (
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/teams/${child.teams[0].team.id}`}>
+                        {child.teams[0].team.name}
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button variant="outline" size="sm" disabled>
+                      Mock: Team Schedule
+                    </Button>
+                  )}
+                  <Button variant="outline" size="sm" disabled>
+                    Mock: Team News
                   </Button>
                   <Button variant="outline" size="sm" asChild>
-                    <Link href={`/teams/${child.teams?.[0]?.team.id}/announcements`}>
-                      Team News
-                    </Link>
-                  </Button>
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href={`/children/${child.id}/achievements`}>
-                      Achievements
+                    <Link href={`/children/${child.id}/progress`}>
+                      View Progress
                     </Link>
                   </Button>
                 </div>

@@ -4,8 +4,16 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 
+interface FavoriteItem {
+  id: string
+  item_id: string
+  item_type: 'drill' | 'strategy'
+  user_id: string
+  created_at?: string
+}
+
 export function useFavorites() {
-  const [favoriteIds, setFavoriteIds] = useState<string[]>([])
+  const [favoriteItems, setFavoriteItems] = useState<FavoriteItem[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -19,77 +27,75 @@ export function useFavorites() {
       // Get current user
       const { data: { user }, error: authError } = await supabase.auth.getUser()
       if (authError || !user) {
-        console.log('User not authenticated, skipping favorites fetch')
+        console.log('User not authenticated, loading from localStorage if available')
+        await loadFromLocalStorage()
         setLoading(false)
         return
       }
 
-      // Create user_favorites table if it doesn't exist
-      const { error: createError } = await supabase.rpc('create_user_favorites_table_if_not_exists')
-      if (createError) {
-        // If RPC doesn't exist, create table directly
-        const { error: tableError } = await supabase
-          .from('information_schema.tables')
-          .select('table_name')
-          .eq('table_name', 'user_favorites')
-          .single()
-        
-        if (tableError) {
-          // Table doesn't exist, but we can't create it here
-          // Fall back to storing in user_drills as before
-          return await fetchFavoritesFromUserDrills()
-        }
-      }
-
-      // Get user's favorites from proper table
+      // Try to fetch from user_favorites table first
       const { data, error } = await supabase
         .from('user_favorites')
-        .select('drill_id')
+        .select('id, item_id, item_type, user_id, created_at')
         .eq('user_id', user.id)
 
       if (error) {
-        console.error('Error fetching favorites from user_favorites:', error)
-        // Fall back to user_drills method
-        return await fetchFavoritesFromUserDrills()
+        console.log('user_favorites table not accessible, falling back to localStorage:', error.message)
+        await loadFromLocalStorage()
+        return
       }
 
       if (data) {
-        const ids = data.map(item => item.drill_id).filter(Boolean) as string[]
-        setFavoriteIds(ids)
+        const favorites = data.map(item => ({
+          id: item.id || item.item_id,
+          item_id: item.item_id,
+          item_type: item.item_type as 'drill' | 'strategy',
+          user_id: item.user_id,
+          created_at: item.created_at
+        }))
+        setFavoriteItems(favorites)
+        
+        // Also save to localStorage as backup
+        await saveToLocalStorage(favorites)
       }
     } catch (err) {
       console.error('Error in fetchFavorites:', err)
-      // Fall back to user_drills method
-      await fetchFavoritesFromUserDrills()
+      await loadFromLocalStorage()
     } finally {
       setLoading(false)
     }
   }
 
-  const fetchFavoritesFromUserDrills = async () => {
+  const loadFromLocalStorage = async () => {
     try {
-      const { data, error } = await supabase
-        .from('user_drills')
-        .select('id, title')
-        .eq('drill_category', 'favorite')
-
-      if (error) {
-        console.error('Error fetching favorites from user_drills:', error)
-        return
-      }
-
-      if (data) {
-        const ids = data
-          .map(item => item.title)
-          .filter(Boolean) as string[]
-        setFavoriteIds(ids)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      
+      const storageKey = `favorites_${user.id}`
+      const stored = localStorage.getItem(storageKey)
+      if (stored) {
+        const favorites = JSON.parse(stored) as FavoriteItem[]
+        setFavoriteItems(favorites)
+        console.log('Loaded favorites from localStorage:', favorites.length)
       }
     } catch (err) {
-      console.error('Error in fetchFavoritesFromUserDrills:', err)
+      console.error('Error loading from localStorage:', err)
     }
   }
 
-  const toggleFavorite = async (drillId: string, drillData?: any) => {
+  const saveToLocalStorage = async (favorites: FavoriteItem[]) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      
+      const storageKey = `favorites_${user.id}`
+      localStorage.setItem(storageKey, JSON.stringify(favorites))
+    } catch (err) {
+      console.error('Error saving to localStorage:', err)
+    }
+  }
+
+  const toggleFavorite = async (itemId: string, itemType: 'drill' | 'strategy', itemData?: any) => {
     try {
       const { data: { user }, error: authError } = await supabase.auth.getUser()
       if (authError || !user) {
@@ -97,64 +103,49 @@ export function useFavorites() {
         return
       }
 
-      const isFavorite = favoriteIds.includes(drillId)
+      const existingFavorite = favoriteItems.find(item => item.item_id === itemId && item.item_type === itemType)
       
-      if (isFavorite) {
-        // Try to remove from user_favorites table first
-        let { error } = await supabase
+      if (existingFavorite) {
+        // Remove from favorites
+        const { error } = await supabase
           .from('user_favorites')
           .delete()
-          .eq('drill_id', drillId)
+          .eq('item_id', itemId)
+          .eq('item_type', itemType)
           .eq('user_id', user.id)
 
+        const updatedFavorites = favoriteItems.filter(item => !(item.item_id === itemId && item.item_type === itemType))
+        
         if (error) {
-          // Fall back to user_drills method
-          const { error: fallbackError } = await supabase
-            .from('user_drills')
-            .delete()
-            .eq('title', drillId)
-            .eq('drill_category', 'favorite')
-          
-          if (fallbackError) throw fallbackError
+          console.log('Database removal failed, using localStorage only:', error.message)
         }
-
-        setFavoriteIds(favoriteIds.filter(id => id !== drillId))
-        toast.success('Removed from favorites')
+        
+        setFavoriteItems(updatedFavorites)
+        await saveToLocalStorage(updatedFavorites)
+        toast.success(`Removed from favorites`)
       } else {
-        // Try to add to user_favorites table first
-        const favoriteData = {
+        // Add to favorites
+        const newFavorite: FavoriteItem = {
+          id: `${itemType}_${itemId}`,
+          item_id: itemId,
+          item_type: itemType,
           user_id: user.id,
-          drill_id: drillId,
-          drill_data: drillData ? {
-            name: drillData.name,
-            duration: drillData.duration,
-            category: drillData.category,
-            drill_video_url: drillData.drill_video_url
-          } : null
+          created_at: new Date().toISOString()
         }
 
-        let { error } = await supabase
+        const { error } = await supabase
           .from('user_favorites')
-          .insert([favoriteData])
+          .insert([newFavorite])
 
+        const updatedFavorites = [...favoriteItems, newFavorite]
+        
         if (error) {
-          // Fall back to user_drills method
-          const { error: fallbackError } = await supabase
-            .from('user_drills')
-            .insert([{
-              title: drillId,
-              drill_category: 'favorite',
-              drill_duration: drillData?.duration ? `${drillData.duration} minutes` : null,
-              drill_notes: `Favorite: ${drillData?.name || 'Drill'}`,
-              content: `Favorited drill from practice planner: ${drillData?.name}`,
-              drill_video_url: drillData?.drill_video_url
-            }])
-          
-          if (fallbackError) throw fallbackError
+          console.log('Database insertion failed, using localStorage only:', error.message)
         }
-
-        setFavoriteIds([...favoriteIds, drillId])
-        toast.success('Added to favorites')
+        
+        setFavoriteItems(updatedFavorites)
+        await saveToLocalStorage(updatedFavorites)
+        toast.success(`Added to favorites`)
       }
     } catch (error: any) {
       console.error('Error toggling favorite:', error)
@@ -162,25 +153,41 @@ export function useFavorites() {
     }
   }
 
-  const isFavorite = (drillId: string) => {
-    return favoriteIds.includes(drillId)
+  const isFavorite = (itemId: string, itemType: 'drill' | 'strategy' = 'drill') => {
+    return favoriteItems.some(item => item.item_id === itemId && item.item_type === itemType)
   }
 
-  const getFavoriteCount = () => {
-    return favoriteIds.length
+  const getFavoriteCount = (itemType?: 'drill' | 'strategy') => {
+    if (itemType) {
+      return favoriteItems.filter(item => item.item_type === itemType).length
+    }
+    return favoriteItems.length
   }
 
-  const getFavorites = () => {
-    return favoriteIds
+  const getFavorites = (itemType?: 'drill' | 'strategy') => {
+    if (itemType) {
+      return favoriteItems.filter(item => item.item_type === itemType).map(item => item.item_id)
+    }
+    return favoriteItems.map(item => item.item_id)
+  }
+
+  const getFavoriteDrills = () => {
+    return favoriteItems.filter(item => item.item_type === 'drill').map(item => item.item_id)
+  }
+
+  const getFavoriteStrategies = () => {
+    return favoriteItems.filter(item => item.item_type === 'strategy').map(item => item.item_id)
   }
 
   return {
-    favoriteIds,
+    favoriteItems,
     loading,
     toggleFavorite,
     isFavorite,
     getFavoriteCount,
     getFavorites,
+    getFavoriteDrills,
+    getFavoriteStrategies,
     refreshFavorites: fetchFavorites
   }
 }

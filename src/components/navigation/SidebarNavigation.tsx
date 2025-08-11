@@ -2,10 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Users, GraduationCap, BookOpen, MessageCircle, LogOut, User, ChevronLeft, ChevronRight, Trophy, Shield, UserCog, Database, Edit3 } from 'lucide-react'
+import { Home, Users, GraduationCap, BookOpen, LogOut, User, ChevronLeft, ChevronRight, Shield, UserCog, Database, Edit3, Eye, Calendar } from 'lucide-react'
 import { useAuth } from '@/contexts/SupabaseAuthContext'
+import { useRoleViewer } from '@/contexts/RoleViewerContext'
+import { useViewAsAuth } from '@/hooks/useViewAsAuth'
 import { useSidebar } from '@/contexts/SidebarContext'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import SearchTrigger from '@/components/search/SearchTrigger'
 import ThemeToggle from '@/components/theme/ThemeToggle'
 import Image from 'next/image'
@@ -22,24 +25,19 @@ const navItems = [
     icon: Users,
   },
   {
-    name: 'Academy',
-    href: '/skills-academy',
-    icon: GraduationCap,
+    name: 'Practice Planner',
+    href: '/practiceplan',
+    icon: Calendar,
   },
   {
-    name: 'Achievements',
-    href: '/gamification-showcase',
-    icon: Trophy,
+    name: 'Academy',
+    href: '/skills-academy/workouts',
+    icon: GraduationCap,
   },
   {
     name: 'Resources',
     href: '/resources',
     icon: BookOpen,
-  },
-  {
-    name: 'Community',
-    href: '/community',
-    icon: MessageCircle,
   },
 ]
 
@@ -69,11 +67,17 @@ const adminItems = [
 
 export default function SidebarNavigation() {
   const pathname = usePathname()
-  const { user, logout } = useAuth()
+  const actualAuth = useAuth() // Get actual auth for admin check
+  const viewAsAuth = useViewAsAuth() // Get view-as auth for display
+  const { isViewingAs } = useRoleViewer()
   const { isCollapsed, toggleSidebar } = useSidebar()
 
-  // Check if user is admin (has administrator role in their roles array)
-  const isAdmin = user?.roles?.includes('administrator') || user?.roles?.includes('admin')
+  // Check if actual user is admin (not viewing role)
+  const isActualAdmin = actualAuth.user?.roles?.includes('administrator') || actualAuth.user?.roles?.includes('admin')
+  
+  // For navigation display, use the viewing role if in view mode
+  const displayUser = viewAsAuth.user
+  const isDisplayAdmin = displayUser?.roles?.includes('administrator') || displayUser?.roles?.includes('admin')
 
   return (
     <aside className={`hidden md:flex md:flex-shrink-0 transition-all duration-300 ease-in-out ${
@@ -174,8 +178,8 @@ export default function SidebarNavigation() {
                 )
               })}
               
-              {/* Admin Section - Only visible to administrators */}
-              {isAdmin && (
+              {/* Admin Section - Only visible to actual administrators, not when viewing as other role */}
+              {isActualAdmin && !isViewingAs && (
                 <>
                   {/* Admin Divider */}
                   <div className="pt-2 mt-2 border-t border-gray-700">
@@ -225,41 +229,52 @@ export default function SidebarNavigation() {
           </div>
           
           {/* User section */}
-          {user && (
+          {displayUser && (
             <div className="flex-shrink-0 flex bg-gray-700 p-4 overflow-hidden">
-              <div className="flex items-center w-full">
-                <div className="flex-shrink-0 relative group">
-                  <User className="h-8 w-8 text-gray-300" />
-                  {/* User tooltip for collapsed state */}
-                  {isCollapsed && (
-                    <div className="absolute left-full ml-2 bottom-0 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50">
-                      {user.name || user.username || user.email}
-                      <div className="absolute left-0 bottom-1/2 translate-y-1/2 -translate-x-1 w-0 h-0 border-r-4 border-r-gray-900 border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
-                    </div>
-                  )}
-                </div>
-                <div className={`ml-3 flex-1 min-w-0 transition-opacity duration-150 ${
-                  isCollapsed ? 'opacity-0' : 'opacity-100'
-                }`}>
-                  <p className="text-sm font-medium text-white truncate">
-                    {user.name || user.username || user.email}
-                  </p>
-                  <p className="text-xs text-gray-300 truncate">
-                    {user.email}
-                  </p>
-                </div>
-                <div className={`flex items-center space-x-1 ml-2 transition-opacity duration-150 ${
-                  isCollapsed ? 'opacity-0' : 'opacity-100'
-                }`}>
-                  <ThemeToggle size="sm" />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={logout}
-                    className="text-gray-300 hover:text-white"
-                  >
-                    <LogOut className="h-4 w-4" />
-                  </Button>
+              <div className="flex flex-col w-full">
+                {/* View As Indicator */}
+                {isViewingAs && !isCollapsed && (
+                  <Badge className="mb-2 bg-orange-600 text-white border-orange-700">
+                    <Eye className="w-3 h-3 mr-1" />
+                    Viewing as {displayUser.role.replace('_', ' ')}
+                  </Badge>
+                )}
+                
+                <div className="flex items-center w-full">
+                  <div className="flex-shrink-0 relative group">
+                    <User className="h-8 w-8 text-gray-300" />
+                    {/* User tooltip for collapsed state */}
+                    {isCollapsed && (
+                      <div className="absolute left-full ml-2 bottom-0 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50">
+                        {displayUser.display_name || displayUser.email}
+                        {isViewingAs && <span className="block text-xs text-orange-400 mt-1">Viewing as {displayUser.role}</span>}
+                        <div className="absolute left-0 bottom-1/2 translate-y-1/2 -translate-x-1 w-0 h-0 border-r-4 border-r-gray-900 border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
+                      </div>
+                    )}
+                  </div>
+                  <div className={`ml-3 flex-1 min-w-0 transition-opacity duration-150 ${
+                    isCollapsed ? 'opacity-0' : 'opacity-100'
+                  }`}>
+                    <p className="text-sm font-medium text-white truncate">
+                      {displayUser.display_name || displayUser.email}
+                    </p>
+                    <p className="text-xs text-gray-300 truncate">
+                      {displayUser.email}
+                    </p>
+                  </div>
+                  <div className={`flex items-center space-x-1 ml-2 transition-opacity duration-150 ${
+                    isCollapsed ? 'opacity-0' : 'opacity-100'
+                  }`}>
+                    <ThemeToggle size="sm" />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={actualAuth.logout}
+                      className="text-gray-300 hover:text-white"
+                    >
+                      <LogOut className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>

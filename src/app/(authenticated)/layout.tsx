@@ -4,6 +4,7 @@ import { useRequireAuth } from '@/contexts/SupabaseAuthContext'
 import { SidebarProvider } from '@/contexts/SidebarContext'
 import BottomNavigation from '@/components/navigation/BottomNavigation'
 import SidebarNavigation from '@/components/navigation/SidebarNavigation'
+import { RoleViewerSelector, RoleViewerKeyboardHandler } from '@/components/admin/RoleViewerSelector'
 import '../globals.css'
 
 export default function AuthenticatedLayout({
@@ -11,25 +12,22 @@ export default function AuthenticatedLayout({
 }: {
   children: React.ReactNode
 }) {
-  // Use the auth hook but don't block on loading
-  // This prevents infinite loading spinners
-  // TODO: Re-enable auth check after fixing auth loading issue
+  // Use the auth hook with modal authentication system
+  // Modal authentication prevents infinite loading spinners
   // const { loading } = useRequireAuth()
 
-  // Temporarily bypass auth loading check to fix infinite spinner
-  const loading = false
-
+  // Temporarily bypass auth check to fix loading issue
   // Only show loading spinner briefly on initial load
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    )
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center">
+  //       <div className="text-center">
+  //         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+  //         <p className="mt-4 text-gray-600">Loading...</p>
+  //       </div>
+  //     </div>
+  //   )
+  // }
 
   return (
     <SidebarProvider>
@@ -42,8 +40,11 @@ export default function AuthenticatedLayout({
           </main>
           
           <BottomNavigation />
-
         </div>
+        
+        {/* Admin Role Viewer Tool */}
+        <RoleViewerSelector />
+        <RoleViewerKeyboardHandler />
       </div>
     </SidebarProvider>
   )

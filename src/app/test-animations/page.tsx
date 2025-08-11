@@ -4,24 +4,14 @@ export default function TestAnimations() {
       <h1>Animation Test Page</h1>
       <p>If you can see this, the server is working!</p>
       <div style={{ marginTop: '40px' }}>
-        <a href="/demo-launcher" style={{ 
+        <a href="/dashboard" style={{ 
           padding: '15px 30px', 
           background: '#4CAF50', 
           color: 'white', 
           textDecoration: 'none',
-          borderRadius: '5px',
-          marginRight: '20px'
-        }}>
-          Go to Demo Launcher
-        </a>
-        <a href="/animations-demo" style={{ 
-          padding: '15px 30px', 
-          background: '#2196F3', 
-          color: 'white', 
-          textDecoration: 'none',
           borderRadius: '5px'
         }}>
-          Go to Animations Demo
+          Go to Dashboard
         </a>
       </div>
     </div>

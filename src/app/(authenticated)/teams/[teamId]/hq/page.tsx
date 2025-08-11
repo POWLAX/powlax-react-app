@@ -60,7 +60,7 @@ export default function TeamHQPage() {
       title: 'Practice Planner',
       description: 'Create and manage practice plans with our intelligent drill library',
       icon: Calendar,
-      href: `/teams/${teamId}/practice-plans`,
+      href: `/teams/${teamId}/practiceplan`,
       available: true,
     },
     {

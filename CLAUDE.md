@@ -85,23 +85,37 @@
 - `/skills-academy` - Marketing page with position tracks
 - `/(authenticated)/strategies` - Strategy browser working
 - `/(authenticated)/details/[type]/[id]` - Detail pages working
-- `/dashboard` - Dashboard (may show loading spinner - data issue)
+- `/(authenticated)/skills-academy/workout/[id]` - Has quiz-style interface (needs refinement)
 
 ### 🔧 NEEDS WORK (See MASTER_CONTRACTs)
+- `/dashboard` - Currently shows fake data with no links to real data
 - `/(authenticated)/skills-academy/workouts` - Enhancement needed per MASTER_CONTRACT
-- `/(authenticated)/skills-academy/workout/[id]` - Quiz-style interface needed
 - `/(authenticated)/teams/[teamId]/practice-plans` - Stability improvements needed
 
 ---
 
 ## 🤖 CLAUDE-TO-CLAUDE SUB AGENT WORKFLOW
 
+**🚨 CRITICAL: ONLY USE GENERAL SUB AGENTS - NO SPECIALIZED CONTROLLERS!**
+
+### **MANDATORY DEVELOPMENT APPROACH**
+**ALWAYS use `general-purpose` sub-agents with specific, focused contracts. NEVER use specialized master controllers or complex agent systems that cause implementation errors.**
+
 ### Active Contracts
 Use contracts in `contracts/active/` for all development work:
 - `database-truth-sync-002.yaml` - Database truth
-- `practice-planner-*.yaml` - Practice Planner contracts
-- `skills-academy-*.yaml` - Skills Academy contracts
+- `authentication-enhancement-system-001.yaml` - Auth system improvements
+- Component-specific MASTER_CONTRACTs for targeted work
 - Other active contracts for specific features
+
+### **Sub Agent Deployment Pattern**
+```bash
+# ✅ CORRECT - Use general-purpose agents with focused contracts
+Task(subagent_type="general-purpose", description="Implement modal login", prompt="...")
+
+# ❌ WRONG - Never use specialized controllers
+# powlax-master-controller, powlax-frontend-developer, etc.
+```
 
 ### Component Documentation
 **Skills Academy:**
@@ -200,18 +214,42 @@ const { data } = await supabase.from('powlax_strategies').select('*')
 
 ---
 
-## 🚀 QUICK START FOR CLAUDE SUB AGENTS
+## 🚀 QUICK START FOR CLAUDE GENERAL SUB AGENTS
 
+**🚨 MANDATORY: Only use `general-purpose` sub-agents with focused, specific tasks!**
+
+### **Standard Sub Agent Workflow**
 1. **Read this file completely**
 2. **Read `AI_FRAMEWORK_ERROR_PREVENTION.md`**
 3. **Read `contracts/active/database-truth-sync-002.yaml`**
 4. **Find your specific contract in `contracts/active/`**
-5. **Read component-specific MASTER_CONTRACT.md**
+5. **Read component-specific MASTER_CONTRACT.md if applicable**
 6. **Start dev server:** `npm run dev`
-7. **Make changes following the contract**
+7. **Make changes following the contract EXACTLY**
 8. **Validate:** `npm run lint && npm run typecheck && npm run build`
 9. **Leave server running for user review**
 
+### **Sub Agent Best Practices**
+- ✅ **Focused Tasks**: One specific feature or component per agent
+- ✅ **Contract-Driven**: Follow contracts exactly, no improvisation
+- ✅ **Database Truth**: Always use actual table names from `database-truth-sync-002.yaml`
+- ✅ **Server Maintenance**: Keep dev server running on port 3000
+- ❌ **No Specialized Controllers**: Never use powlax-master-controller or similar
+- ❌ **No Complex Workflows**: Avoid multi-agent orchestration systems
+
+### **Deployment Command Pattern**
+```javascript
+// ✅ CORRECT - Simple, focused sub-agent deployment
+Task({
+  subagent_type: "general-purpose",
+  description: "Implement authentication modal",
+  prompt: "Create AuthModal component following authentication-enhancement-system-001.yaml contract..."
+})
+
+// ❌ NEVER USE - Specialized controller agents
+// powlax-master-controller, powlax-frontend-developer, etc.
+```
+
 ---
 
-**Remember:** This clean, focused documentation environment is optimized for Claude-to-Claude Sub Agent workflows. All legacy information has been archived to prevent confusion.
+**Remember:** Simple, focused general-purpose sub-agents with specific contracts produce the best results. Complex agent systems cause implementation errors and confusion.

@@ -1,0 +1,387 @@
+# Authentication Enhancement System — Master Contract
+# Version 1.0 - Modal Login, Role Standardization & WordPress Migration
+
+contract:
+  id: authentication-enhancement-system-001
+  type: GENERAL_SUB_AGENT_CONTRACT
+  owner: general-purpose-sub-agents-only
+  created: 2025-01-11
+  status: ACTIVE
+  priority: HIGH
+  
+# 🚨 CRITICAL: ONLY USE GENERAL-PURPOSE SUB-AGENTS
+# NO specialized controllers or complex agent workflows!
+# Deploy simple, focused general-purpose agents with specific tasks
+
+# Current State Analysis
+currentState:
+  authenticationSystem:
+    provider: "Supabase Auth with Magic Links"
+    status: "Functional but needs UX improvements"
+    issues:
+      - "Full-page redirects disrupt user experience"
+      - "Auth enforcement disabled on protected routes"
+      - "Inconsistent role naming across system"
+      - "Dual role storage (role vs roles) causing confusion"
+    
+  roleSystem:
+    storage: "Both `role` (string) and `roles` (TEXT[] array)"
+    mapping: "Client-side mapping from database to application roles"
+    inconsistencies:
+      - "'admin' vs 'administrator' used interchangeably"
+      - "Mixed single/array role checking patterns"
+      - "Context-specific roles overlap with system roles"
+    
+  userMigration:
+    wordpressData: "Available for migration via existing sync"
+    currentUsers: "Can access via magic links immediately"
+    rolePreservation: "WordPress roles preserved in database"
+
+# Target State Requirements
+targetState:
+  userExperience:
+    loginFlow: "Modal overlay login without page disruption"
+    authentication: "Seamless magic link flow"
+    stayOnPage: "Users remain on intended page after login"
+    
+  roleSystem:
+    standardization: "Single consistent role naming system"
+    primaryRoles:
+      - "administrator (system-wide admin)"
+      - "club_director (club management)" 
+      - "team_coach (team coaching)"
+      - "player (player users)"
+      - "parent (parent users)"
+    
+    contextRoles:
+      teamMember: ["head_coach", "assistant_coach", "team_admin", "player", "parent"]
+      clubMember: ["owner", "admin", "director"]
+    
+    checkingPattern: "Consistent user.roles?.includes(role) throughout codebase"
+    
+  migrationComplete:
+    wordpressIndependence: "Full separation from WordPress authentication"
+    dataPreservation: "All user data and roles transferred"
+    invitationSystem: "Admin-managed user invitation via magic links"
+
+# Implementation Strategy
+executionStrategy:
+  type: sequential  # Sequential phases for authentication changes
+  
+  phases:
+    phase_1_modal_login:
+      priority: HIGH
+      description: "Implement modal login system"
+      deliverables:
+        - "AuthModal component with magic link flow"
+        - "Modified useRequireAuth to show modal vs redirect"
+        - "Session preservation across modal login"
+        - "Close modal and stay on original page"
+      
+      components:
+        - "src/components/auth/AuthModal.tsx (NEW)"
+        - "src/contexts/SupabaseAuthContext.tsx (MODIFY)"
+        - "src/app/(authenticated)/layout.tsx (MODIFY)"
+        - "src/hooks/useModalAuth.ts (NEW)"
+    
+    phase_2_role_standardization:
+      priority: HIGH  
+      description: "Standardize role system across codebase"
+      deliverables:
+        - "Single consistent role naming system"
+        - "Remove client-side role mapping"
+        - "Update all role checking logic"
+        - "TypeScript types for role validation"
+      
+      changes:
+        database:
+          - "Use 'administrator' as primary admin role"
+          - "Standardize roles array as source of truth" 
+          - "Keep role field for backward compatibility"
+        
+        codebase:
+          - "Replace 'admin' with 'administrator' in system contexts"
+          - "Standardize to user.roles?.includes(role) pattern"
+          - "Remove roleMap from SupabaseAuthContext"
+          - "Update admin permission checks"
+    
+    phase_3_wordpress_migration:
+      priority: MEDIUM
+      description: "Complete WordPress user data migration"
+      deliverables:
+        - "Batch migration script for existing users"
+        - "Role mapping from WordPress to standardized system"
+        - "Invitation system for new users" 
+        - "Remove deprecated WordPress sync code"
+        
+      migration:
+        existingUsers: "Magic link system preserves all access"
+        roleMapping:
+          - "WordPress 'administrator' → Supabase 'administrator'"
+          - "WordPress 'club_owner' → Supabase 'club_director'"
+          - "WordPress 'coach' → Supabase 'team_coach'"
+          - "WordPress 'subscriber' → Supabase 'player'"
+    
+    phase_4_auth_enforcement:
+      priority: HIGH
+      description: "Re-enable authentication enforcement"
+      deliverables:
+        - "Proper auth protection on authenticated routes"
+        - "Role-based access control implementation"
+        - "Performance optimization for auth checks"
+        - "Security audit of authentication flow"
+
+# Detailed Component Specifications
+componentSpecs:
+  AuthModal:
+    location: "src/components/auth/AuthModal.tsx"
+    type: "NEW_COMPONENT"
+    requirements:
+      - "Full-screen modal overlay"
+      - "Magic link email input form"
+      - "Loading states during email send"
+      - "Success confirmation with instructions"
+      - "Error handling and retry functionality"
+      - "ESC key and click-outside to close"
+      - "Mobile-responsive design"
+      - "POWLAX brand styling"
+    
+    props:
+      - "open: boolean"
+      - "onClose: () => void"
+      - "returnUrl?: string (optional redirect after login)"
+    
+    behavior:
+      - "Captures current page URL for return after login"
+      - "Sends magic link to entered email"
+      - "Shows success message with email check instructions"
+      - "Polls for successful authentication"
+      - "Closes modal and refreshes auth state on success"
+
+  useRequireAuth_Enhancement:
+    location: "src/contexts/SupabaseAuthContext.tsx"  
+    type: "MODIFY_EXISTING"
+    changes:
+      - "Add showAuthModal state management"
+      - "Replace redirect logic with modal trigger"
+      - "Store intended URL for post-login return"
+      - "Add modal login polling logic"
+    
+    newHook: "useModalAuth"
+    exports:
+      - "showAuthModal: boolean"
+      - "requestAuth: (returnUrl?: string) => void"
+      - "hideAuthModal: () => void"
+      - "isAuthModalOpen: boolean"
+
+  RoleStandardization:
+    locations:
+      - "src/contexts/SupabaseAuthContext.tsx"
+      - "src/components/navigation/SidebarNavigation.tsx"  
+      - "src/app/(authenticated)/admin/role-management/page.tsx"
+      - "src/hooks/useAuth.ts"
+    
+    changes:
+      - "Remove roleMap and mapRoles function"
+      - "Use database role names directly"
+      - "Standardize admin checks to 'administrator'"
+      - "Update TypeScript User interface"
+      - "Consistent role checking patterns"
+
+# Database Migration Requirements
+databaseChanges:
+  roleStandardization:
+    description: "Update existing role data to use standardized names"
+    queries:
+      - "UPDATE users SET roles = ARRAY_REPLACE(roles, 'admin', 'administrator') WHERE 'admin' = ANY(roles)"
+      - "UPDATE users SET role = 'administrator' WHERE role = 'admin'"
+      - "UPDATE users SET roles = ARRAY_REPLACE(roles, 'director', 'club_director') WHERE 'director' = ANY(roles)"
+      - "UPDATE users SET role = 'club_director' WHERE role = 'director'"
+      - "UPDATE users SET roles = ARRAY_REPLACE(roles, 'coach', 'team_coach') WHERE 'coach' = ANY(roles)"
+      - "UPDATE users SET role = 'team_coach' WHERE role = 'coach'"
+  
+  cleanup:
+    description: "Remove deprecated WordPress sync tables and columns"
+    actions:
+      - "Archive webhook_queue_stats, webhook_recent_failures"
+      - "Remove wp_sync_log entries"
+      - "Clean up unused registration_links"
+
+# Testing Requirements
+testingStrategy:
+  modalLogin:
+    manual:
+      - "Test modal appears on protected route access"
+      - "Verify magic link email sending"
+      - "Confirm successful login closes modal"
+      - "Test user remains on original page"
+      - "Verify mobile responsiveness"
+    
+    automated:
+      - "E2E test for complete modal login flow"
+      - "Unit tests for AuthModal component"
+      - "Integration test for useModalAuth hook"
+  
+  roleSystem:
+    manual:
+      - "Verify admin access with 'administrator' role"
+      - "Test role-based navigation visibility"
+      - "Confirm permission checks work correctly"
+    
+    automated:
+      - "Unit tests for role checking utilities"
+      - "Integration tests for role-based access control"
+
+# Success Criteria
+successCriteria:
+  userExperience:
+    - "Users can log in without leaving their intended page"
+    - "Modal login works smoothly on mobile and desktop"
+    - "Authentication flow is intuitive and fast"
+    - "No broken user journeys or infinite redirects"
+  
+  roleSystem:
+    - "Consistent role names across entire codebase"
+    - "No more client-side role mapping confusion"
+    - "Admin permissions work reliably"
+    - "TypeScript provides proper role validation"
+  
+  migration:
+    - "All existing users can access their accounts via magic links"
+    - "Role assignments preserved correctly"
+    - "WordPress dependency completely removed"
+    - "New user invitation system operational"
+
+# Risk Assessment
+risks:
+  high:
+    - "Authentication changes could break existing user access"
+    - "Role standardization might miss edge cases"
+    - "Database migration could corrupt user data"
+  
+  mitigation:
+    - "Thorough testing on staging environment"
+    - "Backup database before role migrations"
+    - "Gradual rollout with rollback capability"
+    - "Preserve original WordPress role data during transition"
+
+# Timeline Estimate
+timeline:
+  phase_1_modal_login: "3-5 days"
+  phase_2_role_standardization: "2-3 days"
+  phase_3_wordpress_migration: "1-2 days"
+  phase_4_auth_enforcement: "1-2 days"
+  testing_and_deployment: "2-3 days"
+  total_estimate: "9-15 days"
+
+# Deployment Strategy - GENERAL-PURPOSE SUB-AGENTS ONLY
+deployment:
+  approach: "Deploy focused general-purpose sub-agents for each phase"
+  
+  subAgentTasks:
+    modalLogin:
+      subagent: "general-purpose"
+      task: "Create AuthModal component and modify useRequireAuth hook"
+      contract: "Phase 1 specifications from this contract"
+      
+    roleStandardization:
+      subagent: "general-purpose" 
+      task: "Update role checking logic and remove role mapping"
+      contract: "Phase 2 specifications from this contract"
+      
+    wordpressMigration:
+      subagent: "general-purpose"
+      task: "Create migration scripts and invitation system"
+      contract: "Phase 3 specifications from this contract"
+      
+    authEnforcement:
+      subagent: "general-purpose"
+      task: "Re-enable authentication protection on routes"
+      contract: "Phase 4 specifications from this contract"
+  
+  staging:
+    - "Deploy modal login system for testing"
+    - "Migrate sample users to test role standardization"
+    - "Verify magic link flow works end-to-end"
+  
+  production:
+    - "Database role migration during low-traffic period"
+    - "Deploy authentication changes with feature flags"
+    - "Monitor authentication metrics and error rates"
+    - "Gradual rollout to user cohorts"
+
+# Documentation Updates Required
+documentation:
+  userGuide:
+    - "Update login instructions for magic link flow"
+    - "Document role hierarchy for admins"
+    - "Create user invitation process guide"
+  
+  developerGuide:  
+    - "Authentication system architecture"
+    - "Role checking best practices"
+    - "Modal authentication implementation guide"
+    - "Supabase integration patterns"
+
+# Maintenance Plan
+maintenance:
+  monitoring:
+    - "Authentication success/failure rates"
+    - "Modal login conversion rates" 
+    - "Role permission errors"
+    - "Magic link delivery rates"
+  
+  support:
+    - "User authentication troubleshooting guide"
+    - "Admin role management procedures"
+    - "Magic link resend functionality"
+
+---
+
+# Implementation Notes
+
+## WordPress Role Migration Strategy
+
+**How users get their roles after WordPress migration:**
+
+1. **Existing Users**: Roles are preserved in the database during migration
+   - WordPress roles mapped to standardized Supabase roles
+   - Magic links work immediately with preserved access levels
+   - No loss of permissions or access
+
+2. **New Users**: Admin invitation system
+   - Admins send invitation emails with assigned roles
+   - Magic link creates account with specified role
+   - No WordPress dependency for new users
+
+3. **Role Assignment Process**:
+   ```
+   WordPress Data → Migration Script → Supabase roles[] array
+   Admin Invitation → Magic Link → New Account with assigned role
+   ```
+
+## Answers to User Questions
+
+**Q: How do users get their roles?**
+A: Through two paths:
+- Existing users: Preserved from WordPress migration
+- New users: Admin assigns role during invitation
+
+**Q: Can we still map users from existing WordPress data?**  
+A: Yes, the migration script preserves all WordPress user data and role assignments in Supabase
+
+**Q: Will role standardization require many changes?**
+A: Moderate changes needed:
+- Remove role mapping logic (simplifies code)
+- Update admin checks from 'admin' to 'administrator'
+- Standardize role checking patterns
+- Most changes are search-and-replace operations
+
+**Q: What are the best backend role names?**
+A: Based on codebase analysis:
+- 'administrator' (most used in permissions)
+- 'club_director' (clear hierarchy)
+- 'team_coach' (specific to context)
+- 'player' and 'parent' (already consistent)
+
+This contract provides a complete roadmap for implementing modal login, standardizing roles, and completing WordPress migration while preserving all user access and data.

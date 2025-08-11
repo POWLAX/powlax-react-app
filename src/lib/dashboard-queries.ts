@@ -88,9 +88,9 @@ export async function fetchDashboardData(
  * Admin Dashboard - Full system access
  */
 async function fetchAdminDashboard(userId: string): Promise<DashboardData> {
-  const [organizations, users, subscriptions] = await Promise.all([
-    // Get all organizations
-    supabase.from('club_organizations').select('*').order('created_at', { ascending: false }),
+  const [clubs, users, subscriptions, children] = await Promise.all([
+    // Get all clubs (not organizations)
+    supabase.from('clubs').select('*').order('created_at', { ascending: false }),
     
     // Get user statistics
     supabase.from('users').select('roles', { count: 'exact' }),
@@ -98,15 +98,24 @@ async function fetchAdminDashboard(userId: string): Promise<DashboardData> {
     // Get subscription metrics
     supabase.from('user_subscriptions')
       .select('status', { count: 'exact' })
-      .eq('status', 'active')
+      .eq('status', 'active'),
+    
+    // Get admin's children if they have parent role
+    supabase.from('parent_child_relationships')
+      .select(`
+        *,
+        child:users!child_id(*)
+      `)
+      .eq('parent_id', userId)
   ]);
 
   return {
     user: { id: userId, role: 'admin' },
     metrics: {
-      totalOrganizations: organizations.data?.length || 0,
+      totalOrganizations: clubs.data?.length || 0,
       totalUsers: users.count || 0,
-      activeSubscriptions: subscriptions.count || 0
+      activeSubscriptions: subscriptions.count || 0,
+      children: children.data || []
     },
     recentActivity: [],
     quickActions: [
@@ -129,9 +138,9 @@ async function fetchDirectorDashboard(
   }
 
   const [orgData, teams, coaches, players] = await Promise.all([
-    // Get organization details
+    // Get club details (not organization)
     supabase
-      .from('club_organizations')
+      .from('clubs')
       .select('*')
       .eq('id', context.organizationId)
       .single(),
@@ -199,10 +208,11 @@ async function fetchCoachDashboard(
       `)
       .in('id', context.teamIds),
     
-    // Get team roster
+    // Get team roster with more details
     supabase
       .from('team_members')
       .select(`
+        *,
         user:users(*)
       `)
       .eq('role', 'player')

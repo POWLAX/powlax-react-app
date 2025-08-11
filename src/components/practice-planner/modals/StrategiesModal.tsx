@@ -139,7 +139,7 @@ export default function StrategiesModal({ isOpen, onClose, onRefreshStrategies, 
                                 {strategy.source === 'powlax' && (
                                   <Badge variant="default" className="ml-2 text-xs">
                                     <BookOpen className="h-3 w-3 mr-1" />
-                                    POWLAX
+                                    Study
                                   </Badge>
                                 )}
                               </h4>
@@ -210,7 +210,7 @@ export default function StrategiesModal({ isOpen, onClose, onRefreshStrategies, 
                                       variant={strategy.source === 'powlax' ? 'default' : 'secondary'} 
                                       className="text-xs ml-2 flex-shrink-0"
                                     >
-                                      {strategy.source === 'powlax' ? 'POWLAX' : 'Custom'}
+                                      {strategy.source === 'powlax' ? 'Study' : 'Custom'}
                                     </Badge>
                                   </div>
                                 </div>
@@ -257,68 +257,6 @@ export default function StrategiesModal({ isOpen, onClose, onRefreshStrategies, 
                 </Card>
               )}
 
-              {/* Strategies Section */}
-              {drill.strategies && drill.strategies.length > 0 && (
-                <Card className="bg-white">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <Target className="h-4 w-4" />
-                      Strategies
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2">
-                      {drill.strategies.map((strategy, index) => (
-                        <Badge key={index} variant="default" className="text-xs">
-                          #{strategy}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Concepts Section */}
-              {drill.concepts && drill.concepts.length > 0 && (
-                <Card className="bg-white">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <Lightbulb className="h-4 w-4" />
-                      Concepts
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2">
-                      {drill.concepts.map((concept, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          #{concept}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Skills Section */}
-              {drill.skills && drill.skills.length > 0 && (
-                <Card className="bg-white">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <Zap className="h-4 w-4" />
-                      Skills
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2">
-                      {drill.skills.map((skill, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
-                          #{skill}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
 
               {/* Additional Info */}
               <Card className="bg-white">

@@ -15,15 +15,14 @@ export default function DirectLoginPage() {
       setStatus('Logging in as patrick@powlax.com...')
       
       // Create a mock user session that matches the database user
-      // This user has roles ["director", "admin", "coach"] in the database
-      // which will be mapped to ["club_director", "administrator", "team_coach"]
+      // Patrick now has all 5 roles in the database
       const mockUser = {
         id: '523f2768-6404-439c-a429-f9eb6736aa17', // Actual ID from database
         email: 'patrick@powlax.com',
         full_name: 'Patrick Chapla',
-        display_name: 'powlax_patrick',
-        role: 'director', // Will be mapped to 'club_director'
-        roles: ['director', 'admin', 'coach'], // Will be mapped correctly
+        display_name: 'Patrick Chapla (Admin)',
+        role: 'administrator', // Primary role
+        roles: ['administrator', 'parent', 'club_director', 'team_coach', 'player'], // All 5 roles
         wordpress_id: null,
         avatar_url: null
       }

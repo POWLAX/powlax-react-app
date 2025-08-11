@@ -192,10 +192,10 @@ export default function AcademyPage() {
                 <p className="text-blue-700 text-sm mb-4">
                   Pick up where you left off with your personalized workout
                 </p>
-                <Link href="/skills-academy/interactive-workout">
+                <Link href="/skills-academy/workouts">
                   <Button className="bg-blue-600 hover:bg-blue-700">
                     <Play className="h-4 w-4 mr-2" />
-                    Start Workout
+                    Browse Workouts
                   </Button>
                 </Link>
               </div>
@@ -214,10 +214,10 @@ export default function AcademyPage() {
                 <p className="text-green-700 text-sm mb-4">
                   View your skill development and achievements
                 </p>
-                <Link href="/skills-academy/progress">
+                <Link href="/skills-academy/workouts">
                   <Button variant="outline" className="border-green-600 text-green-700 hover:bg-green-100">
                     <TrendingUp className="h-4 w-4 mr-2" />
-                    View Progress
+                    View Workouts
                   </Button>
                 </Link>
               </div>

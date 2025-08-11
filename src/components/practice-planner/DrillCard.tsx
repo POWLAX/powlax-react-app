@@ -6,7 +6,10 @@ import {
   Trash2,
   ChevronUp,
   ChevronDown,
-  X
+  X,
+  Monitor,
+  Circle,
+  Image
 } from 'lucide-react'
 
 interface DrillCardProps {
@@ -16,6 +19,7 @@ interface DrillCardProps {
     duration_minutes: number
     notes?: string
     videoUrl?: string
+    video_url?: string
     labUrl?: string
     lab_urls?: string[] | string
     lacrosse_lab_urls?: string[]
@@ -65,6 +69,14 @@ const DrillCard = memo(function DrillCard({
   const [editingDuration, setEditingDuration] = useState(false)
   const [tempDuration, setTempDuration] = useState((drill.duration_minutes || 0).toString())
 
+  // Helper function to check if drill has lab URLs
+  const hasLabUrls = (drill: any) => {
+    return drill.drill_lab_url_1 || drill.drill_lab_url_2 || drill.drill_lab_url_3 || 
+           drill.drill_lab_url_4 || drill.drill_lab_url_5 || drill.labUrl || 
+           (drill.lab_urls && Array.isArray(drill.lab_urls) && drill.lab_urls.length > 0) ||
+           (drill.lacrosse_lab_urls && Array.isArray(drill.lacrosse_lab_urls) && drill.lacrosse_lab_urls.length > 0)
+  }
+
   const handleDurationChange = (newDuration: number) => {
     if (newDuration > 0 && newDuration <= 999) {
       onUpdate({ ...drill, duration_minutes: newDuration })
@@ -108,6 +120,16 @@ const DrillCard = memo(function DrillCard({
           {/* Drill name and Study button */}
           <div className="flex items-center gap-2 mb-3 pr-8">
             <h4 className="font-medium text-gray-900">{drill.title}</h4>
+            
+            {/* Content indicators */}
+            <div className="flex items-center gap-1">
+              {(drill.videoUrl || drill.video_url) && <Monitor className="h-3 w-3 text-gray-400" />}
+              {hasLabUrls(drill) && <Circle className="h-3 w-3 text-gray-400" />}
+              {drill.imageUrls && Array.isArray(drill.imageUrls) && drill.imageUrls.length > 0 && (
+                <Image className="h-3 w-3 text-gray-400" />
+              )}
+            </div>
+            
             <span className="text-gray-400">•</span>
             <button 
               onClick={handleStudyClick}
@@ -241,6 +263,16 @@ const DrillCard = memo(function DrillCard({
             <h3 className="text-sm font-medium text-gray-900">
               {drill.title}
             </h3>
+            
+            {/* Content indicators */}
+            <div className="flex items-center gap-1">
+              {(drill.videoUrl || drill.video_url) && <Monitor className="h-3 w-3 text-gray-400" />}
+              {hasLabUrls(drill) && <Circle className="h-3 w-3 text-gray-400" />}
+              {drill.imageUrls && Array.isArray(drill.imageUrls) && drill.imageUrls.length > 0 && (
+                <Image className="h-3 w-3 text-gray-400" />
+              )}
+            </div>
+            
             <span className="text-gray-400 text-xs">•</span>
             <button 
               onClick={handleStudyClick}

@@ -1,17 +1,30 @@
 'use client'
 
 import { useState, useMemo, Fragment } from 'react'
-import { Filter, Plus, Video, Image, Beaker, ChevronDown, ChevronRight, Search, Play, BookOpen } from 'lucide-react'
-import { useStrategies, getStrategiesByActualCategory, searchStrategies } from '@/hooks/useStrategies'
+import { Filter, Plus, Video, Image, Beaker, ChevronDown, ChevronRight, Search, Play, BookOpen, Pencil, Star } from 'lucide-react'
+import { useStrategies, getStrategiesByActualCategory, getStrategiesBySource, searchStrategies } from '@/hooks/useStrategies'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
+import { useFavorites } from '@/hooks/useFavorites'
 import VideoModal from './modals/VideoModal'
 import LacrosseLabModal from './modals/LacrosseLabModal'
 import AddCustomStrategiesModal from './modals/AddCustomStrategiesModal'
+import EditCustomStrategyModal from './modals/EditCustomStrategyModal'
 import StudyStrategyModal from './modals/StudyStrategyModal'
 import FilterStrategiesModal from './modals/FilterStrategiesModal'
 import SaveToPlaybookModal from '@/components/team-playbook/SaveToPlaybookModal'
 import AdminToolbar from './AdminToolbar'
 import AdminEditModal from './modals/AdminEditModal'
-// UserData type no longer needed with Supabase Auth
+// Using proper Supabase User type
+interface User {
+  id: string
+  email: string
+  full_name?: string
+  wordpress_id?: number
+  role: string
+  roles: string[]
+  avatar_url?: string
+  display_name: string
+}
 
 interface Strategy {
   id: string
@@ -29,19 +42,21 @@ interface StrategiesTabProps {
   onSelectStrategy: (strategy: Strategy) => void
   selectedStrategies: string[]
   isMobile?: boolean
-  user?: UserData | null
+  user?: User | null
 }
 
 export default function StrategiesTab({ 
   onSelectStrategy, 
   selectedStrategies,
   isMobile = false,
-  user = null
+  user: propUser = null
 }: StrategiesTabProps) {
   const { strategies, loading, error, refreshStrategies } = useStrategies()
+  const { user } = useAuth()
+  const { toggleFavorite, isFavorite, getFavoriteStrategies } = useFavorites()
   const [searchTerm, setSearchTerm] = useState('')
-  const [expandedCategories, setExpandedCategories] = useState<string[]>(['Face Off', 'Face Offs'])
-  const [showAddModal, setShowAddModal] = useState(false)
+  const [expandedCategories, setExpandedCategories] = useState<string[]>(['Favorite Strategies', 'Face Off', 'Face Offs'])
+  const [showEditModal, setShowEditModal] = useState(false)
   const [showFilterModal, setShowFilterModal] = useState(false)
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   
@@ -53,6 +68,8 @@ export default function StrategiesTab({
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(null)
   const [showAdminEditModal, setShowAdminEditModal] = useState(false)
   const [editingStrategy, setEditingStrategy] = useState<Strategy | null>(null)
+  const [editingUserStrategy, setEditingUserStrategy] = useState<Strategy | null>(null)
+  const [showAddModal, setShowAddModal] = useState(false) // For Add Custom Strategy
 
   const toggleCategory = (category: string) => {
     if (expandedCategories.includes(category)) {
@@ -73,9 +90,19 @@ export default function StrategiesTab({
     return Array.from(categories).sort()
   }, [strategies])
 
+  // Separate strategies by source
+  const powlaxStrategies = useMemo(() => getStrategiesBySource(strategies, 'powlax'), [strategies])
+  const userStrategies = useMemo(() => getStrategiesBySource(strategies, 'user').filter(s => s.user_id === user?.id), [strategies, user?.id])
+  
+  // Get favorite strategies from both powlax and user strategies
+  const favoriteStrategies = useMemo(() => {
+    const allStrategies = [...powlaxStrategies, ...userStrategies]
+    return allStrategies.filter(strategy => isFavorite(strategy.id.toString(), 'strategy'))
+  }, [powlaxStrategies, userStrategies, isFavorite])
+
   // Filter and organize strategies by actual category
   const filteredStrategies = useMemo(() => {
-    let filtered = strategies
+    let filtered = powlaxStrategies // Only POWLAX strategies in main display
     
     // Apply search filter
     if (searchTerm) {
@@ -90,7 +117,19 @@ export default function StrategiesTab({
     }
     
     return getStrategiesByActualCategory(filtered)
-  }, [strategies, searchTerm, selectedCategories])
+  }, [powlaxStrategies, searchTerm, selectedCategories])
+  
+  // Filter user strategies separately
+  const filteredUserStrategies = useMemo(() => {
+    let filtered = userStrategies
+    
+    // Apply search filter to user strategies too
+    if (searchTerm) {
+      filtered = searchStrategies(filtered, searchTerm)
+    }
+    
+    return filtered
+  }, [userStrategies, searchTerm])
 
   const handleStrategySelect = (strategy: Strategy) => {
     onSelectStrategy(strategy)
@@ -111,6 +150,16 @@ export default function StrategiesTab({
   const handleAdminEdit = (strategy: Strategy) => {
     setEditingStrategy(strategy)
     setShowAdminEditModal(true)
+  }
+  
+  const handleEditUserStrategy = (strategy: Strategy) => {
+    setEditingUserStrategy(strategy)
+    setShowEditModal(true)
+  }
+
+  const handleToggleFavorite = async (strategy: Strategy, e: React.MouseEvent) => {
+    e.stopPropagation()
+    await toggleFavorite(strategy.id.toString(), 'strategy', strategy)
   }
 
   const hasVideo = (strategy: Strategy) => {
@@ -193,9 +242,11 @@ export default function StrategiesTab({
               </span>
             )}
           </button>
+          
+          {/* Add Custom Strategy Button - RESTORED */}
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-md"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md"
           >
             <Plus className="h-4 w-4" />
             Add Custom Strategy
@@ -217,13 +268,130 @@ export default function StrategiesTab({
 
       {/* Strategies List */}
       <div className="flex-1 overflow-y-auto relative">
-        {filteredStrategies.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            No strategies found
+        <div className="px-4 pt-4 pb-4 space-y-2">
+          {/* Favorites Section */}
+          <div className="border rounded-lg mb-4">
+            <button
+              onClick={() => toggleCategory('Favorite Strategies')}
+              className={`w-full px-4 py-3 flex items-center justify-between bg-yellow-50 hover:bg-yellow-100 rounded-t-lg transition-all ${
+                expandedCategories.includes('Favorite Strategies') ? 'sticky top-0 -mx-4 px-8 z-20 shadow-md border-b bg-white' : ''
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                {expandedCategories.includes('Favorite Strategies') ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+                <Star className="h-4 w-4 text-yellow-600" />
+                <span className="font-medium text-yellow-800">Favorite Strategies</span>
+                <span className="text-sm text-yellow-600">({favoriteStrategies.length})</span>
+              </div>
+            </button>
+            
+            {expandedCategories.includes('Favorite Strategies') && (
+              <div className="p-2 space-y-2">
+                {favoriteStrategies.length === 0 ? (
+                  <p className="px-3 py-2 text-sm text-gray-500">No favorite strategies yet</p>
+                ) : (
+                  favoriteStrategies.map((strategy) => (
+                    <div
+                      key={strategy.id}
+                      className="p-3 bg-white border rounded-md hover:bg-gray-50 group relative border-yellow-200"
+                    >
+                      <div className="flex flex-col gap-2">
+                        {/* Title row with Plus/checkbox on left */}
+                        <div className="flex items-center gap-2">
+                          {isMobile ? (
+                            <input
+                              type="checkbox"
+                              checked={selectedStrategies.includes(strategy.id.toString())}
+                              onChange={(e) => {
+                                e.stopPropagation()
+                                handleStrategySelect(strategy)
+                              }}
+                              className="flex-shrink-0"
+                            />
+                          ) : (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleStrategySelect(strategy)
+                              }}
+                              className="p-1 border border-gray-300 hover:bg-gray-50 rounded flex-shrink-0"
+                              title="Add to Practice"
+                            >
+                              <Plus className="h-4 w-4 text-gray-600" />
+                            </button>
+                          )}
+                          <h4 className="font-medium text-sm flex-1">{strategy.strategy_name}</h4>
+                          
+                          {/* Favorite button (filled since it's in favorites) */}
+                          <button
+                            onClick={(e) => handleToggleFavorite(strategy, e)}
+                            className="p-1 text-yellow-400 hover:text-yellow-600 transition-colors flex-shrink-0"
+                            title="Remove from favorites"
+                          >
+                            <Star className="h-4 w-4 fill-yellow-400" />
+                          </button>
+                        </div>
+                        
+                        {/* Source Badge and Action buttons */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            {strategy.source === 'user' && (
+                              <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+                                Custom
+                              </span>
+                            )}
+                          </div>
+                          
+                          {/* Action buttons */}
+                          <div className="flex items-center gap-1">
+                            {/* Save to Playbook button */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setSelectedStrategy(strategy)
+                                setShowSaveToPlaybookModal(true)
+                              }}
+                              className="inline-flex items-center gap-1 px-2 py-1 bg-powlax-blue hover:bg-powlax-blue/90 text-white text-xs rounded transition-colors"
+                              title="Save to Team Playbook"
+                            >
+                              <BookOpen className="h-3 w-3" />
+                              Save
+                            </button>
+                            
+                            {/* Study button */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setSelectedStrategy(strategy)
+                                setShowStudyStrategyModal(true)
+                              }}
+                              className="inline-flex items-center gap-1 px-2 py-1 bg-gray-900 text-white text-xs rounded border border-gray-700 hover:bg-gray-800 transition-colors"
+                            >
+                              <Play className="h-3 w-3" fill="white" />
+                              Study
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="px-4 pt-4 pb-4 space-y-2">
-            {filteredStrategies.map(({ category, strategies }) => {
+
+          
+          {/* POWLAX Strategies */}
+          {filteredStrategies.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              No strategies found
+            </div>
+          ) : (
+            filteredStrategies.map(({ category, strategies }) => {
               const isExpanded = expandedCategories.includes(category)
               
               return (
@@ -278,6 +446,16 @@ export default function StrategiesTab({
                               </button>
                             )}
                             <h4 className="font-medium text-sm flex-1">{strategy.strategy_name}</h4>
+                            {/* Favorite button */}
+                            <button
+                              onClick={(e) => handleToggleFavorite(strategy, e)}
+                              className="p-1 text-gray-400 hover:text-yellow-500 transition-colors flex-shrink-0"
+                              title={isFavorite(strategy.id.toString(), 'strategy') ? 'Remove from favorites' : 'Add to favorites'}
+                            >
+                              <Star 
+                                className={`h-4 w-4 ${isFavorite(strategy.id.toString(), 'strategy') ? 'fill-yellow-400 text-yellow-400' : ''}`} 
+                              />
+                            </button>
                             {/* Admin Toolbar */}
                             <AdminToolbar
                               user={user}
@@ -335,16 +513,18 @@ export default function StrategiesTab({
                 )}
               </div>
               )
-            })}
-          </div>
-        )}
+            })
+          )}
+        </div>
       </div>
 
       {/* Modals */}
-      <AddCustomStrategiesModal
-        isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        onStrategyCreated={refreshStrategies}
+      
+      <EditCustomStrategyModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        strategy={editingUserStrategy}
+        onStrategyUpdated={refreshStrategies}
       />
       
       <FilterStrategiesModal
@@ -406,6 +586,36 @@ export default function StrategiesTab({
           setEditingStrategy(null)
         }}
       />
+
+      {/* Add Custom Strategy Modal - RESTORED */}
+      {showAddModal && (
+        <AddCustomStrategiesModal
+          isOpen={showAddModal}
+          onClose={() => setShowAddModal(false)}
+          onAdd={(strategy) => {
+            // Refresh strategies after adding
+            fetchUserStrategies()
+            setShowAddModal(false)
+          }}
+        />
+      )}
+
+      {/* Edit Custom Strategy Modal */}
+      {showEditModal && editingUserStrategy && (
+        <EditCustomStrategyModal
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false)
+            setEditingUserStrategy(null)
+          }}
+          strategy={editingUserStrategy}
+          onSuccess={() => {
+            fetchUserStrategies()
+            setShowEditModal(false)
+            setEditingUserStrategy(null)
+          }}
+        />
+      )}
     </div>
   )
 }

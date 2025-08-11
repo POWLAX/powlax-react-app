@@ -1,0 +1,435 @@
+# Claude-to-Claude Sub Agent Contract: Resources Page Enhancement
+# Contract ID: resources-page-enhancement-001
+# Created: January 2025
+# Status: ACTIVE
+# Priority: HIGH (Core MVP Feature)
+
+metadata:
+  contract_id: "resources-page-enhancement-001"
+  title: "Enhance Resources Page with Role-Based Content and Modals"
+  created_date: "2025-01-11"
+  created_by: "User Request"
+  priority: "HIGH"
+  status: "ACTIVE"
+  estimated_effort: "4 hours"
+  target_completion: "Immediate"
+  sub_agent_type: "general-purpose"
+
+# =============================================================================
+# CONTRACT SCOPE
+# =============================================================================
+
+objective: |
+  Transform the existing Resources page into a comprehensive, role-based content
+  hub that provides tailored educational and administrative materials for each
+  user type (coach, player, parent, director, admin). Implement modal-based
+  resource viewing, search/filter capabilities, and favorites system.
+
+deliverables:
+  - Enhanced Resources page with role-based filtering
+  - ResourceDetailModal component for viewing resources
+  - ResourceFilter component for search and filtering
+  - ResourceCard component update with role indicators
+  - Database schema for resources (documentation only)
+  - Mock data for all user roles
+  - Responsive design optimized for field use
+
+# =============================================================================
+# TECHNICAL REQUIREMENTS
+# =============================================================================
+
+existing_page:
+  location: "src/app/(authenticated)/resources/page.tsx"
+  current_features:
+    - Basic category display (4 categories)
+    - Recent resources section
+    - Mock data implementation
+    - Basic search/filter buttons (non-functional)
+    - Authentication integration
+
+user_role_content:
+  coach:
+    categories:
+      - name: "Practice Planning"
+        icon: "ClipboardList"
+        resources: ["Templates", "Drill Library", "Strategy Guides"]
+      - name: "Training Videos"
+        icon: "Video"
+        resources: ["Technique Demos", "Drill Explanations", "Coaching Tips"]
+      - name: "Certification"
+        icon: "Award"
+        resources: ["Course Materials", "Best Practices", "Safety Protocols"]
+      - name: "Team Management"
+        icon: "Users"
+        resources: ["Roster Templates", "Communication Guides", "Parent Resources"]
+    
+  player:
+    categories:
+      - name: "Skill Development"
+        icon: "Target"
+        resources: ["Wall Ball Videos", "Position Training", "Technique Guides"]
+      - name: "Workouts"
+        icon: "Activity"
+        resources: ["Training Plans", "Conditioning Programs", "Recovery Guides"]
+      - name: "Game Film"
+        icon: "Film"
+        resources: ["Pro Highlights", "Game Analysis", "Strategy Breakdowns"]
+      - name: "Rules & Regulations"
+        icon: "BookOpen"
+        resources: ["Rule Books", "Referee Signals", "Game Situations"]
+    
+  parent:
+    categories:
+      - name: "Equipment Guide"
+        icon: "ShoppingBag"
+        resources: ["Gear Lists", "Sizing Charts", "Maintenance Tips"]
+      - name: "Nutrition"
+        icon: "Apple"
+        resources: ["Meal Plans", "Hydration Guides", "Game Day Nutrition"]
+      - name: "Safety"
+        icon: "Shield"
+        resources: ["Concussion Info", "Injury Prevention", "First Aid"]
+      - name: "Support Resources"
+        icon: "Heart"
+        resources: ["How to Help", "Volunteer Guide", "Team Communication"]
+    
+  club_director:
+    categories:
+      - name: "Administration"
+        icon: "FileText"
+        resources: ["Registration Forms", "Waivers", "Insurance Docs"]
+      - name: "Financial"
+        icon: "DollarSign"
+        resources: ["Budget Templates", "Fundraising Ideas", "Sponsorship Guides"]
+      - name: "Coach Development"
+        icon: "GraduationCap"
+        resources: ["Training Programs", "Certification Tracking", "Evaluation Forms"]
+      - name: "Marketing"
+        icon: "Megaphone"
+        resources: ["Social Templates", "Recruitment Tools", "Brand Guidelines"]
+    
+  administrator:
+    categories:
+      - name: "System Docs"
+        icon: "FileCode"
+        resources: ["API Documentation", "Database Schema", "Integration Guides"]
+      - name: "Training Materials"
+        icon: "BookOpen"
+        resources: ["User Guides", "Video Tutorials", "Quick Start Guides"]
+      - name: "Support Tools"
+        icon: "Wrench"
+        resources: ["FAQ Templates", "Troubleshooting", "Help Articles"]
+      - name: "Analytics"
+        icon: "BarChart"
+        resources: ["Report Templates", "Dashboard Guides", "Metrics Definitions"]
+
+# =============================================================================
+# COMPONENT SPECIFICATIONS
+# =============================================================================
+
+new_components:
+  ResourceDetailModal:
+    file: "src/components/resources/ResourceDetailModal.tsx"
+    features:
+      - View resource details (title, description, metadata)
+      - PDF viewer for documents
+      - Video player for videos (use existing VideoModal pattern)
+      - Download button for downloadable resources
+      - Rating display and user rating input
+      - Related resources suggestions
+      - Favorite/bookmark toggle
+      - Share functionality (copy link)
+    props:
+      - isOpen: boolean
+      - onClose: () => void
+      - resource: Resource type
+      - onFavorite: (resourceId: string) => void
+      - onRate: (resourceId: string, rating: number) => void
+    
+  ResourceFilter:
+    file: "src/components/resources/ResourceFilter.tsx"
+    features:
+      - Search input with real-time filtering
+      - Category filter dropdown
+      - Resource type filter (Video, PDF, Template, Link)
+      - Age group filter (8-10, 11-14, 15+)
+      - Sort options (Newest, Most Popular, Highest Rated)
+      - Clear filters button
+      - Mobile-optimized layout
+    props:
+      - onSearch: (query: string) => void
+      - onFilterChange: (filters: FilterState) => void
+      - activeFilters: FilterState
+      - userRole: string
+    
+  ResourceCard:
+    file: "src/components/resources/ResourceCard.tsx"
+    update_existing: true
+    features:
+      - Display resource thumbnail
+      - Show resource type icon
+      - Title and description
+      - Metadata (size, duration, date)
+      - Rating stars
+      - Download/view count
+      - Favorite button
+      - Click to open detail modal
+
+updated_page_structure:
+  ResourcesPage:
+    sections:
+      - Header with role-based title and description
+      - ResourceFilter component
+      - Favorites section (if user has favorites)
+      - Role-specific categories grid
+      - Recently viewed resources
+      - Recommended resources based on role
+    features:
+      - Role-based content filtering
+      - Search and filter functionality
+      - Favorites management
+      - View tracking
+      - Modal-based resource viewing
+      - Mobile-responsive design
+
+# =============================================================================
+# DATABASE SCHEMA (DOCUMENTATION ONLY)
+# =============================================================================
+
+suggested_tables:
+  powlax_resources:
+    description: "Main resource library table"
+    columns:
+      - id: "UUID PRIMARY KEY"
+      - title: "VARCHAR(255) NOT NULL"
+      - description: "TEXT"
+      - category: "VARCHAR(50)"
+      - resource_type: "VARCHAR(50) -- video, pdf, template, link"
+      - url: "TEXT"
+      - thumbnail_url: "TEXT"
+      - file_size: "INTEGER"
+      - duration_seconds: "INTEGER"
+      - age_groups: "TEXT[] -- ['8-10', '11-14', '15+']"
+      - roles: "TEXT[] -- ['coach', 'player', 'parent', 'director', 'admin']"
+      - rating: "DECIMAL(2,1)"
+      - views_count: "INTEGER DEFAULT 0"
+      - downloads_count: "INTEGER DEFAULT 0"
+      - tags: "TEXT[]"
+      - created_at: "TIMESTAMP"
+      - updated_at: "TIMESTAMP"
+    
+  user_resource_interactions:
+    description: "Track user interactions with resources"
+    columns:
+      - id: "UUID PRIMARY KEY"
+      - user_id: "UUID REFERENCES users(id)"
+      - resource_id: "UUID REFERENCES powlax_resources(id)"
+      - is_favorite: "BOOLEAN DEFAULT FALSE"
+      - rating: "INTEGER CHECK (rating >= 1 AND rating <= 5)"
+      - last_viewed: "TIMESTAMP"
+      - view_count: "INTEGER DEFAULT 0"
+      - download_count: "INTEGER DEFAULT 0"
+      - created_at: "TIMESTAMP"
+      - updated_at: "TIMESTAMP"
+    indexes:
+      - "CREATE INDEX idx_user_favorites ON user_resource_interactions(user_id, is_favorite)"
+      - "CREATE INDEX idx_resource_ratings ON user_resource_interactions(resource_id, rating)"
+
+# =============================================================================
+# MOCK DATA REQUIREMENTS
+# =============================================================================
+
+mock_data:
+  resources_per_category: 5-8
+  total_resources: 100+
+  distribution:
+    - 25% Videos
+    - 35% PDFs
+    - 25% Templates
+    - 15% External Links
+  
+  sample_resources:
+    coach:
+      - title: "U12 Practice Plan Template"
+        type: "template"
+        category: "Practice Planning"
+        rating: 4.8
+        downloads: 234
+      - title: "Ground Ball Technique Video"
+        type: "video"
+        category: "Training Videos"
+        duration: "5:23"
+        views: 1456
+    
+    player:
+      - title: "Wall Ball Workout Series"
+        type: "video"
+        category: "Skill Development"
+        rating: 4.9
+        duration: "12:45"
+      - title: "Position-Specific Training Guide"
+        type: "pdf"
+        category: "Workouts"
+        size: "2.4 MB"
+    
+    parent:
+      - title: "Youth Lacrosse Equipment Guide 2025"
+        type: "pdf"
+        category: "Equipment Guide"
+        rating: 4.7
+        downloads: 567
+      - title: "Game Day Nutrition Tips"
+        type: "link"
+        category: "Nutrition"
+        
+# =============================================================================
+# IMPLEMENTATION SPECIFICATIONS
+# =============================================================================
+
+styling_requirements:
+  colors:
+    primary: "#003366"  # Navy blue
+    accent: "#FF6600"   # Orange
+    background: "#FFFFFF"  # White
+    text_primary: "#1a1a1a"
+    text_secondary: "#6b7280"
+    border: "#e5e7eb"
+  
+  components:
+    - Use Shadcn/UI components from src/components/ui/
+    - White backgrounds for all modals
+    - Consistent card styling with shadow-sm
+    - 8px border radius for cards
+    - Minimum 44px touch targets for mobile
+  
+  responsive:
+    mobile: "<768px"
+    tablet: "768px-1024px"
+    desktop: ">1024px"
+
+implementation_steps:
+  1_create_components:
+    - Create ResourceDetailModal component
+    - Create ResourceFilter component
+    - Update ResourceCard component
+  
+  2_update_resources_page:
+    - Add role-based content filtering
+    - Integrate new components
+    - Add search and filter functionality
+    - Implement favorites system
+  
+  3_add_mock_data:
+    - Create comprehensive mock data for all roles
+    - Include variety of resource types
+    - Add realistic metadata
+  
+  4_implement_interactions:
+    - Add modal open/close functionality
+    - Implement search/filter logic
+    - Add favorite toggle functionality
+    - Track view counts (mock)
+  
+  5_mobile_optimization:
+    - Ensure touch targets are 44px+
+    - Test responsive layouts
+    - Optimize for field use (high contrast)
+
+# =============================================================================
+# VALIDATION CRITERIA
+# =============================================================================
+
+acceptance_criteria:
+  functional:
+    - [ ] Resources page shows role-specific content
+    - [ ] Search filters resources in real-time
+    - [ ] Category filter works correctly
+    - [ ] ResourceDetailModal opens on resource click
+    - [ ] Favorites can be toggled
+    - [ ] Rating display shows correct values
+    - [ ] Download buttons work for downloadable resources
+    - [ ] Related resources show in modal
+  
+  visual:
+    - [ ] Consistent POWLAX branding
+    - [ ] White modal backgrounds
+    - [ ] Responsive on all screen sizes
+    - [ ] Touch targets 44px+ on mobile
+    - [ ] High contrast for outdoor use
+  
+  performance:
+    - [ ] Page loads in <2 seconds
+    - [ ] Search filters in <100ms
+    - [ ] Modal opens instantly
+    - [ ] Smooth scrolling
+  
+  code_quality:
+    - [ ] TypeScript types defined
+    - [ ] No ESLint errors
+    - [ ] Components are reusable
+    - [ ] Mock data is realistic
+
+# =============================================================================
+# ERROR PREVENTION
+# =============================================================================
+
+critical_requirements:
+  - MUST use 'use client' directive on all components
+  - MUST NOT use lazy loading or dynamic imports
+  - MUST NOT use framer-motion
+  - MUST follow existing modal patterns from practice planner
+  - MUST maintain white backgrounds for modals
+  - MUST handle loading states properly
+  - MUST include proper TypeScript types
+
+common_pitfalls:
+  - Forgetting 'use client' directive causes SSR errors
+  - Using dark backgrounds on modals (use white)
+  - Not handling empty states
+  - Missing loading states
+  - Touch targets too small on mobile
+  - Not testing with different user roles
+
+# =============================================================================
+# TESTING CHECKLIST
+# =============================================================================
+
+manual_testing:
+  - [ ] Test with each user role (coach, player, parent, director, admin)
+  - [ ] Test search functionality
+  - [ ] Test all filter combinations
+  - [ ] Open and close modals
+  - [ ] Toggle favorites
+  - [ ] Test on mobile (375px)
+  - [ ] Test on tablet (768px)
+  - [ ] Test on desktop (1024px+)
+  - [ ] Verify loading states
+  - [ ] Check empty states
+
+commands:
+  - "npm run dev  # Start dev server"
+  - "npm run lint  # Check for linting errors"
+  - "npm run typecheck  # Verify TypeScript"
+  - "npm run build  # Ensure build succeeds"
+
+# =============================================================================
+# SUCCESS METRICS
+# =============================================================================
+
+success_indicators:
+  - Resources page loads without errors
+  - Role-specific content displays correctly
+  - Search and filters work smoothly
+  - Modals open and close properly
+  - Mobile experience is optimized
+  - Code passes all validation checks
+  - User can find resources quickly (<30 seconds)
+
+---
+# EXECUTION NOTES FOR SUB AGENT
+
+This contract requires creating a comprehensive Resources page enhancement.
+Focus on role-based content delivery and smooth user interactions.
+Use existing patterns from practice planner modals for consistency.
+Ensure all components use 'use client' directive and avoid lazy loading.
+Test thoroughly with different user roles before marking complete.

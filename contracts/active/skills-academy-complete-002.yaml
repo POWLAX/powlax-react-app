@@ -3,11 +3,15 @@
 
 contract:
   id: skills-academy-complete-002
-  type: MASTER_CONTRACT
-  owner: powlax-master-controller
+  type: GENERAL_SUB_AGENT_CONTRACT
+  owner: general-purpose-sub-agents-only
   created: 2025-08-08
+  updated: 2025-01-11
   status: ACTIVE
   priority: CRITICAL
+  
+# 🚨 CRITICAL: ONLY USE GENERAL-PURPOSE SUB-AGENTS
+# NO complex parallel execution or specialized controllers!
 
 # Current State Analysis
 currentState:
@@ -61,14 +65,14 @@ targetState:
     - Streak tracking implementation
     - Return to main hub after completion
 
-# Execution Strategy (For Big Projects like Skills Academy)
+# Execution Strategy - GENERAL SUB-AGENTS ONLY
 executionStrategy:
-  type: parallel  # Using parallel for this big project with 5 independent sections
+  type: sequential  # Use simple sequential general-purpose sub-agents
   
-  # Parallel execution configuration
-  parallelExecution:
-    enabled: true  # This is a BIG project - perfect for parallel
-    agentCount: 5  # 5 parallel agents for 5 major sections
+  # General Sub-Agent Configuration
+  generalSubAgents:
+    approach: "One focused task per general-purpose sub-agent"
+    complexity: "Simple, no orchestration needed"
     
     # Ultra Think Planning (MANDATORY)
     ultraThinkPlanning:

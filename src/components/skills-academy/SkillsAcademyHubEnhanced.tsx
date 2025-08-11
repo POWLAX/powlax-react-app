@@ -102,10 +102,10 @@ export function SkillsAcademyHubEnhanced({ userId }: SkillsAcademyHubEnhancedPro
         <Button 
           variant="outline" 
           className="flex-1"
-          onClick={() => router.push('/skills-academy/progress')}
+          onClick={() => router.push('/skills-academy/workouts')}
         >
           <TrendingUp className="w-4 h-4 mr-2" />
-          Progress
+          Workouts
         </Button>
         <Button 
           variant="outline" 

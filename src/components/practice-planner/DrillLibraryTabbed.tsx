@@ -6,6 +6,7 @@ import { useDrills } from '@/hooks/useDrills'
 import { useFavorites } from '@/hooks/useFavorites'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import AddCustomDrillModal from './AddCustomDrillModal'
+import EditCustomDrillModal from './EditCustomDrillModal'
 import FilterDrillsModal from './FilterDrillsModal'
 import VideoModal from './modals/VideoModal'
 import LinksModal from './modals/LinksModal'
@@ -16,7 +17,17 @@ import StrategiesTab from './StrategiesTab'
 import AdminToolbar from './AdminToolbar'
 import AdminEditModal from './modals/AdminEditModal'
 import { useAdminEdit } from '@/hooks/useAdminEdit'
-// UserData type no longer needed with Supabase Auth
+// Using proper Supabase User type
+interface User {
+  id: string
+  email: string
+  full_name?: string
+  wordpress_id?: number
+  role: string
+  roles: string[]
+  avatar_url?: string
+  display_name: string
+}
 
 interface Drill {
   id: string
@@ -49,7 +60,7 @@ interface DrillLibraryProps {
   onSelectStrategy?: (strategy: any) => void
   selectedStrategies?: string[]
   isMobile?: boolean
-  user?: UserData | null
+  user?: User | null
 }
 
 export default function DrillLibraryTabbed({ 
@@ -60,11 +71,13 @@ export default function DrillLibraryTabbed({
   user = null
 }: DrillLibraryProps) {
   const { drills: supabaseDrills, loading, error, refreshDrills } = useDrills()
-  const { toggleFavorite, isFavorite } = useFavorites()
+  const { toggleFavorite, isFavorite, getFavoriteDrills, loading: favoritesLoading } = useFavorites()
   const [searchTerm, setSearchTerm] = useState('')
   const [expandedCategories, setExpandedCategories] = useState<string[]>(['favorites'])
   const [showFilterModal, setShowFilterModal] = useState(false)
   const [showAddDrillModal, setShowAddDrillModal] = useState(false)
+  const [showEditDrillModal, setShowEditDrillModal] = useState(false)
+  const [editingCustomDrill, setEditingCustomDrill] = useState<Drill | null>(null)
   
   // Modal states for individual drills
   const [showVideoModal, setShowVideoModal] = useState(false)
@@ -99,7 +112,7 @@ export default function DrillLibraryTabbed({
   const drillsByCategory = useMemo(() => {
     const organized: Record<string, Drill[]> = {
       'Favorites': [],
-      'Custom Drills': []
+      'User Drills': [] // Changed from 'Custom Drills' to 'User Drills' per requirements
     }
     
     // Add all drill categories
@@ -110,17 +123,17 @@ export default function DrillLibraryTabbed({
     // Organize drills
     supabaseDrills.forEach(drill => {
       // Check if it's a favorite
-      if (isFavorite(drill.id)) {
+      if (isFavorite(drill.id, 'drill')) {
         organized['Favorites'].push(drill)
       }
       
-      // Check if it's a custom drill
+      // Check if it's a user drill (show in User Drills accordion)
       if (drill.source === 'user') {
-        organized['Custom Drills'].push(drill)
+        organized['User Drills'].push(drill)
       }
       
-      // Add to category
-      if (drill.category && organized[drill.category]) {
+      // Add to category (only for non-user drills to avoid duplication)
+      if (drill.category && organized[drill.category] && drill.source !== 'user') {
         organized[drill.category].push(drill)
       }
     })
@@ -162,7 +175,7 @@ export default function DrillLibraryTabbed({
 
   const handleToggleFavorite = async (drill: Drill, e: React.MouseEvent) => {
     e.stopPropagation()
-    await toggleFavorite(drill.id, drill)
+    await toggleFavorite(drill.id, 'drill', drill)
   }
 
   const handleAddCustomDrill = (drill: Drill) => {
@@ -285,6 +298,16 @@ export default function DrillLibraryTabbed({
             </button>
           )}
           <h4 className="font-medium text-sm flex-1">{drill.title}</h4>
+          {/* Favorite button */}
+          <button
+            onClick={(e) => handleToggleFavorite(drill, e)}
+            className="p-1 text-gray-400 hover:text-yellow-500 transition-colors flex-shrink-0"
+            title={isFavorite(drill.id, 'drill') ? 'Remove from favorites' : 'Add to favorites'}
+          >
+            <Star 
+              className={`h-4 w-4 ${isFavorite(drill.id, 'drill') ? 'fill-yellow-400 text-yellow-400' : ''}`} 
+            />
+          </button>
           {/* Admin Toolbar */}
           <AdminToolbar
             user={user}
@@ -299,10 +322,28 @@ export default function DrillLibraryTabbed({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {drill.source === 'user' && (
-              <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
-                <User className="h-3 w-3" />
-                Custom
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+                  <User className="h-3 w-3" />
+                  Custom
+                </span>
+                {/* Edit button for user-owned drills */}
+                {user && drill.user_id === user.id && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      // TODO: Open EditCustomDrillModal
+                      console.log('Edit drill:', drill.id)
+                    }}
+                    className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                    title="Edit this custom drill"
+                  >
+                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                )}
+              </div>
             )}
           </div>
           
@@ -400,7 +441,7 @@ export default function DrillLibraryTabbed({
             {/* Drill Categories */}
             <div className="px-4 pt-4 pb-4 space-y-2">
               {Object.entries(filteredDrillsByCategory).map(([category, drills]) => {
-                if (drills.length === 0 && category !== 'Favorites') return null
+                if (drills.length === 0 && category !== 'Favorites' && category !== 'User Drills') return null
                 
                 const isExpanded = expandedCategories.includes(category)
                 
@@ -426,7 +467,11 @@ export default function DrillLibraryTabbed({
                     {isExpanded && (
                       <div className="p-2 space-y-2">
                         {drills.length === 0 ? (
-                          <p className="px-3 py-2 text-sm text-gray-500">No favorites yet</p>
+                          <p className="px-3 py-2 text-sm text-gray-500">
+                            {category === 'Favorites' ? 'No favorites yet' : 
+                             category === 'User Drills' ? 'No custom drills yet' : 
+                             'No drills in this category'}
+                          </p>
                         ) : (
                           drills.map(renderDrillCard)
                         )}
@@ -458,7 +503,17 @@ export default function DrillLibraryTabbed({
           onAddDrill(drill)
           setShowAddDrillModal(false)
         }}
-        onDrillCreated={() => {}}
+        onDrillCreated={() => refreshDrills()}
+      />
+      
+      <EditCustomDrillModal
+        isOpen={showEditDrillModal}
+        onClose={() => {
+          setShowEditDrillModal(false)
+          setEditingCustomDrill(null)
+        }}
+        drill={editingCustomDrill}
+        onDrillUpdated={() => refreshDrills()}
       />
       
       <FilterDrillsModal
