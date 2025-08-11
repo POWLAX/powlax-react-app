@@ -18,7 +18,7 @@ import {
   BookOpen,
   Zap
 } from 'lucide-react'
-import { useAuth } from '@/contexts/JWTAuthContext'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
 
 // Mock data - in production this would come from user's actual progress
 const mockPlayerProgress = {

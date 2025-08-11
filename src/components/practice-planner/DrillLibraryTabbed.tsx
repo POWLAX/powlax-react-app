@@ -13,11 +13,15 @@ import StrategiesModal from './modals/StrategiesModal'
 import LacrosseLabModal, { hasLabUrls } from './modals/LacrosseLabModal'
 import StudyDrillModal from './modals/StudyDrillModal'
 import StrategiesTab from './StrategiesTab'
+import AdminToolbar from './AdminToolbar'
+import AdminEditModal from './modals/AdminEditModal'
+import { useAdminEdit } from '@/hooks/useAdminEdit'
+// UserData type no longer needed with Supabase Auth
 
 interface Drill {
   id: string
-  name: string
-  duration: number
+  title: string
+  duration_minutes: number
   category: string
   drill_types?: string
   strategies?: string[]
@@ -45,13 +49,15 @@ interface DrillLibraryProps {
   onSelectStrategy?: (strategy: any) => void
   selectedStrategies?: string[]
   isMobile?: boolean
+  user?: UserData | null
 }
 
 export default function DrillLibraryTabbed({ 
   onAddDrill, 
   onSelectStrategy,
   selectedStrategies = [],
-  isMobile = false
+  isMobile = false,
+  user = null
 }: DrillLibraryProps) {
   const { drills: supabaseDrills, loading, error, refreshDrills } = useDrills()
   const { toggleFavorite, isFavorite } = useFavorites()
@@ -67,6 +73,8 @@ export default function DrillLibraryTabbed({
   const [showLacrosseLabModal, setShowLacrosseLabModal] = useState(false)
   const [showStudyDrillModal, setShowStudyDrillModal] = useState(false)
   const [selectedDrill, setSelectedDrill] = useState<Drill | null>(null)
+  const [showAdminEditModal, setShowAdminEditModal] = useState(false)
+  const [editingDrill, setEditingDrill] = useState<Drill | null>(null)
   
   // Filter state
   const [selectedGamePhases, setSelectedGamePhases] = useState<string[]>([])
@@ -127,7 +135,7 @@ export default function DrillLibraryTabbed({
     Object.entries(drillsByCategory).forEach(([category, drills]) => {
       filtered[category] = drills.filter(drill => {
         // Search filter
-        const matchesSearch = drill.name.toLowerCase().includes(searchTerm.toLowerCase())
+        const matchesSearch = drill.title.toLowerCase().includes(searchTerm.toLowerCase())
         
         // Game phase filter (if we still want this filter)
         const matchesGamePhase = selectedGamePhases.length === 0 ||
@@ -184,6 +192,11 @@ export default function DrillLibraryTabbed({
     e.stopPropagation()
     setSelectedDrill(drill)
     setShowLacrosseLabModal(true)
+  }
+
+  const handleAdminEdit = (drill: Drill) => {
+    setEditingDrill(drill)
+    setShowAdminEditModal(true)
   }
 
   const clearFilters = () => {
@@ -250,7 +263,7 @@ export default function DrillLibraryTabbed({
   const renderDrillCard = (drill: Drill) => (
     <div
       key={drill.id}
-      className="p-3 bg-white border rounded-lg hover:bg-gray-50"
+      className="p-3 bg-white border rounded-lg hover:bg-gray-50 group relative"
     >
       <div className="flex flex-col gap-2">
         {/* Title row with Plus button on left */}
@@ -271,7 +284,15 @@ export default function DrillLibraryTabbed({
               <Plus className="h-4 w-4 text-gray-600" />
             </button>
           )}
-          <h4 className="font-medium text-sm flex-1">{drill.name}</h4>
+          <h4 className="font-medium text-sm flex-1">{drill.title}</h4>
+          {/* Admin Toolbar */}
+          <AdminToolbar
+            user={user}
+            itemType="drill"
+            item={drill}
+            onEdit={() => handleAdminEdit(drill)}
+            className="opacity-0 group-hover:opacity-100 transition-opacity"
+          />
         </div>
         
         {/* Source Badge and Study button */}
@@ -424,6 +445,7 @@ export default function DrillLibraryTabbed({
             onSelectStrategy={onSelectStrategy || (() => {})}
             selectedStrategies={selectedStrategies}
             isMobile={isMobile}
+            user={user}
           />
         </TabsContent>
       </Tabs>
@@ -488,6 +510,20 @@ export default function DrillLibraryTabbed({
           />
         </>
       )}
+
+      {/* Admin Edit Modal */}
+      <AdminEditModal
+        isOpen={showAdminEditModal}
+        onClose={() => setShowAdminEditModal(false)}
+        itemType="drill"
+        item={editingDrill}
+        user={user}
+        onSuccess={() => {
+          refreshDrills()
+          setShowAdminEditModal(false)
+          setEditingDrill(null)
+        }}
+      />
     </div>
   )
 }

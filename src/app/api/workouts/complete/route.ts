@@ -135,22 +135,22 @@ async function fetchDrillsByIds(drillIds: number[], workoutType: string): Promis
   
   switch (workoutType) {
     case 'team_practice':
-      tableName = 'drills_powlax'
+      tableName = 'powlax_drills'
       selectFields += ', drill_category'
       break
     case 'skills_academy':
-      tableName = 'skills_academy_powlax'
+      tableName = 'skills_academy_drills'
       selectFields += ', academy_category, attack_relevance, midfield_relevance, defense_relevance'
       break
     default:
       // Try both tables for custom workouts
       const { data: teamDrills } = await supabase
-        .from('drills_powlax')
+        .from('powlax_drills')
         .select('id, title, difficulty_score, drill_category')
         .in('id', drillIds)
       
       const { data: academyDrills } = await supabase
-        .from('skills_academy_powlax')
+        .from('skills_academy_drills')
         .select('id, title, difficulty_score, academy_category, attack_relevance, midfield_relevance, defense_relevance')
         .in('id', drillIds)
       

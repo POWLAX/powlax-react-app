@@ -19,7 +19,8 @@ interface StrategiesModalProps {
   onClose: () => void
   onRefreshStrategies?: () => void
   drill: {
-    name: string
+    title?: string
+    name?: string
     strategies?: string[]
     concepts?: string[]
     skills?: string[]
@@ -51,7 +52,7 @@ export default function StrategiesModal({ isOpen, onClose, onRefreshStrategies, 
   const relevantStrategies = strategies.filter(strategy => {
     const drillCategory = drill.category?.toLowerCase() || ''
     const drillSubcategory = drill.subcategory?.toLowerCase() || ''
-    const drillName = drill.name.toLowerCase()
+    const drillName = (drill.title || drill.name || '').toLowerCase()
     
     const strategyCategories = strategy.strategy_categories?.toLowerCase() || ''
     const strategyName = strategy.strategy_name.toLowerCase()
@@ -78,7 +79,7 @@ export default function StrategiesModal({ isOpen, onClose, onRefreshStrategies, 
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 field-drill-name">
             <Target className="h-6 w-6" />
-            {drill.name} - Strategies & Concepts
+            {drill.title || drill.name} - Strategies & Concepts
           </DialogTitle>
           <DialogDescription className="field-text-secondary font-medium">
             Strategic information and teaching concepts for this drill

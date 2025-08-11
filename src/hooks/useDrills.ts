@@ -3,11 +3,14 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 
+// CORRECTED: Now using actual database column names!
 interface Drill {
   id: string
   drill_id?: string
-  name: string
-  duration: number
+  title: string // 🚨 FIXED: Use actual database column 'title', not 'name'
+  name?: string // Legacy compatibility alias
+  duration_minutes: number // 🚨 FIXED: Use actual database column 'duration_minutes', not 'duration'  
+  duration?: number // Legacy compatibility alias
   category: string
   subcategory?: string
   strategies?: string[]
@@ -17,6 +20,7 @@ interface Drill {
   concept_ids?: string[]
   game_phase_ids?: string[]
   videoUrl?: string
+  video_url?: string // Database column name
   drill_video_url?: string
   drill_lab_url_1?: string
   drill_lab_url_2?: string
@@ -105,8 +109,10 @@ export function useDrills() {
       const transformedPowlaxDrills = powlaxDrills.map((drill: any) => ({
         id: drill.id?.toString() || `powlax-drill-${Date.now()}`,
         drill_id: drill.id?.toString(),
-        name: drill.title || 'Unnamed Drill',
-        duration: drill.duration_minutes || 10,
+        title: drill.title || 'Unnamed Drill', // 🚨 FIXED: Use 'title' as primary
+        name: drill.title || 'Unnamed Drill', // Legacy compatibility
+        duration_minutes: drill.duration_minutes || 10, // 🚨 FIXED: Use 'duration_minutes' as primary
+        duration: drill.duration_minutes || 10, // Legacy compatibility
         category: drill.category || 'Uncategorized', // Use the actual category from database
         subcategory: drill.category,
         drill_types: drill.tags || drill.category,
@@ -119,8 +125,9 @@ export function useDrills() {
         concept_ids: extractConceptsFromGameStates(parseArrayField(drill.game_states)),
         game_phase_ids: parseArrayField(drill.game_states),
         
-        // Video and media URLs
-        videoUrl: drill.video_url,
+        // Video and media URLs (use actual database column names)
+        video_url: drill.video_url, // 🚨 FIXED: Use actual column name
+        videoUrl: drill.video_url, // Legacy compatibility
         drill_video_url: drill.video_url,
         vimeo_url: drill.video_url,
         custom_url: drill.custom_url,
@@ -154,8 +161,10 @@ export function useDrills() {
       const transformedUserDrills = userDrills.map((drill: any) => ({
         id: `user-${drill.id}`,
         drill_id: drill.id?.toString(),
-        name: drill.name || drill.title || 'Unnamed Custom Drill',
-        duration: parseDuration(drill.drill_duration) || 10,
+        title: drill.name || drill.title || 'Unnamed Custom Drill', // 🚨 FIXED: Use 'title' as primary
+        name: drill.name || drill.title || 'Unnamed Custom Drill', // Legacy compatibility
+        duration_minutes: parseDuration(drill.drill_duration) || 10, // 🚨 FIXED: Use 'duration_minutes' as primary
+        duration: parseDuration(drill.drill_duration) || 10, // Legacy compatibility
         category: 'Custom Drills', // User drills always go in Custom Drills category
         subcategory: drill.drill_category,
         drill_types: drill.drill_types,

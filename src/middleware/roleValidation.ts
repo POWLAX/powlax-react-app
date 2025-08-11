@@ -141,7 +141,7 @@ export async function validateResourceOwnership(
   switch (resourceType) {
     case 'practice_plan':
       const { data: plan } = await supabase
-        .from('practice_plans')
+        .from('practices')
         .select('coach_id, team_id')
         .eq('id', resourceId)
         .single();

@@ -96,32 +96,83 @@ export function WorkoutCompletionAnimation({
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full space-y-6">
         
-        {/* Main Trophy Animation */}
-        <div
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ 
-            type: "spring",
-            stiffness: 260,
-            damping: 20,
-            duration: 0.8 
-          }}
-          className="text-center"
-        >
+        {/* Main Trophy Animation with Badge Images */}
+        <div className="text-center">
           <div className="relative inline-block">
-            <div
-              animate={{ 
-                rotate: [0, 5, -5, 5, 0],
-                scale: [1, 1.1, 1]
-              }}
-              transition={{ 
-                duration: 2,
-                repeat: Infinity,
-                repeatDelay: 3
-              }}
-              className="w-32 h-32 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto shadow-2xl"
-            >
+            {/* Central Trophy */}
+            <div className="w-32 h-32 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto shadow-2xl animate-bounce">
               <Trophy className="w-16 h-16 text-white" />
+            </div>
+            
+            {/* Floating Badge Images around trophy */}
+            <div className="absolute inset-0">
+              {/* Attack Badge */}
+              <div 
+                className="absolute w-16 h-16 rounded-full border-2 border-yellow-300 shadow-lg animate-bounce"
+                style={{
+                  top: '-20px',
+                  left: '-30px',
+                  animationDelay: '0.5s',
+                  animationDuration: '2s'
+                }}
+              >
+                <img 
+                  src="https://powlax.com/wp-content/uploads/2024/10/A1-Crease-Crawler.png"
+                  alt="Crease Crawler Badge"
+                  className="w-full h-full rounded-full object-cover"
+                />
+              </div>
+              
+              {/* Defense Badge */}
+              <div 
+                className="absolute w-16 h-16 rounded-full border-2 border-green-300 shadow-lg animate-bounce"
+                style={{
+                  top: '-20px',
+                  right: '-30px',
+                  animationDelay: '1s',
+                  animationDuration: '2s'
+                }}
+              >
+                <img 
+                  src="https://powlax.com/wp-content/uploads/2024/10/D1-Hip-Hitter.png"
+                  alt="Hip Hitter Badge"
+                  className="w-full h-full rounded-full object-cover"
+                />
+              </div>
+              
+              {/* Wall Ball Badge */}
+              <div 
+                className="absolute w-16 h-16 rounded-full border-2 border-purple-300 shadow-lg animate-bounce"
+                style={{
+                  bottom: '-20px',
+                  left: '-30px',
+                  animationDelay: '1.5s',
+                  animationDuration: '2s'
+                }}
+              >
+                <img 
+                  src="https://powlax.com/wp-content/uploads/2024/10/WB1-Foundation-Ace.png"
+                  alt="Foundation Ace Badge"
+                  className="w-full h-full rounded-full object-cover"
+                />
+              </div>
+              
+              {/* Midfield Badge */}
+              <div 
+                className="absolute w-16 h-16 rounded-full border-2 border-blue-300 shadow-lg animate-bounce"
+                style={{
+                  bottom: '-20px',
+                  right: '-30px',
+                  animationDelay: '2s',
+                  animationDuration: '2s'
+                }}
+              >
+                <img 
+                  src="https://powlax.com/wp-content/uploads/2024/10/Mid1-Ground-Ball-Guru.png"
+                  alt="Ground Ball Guru Badge"
+                  className="w-full h-full rounded-full object-cover"
+                />
+              </div>
             </div>
             
             {/* Sparkle effects */}
@@ -202,32 +253,47 @@ export function WorkoutCompletionAnimation({
           )}
         </>
 
-        {/* Badge Earned Animation */}
+        {/* Badge Earned Animation with Real Badge */}
         <>
           {showBadge && (
-            <div
-              initial={{ scale: 0, rotate: -360 }}
-              animate={{ scale: 1, rotate: 0 }}
-              exit={{ scale: 0 }}
-              transition={{ type: "spring", stiffness: 200 }}
-            >
-              <Card className="p-6 bg-gradient-to-br from-purple-50 to-white border-2 border-purple-400">
-                <div className="flex items-center justify-center gap-4">
-                  <div
-                    animate={{ 
-                      rotate: 360,
-                      scale: [1, 1.2, 1]
-                    }}
-                    transition={{ 
-                      rotate: { duration: 2, repeat: Infinity, ease: "linear" },
-                      scale: { duration: 1, repeat: Infinity }
-                    }}
-                  >
-                    <Award className="w-12 h-12 text-purple-600" />
+            <div className="animate-pulse">
+              <Card className="p-6 bg-gradient-to-br from-purple-50 to-white border-2 border-purple-400 relative overflow-hidden">
+                {/* Celebration sparkles background */}
+                <div className="absolute inset-0 overflow-hidden">
+                  {[...Array(10)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="absolute w-2 h-2 bg-yellow-300 rounded-full animate-ping"
+                      style={{
+                        left: `${Math.random() * 100}%`,
+                        top: `${Math.random() * 100}%`,
+                        animationDelay: `${Math.random() * 2}s`,
+                        animationDuration: `${1 + Math.random() * 2}s`
+                      }}
+                    />
+                  ))}
+                </div>
+                
+                <div className="flex items-center justify-center gap-4 relative z-10">
+                  {/* Real Badge Image */}
+                  <div className="relative">
+                    <div className="w-20 h-20 rounded-full border-4 border-yellow-400 shadow-lg animate-spin" style={{ animationDuration: '3s' }}>
+                      <img 
+                        src="https://powlax.com/wp-content/uploads/2024/10/A3-Ankle-Breaker.png"
+                        alt="New Badge Earned"
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    </div>
+                    {/* Glow effect */}
+                    <div className="absolute inset-0 rounded-full bg-yellow-400 opacity-30 animate-pulse blur-sm"></div>
                   </div>
+                  
                   <div>
-                    <h3 className="font-bold text-lg">New Badge Earned!</h3>
-                    <p className="text-sm text-gray-600">Workout Warrior</p>
+                    <h3 className="font-bold text-lg bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                      🎉 NEW BADGE EARNED! 🎉
+                    </h3>
+                    <p className="text-sm text-gray-600 font-medium">Ankle Breaker - Attack Master</p>
+                    <p className="text-xs text-gray-500 mt-1">Keep up the great work!</p>
                   </div>
                 </div>
               </Card>

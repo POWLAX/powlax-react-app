@@ -1,6 +1,8 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
+import { Loader2 } from 'lucide-react'
 // Fetch via server API to avoid client-side RLS recursion issues
 
 type Org = { id: string; name: string }
@@ -8,6 +10,7 @@ type Team = { id: string; name: string; club_id?: string | null }
 type MemberRow = { team_id: string; user_id: string; role: string; user?: { email?: string; full_name?: string; username?: string } }
 
 export default function WPImportCheckPage() {
+  const { user, loading: authLoading } = useAuth()
   const [orgs, setOrgs] = useState<Org[]>([])
   const [teams, setTeams] = useState<Team[]>([])
   const [members, setMembers] = useState<MemberRow[]>([])
@@ -38,6 +41,18 @@ export default function WPImportCheckPage() {
     }
     run()
   }, [])
+
+  // Show loading spinner while authentication is being verified
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto" />
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   const teamMembersByTeam: Record<string, MemberRow[]> = members.reduce((acc, m) => {
     acc[m.team_id] = acc[m.team_id] || []

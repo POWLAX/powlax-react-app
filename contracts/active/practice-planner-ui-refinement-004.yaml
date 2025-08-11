@@ -1,0 +1,314 @@
+---
+contractId: practice-planner-ui-refinement-004
+contractVersion: 1.0.0
+contractDate: 2025-01-09
+contractType: parallel-execution
+projectName: POWLAX Practice Planner UI Refinement
+clientContext: |
+  Focused UI improvements to the world-class Practice Planner that has already received
+  92+ enhancements. Recent work includes admin editing system, team playbook, and
+  surgical positioning fixes. This contract addresses specific UI refinements while
+  ensuring the custom drill build feature continues working perfectly.
+
+# EXECUTION STRATEGY
+executionStrategy:
+  type: parallel
+  agentCount: 3  # Reduced scope - more focused
+  ultraThinkCompleted: true
+  ultraThinkDuration: 10 # minutes minimum
+  estimatedDuration: 120 # minutes total (reduced from 180)
+  
+# ULTRA THINK PHASE (MANDATORY - 10 MINUTES MINIMUM)
+ultraThinkPhase:
+  completed: true
+  duration: 10
+  risksIdentified:
+    - "Breaking existing custom drill functionality"
+    - "Conflicting with recent admin/playbook additions"
+    - "Study modal state management conflicts"
+    - "File collision on heavily modified components"
+    - "Auto-save disruption (critical feature)"
+  mitigationStrategies:
+    - "Verify custom drill modal still works"
+    - "Preserve all admin toolbar integrations"
+    - "Maintain existing modal patterns"
+    - "Test auto-save after each change"
+    - "Keep agent file territories minimal"
+  commonErrorsReviewed:
+    - "NO lazy loading or dynamic imports (breaks Practice Planner)"
+    - "NO framer-motion animations (causes SSR errors)"
+    - "ALL components must use 'use client' directive"
+    - "NO server components in practice planner"
+    - "White modal backgrounds only (not dark blue)"
+    - "PRESERVE auto-save functionality"
+    - "MAINTAIN custom drill creation flow"
+
+# PROJECT OVERVIEW
+projectOverview:
+  description: |
+    Refine the Practice Planner UI with specific improvements based on design mockups:
+    1. Unified Study modals combining drill/strategy data in tabbed interface
+    2. Redesigned practice schedule section with blue-tinted styling
+    3. Active strategies display above timeline
+    4. Updated drill cards with Study Drill buttons and cleaner layout
+    
+    CRITICAL: Preserve all existing functionality including custom drill creation,
+    admin editing system, team playbook, and auto-save.
+  
+  existingFeatures: |
+    Already Completed (DO NOT BREAK):
+    - ✅ Admin editing system for drills/strategies
+    - ✅ Team playbook functionality
+    - ✅ Auto-save every 3 seconds
+    - ✅ Custom drill creation via AddCustomDrillModal
+    - ✅ Strategies positioning fix
+    - ✅ Mobile optimization
+    - ✅ Print functionality
+    
+  businessValue: |
+    - Streamline drill study with unified modal interface
+    - Improve visual hierarchy for faster coaching decisions
+    - Enhance field usability with clearer practice schedule
+    - Reduce cognitive load with consistent Study buttons
+
+# REQUIREMENTS
+requirements:
+  functional:
+    mustPreserve:
+      - Custom drill creation functionality (AddCustomDrillModal)
+      - Auto-save every 3 seconds to localStorage
+      - Admin editing system (AdminToolbar, AdminEditModal)
+      - Team playbook system (SaveToPlaybookModal)
+      - All existing modal functionality
+      - Print functionality
+      
+    newFeatures:
+      - Unified StudyDrillModal with 3 tabs (Overview, Diagram, Video)
+      - Unified StudyStrategyModal with same structure
+      - Blue-tinted Practice Schedule card
+      - Active Strategies section above timeline
+      - Study Drill/Strategy buttons on cards
+      - Improved visual hierarchy for drill cards
+      
+  nonFunctional:
+    - Page load time < 2 seconds (maintain current)
+    - Touch targets minimum 44px (maintain current)
+    - Mobile responsive (maintain current)
+    - No console errors (maintain current)
+    - Auto-save continues working (CRITICAL)
+    
+  designSpecifications:
+    colors:
+      primary: "#003366"
+      blueLight: "rgb(239 246 255)"
+      blueBorder: "rgb(191 219 254)"
+      grayBg: "rgb(243 244 246)"
+      purpleBadge: "rgb(147 51 234)"
+    typography:
+      timeDisplay: "text-2xl font-bold text-blue-600"
+      headers: "text-xl font-semibold text-gray-900"
+      coachingNotes: "text-sm text-blue-700 bg-blue-50"
+    spacing:
+      standard: "1rem"
+      compact: "0.75rem"
+
+# PARALLEL AGENTS DISTRIBUTION (3 AGENTS - FOCUSED SCOPE)
+parallelAgents:
+  agent_1:
+    type: general-purpose
+    name: "Study Modals Developer"
+    scope: "Create unified Study modals without breaking existing modals"
+    responsibilities:
+      - Create StudyDrillModal.tsx with 3-tab interface
+      - Create StudyStrategyModal.tsx with same structure
+      - Implement Overview, Diagram, Video tabs
+      - Ensure data flows from existing hooks
+      - Test alongside existing modals (don't remove them yet)
+    files:
+      create:
+        - src/components/practice-planner/modals/StudyDrillModal.tsx
+        - src/components/practice-planner/modals/StudyStrategyModal.tsx
+      read:
+        - src/components/practice-planner/modals/VideoModal.tsx
+        - src/components/practice-planner/modals/StrategiesModal.tsx
+        - src/components/practice-planner/modals/AdminEditModal.tsx
+        - src/components/ui/tabs.tsx
+        - src/hooks/useDrills.ts
+        - src/hooks/useStrategies.ts
+      noTouch:
+        - src/components/practice-planner/AddCustomDrillModal.tsx
+        - src/components/practice-planner/modals/SaveToPlaybookModal.tsx
+        - src/components/practice-planner/AdminToolbar.tsx
+    deliverables:
+      - Two new Study modals with full tab functionality
+      - Data integration with existing hooks
+      - White backgrounds throughout
+      - No disruption to existing modals
+
+  agent_2:
+    type: general-purpose
+    name: "UI Components Enhancer"
+    scope: "Update drill cards and timeline with Study buttons and new styling"
+    responsibilities:
+      - Add Study Drill button to DrillCard.tsx
+      - Update visual hierarchy (larger time, blue notes)
+      - Style parallel drills with gray backgrounds
+      - Add Study Strategy button to StrategyCard.tsx
+      - Ensure custom drill cards still work
+      - Preserve admin toolbar integration
+    files:
+      modify:
+        - src/components/practice-planner/DrillCard.tsx
+        - src/components/practice-planner/PracticeTimelineWithParallel.tsx
+        - src/components/practice-planner/StrategyCard.tsx
+      read:
+        - src/components/practice-planner/AdminToolbar.tsx
+        - src/components/practice-planner/AddCustomDrillModal.tsx
+        - src/hooks/useUserDrills.ts
+      noTouch:
+        - src/components/practice-planner/modals/*
+        - src/app/(authenticated)/teams/[teamId]/practice-plans/page.tsx
+    deliverables:
+      - Study buttons on all drill/strategy cards
+      - Enhanced visual hierarchy
+      - Blue coaching notes boxes
+      - Gray parallel drill backgrounds
+      - Custom drills still functional
+
+  agent_3:
+    type: general-purpose
+    name: "Page Layout Coordinator"
+    scope: "Reorganize practice schedule and integrate Study modals"
+    responsibilities:
+      - Create PracticeScheduleCard component
+      - Create ActiveStrategiesSection component
+      - Integrate into main page
+      - Wire up Study modal triggers
+      - Verify auto-save still works
+      - Test custom drill flow end-to-end
+    files:
+      create:
+        - src/components/practice-planner/PracticeScheduleCard.tsx
+        - src/components/practice-planner/ActiveStrategiesSection.tsx
+      modify:
+        - src/app/(authenticated)/teams/[teamId]/practice-plans/page.tsx
+      read:
+        - src/components/practice-planner/modals/StudyDrillModal.tsx
+        - src/components/practice-planner/modals/StudyStrategyModal.tsx
+        - src/components/practice-planner/AddCustomDrillModal.tsx
+        - src/hooks/usePracticePlans.ts
+      noTouch:
+        - src/components/practice-planner/DrillLibraryTabbed.tsx
+        - src/components/practice-planner/StrategiesTab.tsx
+    deliverables:
+      - Blue-tinted practice schedule section
+      - Active strategies display
+      - Study modals integrated
+      - Auto-save verified working
+      - Custom drill creation verified
+
+# VERIFICATION CHECKLIST
+verificationChecklist:
+  criticalFeatures:
+    - [ ] Custom drill creation via AddCustomDrillModal works
+    - [ ] Auto-save triggers every 3 seconds
+    - [ ] Admin edit buttons appear on hover (admin users only)
+    - [ ] Team playbook save functionality works
+    - [ ] Print functionality maintained
+    - [ ] All existing modals still accessible
+    
+  newFeatures:
+    - [ ] Study Drill modal opens with 3 tabs
+    - [ ] Study Strategy modal opens with 3 tabs
+    - [ ] Practice schedule shows blue-tinted design
+    - [ ] Active strategies appear above timeline
+    - [ ] Drill cards have Study buttons
+    - [ ] Parallel drills have gray backgrounds
+    
+  regressionTests:
+    - [ ] No TypeScript errors
+    - [ ] No console errors
+    - [ ] Page loads in < 2 seconds
+    - [ ] Mobile layout responsive
+    - [ ] Touch targets >= 44px
+
+# SUCCESS METRICS
+successMetrics:
+  required:
+    - All 3 agents complete without errors
+    - Custom drill creation still works
+    - Auto-save continues functioning
+    - Admin features remain intact
+    - No console errors
+  quality:
+    - Study modals display correctly
+    - Practice schedule properly styled
+    - Visual hierarchy improved
+    - Mobile responsive maintained
+
+# TESTING REQUIREMENTS
+testingRequirements:
+  preDeployment:
+    - Create a custom drill and verify it appears
+    - Edit a drill as admin (if admin user)
+    - Save a strategy to team playbook
+    - Verify auto-save after 3 seconds
+    - Test print preview
+    - Open all Study modals
+    - Check mobile responsiveness
+    
+  criticalPaths:
+    - Custom drill creation flow
+    - Auto-save functionality
+    - Study modal data display
+    - Admin editing workflow
+    - Team playbook saving
+
+# ROLLBACK PLAN
+rollbackPlan:
+  triggers:
+    - Custom drill creation breaks
+    - Auto-save stops working
+    - Admin features become inaccessible
+    - Page load exceeds 5 seconds
+  steps:
+    - Git revert to previous commit
+    - Clear .next cache
+    - Restart development server
+    - Verify all features restored
+
+# CONTRACT STATUS
+status:
+  stage: ready_for_execution
+  lastUpdated: 2025-01-09T10:00:00Z
+  approvedBy: user
+  
+# AGENT PROGRESS TRACKING
+agentProgress:
+  agent_1:
+    status: not_started
+    startTime: null
+    completionTime: null
+    blockers: []
+    
+  agent_2:
+    status: not_started
+    startTime: null
+    completionTime: null
+    blockers: []
+    
+  agent_3:
+    status: not_started
+    startTime: null
+    completionTime: null
+    blockers: []
+
+# NOTES
+notes: |
+  - This is a REFINEMENT, not a complete redesign
+  - Practice Planner already has 92+ enhancements
+  - Recent additions include admin system and team playbook
+  - Custom drill functionality is CRITICAL - must be preserved
+  - Auto-save is CRITICAL - test thoroughly
+  - Favorites system is PENDING - not part of this contract
+  - All agents must verify existing features still work

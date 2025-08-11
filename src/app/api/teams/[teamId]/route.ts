@@ -28,14 +28,14 @@ export const GET = roleMiddleware.authenticated(async (
 
     // Fetch team data
     const { data, error } = await supabase
-      .from('teams')
+      .from('team_teams')
       .select(`
         *,
-        organization:organizations(name, id),
+        organization:club_organizations(name, id),
         members:team_members(
           user:users(
             id,
-            full_name,
+            display_name,
             email,
             roles
           )
@@ -57,7 +57,7 @@ export const GET = roleMiddleware.authenticated(async (
       data.members = data.members.map((member: any) => ({
         user: {
           id: member.user.id,
-          full_name: member.user.full_name,
+          display_name: member.user.display_name,
           roles: member.user.roles
         }
       }));
@@ -107,7 +107,7 @@ export const PUT = roleMiddleware.coachLevel(async (
 
     // Update team
     const { data, error } = await supabase
-      .from('teams')
+      .from('team_teams')
       .update(updateData)
       .eq('id', teamId)
       .select()

@@ -14,8 +14,8 @@ import AddCustomStrategiesModal from './modals/AddCustomStrategiesModal'
 
 interface Drill {
   id: string
-  name: string
-  duration: number
+  title: string
+  duration_minutes: number
   category: string
   strategies?: string[]
   concepts?: string[]
@@ -90,7 +90,7 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
   const filteredDrills = useMemo(() => {
     return supabaseDrills.filter(drill => {
       // Search term filter
-      const matchesSearch = drill.name.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesSearch = drill.title.toLowerCase().includes(searchTerm.toLowerCase())
       
       // Category filter
       const matchesCategory = !selectedCategory || drill.category === selectedCategory
@@ -105,7 +105,7 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
       
       // Duration filter
       const matchesDuration = !selectedDuration ||
-        (drill.duration >= selectedDuration.min && drill.duration <= selectedDuration.max)
+        (drill.duration_minutes >= selectedDuration.min && drill.duration_minutes <= selectedDuration.max)
       
       // Game states filter
       const matchesGameStates = selectedGameStates.length === 0 ||
@@ -303,7 +303,7 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
                         <div className="flex items-start justify-between">
                           <div className="flex-1 pr-4">
                             <div className="flex items-center gap-2 mb-1">
-                              <h4 className="field-drill-name text-base">{drill.name}</h4>
+                              <h4 className="field-drill-name text-base">{drill.title}</h4>
                               {drill.source === 'user' && (
                                 <div className="flex items-center gap-1">
                                   <User className="h-3 w-3 text-green-600" />
@@ -372,7 +372,7 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
                           </div>
                           
                           <div className="flex items-center gap-2">
-                            <span className="text-sm field-text-secondary font-semibold">{drill.duration}m</span>
+                            <span className="text-sm field-text-secondary font-semibold">{drill.duration_minutes}m</span>
                             <button
                               onClick={(e) => handleToggleFavorite(drill, e)}
                               className={`touch-target-sm rounded-lg transition-colors ${

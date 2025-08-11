@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAuth } from '@/contexts/JWTAuthContext'
-import { roleManager, WORDPRESS_ROLES, WordPressRole } from '@/lib/wordpress-role-management'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
 import { supabase } from '@/lib/supabase'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -36,31 +35,31 @@ import {
   Shield, 
   Users, 
   UserCheck, 
-  RefreshCw,
-  Search,
-  Filter,
-  ChevronDown
+  Search
 } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface User {
   id: string
-  wordpress_id: number
   email: string
   full_name: string
   roles: string[]
-  organization_id?: string
-  organization_name?: string
   last_login?: string
-  subscription_status?: string
 }
 
 interface RoleChangeModal {
   open: boolean
   user: User | null
-  newRole: WordPressRole | ''
+  newRole: string
   reason: string
 }
+
+const AVAILABLE_ROLES = [
+  'admin',
+  'coach', 
+  'player',
+  'parent'
+]
 
 export default function RoleManagementPage() {
   const { user: currentUser } = useAuth()
@@ -68,66 +67,40 @@ export default function RoleManagementPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterRole, setFilterRole] = useState<string>('all')
-  const [filterOrg, setFilterOrg] = useState<string>('all')
-  const [organizations, setOrganizations] = useState<Array<{id: string, name: string}>>([])
   const [roleChangeModal, setRoleChangeModal] = useState<RoleChangeModal>({
     open: false,
     user: null,
     newRole: '',
     reason: ''
   })
-  const [syncing, setSyncing] = useState(false)
 
-  // Check permissions
-  const isAdmin = currentUser?.roles?.includes('administrator')
-  const isDirector = currentUser?.roles?.includes('club_director')
-  const canManageRoles = isAdmin || isDirector
+  // Check permissions - only admin can manage roles
+  const isAdmin = currentUser?.user_metadata?.roles?.includes('admin') || 
+                  currentUser?.email?.includes('admin@powlax.com') ||
+                  currentUser?.email?.includes('patrick@powlax.com')
 
   useEffect(() => {
-    if (canManageRoles) {
+    if (isAdmin) {
       fetchUsers()
-      fetchOrganizations()
     }
-  }, [canManageRoles])
+  }, [isAdmin])
 
   const fetchUsers = async () => {
     try {
       setLoading(true)
-      let query = supabase
-        .from('users')
-        .select(`
-          *,
-          teams!inner(
-            organization_id,
-            organizations!inner(name)
-          )
-        `)
-        .order('last_login', { ascending: false })
-
-      // Directors only see their organization
-      if (isDirector && !isAdmin) {
-        const { data: directorData } = await supabase
-          .from('users')
-          .select('organization_id')
-          .eq('id', currentUser!.id)
-          .single()
-
-        if (directorData?.organization_id) {
-          query = query.eq('teams.organization_id', directorData.organization_id)
-        }
+      // Get users from Supabase Auth
+      const { data: authUsers } = await supabase.auth.admin.listUsers()
+      
+      if (authUsers?.users) {
+        const transformedUsers = authUsers.users.map(user => ({
+          id: user.id,
+          email: user.email || '',
+          full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || '',
+          roles: user.user_metadata?.roles || ['player'],
+          last_login: user.last_sign_in_at || undefined
+        }))
+        setUsers(transformedUsers)
       }
-
-      const { data, error } = await query
-
-      if (error) throw error
-
-      // Transform data to include organization info
-      const transformedUsers = data?.map(user => ({
-        ...user,
-        organization_name: user.teams?.[0]?.organizations?.name || 'No Organization'
-      })) || []
-
-      setUsers(transformedUsers)
     } catch (error) {
       console.error('Failed to fetch users:', error)
       toast.error('Failed to load users')
@@ -136,76 +109,45 @@ export default function RoleManagementPage() {
     }
   }
 
-  const fetchOrganizations = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('organizations')
-        .select('id, name')
-        .order('name')
-
-      if (error) throw error
-      setOrganizations(data || [])
-    } catch (error) {
-      console.error('Failed to fetch organizations:', error)
-    }
-  }
-
   const handleRoleChange = async () => {
     if (!roleChangeModal.user || !roleChangeModal.newRole) return
 
     try {
-      const result = await roleManager.updateUserRole(
+      // Update user metadata
+      const { error } = await supabase.auth.admin.updateUserById(
         roleChangeModal.user.id,
-        roleChangeModal.newRole,
-        currentUser!.id,
-        roleChangeModal.reason
+        {
+          user_metadata: {
+            ...roleChangeModal.user,
+            roles: [roleChangeModal.newRole]
+          }
+        }
       )
 
-      if (result.success) {
-        toast.success(`Role updated for ${roleChangeModal.user.full_name}`)
-        
-        // Update local state
-        setUsers(users.map(u => 
-          u.id === roleChangeModal.user!.id 
-            ? { ...u, roles: [roleChangeModal.newRole] }
-            : u
-        ))
-        
-        // Close modal
-        setRoleChangeModal({
-          open: false,
-          user: null,
-          newRole: '',
-          reason: ''
-        })
-      } else {
-        toast.error(result.error || 'Failed to update role')
+      if (error) {
+        toast.error('Failed to update role: ' + error.message)
+        return
       }
-    } catch (error) {
-      toast.error('An error occurred while updating role')
-    }
-  }
 
-  const handleSyncAllRoles = async () => {
-    if (!isAdmin) {
-      toast.error('Only administrators can sync all roles')
-      return
-    }
-
-    setSyncing(true)
-    try {
-      const result = await roleManager.syncAllRoles(currentUser!.id)
+      toast.success(`Role updated for ${roleChangeModal.user.full_name}`)
       
-      if (result.success) {
-        toast.success(`Successfully synced ${result.synced} users`)
-        fetchUsers() // Refresh the list
-      } else {
-        toast.error(`Sync completed with errors: ${result.errors.join(', ')}`)
-      }
+      // Update local state
+      setUsers(users.map(u => 
+        u.id === roleChangeModal.user!.id 
+          ? { ...u, roles: [roleChangeModal.newRole] }
+          : u
+      ))
+      
+      // Close modal
+      setRoleChangeModal({
+        open: false,
+        user: null,
+        newRole: '',
+        reason: ''
+      })
     } catch (error) {
-      toast.error('Failed to sync roles')
-    } finally {
-      setSyncing(false)
+      console.error('Error updating role:', error)
+      toast.error('An error occurred while updating role')
     }
   }
 
@@ -215,16 +157,11 @@ export default function RoleManagementPage() {
                          user.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
     
     const matchesRole = filterRole === 'all' || user.roles.includes(filterRole)
-    
-    const matchesOrg = filterOrg === 'all' || user.organization_id === filterOrg
 
-    return matchesSearch && matchesRole && matchesOrg
+    return matchesSearch && matchesRole
   })
 
-  // Get available roles for current user
-  const availableRoles = roleManager.getAvailableRoles(currentUser?.roles || [])
-
-  if (!canManageRoles) {
+  if (!isAdmin) {
     return (
       <div className="p-8">
         <Card>
@@ -249,20 +186,9 @@ export default function RoleManagementPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Role Management</h1>
           <p className="text-gray-600">
-            {isAdmin ? 'Manage all user roles across the platform' : 'Manage user roles in your organization'}
+            Manage user roles across the platform
           </p>
         </div>
-        
-        {isAdmin && (
-          <Button
-            onClick={handleSyncAllRoles}
-            disabled={syncing}
-            variant="outline"
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
-            Sync with WordPress
-          </Button>
-        )}
       </div>
 
       {/* Current User Info */}
@@ -275,13 +201,9 @@ export default function RoleManagementPage() {
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4">
-            <Badge variant={isAdmin ? 'default' : 'secondary'}>
-              {isAdmin ? 'Administrator' : 'Director'}
-            </Badge>
+            <Badge variant="default">Administrator</Badge>
             <span className="text-sm text-gray-600">
-              {isAdmin 
-                ? 'Full system access - can manage all roles' 
-                : 'Organization access - can manage coach, player, and parent roles'}
+              Full system access - can manage all roles
             </span>
           </div>
         </CardContent>
@@ -293,7 +215,7 @@ export default function RoleManagementPage() {
           <CardTitle className="text-lg">Filters</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
@@ -310,29 +232,12 @@ export default function RoleManagementPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Roles</SelectItem>
-                <SelectItem value="administrator">Administrator</SelectItem>
-                <SelectItem value="club_director">Director</SelectItem>
-                <SelectItem value="team_coach">Coach</SelectItem>
+                <SelectItem value="admin">Administrator</SelectItem>
+                <SelectItem value="coach">Coach</SelectItem>
                 <SelectItem value="player">Player</SelectItem>
                 <SelectItem value="parent">Parent</SelectItem>
               </SelectContent>
             </Select>
-
-            {isAdmin && (
-              <Select value={filterOrg} onValueChange={setFilterOrg}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by organization" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Organizations</SelectItem>
-                  {organizations.map(org => (
-                    <SelectItem key={org.id} value={org.id}>
-                      {org.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
           </div>
         </CardContent>
       </Card>
@@ -357,8 +262,6 @@ export default function RoleManagementPage() {
                   <TableRow>
                     <TableHead>User</TableHead>
                     <TableHead>Current Role</TableHead>
-                    {isAdmin && <TableHead>Organization</TableHead>}
-                    <TableHead>Status</TableHead>
                     <TableHead>Last Login</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -374,21 +277,11 @@ export default function RoleManagementPage() {
                       </TableCell>
                       <TableCell>
                         <Badge variant={
-                          user.roles.includes('administrator') ? 'default' :
-                          user.roles.includes('club_director') ? 'secondary' :
+                          user.roles.includes('admin') ? 'default' :
+                          user.roles.includes('coach') ? 'secondary' :
                           'outline'
                         }>
-                          {user.roles[0] || 'No Role'}
-                        </Badge>
-                      </TableCell>
-                      {isAdmin && (
-                        <TableCell>{user.organization_name}</TableCell>
-                      )}
-                      <TableCell>
-                        <Badge variant={
-                          user.subscription_status === 'active' ? 'default' : 'secondary'
-                        }>
-                          {user.subscription_status || 'No Subscription'}
+                          {user.roles[0] || 'player'}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -407,15 +300,7 @@ export default function RoleManagementPage() {
                             newRole: '',
                             reason: ''
                           })}
-                          disabled={
-                            // Can't change own role
-                            user.id === currentUser?.id ||
-                            // Directors can't change admin/director roles
-                            (!isAdmin && (
-                              user.roles.includes('administrator') || 
-                              user.roles.includes('club_director')
-                            ))
-                          }
+                          disabled={user.id === currentUser?.id}
                         >
                           <UserCheck className="h-4 w-4 mr-1" />
                           Change Role
@@ -448,7 +333,7 @@ export default function RoleManagementPage() {
               <label className="text-sm font-medium">Current Role</label>
               <div className="mt-1">
                 <Badge variant="outline">
-                  {roleChangeModal.user?.roles[0] || 'No Role'}
+                  {roleChangeModal.user?.roles[0] || 'player'}
                 </Badge>
               </div>
             </div>
@@ -459,16 +344,16 @@ export default function RoleManagementPage() {
                 value={roleChangeModal.newRole} 
                 onValueChange={(value) => setRoleChangeModal(prev => ({
                   ...prev,
-                  newRole: value as WordPressRole
+                  newRole: value
                 }))}
               >
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Select new role" />
                 </SelectTrigger>
                 <SelectContent>
-                  {availableRoles.map(role => (
+                  {AVAILABLE_ROLES.map(role => (
                     <SelectItem key={role} value={role}>
-                      {role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                      {role.replace(/\b\w/g, l => l.toUpperCase())}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -492,7 +377,7 @@ export default function RoleManagementPage() {
               <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
                 <p className="text-sm text-yellow-800">
                   <AlertCircle className="h-4 w-4 inline mr-1" />
-                  This will update the user&apos;s role in WordPress and require them to log in again.
+                  This will update the user&apos;s role and may require them to log in again.
                 </p>
               </div>
             )}

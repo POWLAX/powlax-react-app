@@ -19,36 +19,84 @@ export async function POST(request: NextRequest) {
   try {
     const cookieStore = cookies()
     const sessionToken = cookieStore.get('powlax_session')?.value
+    const body = await request.json().catch(() => ({}))
+    const tokenFromBody = body.token || sessionToken
     
-    if (sessionToken) {
+    let userId = null
+    
+    if (tokenFromBody) {
       const supabase = getAdminClient()
       
-      // Invalidate session in database
+      // Get user ID before deleting session
+      try {
+        const { data: sessionData } = await supabase
+          .from('user_sessions')
+          .select('user_id, wordpress_user_id')
+          .eq('auth_token', tokenFromBody)
+          .single()
+        
+        if (sessionData) {
+          userId = sessionData.user_id
+          
+          // Sign out from Supabase Auth if we have a user ID
+          if (userId) {
+            try {
+              await supabase.auth.admin.signOut(userId)
+            } catch (authError) {
+              console.warn('Supabase auth signout failed:', authError)
+            }
+          }
+        }
+      } catch (error) {
+        console.warn('Could not fetch session data:', error)
+      }
+      
+      // Delete session from database
       try {
         await supabase
           .from('user_sessions')
           .delete()
-          .eq('auth_token', sessionToken)
+          .eq('auth_token', tokenFromBody)
       } catch (error) {
         console.error('Session cleanup error:', error)
       }
     }
     
-    // Clear session cookie
-    cookieStore.delete('powlax_session')
+    // Clear all authentication cookies
+    const cookiesToClear = [
+      'powlax_session',
+      'sb-access-token', 
+      'sb-refresh-token',
+      'supabase-auth-token',
+      'supabase.auth.token'
+    ]
     
-    // Also clear Supabase auth cookies if they exist
-    const supabaseCookies = ['sb-access-token', 'sb-refresh-token']
-    supabaseCookies.forEach(name => {
-      if (cookieStore.get(name)) {
-        cookieStore.delete(name)
+    cookiesToClear.forEach(cookieName => {
+      try {
+        cookieStore.delete(cookieName)
+      } catch (error) {
+        console.warn(`Could not delete cookie ${cookieName}:`, error)
+      }
+    })
+    
+    // Also try to clear cookies with different path configurations
+    cookiesToClear.forEach(cookieName => {
+      try {
+        cookieStore.set(cookieName, '', {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 0,
+          path: '/'
+        })
+      } catch (error) {
+        console.warn(`Could not clear cookie ${cookieName}:`, error)
       }
     })
 
     // Also try the proxy logout for WordPress compatibility
     try {
-      const { token } = await request.json().catch(() => ({}))
-      if (token) {
+      if (tokenFromBody) {
         await fetch(`${request.nextUrl.origin}/api/auth/proxy`, {
           method: 'POST',
           headers: {
@@ -56,15 +104,18 @@ export async function POST(request: NextRequest) {
           },
           body: JSON.stringify({
             action: 'logout',
-            token
+            token: tokenFromBody
           })
         })
       }
-    } catch {}
+    } catch (proxyError) {
+      console.warn('Proxy logout failed:', proxyError)
+    }
     
     return NextResponse.json({
       success: true,
-      message: 'Logged out successfully'
+      message: 'Logged out successfully',
+      cleared_session: !!tokenFromBody
     })
 
   } catch (error) {

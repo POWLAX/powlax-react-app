@@ -31,9 +31,9 @@ export async function getUserSecurityContext(userId: string): Promise<SecurityCo
       .from('users')
       .select(`
         *,
-        organization:organizations(*),
+        organization:club_organizations(*),
         teams:team_members!inner(
-          team:teams!inner(*)
+          team:team_teams!inner(*)
         ),
         children:parent_child_relationships!parent_id(
           child:users!child_id(*)
@@ -90,7 +90,7 @@ export async function fetchDashboardData(
 async function fetchAdminDashboard(userId: string): Promise<DashboardData> {
   const [organizations, users, subscriptions] = await Promise.all([
     // Get all organizations
-    supabase.from('organizations').select('*').order('created_at', { ascending: false }),
+    supabase.from('club_organizations').select('*').order('created_at', { ascending: false }),
     
     // Get user statistics
     supabase.from('users').select('roles', { count: 'exact' }),
@@ -131,14 +131,14 @@ async function fetchDirectorDashboard(
   const [orgData, teams, coaches, players] = await Promise.all([
     // Get organization details
     supabase
-      .from('organizations')
+      .from('club_organizations')
       .select('*')
       .eq('id', context.organizationId)
       .single(),
     
     // Get all teams in organization
     supabase
-      .from('teams')
+      .from('team_teams')
       .select('*')
       .eq('organization_id', context.organizationId),
     
@@ -192,10 +192,10 @@ async function fetchCoachDashboard(
   const [teams, roster, practices, drills] = await Promise.all([
     // Get coach's teams
     supabase
-      .from('teams')
+      .from('team_teams')
       .select(`
         *,
-        organization:organizations(name)
+        organization:club_organizations(name)
       `)
       .in('id', context.teamIds),
     
@@ -208,7 +208,7 @@ async function fetchCoachDashboard(
       .eq('role', 'player')
       .in('team_id', context.teamIds),
     
-    // Get recent practice plans (when practice_plans table exists)
+    // Get recent practice plans (from practices table)
     Promise.resolve({ data: [] }), // Placeholder
     
     // Get favorite drills (when drills table exists)
@@ -251,9 +251,9 @@ async function fetchPlayerDashboard(
     supabase
       .from('team_members')
       .select(`
-        team:teams(
+        team:team_teams(
           *,
-          organization:organizations(name)
+          organization:club_organizations(name)
         )
       `)
       .eq('user_id', userId)
@@ -309,7 +309,7 @@ async function fetchParentDashboard(
       .from('team_members')
       .select(`
         user_id,
-        team:teams(*)
+        team:team_teams(*)
       `)
       .in('user_id', context.childIds)
       .eq('role', 'player'),

@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     // Get counts from database
     const [orgsResult, teamsResult, rolesResult] = await Promise.all([
-      supabase.from('organizations').select('id', { count: 'exact', head: true }),
+      supabase.from('clubs').select('id', { count: 'exact', head: true }),
       supabase.from('teams').select('id', { count: 'exact', head: true }),
       supabase.from('user_team_roles').select('id', { count: 'exact', head: true })
     ])

@@ -15,27 +15,12 @@ export async function GET() {
       auth: { autoRefreshToken: false, persistSession: false }
     })
 
-    const [{ data: prefOrgs, error: orgErr1 }, { data: prefTeams, error: teamErr1 }, { data: members, error: memErr }] = await Promise.all([
-      supabase.from('club_organizations').select('id, name').order('name'),
-      supabase.from('team_teams').select('id, name, club_id').order('name'),
+    // Query the actual tables (club_organizations and team_teams don't exist)
+    const [{ data: orgs, error: orgErr }, { data: teams, error: teamErr }, { data: members, error: memErr }] = await Promise.all([
+      supabase.from('clubs').select('id, name').order('name'),
+      supabase.from('teams').select('id, name, club_id').order('name'),
       supabase.from('team_members').select('team_id, user_id, role')
     ])
-
-    // Fallback to legacy tables if prefix query failed or returned empty
-    let orgs = prefOrgs || []
-    if ((orgErr1 && orgErr1.message.includes('does not exist')) || (orgs.length === 0)) {
-      const { data: legacyOrgs } = await supabase.from('organizations').select('id, name').order('name')
-      orgs = legacyOrgs || []
-    }
-
-    let teams = prefTeams || []
-    if ((teamErr1 && teamErr1.message.includes('does not exist')) || (teams.length === 0)) {
-      const { data: legacyTeams } = await supabase.from('teams').select('id, name, organization_id').order('name')
-      teams = (legacyTeams || []).map((x: any) => ({ id: x.id, name: x.name, club_id: x.organization_id || null }))
-    }
-
-    const orgErr = null
-    const teamErr = null
 
     if (orgErr) throw orgErr
     if (teamErr) throw teamErr
@@ -46,11 +31,19 @@ export async function GET() {
     if (userIds.length) {
       const { data: users, error: ue } = await supabase
         .from('users')
-        .select('id, email, full_name, username')
+        .select('id, email, display_name')
         .in('id', userIds)
-      if (ue) throw ue
-      for (const u of users || []) {
-        usersById[u.id as string] = { email: u.email as string, full_name: u.full_name as string, username: u.username as string }
+      if (ue) {
+        // If users table fails, just continue without user data
+        console.error('Error fetching users:', ue)
+      } else {
+        for (const u of users || []) {
+          usersById[u.id as string] = { 
+            email: u.email as string, 
+            full_name: u.display_name as string || u.email as string, 
+            username: u.email as string // Use email as username fallback
+          }
+        }
       }
     }
 

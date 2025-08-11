@@ -7,9 +7,10 @@ import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   Trophy, Target, Shield, Zap, TrendingUp, Calendar,
-  Award, Clock, CheckCircle, Circle, Star
+  Award, Clock, CheckCircle, Circle, Star, Loader2
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
 
 interface ProgressData {
   totalWorkoutsCompleted: number
@@ -58,6 +59,7 @@ interface SkillProgress {
 }
 
 export default function ProgressPage() {
+  const { user, loading: authLoading } = useAuth()
   const [progressData, setProgressData] = useState<ProgressData | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedTab, setSelectedTab] = useState('overview')
@@ -65,6 +67,18 @@ export default function ProgressPage() {
   useEffect(() => {
     fetchProgressData()
   }, [])
+
+  // Show loading spinner while authentication is being verified
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto" />
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   const fetchProgressData = async () => {
     try {

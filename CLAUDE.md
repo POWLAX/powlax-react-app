@@ -91,9 +91,9 @@ npm run import:csv       # Import CSV data to Supabase
 npx tsx scripts/*.ts     # Run TypeScript scripts directly
 
 # Common database scripts
-npx tsx scripts/database/check-all-tables.ts  # Verify database tables
-npx tsx scripts/check-existing-tables.ts      # Check table existence
-npx tsx scripts/verify-tables.ts              # Validate table structure
+npx tsx scripts/check-actual-tables.ts        # Verify ACTUAL database tables
+npx tsx scripts/check-supabase-auth.ts        # Check auth integration
+npx tsx scripts/check-wall-ball-tables.ts     # Validate Skills Academy tables
 ```
 
 ## 🤖 POWLAX Agent Usage Guidelines
@@ -292,55 +292,148 @@ useEffect(() => {
 }, [])
 ```
 
-## Database Architecture
+## Database Architecture (ACTUAL - HOLY BIBLE)
 
-### Core Tables (33 Total)
-- **Practice Planning**: `drills`, `strategies`, `concepts`, `skills`, `practice_plans`
-- **Skills Academy**: `skills_academy_series` (41), `skills_academy_workouts` (118), `skills_academy_drills` (167), `skills_academy_workout_drills` (0 - EMPTY)
-- **Wall Ball**: `powlax_wall_ball_collections`, `powlax_wall_ball_collection_drills`, `powlax_wall_ball_drill_library`
-- **User Management**: `user_profiles`, `teams`, `team_members`
-- **Gamification**: `points_ledger`, `badges`, `user_badges`
-- **Assessments**: `quizzes`, `quiz_questions`, `quiz_responses`
+**🚨 CRITICAL: This is the definitive database schema. Reference /contracts/active/database-truth-sync-002.yaml for complete details.**
 
-### ⚠️ Skills Academy Connection Issue
-The `skills_academy_workout_drills` junction table is **EMPTY (0 records)**, causing:
-- Workout modals show "0 drills"
-- "Start Workout" leads to "Workout Not Found"
-- No drill-to-workout connections exist
+### ✅ Active Tables with Data (62 Tables Total)
 
-**Tables exist but need connection:**
-- ✅ `skills_academy_series` (41 series definitions)
-- ✅ `skills_academy_workouts` (118 workouts with drill_count but no actual drills)
-- ✅ `skills_academy_drills` (167 individual drills)
-- ❌ `skills_academy_workout_drills` (empty junction table)
+#### **Skills Academy Core (WORKING)**
+- **skills_academy_drills** (167 records) - Skills Academy drill library
+- **skills_academy_series** (49 records) - Workout series definitions (includes Wall Ball series)
+- **skills_academy_workouts** (166 records) - Workout definitions with `drill_ids` column linking to drills
+- **skills_academy_user_progress** (3 records) - User progress tracking
+- **wall_ball_drill_library** (48 records) - Bite-sized segments of wall ball workout videos
 
-### Taxonomy System
-4-tier bidirectional relationship:
+#### **Practice Planning (ACTIVE)**
+- **powlax_drills** - Main POWLAX drill library (NOT `drills`)
+- **powlax_strategies** - Strategy library (NOT `strategies`)
+- **practices** - THE REAL practice plans table (NOT `practice_plans`)
+- **practice_drills** - Drill instances with notes and modifications
+- **powlax_images** - Drill media images
+- **user_drills** - User-created drills
+- **user_strategies** - User-created strategies
+
+#### **Team Management (WORKING)**
+- **clubs** (2 records) - Organization level above teams (NOT `organizations`)
+- **teams** (10 records) - Team entities
+- **team_members** (25 records) - Team membership
+
+#### **User & Auth (ACTIVE)**
+- **users** - Main user table (NOT `user_profiles`)
+- **user_sessions** - Session management
+- **user_auth_status** - User authentication state
+- **magic_links** (10 records) - Magic link authentication
+- **registration_links** (10 records) - Registration tokens
+- **registration_sessions** - Registration process tracking
+
+#### **Family Management (ACTIVE)**
+- **family_accounts** (1 record) - Family account management
+- **family_members** - Family member relationships
+- **parent_child_relationships** - Parent-child user links
+
+#### **Gamification (PARTIALLY ACTIVE)**
+- **powlax_points_currencies** - Point currency definitions
+- **points_transactions_powlax** - Point transaction history (NOT `points_ledger`)
+- **powlax_player_ranks** - Player ranking definitions
+- **user_badges** - Earned badges (NOT `badges`)
+- **user_badge_progress_powlax** - Badge progress tracking
+- **user_rank_progress_powlax** - Rank progression
+- **user_points_wallets** - User point balances
+- **point_types_powlax** - Point currency types
+- **leaderboard** - Leaderboard rankings
+
+### ⚠️ DEPRECATED/NOT IN USE (DO NOT REFERENCE)
+- **drill_game_states** - Old WordPress backend connections (DEPRECATED)
+- **position_drills** - Duplicate of skills_academy_drills (DO NOT USE)
+- **powlax_academy_workout_collections** - NOT IN USE
+- **workout_drill_mapping** - NOT IN USE (use skills_academy_workouts.drill_ids)
+- **workout_drill_relationships** - NOT IN USE (use skills_academy_workouts.drill_ids)
+
+### ❌ TABLES THAT DO NOT EXIST (NEVER REFERENCE THESE)
+- **drills**, **strategies**, **concepts**, **skills** (use `powlax_` prefix versions)
+- **practice_plans** (use `practices`)
+- **practice_plan_drills** (use `practice_drills`)
+- **powlax_wall_ball_collections** (wall ball is part of skills academy)
+- **organizations** (use `clubs`)
+- **badges** (use `user_badges`)
+- **points_ledger** (use `points_transactions_powlax`)
+- **user_profiles** (use `users`)
+- **skills_academy_workout_drills** (use `drill_ids` column in workouts)
+- **quizzes**, **quiz_questions**, **quiz_responses** (do not exist)
+
+### 🔑 Key Relationships
+
+#### Skills Academy Structure
 ```
-Drills ↔ Strategies ↔ Concepts ↔ Skills
+skills_academy_series (49) 
+    ↓
+skills_academy_workouts (166) [contains drill_ids array]
+    ↓
+skills_academy_drills (167) [referenced by drill_ids]
+
+wall_ball_drill_library (48) - Segments of wall ball workout videos
 ```
 
-### Wall Ball System (Working)
-- `powlax_wall_ball_collections` - Workout collections
-- `powlax_wall_ball_collection_drills` - Junction table
-- `powlax_wall_ball_drill_library` - Individual drills
+#### Practice Planning Structure
+```
+practices (main practice plans)
+    ↓
+practice_drills (instances with notes/modifications)
+    ↓
+powlax_drills / user_drills (drill definitions)
+powlax_strategies / user_strategies (strategy definitions)
+```
 
-### Skills Academy System (Partial)
-**Correct Table Structure:**
-- `skills_academy_series` - Series definitions (41 records) ✅
-- `skills_academy_workouts` - Individual workouts (118 records) ✅
-- `skills_academy_drills` - Drill library (167 records) ✅
-- `skills_academy_workout_drills` - Junction table (0 records) ❌ EMPTY
+#### User Hierarchy
+```
+clubs (2)
+    ↓
+teams (10)
+    ↓
+team_members (25)
+    ↓
+users (main user table)
+```
 
-**Connection Method Needed:**
-Workouts need to connect to drills either through:
-1. Populating the junction table with workout_id + drill_id relationships
-2. Creating helper function to programmatically connect workouts to appropriate drills
-3. Using drill categories/tags to auto-associate drills with workouts
+### 🚨 CRITICAL DATABASE WARNINGS
+
+1. **NEVER** reference tables that don't exist
+2. **ALWAYS** use `powlax_` prefix for content tables
+3. **Wall Ball is part of Skills Academy**, not separate
+4. **NO 4-tier taxonomy** exists (no concepts/skills tables)
+5. **Use `drill_ids` column**, not junction tables
+6. **`users` table**, not `user_profiles`
+7. **`practices` table**, not `practice_plans`
+8. **`clubs` table**, not `organizations`
 
 ## Common Errors & Prevention
 
-### 1. Infinite Loading Spinners ❌
+### 1. Database Table Reference Errors ❌
+```typescript
+// ❌ WRONG - Non-existent tables
+const { data } = useQuery('drills', () => supabase.from('drills').select('*'))
+const { data } = useQuery('strategies', () => supabase.from('strategies').select('*'))
+
+// ✅ CORRECT - Actual table names
+const { data } = useQuery('powlax_drills', () => supabase.from('powlax_drills').select('*'))
+const { data } = useQuery('powlax_strategies', () => supabase.from('powlax_strategies').select('*'))
+```
+
+### 2. Skills Academy Connection Errors ❌
+```typescript
+// ❌ WRONG - Looking for junction table
+const { data } = useQuery('workout_drills', () => 
+  supabase.from('skills_academy_workout_drills').select('*')
+)
+
+// ✅ CORRECT - Use drill_ids column
+const { data } = useQuery('workout', () => 
+  supabase.from('skills_academy_workouts').select('*, drill_ids')
+)
+```
+
+### 3. Infinite Loading Spinners ❌
 ```typescript
 // ❌ WRONG - Blocks on auth
 const { user, loading } = useAuth()
@@ -351,7 +444,7 @@ const [loading, setLoading] = useState(false)
 return loading ? <LoadingSpinner /> : <Content />
 ```
 
-### 2. Missing Imports ❌
+### 4. Missing Imports ❌
 ```typescript
 // ❌ WRONG - Trophy not imported
 <Trophy className="w-5 h-5" />
@@ -360,25 +453,13 @@ return loading ? <LoadingSpinner /> : <Content />
 import { Trophy } from 'lucide-react'
 ```
 
-### 3. Unescaped Quotes ❌
+### 5. Unescaped Quotes ❌
 ```typescript
 // ❌ WRONG
 <p>doesn't work</p>
 
 // ✅ CORRECT
 <p>doesn&apos;t work</p>
-```
-
-### 4. Vendor Chunk Errors ❌
-```typescript
-// ❌ WRONG - Client library in server component
-import { Toaster } from 'sonner'
-
-// ✅ CORRECT - Use client wrapper
-'use client'
-export function ToasterProvider() {
-  return <Toaster position="top-right" />
-}
 ```
 
 ## Component Patterns
@@ -408,18 +489,18 @@ powlax: {
 ## Key Features Status
 
 ### ✅ Completed
-- Practice Planner core functionality
-- Drill library with search and filtering
-- Wall Ball workouts UI
+- Practice Planner core functionality using `practices` and `practice_drills` tables
+- Skills Academy with 49 series, 166 workouts, 167 drills
+- Wall Ball integrated into Skills Academy (48 drill segments)
 - Mobile-responsive navigation
-- Basic authentication flow
+- Supabase Auth integration with `users`, `user_sessions`, and `magic_links`
 - All main pages working (Dashboard, Teams, Academy, etc.)
 
-### 🚧 In Progress
-- Skills Academy workout runner
-- Team management system
-- Gamification points system
-- WordPress data migration
+### 🚧 In Progress  
+- Connecting gamification system (`user_points_wallets`, `user_badges`)
+- Team management using `clubs`, `teams`, `team_members`
+- Family account system (`family_accounts`, `parent_child_relationships`)
+- Practice planner integration with `powlax_drills` and `powlax_strategies`
 
 ## Commit & Production Guidelines
 
@@ -491,8 +572,17 @@ curl -s "http://localhost:3000/dashboard" | head -20
 # Find loading spinners (indicates stuck state)
 curl -s "http://localhost:3000/dashboard" | grep -i "loading"
 
-# Verify Supabase connection
-npx tsx scripts/database/check-all-tables.ts
+# Verify ACTUAL database tables
+npx tsx scripts/check-actual-tables.ts
+
+# Check Skills Academy connections
+npx tsx scripts/check-wall-ball-tables.ts
+
+# Verify gamification tables
+npx tsx scripts/check-gamification-tables.ts
+
+# Check for incorrect table references
+grep -r "skills_academy_workout_drills\|drills_powlax\|practice_plans" src/
 
 # Check for TypeScript errors
 npm run typecheck
@@ -513,12 +603,15 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key  # For scripts only
 ```
 
-## WordPress Migration Notes
+## Data Migration Notes
 
-- Legacy data in `/csv-exports/` directory
-- Import scripts in `/scripts/` transform to Supabase schema
-- Import WordPress groups: `npx tsx scripts/imports/wordpress-groups-analyze-and-import.ts`
-- Maintain backward compatibility during transition
+- Legacy data in `/docs/Wordpress CSV's/` directory
+- Import scripts in `/scripts/` transform to Supabase schema  
+- Skills Academy data successfully migrated to `skills_academy_*` tables
+- Wall Ball data integrated as part of Skills Academy system
+- Team data in `clubs` (2), `teams` (10), `team_members` (25)
+- Auth system uses Supabase Auth with custom `users` table
+- Gamification tables ready for point system activation
 
 ## Performance Benchmarks
 

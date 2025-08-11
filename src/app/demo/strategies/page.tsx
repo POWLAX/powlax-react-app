@@ -48,7 +48,7 @@ export default function StrategiesPage() {
   const fetchStrategies = async () => {
     try {
       const { data, error } = await supabase
-        .from('strategies_powlax')
+        .from('powlax_strategies')
         .select('*')
         .order('strategy_name')
 

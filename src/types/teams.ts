@@ -1,37 +1,43 @@
-// Organization Types (Club OS and Club Team OS)
-export interface Organization {
+// Club Types (ACTIVE TABLE - 'clubs', NOT 'organizations')
+export interface Club {
   id: string
   wp_group_id?: number
   name: string
   slug: string
   type: 'club_os' | 'club_team_os'
-  parent_org_id?: string
+  parent_club_id?: string // Updated from parent_org_id
   tier?: 'foundation' | 'growth' | 'command'
-  settings: OrganizationSettings
-  branding: OrganizationBranding
+  settings: ClubSettings
+  branding: ClubBranding
   created_at: string
   updated_at: string
   // Relations
-  parent_org?: Organization
-  child_orgs?: Organization[]
+  parent_club?: Club
+  child_clubs?: Club[]
   teams?: Team[]
 }
 
-export interface OrganizationSettings {
+export interface ClubSettings {
   description?: string
   [key: string]: any
 }
 
-export interface OrganizationBranding {
+export interface ClubBranding {
   primary_color?: string
   secondary_color?: string
   logo_url?: string
 }
 
-// Team Types (Team HQ)
+// Legacy alias for backwards compatibility
+export type Organization = Club
+export type OrganizationSettings = ClubSettings
+export type OrganizationBranding = ClubBranding
+
+// Team Types (Team HQ) - CORRECTED to match actual database!
 export interface Team {
   id: string
-  club_id?: string  // Changed from organization_id
+  club_id: string | null  // 🚨 CONFIRMED: This is the correct database column name
+  organization_id?: string // Legacy compatibility alias
   wp_group_id?: number
   wp_buddyboss_group_id?: number
   name: string
@@ -46,7 +52,8 @@ export interface Team {
   created_at: string
   wp_last_synced?: string
   // Relations
-  organization?: Organization
+  club?: Club // Updated from organization
+  organization?: Club // Legacy compatibility alias
   user_roles?: UserTeamRole[]
 }
 
@@ -58,16 +65,19 @@ export interface TeamSettings {
 }
 
 // User Role Types
-export interface UserOrganizationRole {
+export interface UserClubRole {
   id: string
   user_id: string
-  organization_id: string
+  club_id: string // Updated from organization_id
   role: 'owner' | 'admin' | 'director'
   created_at: string
   // Relations
   user?: any // User type from your auth system
-  organization?: Organization
+  club?: Club
 }
+
+// Legacy alias for backwards compatibility
+export type UserOrganizationRole = UserClubRole
 
 export interface UserTeamRole {
   id: string
@@ -102,22 +112,26 @@ export interface UserTeamAccess {
   team_name: string
   team_slug: string
   user_role: string
-  organization_name: string
-  club_name?: string
+  club_name: string // Updated from organization_name
+  organization_name?: string // Legacy compatibility alias
 }
 
 // Form Types
-export interface CreateOrganizationInput {
+export interface CreateClubInput {
   name: string
   type: 'club_os' | 'club_team_os'
-  parent_org_id?: string
+  parent_club_id?: string // Updated from parent_org_id
   tier?: 'foundation' | 'growth' | 'command'
-  settings?: OrganizationSettings
-  branding?: OrganizationBranding
+  settings?: ClubSettings
+  branding?: ClubBranding
 }
 
+// Legacy alias for backwards compatibility
+export type CreateOrganizationInput = CreateClubInput
+
 export interface CreateTeamInput {
-  club_id?: string  // Changed from organization_id
+  club_id?: string  // 🚨 CONFIRMED: This is correct
+  organization_id?: string // Legacy compatibility alias
   name: string
   team_type?: 'single_team_hq' | 'team_hq'
   subscription_tier?: 'structure' | 'leadership' | 'activated'
@@ -136,8 +150,11 @@ export interface AddUserToTeamInput {
   position?: string
 }
 
-export interface AddUserToOrganizationInput {
+export interface AddUserToClubInput {
   user_id: string
-  organization_id: string
+  club_id: string // Updated from organization_id
   role: 'owner' | 'admin' | 'director'
 }
+
+// Legacy alias for backwards compatibility
+export type AddUserToOrganizationInput = AddUserToClubInput

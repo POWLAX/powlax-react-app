@@ -63,15 +63,15 @@ export function usePracticeTemplates() {
           .from('practice_templates')
           .select(`
             *,
-            organizations!inner(
-              teams!inner(
+            club_organizations!inner(
+              team_teams!inner(
                 team_members!inner(
                   user_id
                 )
               )
             )
           `)
-          .eq('teams.team_members.user_id', user.id)
+          .eq('team_teams.team_members.user_id', user.id)
         
         // Combine all results
         const [publicResult, userResult, orgResult] = await Promise.allSettled([

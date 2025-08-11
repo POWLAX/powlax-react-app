@@ -8,8 +8,8 @@ import { Star, BookOpen, Play, Target, ChevronLeft, ChevronRight, Loader2, Downl
 
 interface Drill {
   id: string
-  name: string
-  duration: number
+  title: string
+  duration_minutes: number
   notes?: string
   videoUrl?: string
   drill_video_url?: string
@@ -143,7 +143,7 @@ export default function StudyDrillModal({ isOpen, onClose, drill, onUpdateDrill 
         <DialogHeader className="px-6 pt-6 pb-4 border-b flex-shrink-0">
           <DialogTitle className="flex items-center gap-2 text-xl pr-48">
             <BookOpen className="h-5 w-5" />
-            {drill?.name || ''}
+            {drill?.title || ''}
           </DialogTitle>
           <div className="absolute top-6 right-6 flex items-center gap-2">
             {drill?.master_pdf_url && (
@@ -385,7 +385,7 @@ export default function StudyDrillModal({ isOpen, onClose, drill, onUpdateDrill 
                     <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
                       <Target className="h-10 w-10 text-green-600" />
                     </div>
-                    <p className="text-green-800 font-medium">{drill.name} Diagram</p>
+                    <p className="text-green-800 font-medium">{drill.title} Diagram</p>
                     <p className="text-green-600 text-sm mt-2">Interactive field diagram would load here</p>
                   </div>
                 )}
@@ -432,7 +432,7 @@ export default function StudyDrillModal({ isOpen, onClose, drill, onUpdateDrill 
                     <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-800 flex items-center justify-center">
                       <Play className="h-10 w-10 text-white" />
                     </div>
-                    <p className="text-white font-medium">{drill.name}</p>
+                    <p className="text-white font-medium">{drill.title}</p>
                     <p className="text-gray-400 text-sm mt-2">Video demonstration</p>
                   </div>
                 )}

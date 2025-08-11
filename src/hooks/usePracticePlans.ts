@@ -2,13 +2,16 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
-import { useSupabase } from '@/hooks/useSupabase'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
 
+// CORRECTED: Practice interface now matches actual database schema!
 export interface PracticePlan {
   id?: string
-  title: string
-  user_id?: string
-  team_id?: string
+  title?: string
+  name?: string // Legacy compatibility alias for title
+  coach_id?: string // 🚨 FIXED: Database uses 'coach_id', not 'user_id'
+  user_id?: string // Legacy compatibility alias
+  team_id?: string // Can be null in database
   practice_date: string
   start_time?: string
   duration_minutes: number
@@ -43,7 +46,7 @@ export interface TimeSlot {
 }
 
 export function usePracticePlans(teamId?: string) {
-  const { user } = useSupabase()
+  const { user } = useAuth()
   const [plans, setPlans] = useState<PracticePlan[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -58,13 +61,8 @@ export function usePracticePlans(teamId?: string) {
     try {
       setLoading(true)
       
-      // Check if new table exists, fallback to old if not
-      const { error: checkError } = await supabase
-        .from('practice_plans')
-        .select('id')
-        .limit(1)
-      
-      const tableName = checkError?.code === '42P01' ? 'practice_plans_collaborative' : 'practice_plans'
+      // Use 'practices' table as specified in database contract
+      const tableName = 'practices'
       
       let query = supabase
         .from(tableName)
@@ -76,13 +74,8 @@ export function usePracticePlans(teamId?: string) {
       }
 
       if (user?.id) {
-        if (tableName === 'practice_plans') {
-          // New table structure
-          query = query.or(`user_id.eq.${user.id}`)
-        } else {
-          // Old table structure
-          query = query.or(`coach_id.eq.${user.id},shared_with.cs.{${user.id}}`)
-        }
+        // Use coach_id for filtering (practices table structure)
+        query = query.or(`coach_id.eq.${user.id}`)
       }
 
       const { data, error } = await query
@@ -100,25 +93,14 @@ export function usePracticePlans(teamId?: string) {
 
   const savePracticePlan = async (plan: Omit<PracticePlan, 'id' | 'created_at' | 'updated_at'>) => {
     try {
-      // Check which table to use
-      const { error: checkError } = await supabase
-        .from('practice_plans')
-        .select('id')
-        .limit(1)
+      // Use 'practices' table as specified in database contract
+      const tableName = 'practices'
       
-      const tableName = checkError?.code === '42P01' ? 'practice_plans_collaborative' : 'practice_plans'
-      
-      const planData = tableName === 'practice_plans' 
-        ? {
-            ...plan,
-            user_id: user?.id,
-            updated_at: new Date().toISOString()
-          }
-        : {
-            ...plan,
-            coach_id: user?.id,
-            updated_at: new Date().toISOString()
-          }
+      const planData = {
+        ...plan,
+        coach_id: user?.id,
+        updated_at: new Date().toISOString()
+      }
 
       const { data, error } = await supabase
         .from(tableName)
@@ -140,13 +122,8 @@ export function usePracticePlans(teamId?: string) {
 
   const updatePracticePlan = async (id: string, updates: Partial<PracticePlan>) => {
     try {
-      // Check which table to use
-      const { error: checkError } = await supabase
-        .from('practice_plans')
-        .select('id')
-        .limit(1)
-      
-      const tableName = checkError?.code === '42P01' ? 'practice_plans_collaborative' : 'practice_plans'
+      // Use 'practices' table as specified in database contract
+      const tableName = 'practices'
       
       const { data, error } = await supabase
         .from(tableName)
@@ -172,13 +149,8 @@ export function usePracticePlans(teamId?: string) {
 
   const deletePracticePlan = async (id: string) => {
     try {
-      // Check which table to use
-      const { error: checkError } = await supabase
-        .from('practice_plans')
-        .select('id')
-        .limit(1)
-      
-      const tableName = checkError?.code === '42P01' ? 'practice_plans_collaborative' : 'practice_plans'
+      // Use 'practices' table as specified in database contract
+      const tableName = 'practices'
       
       const { error } = await supabase
         .from(tableName)
@@ -199,13 +171,8 @@ export function usePracticePlans(teamId?: string) {
 
   const loadPracticePlan = async (id: string) => {
     try {
-      // Check which table to use
-      const { error: checkError } = await supabase
-        .from('practice_plans')
-        .select('id')
-        .limit(1)
-      
-      const tableName = checkError?.code === '42P01' ? 'practice_plans_collaborative' : 'practice_plans'
+      // Use 'practices' table as specified in database contract
+      const tableName = 'practices'
       
       const { data, error } = await supabase
         .from(tableName)

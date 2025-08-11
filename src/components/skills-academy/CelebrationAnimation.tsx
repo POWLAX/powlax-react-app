@@ -63,7 +63,7 @@ export function CelebrationAnimation({ points, isVisible, onAnimationEnd }: Cele
         </div>
       )}
       
-      {/* Central trophy with pulse animation */}
+      {/* Central celebration with player rank and trophy */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div className={`transition-all duration-1000 ${isVisible ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`}>
           <div className="relative">
@@ -71,15 +71,50 @@ export function CelebrationAnimation({ points, isVisible, onAnimationEnd }: Cele
             <div className="absolute inset-0 w-32 h-32 border-4 border-yellow-400 rounded-full animate-ping" />
             <div className="absolute inset-0 w-32 h-32 border-2 border-orange-500 rounded-full animate-pulse" />
             
-            {/* Trophy icon */}
+            {/* Central Trophy with Player Rank overlay */}
             <div className="w-32 h-32 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center relative">
               <Trophy className="w-16 h-16 text-white animate-bounce" />
               
-              {/* Sparkle effects */}
-              <Star className="absolute -top-2 -right-2 w-6 h-6 text-yellow-300 animate-spin" />
-              <Zap className="absolute -bottom-2 -left-2 w-6 h-6 text-orange-300 animate-pulse" />
-              <Award className="absolute top-1/2 -left-8 w-5 h-5 text-yellow-400 animate-bounce" style={{ animationDelay: '0.5s' }} />
-              <Award className="absolute top-1/2 -right-8 w-5 h-5 text-orange-400 animate-bounce" style={{ animationDelay: '1s' }} />
+              {/* Player Rank Achievement overlay */}
+              <div className="absolute -top-8 left-1/2 transform -translate-x-1/2">
+                <div className="w-16 h-16 rounded-full border-2 border-white shadow-lg animate-bounce" style={{ animationDelay: '0.5s' }}>
+                  <img 
+                    src="https://powlax.com/wp-content/uploads/2024/10/Flow-Bro.png"
+                    alt="Flow Bro Rank"
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                </div>
+              </div>
+              
+              {/* Sparkle effects with badge images */}
+              <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full border border-yellow-300 animate-spin">
+                <img 
+                  src="https://powlax.com/wp-content/uploads/2024/10/WB8-Wall-Ball-Wizard.png"
+                  alt="Badge"
+                  className="w-full h-full rounded-full object-cover"
+                />
+              </div>
+              <div className="absolute -bottom-2 -left-2 w-8 h-8 rounded-full border border-orange-300 animate-pulse">
+                <img 
+                  src="https://powlax.com/wp-content/uploads/2024/10/D2-Footwork-Fortress.png"
+                  alt="Badge"
+                  className="w-full h-full rounded-full object-cover"
+                />
+              </div>
+              <div className="absolute top-1/2 -left-10 w-6 h-6 rounded-full border border-yellow-400 animate-bounce" style={{ animationDelay: '0.5s' }}>
+                <img 
+                  src="https://powlax.com/wp-content/uploads/2024/10/A2-Wing-Wizard.png"
+                  alt="Badge"
+                  className="w-full h-full rounded-full object-cover"
+                />
+              </div>
+              <div className="absolute top-1/2 -right-10 w-6 h-6 rounded-full border border-orange-400 animate-bounce" style={{ animationDelay: '1s' }}>
+                <img 
+                  src="https://powlax.com/wp-content/uploads/2024/10/Mid1-Ground-Ball-Guru.png"
+                  alt="Badge"
+                  className="w-full h-full rounded-full object-cover"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -101,9 +136,18 @@ export function CelebrationAnimation({ points, isVisible, onAnimationEnd }: Cele
         </div>
       )}
       
-      {/* Floating achievement badges */}
+      {/* Floating real badge images */}
       <div className="absolute inset-0">
-        {[...Array(8)].map((_, i) => (
+        {[
+          'https://powlax.com/wp-content/uploads/2024/10/A1-Crease-Crawler.png',
+          'https://powlax.com/wp-content/uploads/2024/10/D1-Hip-Hitter.png',
+          'https://powlax.com/wp-content/uploads/2024/10/WB1-Foundation-Ace.png',
+          'https://powlax.com/wp-content/uploads/2024/10/Mid2-Transition-Titan.png',
+          'https://powlax.com/wp-content/uploads/2024/10/A4-Goalies-Nightmare.png',
+          'https://powlax.com/wp-content/uploads/2024/10/D3-Slide-Master.png',
+          'https://powlax.com/wp-content/uploads/2024/10/WB2-Dominant-Dodger.png',
+          'https://powlax.com/wp-content/uploads/2024/10/SS1-Ball-Mover.png'
+        ].map((badgeUrl, i) => (
           <div
             key={i}
             className="absolute animate-bounce"
@@ -114,8 +158,12 @@ export function CelebrationAnimation({ points, isVisible, onAnimationEnd }: Cele
               animationDuration: '2s'
             }}
           >
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center opacity-80">
-              <Star className="w-4 h-4 text-white" />
+            <div className="w-10 h-10 rounded-full border-2 border-white shadow-lg opacity-80 hover:opacity-100 transition-opacity">
+              <img 
+                src={badgeUrl}
+                alt={`Badge ${i + 1}`}
+                className="w-full h-full rounded-full object-cover"
+              />
             </div>
           </div>
         ))}

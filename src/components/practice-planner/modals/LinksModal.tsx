@@ -16,7 +16,8 @@ interface LinksModalProps {
   isOpen: boolean
   onClose: () => void
   drill: {
-    name: string
+    title?: string
+    name?: string
     custom_url?: string
     drill_lab_url_1?: string
     drill_lab_url_2?: string
@@ -60,7 +61,7 @@ export default function LinksModal({ isOpen, onClose, drill }: LinksModalProps) 
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Link className="h-5 w-5" />
-            {drill.name} - External Links
+            {drill.title || drill.name} - External Links
           </DialogTitle>
           <DialogDescription>
             Access additional resources and materials for this drill

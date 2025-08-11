@@ -1,6 +1,6 @@
 'use client'
 
-import { useRequireAuth } from '@/contexts/JWTAuthContext'
+import { useRequireAuth } from '@/contexts/SupabaseAuthContext'
 import { SidebarProvider } from '@/contexts/SidebarContext'
 import BottomNavigation from '@/components/navigation/BottomNavigation'
 import SidebarNavigation from '@/components/navigation/SidebarNavigation'
@@ -11,10 +11,15 @@ export default function AuthenticatedLayout({
 }: {
   children: React.ReactNode
 }) {
-  // Temporarily disable auth loading to fix dashboard
+  // Use the auth hook but don't block on loading
+  // This prevents infinite loading spinners
+  // TODO: Re-enable auth check after fixing auth loading issue
   // const { loading } = useRequireAuth()
-  const loading = false // Force no loading
 
+  // Temporarily bypass auth loading check to fix infinite spinner
+  const loading = false
+
+  // Only show loading spinner briefly on initial load
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">

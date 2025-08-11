@@ -15,7 +15,8 @@ interface VideoModalProps {
   isOpen: boolean
   onClose: () => void
   drill: {
-    name: string
+    title?: string
+    name?: string
     videoUrl?: string
     drill_video_url?: string
   }
@@ -142,7 +143,7 @@ export default function VideoModal({ isOpen, onClose, drill }: VideoModalProps) 
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
-                  title={`${drill.name} drill video`}
+                  title={`${drill.title || drill.name} drill video`}
                   onLoad={() => setIsLoading(false)}
                   onError={() => {
                     setIsLoading(false)

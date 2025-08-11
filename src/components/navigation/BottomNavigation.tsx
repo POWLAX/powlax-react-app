@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
-import { Home, Users, GraduationCap, BookOpen, MessageCircle, ChevronUp, ChevronDown } from 'lucide-react'
+import { Home, Users, GraduationCap, BookOpen, MessageCircle, ChevronUp, ChevronDown, Trophy } from 'lucide-react'
 
 const navItems = [
   {
@@ -22,14 +22,14 @@ const navItems = [
     icon: GraduationCap,
   },
   {
+    name: 'Rewards',
+    href: '/gamification-showcase',
+    icon: Trophy,
+  },
+  {
     name: 'Resources',
     href: '/resources',
     icon: BookOpen,
-  },
-  {
-    name: 'Community',
-    href: '/community',
-    icon: MessageCircle,
   },
 ]
 

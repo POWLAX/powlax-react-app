@@ -1,0 +1,411 @@
+contract_id: "claude-to-claude-auth-migration-007"
+title: "URGENT: Authentication System Migration - WordPress JWT to Supabase Auth"
+type: "claude_to_claude_parallel_general_purpose_agents"
+priority: "CRITICAL"
+created: "2025-01-10"
+status: "ready_for_execution"
+
+# ==========================================
+# ULTRA-THINK PHASE REQUIREMENTS (MANDATORY)
+# ==========================================
+
+ultra_think_requirements:
+  minimum_duration: "10 minutes"
+  required_analysis:
+    - "Map ALL authentication touchpoints across the entire codebase"
+    - "Identify EVERY file that uses useAuth, useSupabase, or JWT tokens"
+    - "Analyze session management flow from login to navigation to logout"
+    - "Identify potential breaking points during migration"
+    - "Map user data preservation strategy"
+    - "Identify file collision risks if using parallel agents"
+    - "Review ALL error prevention guides in docs/development/"
+    - "Understand admin permission detection across all components"
+    - "Map WordPress user migration path without data loss"
+    - "Identify testing requirements for each phase"
+  
+  error_patterns_to_evaluate:
+    - "Authentication loops (401/200 alternating responses)"
+    - "Multiple login prompts during navigation"
+    - "Session state conflicts between providers"
+    - "Admin features not showing despite correct permissions"
+    - "Infinite loading spinners on authenticated pages"
+    - "User data loss during migration"
+    - "Breaking existing WordPress integrations"
+    - "Magic link delivery failures"
+
+  documentation_to_review:
+    - "docs/development/POWLAX_PAGE_ERROR_PREVENTION_GUIDE.md"
+    - "docs/development/PRACTICE_PLANNER_STABILITY_GUIDE.md"
+    - "docs/handoff/memberpress-security-integration-handoff.md"
+    - "docs/architecture/POWLAX-WordPress-MemberPress-Integration-and-Migration-Guide.md"
+    - "AI_FRAMEWORK_ERROR_PREVENTION.md"
+
+# ==========================================
+# ORCHESTRATION STRATEGY
+# ==========================================
+
+orchestration_approach:
+  type: "parallel_general_purpose"
+  agent_count: 3
+  reason: "Critical authentication fix requires focused parallel work"
+  
+# ==========================================
+# PARALLEL AGENT DISTRIBUTION
+# ==========================================
+
+parallel_agents:
+  agent_1_auth_provider:
+    type: "general-purpose"
+    scope: "Core Authentication Provider Migration"
+    focus_files:
+      - "src/app/ClientProviders.tsx"
+      - "src/contexts/JWTAuthContext.tsx"
+      - "src/contexts/AuthContext.tsx"
+      - "src/lib/supabase.ts"
+      - "src/lib/supabase-server.ts"
+    tasks:
+      - "Replace JWTAuthProvider with Supabase AuthProvider"
+      - "Update AuthContext to use Supabase client"
+      - "Ensure consistent auth state management"
+      - "Remove JWT token dependencies"
+    no_touch: ["hooks", "components", "api"]
+    
+  agent_2_api_migration:
+    type: "general-purpose"
+    scope: "API Endpoints and Magic Link System"
+    focus_files:
+      - "src/app/api/auth/validate/route.ts"
+      - "src/app/api/auth/magic-link/route.ts" # create
+      - "src/app/api/auth/logout/route.ts" # create
+      - "src/app/api/auth/session/route.ts" # create
+      - "src/lib/wordpress-auth.ts"
+    tasks:
+      - "Create magic link authentication endpoints"
+      - "Update validation to use Supabase sessions"
+      - "Implement WordPress user bridge"
+      - "Add session management endpoints"
+    no_touch: ["contexts", "components", "hooks"]
+    
+  agent_3_hooks_admin:
+    type: "general-purpose"
+    scope: "Hooks Update and Admin System Fix"
+    focus_files:
+      - "src/hooks/useOrganizations.ts"
+      - "src/hooks/useDrills.ts"
+      - "src/hooks/useStrategies.ts"
+      - "src/hooks/usePracticePlans.ts"
+      - "src/lib/adminPermissions.ts"
+      - "src/hooks/useAdminEdit.ts"
+    tasks:
+      - "Update all hooks to use consistent auth"
+      - "Fix admin detection for Supabase Auth"
+      - "Ensure patrick@powlax.com has admin status"
+      - "Verify admin UI component visibility"
+    no_touch: ["contexts", "api", "components"]
+
+# ==========================================
+# CRITICAL PROBLEM ANALYSIS
+# ==========================================
+
+current_system_conflicts:
+  primary_issue: |
+    Two authentication systems running simultaneously:
+    1. WordPress JWT Authentication (currently active in JWTAuthProvider)
+    2. Supabase Auth expectations (in various hooks and components)
+    
+    This causes:
+    - Multiple login prompts when navigating
+    - 401/200 alternating auth validation responses
+    - Admin features not showing for patrick@powlax.com
+    - Infinite loading on teams page
+    - Session state conflicts
+
+  evidence:
+    - "Terminal logs: POST /api/auth/validate alternating 401/200"
+    - "User report: 'All I see is the study button' (missing admin icons)"
+    - "useTeams hook was using non-existent useSupabase hook"
+    - "Multiple re-authentication prompts during navigation"
+
+# ==========================================
+# IMPLEMENTATION PHASES
+# ==========================================
+
+phase_1_analysis_and_preparation:
+  duration: "15 minutes"
+  tasks:
+    - task: "Deep system analysis"
+      actions:
+        - "Map all authentication touchpoints"
+        - "Identify all files using auth hooks"
+        - "Document current JWT flow"
+        - "Plan Supabase Auth integration"
+      validation: "Complete authentication flow diagram"
+
+phase_2_core_migration:
+  duration: "30 minutes"
+  tasks:
+    - task: "Replace authentication provider"
+      files_to_modify:
+        - "src/app/ClientProviders.tsx"
+        - "src/contexts/JWTAuthContext.tsx"
+        - "src/contexts/AuthContext.tsx"
+      actions:
+        - "Switch from JWTAuthProvider to Supabase AuthProvider"
+        - "Update AuthContext to use Supabase client"
+        - "Ensure consistent auth state management"
+      validation: "Auth provider loads without errors"
+
+    - task: "Create magic link system"
+      files_to_create:
+        - "src/app/api/auth/magic-link/route.ts"
+        - "src/app/api/auth/logout/route.ts"
+        - "src/app/api/auth/session/route.ts"
+      actions:
+        - "Implement magic link generation"
+        - "Create session management endpoints"
+        - "Add logout functionality"
+      validation: "Magic link generation working"
+
+phase_3_user_migration:
+  duration: "20 minutes"
+  tasks:
+    - task: "WordPress user bridge"
+      files_to_modify:
+        - "src/lib/wordpress-auth.ts"
+        - "src/lib/supabase-server.ts"
+      database_changes:
+        - "Add auth_user_id to users table"
+        - "Create user linking function"
+      actions:
+        - "Map WordPress users to Supabase Auth"
+        - "Preserve all user data and progress"
+        - "Handle email-based account linking"
+      validation: "Existing users can login"
+
+phase_4_admin_system_fix:
+  duration: "15 minutes"
+  tasks:
+    - task: "Fix admin detection"
+      files_to_modify:
+        - "src/lib/adminPermissions.ts"
+        - "src/hooks/useAdminEdit.ts"
+      actions:
+        - "Update admin detection for Supabase Auth"
+        - "Ensure patrick@powlax.com has admin status"
+        - "Fix admin UI component visibility"
+      validation: "Admin features visible for patrick@powlax.com"
+
+phase_5_integration_testing:
+  duration: "20 minutes"
+  tasks:
+    - task: "End-to-end authentication flow"
+      test_scenarios:
+        - "New user magic link registration"
+        - "Existing WordPress user login"
+        - "Navigation without re-authentication"
+        - "Admin features visibility"
+        - "Session persistence"
+      validation: "All scenarios pass without errors"
+
+# ==========================================
+# FILES INVENTORY
+# ==========================================
+
+critical_files_to_modify:
+  authentication_core:
+    - path: "src/app/ClientProviders.tsx"
+      current: "Uses JWTAuthProvider"
+      target: "Use Supabase AuthProvider"
+      
+    - path: "src/contexts/JWTAuthContext.tsx"
+      current: "JWT token management"
+      target: "Deprecated or repurposed for migration"
+      
+    - path: "src/contexts/AuthContext.tsx"
+      current: "Mixed auth expectations"
+      target: "Pure Supabase Auth"
+
+  api_endpoints:
+    - path: "src/app/api/auth/validate/route.ts"
+      current: "JWT validation"
+      target: "Supabase session validation"
+      
+    - path: "src/app/api/auth/magic-link/route.ts"
+      current: "Does not exist"
+      target: "Create magic link endpoint"
+
+  hooks_requiring_updates:
+    - "src/hooks/useTeams.ts" # Already fixed
+    - "src/hooks/useOrganizations.ts"
+    - "src/hooks/useDrills.ts"
+    - "src/hooks/useStrategies.ts"
+    - "src/hooks/usePracticePlans.ts"
+
+  admin_system:
+    - "src/lib/adminPermissions.ts"
+    - "src/components/practice-planner/AdminToolbar.tsx"
+    - "src/components/practice-planner/modals/AdminEditModal.tsx"
+
+# ==========================================
+# SUCCESS CRITERIA
+# ==========================================
+
+must_achieve:
+  authentication_flow:
+    - "Single login without multiple prompts"
+    - "No 401/200 alternating responses"
+    - "Seamless navigation between all pages"
+    - "Session persists across page refreshes"
+    
+  admin_functionality:
+    - "patrick@powlax.com sees admin edit icons"
+    - "AdminEditModal opens on icon click"
+    - "Admin toolbar visible in practice planner"
+    - "All admin features functional"
+    
+  user_experience:
+    - "Teams page loads without infinite spinner"
+    - "Dashboard → Teams → Practice Planner navigation works"
+    - "No authentication loops"
+    - "Magic link delivery successful"
+    
+  data_preservation:
+    - "All WordPress users migrated"
+    - "User progress/points/badges preserved"
+    - "Team associations maintained"
+    - "No data loss during migration"
+
+# ==========================================
+# TESTING REQUIREMENTS
+# ==========================================
+
+testing_protocol:
+  unit_tests:
+    - "Auth provider initialization"
+    - "Magic link generation"
+    - "Session management"
+    - "User migration logic"
+    
+  integration_tests:
+    - "Full authentication flow"
+    - "Navigation without re-auth"
+    - "Admin detection and features"
+    - "WordPress user login"
+    
+  manual_verification:
+    - url: "http://localhost:3000/dashboard"
+      check: "Loads without login prompt if authenticated"
+      
+    - url: "http://localhost:3000/teams"
+      check: "No infinite loading spinner"
+      
+    - url: "http://localhost:3000/teams/1/practice-plans"
+      check: "Admin features visible for patrick@powlax.com"
+
+# ==========================================
+# RISK MITIGATION
+# ==========================================
+
+potential_risks:
+  breaking_changes:
+    risk: "Existing users locked out"
+    mitigation: "Implement gradual migration with fallback"
+    
+  data_loss:
+    risk: "User progress lost during migration"
+    mitigation: "Backup before migration, test with subset first"
+    
+  integration_failures:
+    risk: "MemberPress webhooks break"
+    mitigation: "Maintain backward compatibility layer"
+    
+  performance_impact:
+    risk: "Additional auth checks slow down app"
+    mitigation: "Cache session state, minimize auth calls"
+
+rollback_plan:
+  trigger: "Critical auth failures affecting >10% of users"
+  steps:
+    1. "Revert ClientProviders.tsx to JWTAuthProvider"
+    2. "Restore JWT validation endpoints"
+    3. "Clear Supabase auth sessions"
+    4. "Notify users of temporary rollback"
+
+# ==========================================
+# PARALLEL AGENT EXECUTION COMMAND
+# ==========================================
+
+execution_instructions: |
+  TO EXECUTE THIS CONTRACT WITH PARALLEL AGENTS:
+  
+  1. EACH general-purpose agent MUST:
+     a. Spend 5+ minutes in ultra-think phase for their scope
+     b. Read ALL files in their focus_files list
+     c. Analyze error patterns relevant to their tasks
+     d. Stay within their defined boundaries (no_touch)
+  
+  2. Parallel execution approach:
+     a. All 3 agents work simultaneously
+     b. Each agent has exclusive file territories
+     c. No file collision between agents
+     d. Preserve all existing functionality
+  
+  3. Agent-specific success criteria:
+     - Agent 1: Auth provider switched, no JWT references
+     - Agent 2: Magic links working, sessions validated
+     - Agent 3: All hooks updated, admin features visible
+  
+  4. Integration after agents complete:
+     a. Verify no conflicts between changes
+     b. Run full Playwright test suite
+     c. Test complete auth flow end-to-end
+     d. Confirm admin features for patrick@powlax.com
+
+coordination_notes: |
+  - This is THE critical fix for current authentication issues
+  - JWT/Supabase conflict is root cause of multiple problems
+  - Surgical fixes are already in place - don't break them
+  - Focus on auth system, not UI components
+  - Server must remain running on port 3000 during work
+  - Update this contract with progress after each phase
+
+# ==========================================
+# PROGRESS TRACKING
+# ==========================================
+
+progress:
+  ultra_think_completed: true
+  ultra_think_findings: |
+    CRITICAL FINDINGS FROM 15+ MINUTE ULTRA-THINK ANALYSIS:
+    
+    ROOT CAUSE: useSupabase hook conflict, NOT full auth system replacement needed
+    - useSupabase() only returns supabase client, but components expect { user } from it
+    - Line 49 in usePracticePlans.ts: const { user } = useSupabase() // BROKEN
+    - useSupabase.ts only exports: return supabase (no user property)
+    
+    AUTHENTICATION TOUCHPOINT MAP:
+    ✅ WORKING: JWTAuthProvider, JWTAuthContext, jwt-auth.ts, adminPermissions.ts
+    ❌ BROKEN: useSupabase hook expectations, hooks trying to destructure non-existent user
+    ❌ BROKEN: Admin features not showing due to user access conflicts
+    
+    STRATEGIC DECISION: Create auth bridge instead of full migration
+    - Preserve existing JWT WordPress integration
+    - Bridge JWT user data to Supabase hook expectations
+    - Fix admin detection immediately
+    - Maintain zero downtime
+    
+    FILES NEEDING SURGICAL FIXES (not full replacement):
+    - src/hooks/useSupabase.ts: Add user property from JWT auth
+    - src/hooks/usePracticePlans.ts: Fix user destructuring
+    - Similar fixes for other hooks expecting useSupabase().user
+    
+    ADMIN ISSUE: patrick@powlax.com user not accessible to admin components
+  phase_1_completed: false
+  phase_2_completed: false
+  phase_3_completed: false
+  phase_4_completed: false
+  phase_5_completed: false
+  
+blockers: []
+
+completion_timestamp: null

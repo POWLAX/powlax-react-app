@@ -12,8 +12,8 @@ import {
 interface DrillCardProps {
   drill: {
     id: string
-    name: string
-    duration: number
+    title: string
+    duration_minutes: number
     notes?: string
     videoUrl?: string
     labUrl?: string
@@ -63,11 +63,11 @@ const DrillCard = memo(function DrillCard({
   const [editingNotes, setEditingNotes] = useState(false)
   const [tempNotes, setTempNotes] = useState(drill.notes || '')
   const [editingDuration, setEditingDuration] = useState(false)
-  const [tempDuration, setTempDuration] = useState(drill.duration.toString())
+  const [tempDuration, setTempDuration] = useState((drill.duration_minutes || 0).toString())
 
   const handleDurationChange = (newDuration: number) => {
     if (newDuration > 0 && newDuration <= 999) {
-      onUpdate({ ...drill, duration: newDuration })
+      onUpdate({ ...drill, duration_minutes: newDuration })
     }
   }
 
@@ -76,7 +76,7 @@ const DrillCard = memo(function DrillCard({
     if (duration > 0 && duration <= 999) {
       handleDurationChange(duration)
     } else {
-      setTempDuration(drill.duration.toString())
+      setTempDuration((drill.duration_minutes || 0).toString())
     }
     setEditingDuration(false)
   }
@@ -107,7 +107,7 @@ const DrillCard = memo(function DrillCard({
         <div className="p-4">
           {/* Drill name and Study button */}
           <div className="flex items-center gap-2 mb-3 pr-8">
-            <h4 className="font-medium text-gray-900">{drill.name}</h4>
+            <h4 className="font-medium text-gray-900">{drill.title}</h4>
             <span className="text-gray-400">•</span>
             <button 
               onClick={handleStudyClick}
@@ -201,7 +201,7 @@ const DrillCard = memo(function DrillCard({
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleDurationSave()
                     if (e.key === 'Escape') {
-                      setTempDuration(drill.duration.toString())
+                      setTempDuration((drill.duration_minutes || 0).toString())
                       setEditingDuration(false)
                     }
                   }}
@@ -217,7 +217,7 @@ const DrillCard = memo(function DrillCard({
                 onClick={() => setEditingDuration(true)}
                 className="px-2 py-0.5 bg-white/20 rounded hover:bg-white/30 transition-colors text-sm font-semibold"
               >
-                {drill.duration}m
+                {drill.duration_minutes || 0}m
               </button>
             )}
           </div>
@@ -239,7 +239,7 @@ const DrillCard = memo(function DrillCard({
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2 flex-1">
             <h3 className="text-sm font-medium text-gray-900">
-              {drill.name}
+              {drill.title}
             </h3>
             <span className="text-gray-400 text-xs">•</span>
             <button 

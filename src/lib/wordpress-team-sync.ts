@@ -132,7 +132,7 @@ class WordPressTeamSync {
 
       for (const org of organizations) {
         const { data: existing } = await this.supabase
-          .from('organizations')
+          .from('clubs')
           .select('id')
           .eq('wp_group_id', org.wp_group_id)
           .single()
@@ -140,7 +140,7 @@ class WordPressTeamSync {
         if (existing) {
           // Update existing
           const { error } = await this.supabase
-            .from('organizations')
+            .from('clubs')
             .update({
               ...org,
               wp_last_synced: new Date().toISOString()
@@ -155,7 +155,7 @@ class WordPressTeamSync {
         } else {
           // Create new
           const { error } = await this.supabase
-            .from('organizations')
+            .from('clubs')
             .insert({
               ...org,
               wp_last_synced: new Date().toISOString()
@@ -231,7 +231,7 @@ class WordPressTeamSync {
 
       // Get default organization
       const { data: defaultOrg } = await this.supabase
-        .from('organizations')
+        .from('clubs')
         .select('id')
         .eq('type', 'club_os')
         .single()

@@ -16,7 +16,8 @@ interface LacrosseLabModalProps {
   isOpen: boolean
   onClose: () => void
   drill: {
-    name: string
+    title?: string
+    name?: string
     drill_lab_url_1?: string
     drill_lab_url_2?: string
     drill_lab_url_3?: string
@@ -198,7 +199,7 @@ export default function LacrosseLabModal({ isOpen, onClose, drill }: LacrosseLab
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-[#003366]">
               <Beaker className="h-5 w-5" />
-              {drill.name} - Lacrosse Lab
+              {drill.title || drill.name} - Lacrosse Lab
             </DialogTitle>
           </DialogHeader>
           <div className="flex items-center justify-center p-8">
@@ -215,7 +216,7 @@ export default function LacrosseLabModal({ isOpen, onClose, drill }: LacrosseLab
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Beaker className="h-5 w-5" />
-            {drill.name} - Lacrosse Lab Diagrams
+            {drill.title || drill.name} - Lacrosse Lab Diagrams
           </DialogTitle>
           <DialogDescription className="flex items-center justify-between text-gray-600">
             <span>Interactive drill diagrams and field setups</span>

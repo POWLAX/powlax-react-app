@@ -18,8 +18,8 @@ import LacrosseLabModal from './modals/LacrosseLabModal'
 
 interface Drill {
   id: string
-  name: string
-  duration: number
+  title: string
+  duration_minutes: number
   category: string
   strategies?: string[]
   concepts?: string[]
@@ -139,8 +139,8 @@ export default function DrillSelectionAccordion({
                     />
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
-                        <h4 className="font-medium text-gray-900">{drill.name}</h4>
-                        <span className="text-sm text-gray-500">{drill.duration}min</span>
+                        <h4 className="font-medium text-gray-900">{drill.title}</h4>
+                        <span className="text-sm text-gray-500">{drill.duration_minutes}min</span>
                       </div>
                       
                       {drill.strategies && drill.strategies.length > 0 && (
@@ -257,8 +257,8 @@ export default function DrillSelectionAccordion({
                         />
                         <div className="flex-1">
                           <div className="flex items-center justify-between">
-                            <h4 className="font-medium text-gray-900 text-sm">{drill.name}</h4>
-                            <span className="text-xs text-gray-500">{drill.duration}min</span>
+                            <h4 className="font-medium text-gray-900 text-sm">{drill.title}</h4>
+                            <span className="text-xs text-gray-500">{drill.duration_minutes}min</span>
                           </div>
                           
                           {drill.strategies && drill.strategies.length > 0 && (

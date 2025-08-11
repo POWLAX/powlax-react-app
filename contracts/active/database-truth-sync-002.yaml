@@ -1,0 +1,347 @@
+# DATABASE TRUTH SYNCHRONIZATION CONTRACT
+# Contract ID: database-truth-sync-002
+# Created: 2025-01-11
+# Branch: Claude-to-Claude-Sub-Agent-Work-Flow
+# STATUS: HOLY BIBLE - THIS IS THE DEFINITIVE SOURCE OF TRUTH
+
+## 🎯 CONTRACT OBJECTIVE
+Synchronize all code, documentation, and references to match the ACTUAL database structure.
+Remove all references to non-existent tables and deprecated systems.
+
+## 📊 PART 1: THE ACTUAL DATABASE TRUTH
+
+### ✅ TABLES IN ACTIVE USE (HOLY BIBLE)
+
+#### SKILLS ACADEMY CORE (WORKING)
+- **skills_academy_drills** (167 records) - Skills Academy drill library
+- **skills_academy_series** (49 records) - Workout series definitions (includes Wall Ball series)
+- **skills_academy_workouts** (166 records) - Workout definitions with `drill_ids` column linking to drills
+- **skills_academy_user_progress** (3 records) - User progress tracking (NOT YET connected to points_wallets)
+- **wall_ball_drill_library** (48 records) - Bite-sized segments of wall ball workout videos
+
+#### PRACTICE PLANNING (ACTIVE)
+- **powlax_drills** - Main POWLAX drill library
+- **powlax_strategies** - Strategy library
+- **practices** - THE REAL practice plans table (can edit in Supabase)
+- **practice_drills** - Drill instances with notes and modifications
+- **powlax_images** - Drill media images (just renamed from drill_media)
+- **user_drills** - User-created drills
+- **user_strategies** - User-created strategies
+
+#### TEAM MANAGEMENT (WORKING)
+- **clubs** (2 records) - Organization level above teams
+- **teams** (10 records) - Team entities
+- **team_members** (25 records) - Team membership
+
+#### USER & AUTH (ACTIVE)
+- **users** - Main user table (NOT user_profiles!)
+- **user_sessions** - Session management
+- **user_auth_status** - User authentication state
+- **magic_links** (10 records) - Magic link authentication
+- **registration_links** (10 records) - Registration tokens
+- **registration_sessions** - Registration process tracking
+
+#### FAMILY MANAGEMENT (ACTIVE)
+- **family_accounts** (1 record) - Family account management
+- **family_members** - Family member relationships
+- **parent_child_relationships** - Parent-child user links
+
+#### GAMIFICATION (PARTIALLY ACTIVE)
+- **powlax_points_currencies** - Point currency definitions
+- **points_transactions_powlax** - Point transaction history
+- **powlax_player_ranks** - Player ranking definitions
+- **user_badges** - Earned badges
+- **user_badge_progress_powlax** - Badge progress tracking
+- **user_rank_progress_powlax** - Rank progression
+- **user_points_wallets** - User point balances (NOT YET connected to skills_academy_user_progress)
+- **point_types_powlax** - Point currency types
+- **leaderboard** - Leaderboard rankings (points not yet showing)
+
+#### MEMBERSHIP (ACTIVE)
+- **membership_entitlements** - User access rights
+- **membership_products** - Membership product definitions
+- **user_subscriptions** - Subscription data
+
+#### MISC ACTIVE
+- **age_bands** - Age progression for drills, strategies, and skills
+- **drill_point_summary** - Point values for drills
+- **drill_lab_urls** - Lacrosse Lab URL associations
+- **user_favorites** - User favorites
+- **user_onboarding** - Onboarding progress
+- **user_events** - User event tracking
+- **user_activity_log** - Activity tracking (empty - may not track admin/dev)
+
+#### WEBHOOKS (ACTIVE)
+- **webhook_events** - Webhook event log
+- **webhook_queue** - Webhook processing queue
+- **webhook_queue_stats** - Webhook statistics
+- **webhook_recent_failures** - Failed webhook tracking
+- **wp_sync_log** - WordPress sync tracking
+
+### ⚠️ DEPRECATED/NOT IN USE (DO NOT REFERENCE)
+- **drill_game_states** - Old WordPress backend connections (DEPRECATED)
+- **drill_lacrosse_lab** - NOT IN USE
+- **game_states** - Old WordPress system (moved to drills/strategies directly)
+- **position_drills** - Duplicate of skills_academy_drills (DO NOT USE)
+- **powlax_academy_workout_collections** - NOT IN USE
+- **powlax_academy_workout_item_answers** - NOT IN USE
+- **powlax_academy_workout_items** - NOT IN USE
+- **powlax_workout_drill_sequences** - NOT IN USE
+- **workout_drill_mapping** - NOT IN USE (use skills_academy_workouts.drill_ids)
+- **workout_drill_relationships** - NOT IN USE (use skills_academy_workouts.drill_ids)
+
+### 🔄 UNCLEAR/NEEDS INVESTIGATION
+- **practice_summary** - Possibly duplicate of `practices` (linked to deprecated items?)
+- **practice_templates** (3 records) - MOCK DATA placeholder, will update later
+- **skills_academy_workouts_backup** - Backup with extras to upload later
+
+### ❌ TABLES THAT DO NOT EXIST (STOP LOOKING FOR THESE!)
+- **drills** - DOES NOT EXIST (use `powlax_drills`)
+- **strategies** - DOES NOT EXIST (use `powlax_strategies`)
+- **concepts** - DOES NOT EXIST
+- **skills** - DOES NOT EXIST
+- **drill_strategies** - DOES NOT EXIST
+- **strategy_concepts** - DOES NOT EXIST
+- **concept_skills** - DOES NOT EXIST
+- **practice_plans** - DOES NOT EXIST (use `practices`)
+- **practice_plan_drills** - DOES NOT EXIST (use `practice_drills`)
+- **powlax_wall_ball_collections** - DOES NOT EXIST
+- **powlax_wall_ball_drill_library** - DOES NOT EXIST (use `wall_ball_drill_library`)
+- **organizations** - DOES NOT EXIST (use `clubs`)
+- **badges** - DOES NOT EXIST (use `user_badges`)
+- **points_ledger** - DOES NOT EXIST (use `points_transactions_powlax`)
+- **point_types** - DOES NOT EXIST (use `point_types_powlax`)
+- **player_ranks** - DOES NOT EXIST (use `powlax_player_ranks`)
+- **user_profiles** - DOES NOT EXIST (use `users`)
+- **skills_academy_workout_drills** - DOES NOT EXIST (use `drill_ids` column)
+- **drills_powlax** - DOES NOT EXIST
+- **strategies_powlax** - DOES NOT EXIST
+- **team_playbooks** - DOES NOT EXIST
+- **playbook_plays** - DOES NOT EXIST
+- **achievements** - DOES NOT EXIST
+- **quizzes** - DOES NOT EXIST
+- **quiz_questions** - DOES NOT EXIST
+- **quiz_responses** - DOES NOT EXIST
+
+## 📋 PART 2: CRITICAL RELATIONSHIPS TO UNDERSTAND
+
+### Skills Academy Relationships
+```
+skills_academy_series (49) 
+    ↓
+skills_academy_workouts (166) [contains drill_ids array]
+    ↓
+skills_academy_drills (167) [referenced by drill_ids]
+
+wall_ball_drill_library (48) - Segments of wall ball workout videos
+```
+
+### Practice Planning Relationships
+```
+practices (main practice plans)
+    ↓
+practice_drills (instances with notes/modifications)
+    ↓
+powlax_drills / user_drills (drill definitions)
+powlax_strategies / user_strategies (strategy definitions)
+```
+
+### User Hierarchy
+```
+clubs (2)
+    ↓
+teams (10)
+    ↓
+team_members (25)
+    ↓
+users (main user table)
+```
+
+## 🔧 PART 3: CODE FIXES REQUIRED
+
+### Files with Wrong Table References (MUST FIX):
+```
+src/app/demo/strategies/page.tsx         → Change 'strategies_powlax' to 'powlax_strategies'
+src/app/api/workouts/complete/route.ts   → Change 'drills_powlax' to 'powlax_drills'
+scripts/database/*.ts                    → Remove all non-existent table references
+src/hooks/useDrills.ts                   → Use 'powlax_drills' not 'drills'
+src/hooks/useStrategies.ts               → Use 'powlax_strategies' not 'strategies'
+src/types/database.ts                    → Update all type definitions
+```
+
+### Documentation to Update:
+```
+/CLAUDE.md                                → Complete rewrite with actual tables
+/src/claude.md                            → Update component documentation
+/docs/database/*.md                       → Fix all database documentation
+/README.md                                → Update project documentation
+```
+
+### Authentication to Fix:
+```
+src/hooks/useWordPressAuth.tsx           → Remove completely
+src/lib/wordpress-role-management.ts     → Remove WordPress dependencies
+src/app/api/auth/validate/route.ts       → Remove WordPress metadata
+src/app/api/auth/magic-link/route.ts     → Remove wordpressAuth imports
+src/app/api/auth/session/route.ts        → Remove WordPress metadata
+```
+
+## 🚀 PART 4: SUB-AGENT EXECUTION PLAN
+
+### ULTRA THINK PHASE (5+ minutes MANDATORY)
+Evaluate:
+1. All files referencing non-existent tables
+2. Type definition mismatches with actual schema
+3. Hook dependencies on wrong table names
+4. Documentation spreading false information
+5. Authentication still using WordPress patterns
+
+### PARALLEL AGENT ASSIGNMENTS:
+
+#### Agent 1: Database Types & Hooks
+**Scope:** Fix all TypeScript types and database hooks
+**Critical Changes:**
+- Update types to use `powlax_drills` not `drills`
+- Update types to use `powlax_strategies` not `strategies`
+- Remove all references to non-existent tables
+- Fix Skills Academy to use `drill_ids` column
+**Files:**
+- `/src/types/database.ts`
+- `/src/types/*.ts`
+- `/src/hooks/use*.ts`
+- `/src/lib/supabase*.ts`
+
+#### Agent 2: Skills Academy & Wall Ball
+**Scope:** Fix Skills Academy implementation
+**Critical Changes:**
+- Use `skills_academy_workouts.drill_ids` for drill relationships
+- Reference `wall_ball_drill_library` for wall ball segments
+- Remove any junction table references
+**Files:**
+- `/src/app/(authenticated)/skills-academy/**`
+- `/src/components/skills-academy/**`
+- Any wall ball references
+
+#### Agent 3: Practice Planning
+**Scope:** Fix practice planner references
+**Critical Changes:**
+- Use `practices` not `practice_plans`
+- Use `practice_drills` not `practice_plan_drills`
+- Use `powlax_drills` and `powlax_strategies`
+- Reference `powlax_images` for media
+**Files:**
+- `/src/app/(authenticated)/practice-planner/**`
+- `/src/components/practice-planner/**`
+- `/src/hooks/usePractice*.ts`
+
+#### Agent 4: Documentation Rewrite
+**Scope:** Complete documentation overhaul
+**Critical Changes:**
+- Document ONLY tables that exist
+- Mark deprecated tables clearly
+- Update all database references
+- Create new CLAUDE.md based on truth
+**Files:**
+- `/CLAUDE.md`
+- `/src/claude.md`
+- `/docs/**/*.md`
+- `/README.md`
+
+#### Agent 5: Authentication Cleanup
+**Scope:** Remove WordPress auth remnants
+**Critical Changes:**
+- Delete WordPress auth files
+- Ensure all auth uses Supabase Auth
+- Update user references to `users` table
+- Clean up session management
+**Files:**
+- `/src/contexts/*Auth*.tsx`
+- `/src/app/api/auth/**`
+- `/src/lib/*auth*.ts`
+- `/src/middleware/*.ts`
+
+## 📝 PART 5: VALIDATION TESTS
+
+### Must Pass All:
+```bash
+# No references to non-existent tables
+grep -r "drills_powlax\|strategies_powlax\|concepts\|skills\|practice_plans" src/
+
+# Correct table usage
+grep -r "powlax_drills\|powlax_strategies\|practices" src/ | wc -l
+# Should return many results
+
+# No WordPress auth
+grep -r "wordpressAuth\|JWT\|jwt" src/ --exclude="*.md"
+# Should return nothing
+
+# Type checking passes
+npm run typecheck
+
+# Build succeeds
+npm run build
+```
+
+## 🎯 PART 6: NEW CLAUDE.MD STRUCTURE
+
+```markdown
+## Database Architecture (ACTUAL - HOLY BIBLE)
+
+### ✅ Active Tables with Data
+- **Skills Academy** (WORKING)
+  - `skills_academy_series`: 49 series
+  - `skills_academy_workouts`: 166 workouts (drill_ids column = junction)
+  - `skills_academy_drills`: 167 drills
+  - `wall_ball_drill_library`: 48 wall ball segments
+
+- **Teams** (WORKING)
+  - `clubs`: 2 organizations
+  - `teams`: 10 teams
+  - `team_members`: 25 members
+
+### 📦 Active Tables (Awaiting Data/Connection)
+- **Practice Planning**
+  - `powlax_drills`: Main drill library
+  - `powlax_strategies`: Strategy library
+  - `practices`: Practice plans
+  - `practice_drills`: Drill instances
+
+- **Gamification**
+  - `powlax_points_currencies`: Point types
+  - `user_points_wallets`: Balances (needs connection)
+
+### ❌ DO NOT USE
+- Any table with 'concepts' or 'skills'
+- Any legacy '_powlax' suffix tables
+- `drill_game_states`, `game_states` (deprecated)
+- `position_drills` (duplicate)
+- Junction tables (use drill_ids column instead)
+```
+
+## ⚠️ CRITICAL WARNINGS
+
+1. **NEVER** reference tables that don't exist
+2. **ALWAYS** use `powlax_` prefix for content tables
+3. **Wall Ball is part of Skills Academy**, not separate
+4. **No 4-tier taxonomy** exists (no concepts/skills)
+5. **Use `drill_ids` column**, not junction tables
+6. **`users` table**, not `user_profiles`
+7. **`practices` table**, not `practice_plans`
+
+## ✅ SUCCESS CRITERIA
+
+- [ ] Zero references to non-existent tables
+- [ ] All types match actual database schema
+- [ ] Skills Academy uses drill_ids column
+- [ ] Practice planner uses correct tables
+- [ ] No WordPress auth code remains
+- [ ] Documentation 100% accurate
+- [ ] All tests pass
+- [ ] Build succeeds
+
+---
+
+**Contract Status:** READY FOR ULTRA THINK
+**Database Truth:** ESTABLISHED
+**Risk Level:** High (many incorrect assumptions to fix)
+**Estimated Time:** 3-4 hours with parallel agents

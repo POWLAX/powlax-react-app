@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { useSupabase } from '@/hooks/useSupabase'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
 import type { 
   Organization, 
   Team,
@@ -12,7 +12,7 @@ import type {
 } from '@/types/teams'
 
 export function useOrganizations() {
-  const { user } = useSupabase()
+  const { user } = useAuth()
   const [organizations, setOrganizations] = useState<Organization[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -32,10 +32,10 @@ export function useOrganizations() {
         .from('user_organization_roles')
         .select(`
           *,
-          organization:organizations(
+          organization:club_organizations(
             *,
-            parent_org:organizations!parent_org_id(*),
-            teams(*)
+            parent_org:club_organizations!parent_org_id(*),
+            team_teams(*)
           )
         `)
         .eq('user_id', user!.id)
@@ -46,11 +46,11 @@ export function useOrganizations() {
       const { data: teamRoles, error: teamError } = await supabase
         .from('user_team_roles')
         .select(`
-          team:teams(
-            organization:organizations(
+          team:team_teams(
+            organization:club_organizations(
               *,
-              parent_org:organizations!parent_org_id(*),
-              teams(*)
+              parent_org:club_organizations!parent_org_id(*),
+              team_teams(*)
             )
           )
         `)
@@ -85,7 +85,7 @@ export function useOrganizations() {
         .replace(/(^-|-$)/g, '')
 
       const { data, error } = await supabase
-        .from('organizations')
+        .from('club_organizations')
         .insert([{
           ...input,
           slug
@@ -115,7 +115,7 @@ export function useOrganizations() {
   const updateOrganization = async (id: string, updates: Partial<Organization>) => {
     try {
       const { data, error } = await supabase
-        .from('organizations')
+        .from('club_organizations')
         .update(updates)
         .eq('id', id)
         .select()
@@ -134,7 +134,7 @@ export function useOrganizations() {
   const deleteOrganization = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('organizations')
+        .from('club_organizations')
         .delete()
         .eq('id', id)
 
@@ -214,11 +214,11 @@ export function useOrganization(organizationId: string) {
       
       // Fetch organization with parent and children
       const { data: orgData, error: orgError } = await supabase
-        .from('organizations')
+        .from('club_organizations')
         .select(`
           *,
-          parent_org:organizations!parent_org_id(*),
-          child_orgs:organizations!parent_org_id(*)
+          parent_org:club_organizations!parent_org_id(*),
+          child_orgs:club_organizations!parent_org_id(*)
         `)
         .eq('id', organizationId)
         .single()
@@ -228,7 +228,7 @@ export function useOrganization(organizationId: string) {
 
       // Fetch all teams under this organization
       const { data: teamData, error: teamError } = await supabase
-        .from('teams')
+        .from('team_teams')
         .select('*')
         .eq('organization_id', organizationId)
 

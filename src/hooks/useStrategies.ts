@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 
-// Interface for both POWLAX and user strategies
+// CORRECTED: Interface now matches actual database schemas!
 export interface Strategy {
-  id: string
-  strategy_name: string
+  id: string | number // 🚨 FIXED: POWLAX strategies use number IDs, user strategies use string UUIDs
+  strategy_name: string // 🚨 CONFIRMED: This is correct in database
+  name?: string // Legacy compatibility alias
   strategy_categories?: string
   description?: string
   lacrosse_lab_links?: any
@@ -90,8 +91,9 @@ export function useStrategies() {
       // Add POWLAX strategies
       if (powlaxData && powlaxData.length > 0) {
         const powlaxStrategies = powlaxData.map((strategy: any) => ({
-          id: strategy.id?.toString(),
+          id: strategy.id, // 🚨 FIXED: Keep as number for POWLAX strategies
           strategy_name: strategy.strategy_name,
+          name: strategy.strategy_name, // Legacy compatibility alias
           strategy_categories: strategy.strategy_categories,
           description: strategy.description,
           lacrosse_lab_links: strategy.lacrosse_lab_links,
@@ -117,9 +119,10 @@ export function useStrategies() {
       // Add user strategies
       if (userData && userData.length > 0) {
         const userStrategies = userData.map((strategy: any) => ({
-          id: `user-${strategy.id}`, // Prefix to avoid ID conflicts
+          id: `user-${strategy.id}`, // 🚨 FIXED: Keep as string for user strategies
           user_id: strategy.user_id,
           strategy_name: strategy.strategy_name,
+          name: strategy.strategy_name, // Legacy compatibility alias
           strategy_categories: strategy.strategy_categories,
           description: strategy.description,
           lacrosse_lab_links: strategy.lacrosse_lab_links,

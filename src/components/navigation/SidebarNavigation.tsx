@@ -2,8 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Users, GraduationCap, BookOpen, MessageCircle, LogOut, User, ChevronLeft, ChevronRight } from 'lucide-react'
-import { useAuth } from '@/contexts/JWTAuthContext'
+import { Home, Users, GraduationCap, BookOpen, MessageCircle, LogOut, User, ChevronLeft, ChevronRight, Trophy, Shield, UserCog, Database, Edit3 } from 'lucide-react'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
 import { useSidebar } from '@/contexts/SidebarContext'
 import { Button } from '@/components/ui/button'
 import SearchTrigger from '@/components/search/SearchTrigger'
@@ -27,6 +27,11 @@ const navItems = [
     icon: GraduationCap,
   },
   {
+    name: 'Achievements',
+    href: '/gamification-showcase',
+    icon: Trophy,
+  },
+  {
     name: 'Resources',
     href: '/resources',
     icon: BookOpen,
@@ -38,10 +43,37 @@ const navItems = [
   },
 ]
 
+// Admin navigation items - only shown to administrators
+const adminItems = [
+  {
+    name: 'Role Management',
+    href: '/admin/role-management',
+    icon: UserCog,
+  },
+  {
+    name: 'Drill Editor',
+    href: '/admin/drill-editor',
+    icon: Edit3,
+  },
+  {
+    name: 'WP Import Check',
+    href: '/admin/wp-import-check',
+    icon: Database,
+  },
+  {
+    name: 'Sync Data',
+    href: '/admin/sync',
+    icon: Shield,
+  },
+]
+
 export default function SidebarNavigation() {
   const pathname = usePathname()
   const { user, logout } = useAuth()
   const { isCollapsed, toggleSidebar } = useSidebar()
+
+  // Check if user is admin (has administrator role in their roles array)
+  const isAdmin = user?.roles?.includes('administrator') || user?.roles?.includes('admin')
 
   return (
     <aside className={`hidden md:flex md:flex-shrink-0 transition-all duration-300 ease-in-out ${
@@ -141,6 +173,54 @@ export default function SidebarNavigation() {
                   </div>
                 )
               })}
+              
+              {/* Admin Section - Only visible to administrators */}
+              {isAdmin && (
+                <>
+                  {/* Admin Divider */}
+                  <div className="pt-2 mt-2 border-t border-gray-700">
+                    <div className={`px-2 py-1 text-xs font-semibold text-gray-400 uppercase tracking-wider ${
+                      isCollapsed ? 'opacity-0' : 'opacity-100'
+                    } transition-opacity duration-150`}>
+                      Admin
+                    </div>
+                  </div>
+                  
+                  {/* Admin Navigation Items */}
+                  {adminItems.map((item) => {
+                    const isActive = pathname.startsWith(item.href)
+                    const Icon = item.icon
+                    
+                    return (
+                      <div key={item.name} className="relative group">
+                        <Link
+                          href={item.href}
+                          className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+                            isActive
+                              ? 'bg-gray-900 text-white'
+                              : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                          }`}
+                        >
+                          <Icon className="h-6 w-6 flex-shrink-0 mr-3" />
+                          <span className={`whitespace-nowrap transition-opacity duration-150 ${
+                            isCollapsed ? 'opacity-0' : 'opacity-100'
+                          }`}>
+                            {item.name}
+                          </span>
+                        </Link>
+                        
+                        {/* Tooltip for collapsed state */}
+                        {isCollapsed && (
+                          <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50">
+                            {item.name}
+                            <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-0 h-0 border-r-4 border-r-gray-900 border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </>
+              )}
             </nav>
           </div>
           
@@ -153,7 +233,7 @@ export default function SidebarNavigation() {
                   {/* User tooltip for collapsed state */}
                   {isCollapsed && (
                     <div className="absolute left-full ml-2 bottom-0 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50">
-                      {user.first_name || user.username}
+                      {user.name || user.username || user.email}
                       <div className="absolute left-0 bottom-1/2 translate-y-1/2 -translate-x-1 w-0 h-0 border-r-4 border-r-gray-900 border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
                     </div>
                   )}
@@ -162,7 +242,7 @@ export default function SidebarNavigation() {
                   isCollapsed ? 'opacity-0' : 'opacity-100'
                 }`}>
                   <p className="text-sm font-medium text-white truncate">
-                    {user.first_name || user.username}
+                    {user.name || user.username || user.email}
                   </p>
                   <p className="text-xs text-gray-300 truncate">
                     {user.email}

@@ -116,11 +116,13 @@ export interface SkillsAcademyWorkoutNew {
   average_completion_time: number | null;
   completion_rate: number | null;
   is_active: boolean;
+  // 🚨 CRITICAL: Use drill_ids column, NOT junction table
+  drill_ids: string[] | null; // JSON array of drill IDs
   created_at: string;
   updated_at: string;
   // Join data
   series?: SkillsAcademySeries;
-  drills?: SkillsAcademyWorkoutDrill[];
+  drills?: SkillsAcademyDrillNew[]; // Direct drills, not junction
 }
 
 export interface SkillsAcademyDrillNew {
@@ -155,25 +157,20 @@ export interface SkillsAcademyDrillNew {
   updated_at: string;
 }
 
-export interface SkillsAcademyWorkoutDrill {
-  id: number;
-  workout_id: number;
-  drill_id: number;
-  sequence_order: number;
-  drill_duration_seconds: number | null;
-  rest_duration_seconds: number;
-  workout_specific_instructions: string | null;
-  repetitions: number | null;
-  video_type: 'strong_hand' | 'off_hand' | 'both_hands';
-  is_optional: boolean;
-  points_value: number;
-  // Join data - connects to skills_academy_drills table
-  drill?: SkillsAcademyDrillNew;
-}
+// 🚨 DEPRECATED: Junction table does NOT exist - use drill_ids column instead
+// export interface SkillsAcademyWorkoutDrill - DO NOT USE
 
-// IMPORTANT: skills_academy_workout_drills junction table is currently EMPTY (0 records)
-// This means workouts have no drill connections, causing "0 drills" in modals
-// Need to populate this table or create helper function to connect workouts to drills
+// IMPORTANT: skills_academy_workout_drills junction table DOES NOT EXIST
+// Instead, use the drill_ids column in skills_academy_workouts table
+// This column contains a JSON array of drill IDs that reference skills_academy_drills
+
+// Helper type for drill with workout context
+export interface DrillWithWorkoutContext extends SkillsAcademyDrillNew {
+  sequence_order?: number;
+  workout_specific_instructions?: string | null;
+  is_optional?: boolean;
+  points_value?: number;
+}
 
 export interface SkillsAcademyUserProgress {
   id: number;
@@ -195,7 +192,7 @@ export interface SkillsAcademyUserProgress {
 }
 
 // Helper types
-export interface DrillWithProgress extends SkillsAcademyWorkoutDrill {
+export interface DrillWithProgress extends DrillWithWorkoutContext {
   isCompleted: boolean;
   isCurrent: boolean;
   isLocked: boolean;
@@ -206,6 +203,8 @@ export interface WorkoutSession {
   drills: DrillWithProgress[];
   progress: SkillsAcademyUserProgress | null;
   currentDrillIndex: number;
+  // Helper to get drills from drill_ids
+  getDrillsFromIds?: (drillIds: string[]) => Promise<SkillsAcademyDrillNew[]>;
 }
 
 // Grouped workouts by size

@@ -1,0 +1,263 @@
+---
+contractId: table-mapping-emergency-fix-002
+contractVersion: 2.0.0
+contractDate: 2025-01-09
+contractType: parallel-execution
+projectName: POWLAX Emergency Table & Column Mapping Fix
+clientContext: |
+  CRITICAL: The surgical enhancements are using WRONG table AND column names!
+  Database has data but code can't access it due to mismatched names.
+  Must fix table names AND ensure column names match actual schema.
+
+# EXECUTION STRATEGY
+executionStrategy:
+  type: parallel
+  agentCount: 3
+  ultraThinkCompleted: true
+  ultraThinkDuration: 10
+  estimatedDuration: 90
+  priority: EMERGENCY
+  
+# CRITICAL TABLE & COLUMN MAPPINGS
+tableAndColumnMappings:
+  powlax_drills:
+    tableName:
+      wrong: drills_powlax
+      correct: powlax_drills
+    criticalColumns:
+      - id (UUID)
+      - title (not name!)
+      - content
+      - category
+      - duration_minutes (number, not string!)
+      - video_url
+      - notes
+      - lacrosse_lab_urls (JSON array)
+      - min_players
+      - max_players
+      
+  powlax_strategies:
+    tableName:
+      wrong: strategies_powlax
+      correct: powlax_strategies
+    criticalColumns:
+      - id (number, not UUID!)
+      - strategy_name (not title!)
+      - strategy_categories
+      - description
+      - vimeo_link
+      - lacrosse_lab_links (JSON array)
+      - thumbnail_urls (JSON array)
+      
+  users:
+    tableName:
+      wrong: user_profiles
+      correct: users
+    criticalColumns:
+      - id (UUID)
+      - email
+      - display_name (not full_name!)
+      - role (singular)
+      - roles (array, often empty!)
+      - wp_user_id
+      - auth_user_id
+      
+  team_teams:
+    tableName:
+      wrong: teams
+      correct: team_teams
+    criticalColumns:
+      - id (UUID)
+      - club_id (not organization_id!)
+      - name
+      - created_at
+      - updated_at
+      
+  practices:
+    tableName:
+      wrong: practice_plans
+      correct: practices
+    criticalColumns:
+      - id (UUID)
+      - coach_id (UUID reference to users)
+      - team_id (can be null!)
+      - name
+      - practice_date
+      - duration_minutes
+      - notes
+      - raw_wp_data (JSON)
+
+# REQUIREMENTS
+requirements:
+  critical:
+    - Fix ALL table name references
+    - Fix column name mismatches
+    - Handle null values properly
+    - Fix type mismatches (id types, duration formats)
+    - Ensure admin features work for patrick@powlax.com
+    
+  columnFixesNeeded:
+    - Drills: use 'title' not 'name'
+    - Drills: duration_minutes is number not string
+    - Strategies: id is number not UUID
+    - Strategies: use 'strategy_name' not 'title'
+    - Users: use 'display_name' not 'full_name'
+    - Teams: use 'club_id' not 'organization_id'
+    - Users: roles array is often empty, check 'role' field
+
+# PARALLEL AGENTS DISTRIBUTION
+parallelAgents:
+  agent_1:
+    type: general-purpose
+    name: "Hooks & Queries Fixer"
+    scope: "Fix all database hooks with correct tables AND columns"
+    criticalTasks:
+      - Fix table names (powlax_drills, powlax_strategies, etc.)
+      - Fix column references (title vs name, etc.)
+      - Handle nullable fields properly
+      - Fix type conversions (duration as number)
+    responsibilities:
+      - Update ALL hooks to use correct table names
+      - Fix column name references in select statements
+      - Update type definitions to match actual schemas
+      - Handle null values gracefully
+      - Test queries don't break with actual data
+    files:
+      modify:
+        - src/hooks/usePracticePlans.ts
+        - src/hooks/useTeams.ts
+        - src/hooks/useOrganizations.ts
+        - src/hooks/useDrills.ts
+        - src/hooks/useStrategies.ts
+        - src/hooks/useAdminEdit.ts
+        - src/hooks/useTeamPlaybook.ts
+        - src/lib/dashboard-queries.ts
+      noTouch:
+        - src/components/*
+        - src/app/*
+    deliverables:
+      - All queries using correct table AND column names
+      - Type definitions matching actual schemas
+      - Null handling for optional fields
+      - Duration as number not string
+
+  agent_2:
+    type: general-purpose
+    name: "Component Props Fixer"
+    scope: "Fix components expecting wrong property names"
+    criticalTasks:
+      - Update drill cards to use 'title' not 'name'
+      - Fix duration display (number vs string)
+      - Update strategy cards with correct props
+      - Fix user display names
+    responsibilities:
+      - Find components using wrong prop names
+      - Update drill components for 'title' field
+      - Fix duration formatting (minutes as number)
+      - Update strategy components for correct fields
+      - Fix admin permission checks with actual user structure
+    files:
+      modify:
+        - src/components/practice-planner/DrillCard.tsx
+        - src/components/practice-planner/DrillLibraryTabbed.tsx
+        - src/components/practice-planner/StrategyCard.tsx
+        - src/components/practice-planner/modals/StudyDrillModal.tsx
+        - src/components/practice-planner/modals/StudyStrategyModal.tsx
+        - src/lib/adminPermissions.ts
+      read:
+        - src/hooks/useDrills.ts
+        - src/hooks/useStrategies.ts
+      noTouch:
+        - src/app/*
+    deliverables:
+      - Components using correct property names
+      - Duration displayed correctly
+      - Admin features working for patrick@powlax.com
+      - User names displayed properly
+
+  agent_3:
+    type: general-purpose
+    name: "Type Definitions & Interfaces Fixer"
+    scope: "Update TypeScript types to match actual schemas"
+    criticalTasks:
+      - Update Drill interface (title not name)
+      - Update Strategy interface (strategy_name)
+      - Update User interface (display_name)
+      - Fix ID types (number vs UUID)
+    responsibilities:
+      - Find all type definitions
+      - Update interfaces to match actual columns
+      - Fix type mismatches
+      - Add proper null handling
+      - Create migration helper functions
+    files:
+      modify:
+        - src/types/database.ts
+        - src/types/drill.ts
+        - src/types/strategy.ts
+        - src/types/user.ts
+        - src/types/team.ts
+      create:
+        - src/lib/column-mappers.ts
+        - docs/ACTUAL_VS_EXPECTED_SCHEMAS.md
+      noTouch:
+        - src/app/*
+    deliverables:
+      - All types matching actual database
+      - Helper functions for data transformation
+      - Documentation of schema differences
+      - No TypeScript errors
+
+# VERIFICATION DATA
+verificationData:
+  confirmedRecords:
+    powlax_drills: "135 drills with 'title' field"
+    powlax_strategies: "220 strategies with 'strategy_name'"
+    users: "patrick@powlax.com has display_name='powlax_patrick'"
+    team_teams: "10 teams with 'club_id'"
+    practices: "25 practices with coach_id references"
+
+# TESTING CHECKLIST
+testingChecklist:
+  immediate:
+    - [ ] Drills display with correct titles
+    - [ ] Strategies show with strategy_name
+    - [ ] Admin buttons visible for patrick@powlax.com
+    - [ ] Durations display as minutes (number)
+    - [ ] Teams load with correct names
+    
+  criticalPaths:
+    - [ ] Create drill - uses title field
+    - [ ] Save practice - references correct tables
+    - [ ] Admin edit - verifies user properly
+    - [ ] Team playbook - saves with correct IDs
+
+# SUCCESS METRICS
+successMetrics:
+  required:
+    - All 135 drills display with titles
+    - All 220 strategies show with names
+    - patrick@powlax.com sees admin features
+    - Practice saving works
+    - No TypeScript errors
+    - No console errors
+
+# CONTRACT STATUS
+status:
+  stage: ready_for_emergency_execution
+  severity: CRITICAL
+  lastUpdated: 2025-01-09T12:00:00Z
+  
+# NOTES
+notes: |
+  EMERGENCY: Complete system failure due to wrong table AND column names!
+  
+  KEY DISCOVERIES:
+  - Drills use 'title' not 'name'
+  - Strategies use 'strategy_name' not 'title'
+  - Users have 'display_name' not 'full_name'
+  - Teams use 'club_id' not 'organization_id'
+  - Many IDs are different types than expected
+  - Duration is number not string
+  
+  Once fixed, all 135 drills and 220 strategies will be accessible!

@@ -2,8 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
+import { Loader2 } from 'lucide-react'
 
 export default function TestSupabasePage() {
+  const { user, loading: authLoading } = useAuth()
   const [status, setStatus] = useState<string>('Testing connection...')
   const [drillCount, setDrillCount] = useState<number | null>(null)
   const [tables, setTables] = useState<string[]>([])
@@ -12,6 +15,18 @@ export default function TestSupabasePage() {
   useEffect(() => {
     testConnection()
   }, [])
+
+  // Show loading spinner while authentication is being verified
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto" />
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   const testConnection = async () => {
     try {
@@ -25,7 +40,7 @@ export default function TestSupabasePage() {
 
       // Test 2: List tables (check if drills table exists)
       const { data: tablesData, error: tablesError } = await supabase
-        .from('drills')
+        .from('powlax_drills')
         .select('count', { count: 'exact', head: true })
 
       if (tablesError) {
@@ -48,7 +63,7 @@ export default function TestSupabasePage() {
 
       // Test 3: Count drills
       const { count, error: countError } = await supabase
-        .from('drills')
+        .from('powlax_drills')
         .select('*', { count: 'exact', head: true })
 
       if (!countError && count !== null) {
@@ -57,7 +72,7 @@ export default function TestSupabasePage() {
 
       // Test 4: Get sample drill
       const { data: sampleDrill, error: sampleError } = await supabase
-        .from('drills')
+        .from('powlax_drills')
         .select('*')
         .limit(1)
         .single()

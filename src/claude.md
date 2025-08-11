@@ -129,16 +129,58 @@ export default function Page() {
 }
 ```
 
-### 📊 Database Integration Notes
+### 📊 Database Integration Notes (ACTUAL SCHEMA)
 
-#### Wall Ball Implementation
-- **Tables**: `powlax_wall_ball_collections`, `powlax_wall_ball_collection_drills`, `powlax_wall_ball_drill_library`
-- **Sample Data**: Created via `scripts/database/create_sample_wall_ball_data.sql`
-- **Status**: Working with 4 sample workouts
+**🚨 CRITICAL: Reference `/contracts/active/database-truth-sync-002.yaml` for complete truth**
 
-#### Skills Academy Tables
-- **Current State**: Using mock data for workouts page
-- **Next Step**: Implement proper database queries after fixing loading patterns
+#### 🔐 Core Authentication Tables (Supabase Auth)
+- **users** - Main user table (NOT user_profiles) with auth_user_id linking to Supabase Auth
+- **user_sessions** - Active session tracking with tokens, expiry, IP tracking  
+- **user_auth_status** - User authentication state
+- **magic_links** (10 records) - Magic link authentication tokens
+- **registration_links** (10 records) - Registration tokens
+- **registration_sessions** - Track registration progress (started → verified → completed)
+- **user_onboarding** - Step-by-step onboarding progress tracking
+- **webhook_queue** - Reliable webhook processing with retry logic
+- **webhook_events** - Complete audit trail of webhook events
+- **membership_products** - Membership product definitions
+- **membership_entitlements** - User access rights
+- **user_subscriptions** - Subscription data
+
+#### 🏢 Team & Family Management
+- **clubs** (2 records) - Organization level (NOT organizations)
+- **teams** (10 records) - Team entities  
+- **team_members** (25 records) - Team membership
+- **family_accounts** (1 record) - Family account management
+- **family_members** - Family member relationships
+- **parent_child_relationships** - Parent-child user links
+
+#### 🎯 Practice Planning Tables
+- **powlax_drills** - Main POWLAX drill library (NOT drills)
+- **powlax_strategies** - Strategy library (NOT strategies)
+- **practices** - Practice plans (NOT practice_plans)
+- **practice_drills** - Drill instances with notes and modifications
+- **powlax_images** - Drill media images
+- **user_drills** - User-created drills
+- **user_strategies** - User-created strategies
+
+#### 🏆 Skills Academy Tables (WORKING)
+- **skills_academy_series** (49 records) - Workout series definitions
+- **skills_academy_workouts** (166 records) - Workout definitions with `drill_ids` column
+- **skills_academy_drills** (167 records) - Individual drill definitions
+- **skills_academy_user_progress** (3 records) - User workout completion tracking
+- **wall_ball_drill_library** (48 records) - Wall ball drill segments
+
+#### 🎮 Gamification Tables (PARTIALLY ACTIVE)
+- **user_points_wallets** - User point balances per currency
+- **user_badges** - User badge awards (NOT badges)
+- **powlax_points_currencies** - Point currency definitions
+- **points_transactions_powlax** - Point transaction history (NOT points_ledger)
+- **powlax_player_ranks** - Player ranking definitions
+- **user_badge_progress_powlax** - Badge progress tracking
+- **user_rank_progress_powlax** - Rank progression
+- **point_types_powlax** - Point currency types
+- **leaderboard** - Leaderboard rankings
 
 ### 🚀 Development Workflow
 
@@ -219,10 +261,13 @@ src/
 └── lib/                   # Database and utilities
 ```
 
-### Database Schema
-- **Wall Ball**: 3-table structure with collections, drills, and library
-- **Skills Academy**: Workouts table (mock data currently)
-- **User Management**: WordPress integration (to be implemented)
+### Database Schema (ACTUAL)
+- **Skills Academy**: 49 series, 166 workouts, 167 drills (WORKING with drill_ids column)
+- **Wall Ball**: Integrated into Skills Academy as 48 drill segments
+- **Teams**: clubs (2) → teams (10) → team_members (25)
+- **Auth**: Supabase Auth + custom users table + magic links
+- **Practice Planning**: powlax_drills, powlax_strategies, practices, practice_drills
+- **Gamification**: user_points_wallets, user_badges, powlax_points_currencies
 
 ### Authentication Flow
 - **Current**: Simplified, non-blocking approach

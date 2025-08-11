@@ -1,9 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import dynamic from 'next/dynamic'
-// Load client-only providers without touching the server bundle to avoid vendor-chunk SSR issues
-const ClientProviders = dynamic(() => import('./ClientProviders'), { ssr: false })
+import ClientProviders from './ClientProviders'
 
 const inter = Inter({ subsets: ['latin'] })
 

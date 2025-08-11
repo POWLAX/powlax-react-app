@@ -9,7 +9,8 @@ import {
   Play,
   Clock,
   MapPin,
-  CheckCircle
+  CheckCircle,
+  BookOpen
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -100,6 +101,15 @@ export function CoachQuickActions({ team, upcomingEvents }: CoachQuickActionsPro
 
         {/* Quick action grid - Large touch targets for mobile/field use */}
         <div className="grid grid-cols-2 gap-4">
+          {/* Team Playbook */}
+          <Button 
+            variant="outline" 
+            className="h-20 flex flex-col items-center justify-center space-y-2 hover:bg-powlax-blue/5 hover:border-powlax-blue/20"
+            onClick={() => window.location.href = `/teams/${team.id}/playbook`}
+          >
+            <BookOpen className="h-6 w-6 text-powlax-blue" />
+            <span className="text-sm font-medium">Team Playbook</span>
+          </Button>
           {/* Take Attendance */}
           <Dialog open={attendanceOpen} onOpenChange={setAttendanceOpen}>
             <DialogTrigger asChild>

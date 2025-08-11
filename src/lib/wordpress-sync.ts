@@ -60,7 +60,7 @@ export class WordPressSync {
             // Check if drill already exists if skipExisting is true
             if (skipExisting) {
               const { data: existing } = await supabase
-                .from('drills')
+                .from('powlax_drills')
                 .select('id')
                 .eq('wordpress_id', wpDrill.id)
                 .single();
@@ -82,7 +82,7 @@ export class WordPressSync {
 
             // Insert into Supabase
             const { error } = await supabase
-              .from('drills')
+              .from('powlax_drills')
               .upsert(transformedDrill, { 
                 onConflict: 'wordpress_id' 
               });

@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/contexts/JWTAuthContext';
+import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { 
   getUserSecurityContext, 
   fetchDashboardData,
@@ -182,7 +182,7 @@ export function useOrganizationData(organizationId?: string) {
 
       // Fetch organization data
       const { data, error } = await supabase
-        .from('organizations')
+        .from('club_organizations')
         .select(`
           *,
           teams:teams(count),
@@ -218,10 +218,10 @@ export function useTeamData(teamId?: string) {
 
       // Fetch team data
       const { data, error } = await supabase
-        .from('teams')
+        .from('team_teams')
         .select(`
           *,
-          organization:organizations(name),
+          organization:club_organizations(name),
           members:team_members(
             user:users(*)
           )
@@ -256,7 +256,7 @@ export function useChildrenData() {
         .select(`
           *,
           teams:team_members(
-            team:teams(*)
+            team:team_teams(*)
           )
         `)
         .in('id', securityContext.childIds);

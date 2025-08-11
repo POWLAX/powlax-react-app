@@ -1,0 +1,252 @@
+contract_id: "authentication-system-migration-006"
+title: "Fix Authentication System - WordPress JWT to Supabase Auth Migration"
+type: "critical_system_fix"
+priority: "URGENT"
+created: "2025-01-09"
+status: "active"
+
+# ==========================================
+# CRITICAL AUTHENTICATION SYSTEM FIX
+# ==========================================
+
+problem_statement: |
+  The POWLAX app has conflicting authentication systems causing:
+  - Multiple login prompts during navigation
+  - Infinite loading on teams page
+  - Admin features not showing (edit icons missing)
+  - 401/200 mixed auth responses in logs
+  - Session conflicts between dashboard → teams → practice planner
+
+root_cause: |
+  Two conflicting auth systems running simultaneously:
+  1. WordPress JWT Authentication (currently active)
+  2. Supabase Auth + Magic Links (recommended in MemberPress docs)
+  
+  The app uses JWTAuthProvider but some hooks expect Supabase auth,
+  causing authentication loops and validation failures.
+
+# ==========================================
+# SOLUTION REQUIREMENTS
+# ==========================================
+
+target_outcome: |
+  Migrate to Supabase Auth + Magic Links system as originally planned:
+  - Single, consistent authentication flow
+  - No multiple login prompts
+  - Admin features working for patrick@powlax.com
+  - Seamless navigation between all pages
+  - Existing WordPress users preserved and migrated safely
+
+# ==========================================
+# TECHNICAL IMPLEMENTATION
+# ==========================================
+
+implementation_steps:
+  phase_1_immediate_fixes:
+    - task: "Replace JWTAuthProvider with Supabase Auth"
+      files_to_modify:
+        - "src/app/ClientProviders.tsx"
+        - "src/contexts/JWTAuthContext.tsx" 
+      action: "Switch from JWTAuthProvider to Supabase AuthProvider"
+      
+    - task: "Fix useTeams hook authentication"
+      files_to_modify:
+        - "src/hooks/useTeams.ts"
+      action: "Already fixed - using useAuth() instead of useSupabase()"
+      status: "completed"
+      
+    - task: "Implement magic link authentication API"
+      files_to_create:
+        - "src/app/api/auth/magic-link/route.ts"
+        - "src/app/api/auth/logout/route.ts"
+      action: "Create magic link endpoints as per handoff document"
+
+  phase_2_user_migration:
+    - task: "Create user migration system"
+      files_to_modify:
+        - "src/lib/wordpress-auth.ts"
+      action: "Add function to migrate WordPress users to Supabase Auth"
+      
+    - task: "Link existing WordPress users to Supabase Auth"
+      database_changes:
+        - "Add auth_user_id column to users table"
+        - "Create migration function for existing users"
+      action: "Preserve all user data while switching auth method"
+
+  phase_3_admin_system:
+    - task: "Fix admin detection for patrick@powlax.com"
+      files_to_modify:
+        - "src/lib/adminPermissions.ts"
+        - "src/contexts/AuthContext.tsx"
+      action: "Ensure admin status works with Supabase Auth"
+      
+    - task: "Test admin features visibility"
+      verification:
+        - "Admin edit icons appear on hover (drill cards)"
+        - "AdminEditModal opens when clicking edit icons"
+        - "Admin toolbar shows in practice planner"
+
+# ==========================================
+# CURRENT STATE ANALYSIS
+# ==========================================
+
+current_issues_identified:
+  auth_loops:
+    description: "Multiple auth validation attempts causing 401/200 mixed responses"
+    evidence: "Terminal logs show: POST /api/auth/validate 401/200 alternating"
+    location: "All authenticated pages"
+    
+  missing_admin_features:
+    description: "Admin edit icons not visible, only Study button shows"
+    evidence: "User reports 'All I see is the study button'"
+    location: "Practice Planner drill library (right side)"
+    
+  navigation_failures:
+    description: "Teams page infinite loading, multiple login prompts"
+    evidence: "useTeams hook was using non-existent useSupabase hook"
+    location: "Dashboard → Teams → Practice Planner navigation"
+
+# ==========================================
+# FILES AND COMPONENTS REFERENCE
+# ==========================================
+
+key_files:
+  authentication:
+    - "src/app/ClientProviders.tsx" # Current auth provider setup
+    - "src/contexts/JWTAuthContext.tsx" # Current JWT auth system
+    - "src/lib/adminPermissions.ts" # Admin user configuration
+    - "src/lib/jwt-auth.ts" # JWT authentication logic
+    
+  practice_planner:
+    - "src/app/(authenticated)/teams/[teamId]/practice-plans/page.tsx" # Main page
+    - "src/components/practice-planner/AdminToolbar.tsx" # Admin edit icons
+    - "src/components/practice-planner/modals/AdminEditModal.tsx" # Edit interface
+    - "src/components/practice-planner/DrillCard.tsx" # Cards with admin features
+    
+  hooks:
+    - "src/hooks/useTeams.ts" # Fixed teams loading
+    - "src/hooks/useAdminEdit.ts" # Admin functionality
+    - "src/hooks/useDrills.ts" # Drill data loading
+
+existing_surgical_fixes:
+  status: "IMPLEMENTED ✅"
+  components_working:
+    - "AdminToolbar.tsx" # Shows edit icons on hover
+    - "AdminEditModal.tsx" # Full editing interface
+    - "SaveToPlaybookModal.tsx" # Team playbook system
+    - "TeamPlaybook.tsx" # Playbook management
+  integration_status: "Properly integrated in DrillCard and StrategiesTab"
+
+# ==========================================
+# MIGRATION STRATEGY
+# ==========================================
+
+user_impact_mitigation:
+  existing_wordpress_users:
+    impact: "MINIMAL - No data loss, improved experience"
+    process: |
+      1. User data preserved in Supabase (wordpress_id links maintained)
+      2. First login: Magic link sent to WordPress email
+      3. Automatic account linking via email matching
+      4. No password required going forward
+      5. All progress/points/badges preserved
+      
+  new_users:
+    impact: "IMPROVED - Passwordless from start"
+    process: "Magic link registration via MemberPress webhooks"
+
+# ==========================================
+# VERIFICATION CRITERIA
+# ==========================================
+
+success_metrics:
+  authentication:
+    - "No 401 errors in auth validation logs"
+    - "Single login flow without redirects"
+    - "Seamless navigation: dashboard → teams → practice planner"
+    
+  admin_features:
+    - "patrick@powlax.com shows admin edit icons on drill cards"
+    - "AdminEditModal opens when clicking edit icons"
+    - "Admin toolbar visible in practice planner"
+    
+  user_experience:
+    - "Teams page loads without infinite spinner"
+    - "No multiple login prompts"
+    - "Magic link login working for existing users"
+
+# ==========================================
+# AGENT EXECUTION INSTRUCTIONS
+# ==========================================
+
+agent_instructions: |
+  CRITICAL: This is a system-wide authentication migration. Follow these steps EXACTLY:
+  
+  1. ANALYZE CURRENT STATE:
+     - Read all files in key_files section
+     - Understand current JWT vs Supabase Auth conflict
+     - Verify surgical fixes are implemented (they are)
+  
+  2. IMPLEMENT SUPABASE AUTH MIGRATION:
+     - Replace JWTAuthProvider with Supabase AuthProvider
+     - Create magic link authentication endpoints
+     - Migrate user linking system
+     - Preserve all existing user data
+  
+  3. FIX ADMIN DETECTION:
+     - Ensure patrick@powlax.com admin status works with new auth
+     - Test admin features visibility
+     - Verify AdminEditModal functionality
+  
+  4. VERIFY COMPLETE FLOW:
+     - Test navigation: dashboard → teams → practice planner
+     - Confirm no auth loops or multiple login prompts
+     - Validate admin features show for patrick@powlax.com
+
+coordination_notes: |
+  - This fixes the "wrong tables" issue (it was actually wrong auth system)
+  - Surgical fixes are already implemented and working
+  - Focus on auth system migration, not component development
+  - Preserve all existing functionality while fixing auth
+
+# ==========================================
+# REFERENCE DOCUMENTATION
+# ==========================================
+
+reference_documents:
+  - "docs/handoff/memberpress-security-integration-handoff.md" # Recommended auth strategy
+  - "docs/architecture/POWLAX-WordPress-MemberPress-Integration-and-Migration-Guide.md" # Migration plan
+  - "docs/MEMBERPRESS-INTEGRATION-IMPLEMENTATION-SUMMARY.md" # Implementation details
+
+current_working_solutions:
+  - "Practice Planner page loads correctly (HTTP 200)"
+  - "Component imports fixed (ActiveStrategiesSection, etc.)"
+  - "Database tables correctly named (powlax_drills, powlax_strategies)"
+  - "Surgical fix components exist and are integrated"
+
+testing_urls:
+  - "http://localhost:3004/teams/1/practice-plans" # Main practice planner
+  - "http://localhost:3004/admin-demo" # Admin features demo
+  - "http://localhost:3004/debug-auth" # Auth status debugging
+
+# ==========================================
+# CRITICAL SUCCESS FACTORS
+# ==========================================
+
+must_preserve:
+  - "All existing user data and progress"
+  - "All surgical fix components and functionality"
+  - "Database table structure and naming"
+  - "MemberPress webhook integration"
+
+must_fix:
+  - "Authentication loops and multiple login prompts"
+  - "Admin features visibility for patrick@powlax.com"
+  - "Teams page infinite loading"
+  - "Session management across page navigation"
+
+must_implement:
+  - "Supabase Auth + Magic Links as primary auth method"
+  - "WordPress user to Supabase Auth migration bridge"
+  - "Consistent auth state management"
+  - "Admin role detection with new auth system"

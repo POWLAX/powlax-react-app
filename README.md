@@ -29,19 +29,17 @@ npm run lint  # Run this before AND after AI changes
 ```
 
 ## Overview
-POWLAX is a comprehensive lacrosse training ecosystem designed to revolutionize how coaches plan practices, how players develop skills, and how clubs manage their programs. This React-based platform is the evolution of a successful WordPress plugin system with integrations from BuddyBoss, LearnDash, and GamiPress, bringing modern performance and enhanced strategic depth to lacrosse training.
+POWLAX is a comprehensive lacrosse training ecosystem built on modern React/Next.js with Supabase backend. The platform features a complete Skills Academy system with 49 workout series, 166 workouts, and 167 drills, plus integrated team management, practice planning, and gamification systems. All data is stored in a robust 62-table PostgreSQL database providing real-time performance and scalability.
 
 ## 🏑 Key Features
 
 ### For Coaches
 - **Strategic Practice Planner**: 
-  - Click to add / drag-and-drop interface with bidirectional linking:
-    - drills → strategies → concepts → skills
-    - skills → concepts → strategies → drills
-  - Strategy, Drill Type, Game Phase, and Age-appropriate filtering
-  - Create custom drills, concepts, skills, and strategies
-  - Submit finalized practices for team visibility
-  - PDF printables for strategies, drills, concepts, and skills (Currently accessible through URL links guarded by Memberpress rules)
+  - Drag-and-drop interface using `practices` and `practice_drills` tables
+  - Access to `powlax_drills` and `powlax_strategies` libraries
+  - Custom drill creation with `user_drills` and `user_strategies`
+  - Age-appropriate filtering and drill modifications
+  - Practice timing and sequencing tools
   - Save as template functionality
   - Live practice mode with timer
 - **Team Management**: 
@@ -59,32 +57,32 @@ POWLAX is a comprehensive lacrosse training ecosystem designed to revolutionize 
   - Understanding checks and certifications
   - Progress tracking for coaching education
 
-### For Players
+### For Players  
 - **Skills Academy**: 
-  - Structured skill development with video tutorials
-  - Two tiers: Basic (5 workouts) and Complete (all content)
-- **Challenge Mode**:
-  - Skill challenges after workouts (game-relevant tasks)
-  - Lacrosse tricks for fun and coordination (always available)
+  - **49 workout series** with structured progressions
+  - **166 individual workouts** covering all lacrosse fundamentals
+  - **167 drill definitions** with video tutorials and instructions
+  - **Wall Ball system** with 48 specialized drill segments
+  - Progress tracking via `skills_academy_user_progress`
 - **Personal Progress Tracking**: 
-  - Skill assessments and achievement system
-  - Gamification points: Lax Credits, Lax IQ points, Rebound Rewards, Defense Dollars, Midfield Medals, Attack Tokens
+  - Achievement system with `user_badges` and `user_points_wallets`
+  - Point currencies: Multiple types via `powlax_points_currencies`
+  - Ranking system with `powlax_player_ranks` and progression tracking
 - **Team Integration**: 
-  - Access to team practices and playbooks
-  - Understanding checks for playbook knowledge
-  - Badge system for achievements
+  - Access to team practices via `team_members` relationship
+  - Family account support through `family_accounts` system
 
 ### For Parents
-- **Child Progress Monitoring**: View achievements and skill development
-- **Support Resources**: "Support My Player" quiz with personalized tips
-- **Event Calendar**: Team schedules and important dates
-- **Secure Communication**: Age-appropriate messaging controls
+- **Child Progress Monitoring**: View achievements via `family_accounts` and `parent_child_relationships`
+- **Skills Academy Access**: Monitor workout completion and drill progress
+- **Team Integration**: Access team information through family account system
+- **Progress Analytics**: Track skill development and achievement milestones
 
 ### For Club Directors
-- **Multi-Team Overview**: Club-wide analytics and metrics
-- **Resource Management**: Centralized content distribution
-- **Registration Tools**: Team activation and member management
-- **Coach Assessment Creation**: Build understanding checks for coaches
+- **Multi-Team Overview**: Manage multiple teams via `clubs` → `teams` hierarchy
+- **Member Management**: Full roster control through `team_members` system
+- **Resource Distribution**: Centralized access to Skills Academy and practice content
+- **Analytics Dashboard**: Club-wide performance metrics and engagement tracking
 
 ## 🚀 Technical Stack
 
@@ -94,111 +92,170 @@ POWLAX is a comprehensive lacrosse training ecosystem designed to revolutionize 
 - **Storage**: Supabase Storage for media files
 - **Deployment**: Vercel (recommended)
 
-## 📊 Database Architecture
+## 📊 Database Architecture (ACTUAL)
 
-### Sophisticated Taxonomy System
-The platform uses a comprehensive data model that captures the relationships between:
+**🚨 CRITICAL: This reflects the REAL database schema. See `/contracts/active/database-truth-sync-002.yaml` for complete verification.**
 
-1. **Drills** ↔ **Strategies** ↔ **Concepts** ↔ **Skills**
-2. **Player Situations** (5 universal scenarios with phase-specific variations)
-3. **Game Phases** (Face Off, Transition, Settled Offense/Defense, Special Teams)
-4. **Age-Based Progression**: Overlapping developmental ranges where skills progress from introduction (do_it: 6-10), through competitive application (coach_it: 8-12), to mastery (own_it: 10-14)
+### Active Database Tables (62 Total)
 
-### Key Tables
-- `drills`: Core drill library with video URLs, Lacrosse Lab diagrams, image carousels, PDF links
-- `academy_drills`: Skill-focused training content
-- `strategies`: Phase-specific game plans:
-  - Face Off
-  - Transition Offense
-  - Transition Defense  
-  - Settled Offense
-  - Settled Defense
-  - Man Up
-  - Man Down
-  - Ride
-  - Clear
-- `concepts`: Teaching points that can span multiple phases
-- `skills`: Granular player abilities
-- `player_situations`: 5 core situations with phase-based variations
-- `user_profiles`: Extended user data with family relationships
-- `teams`: Organization and roster management (replaces BuddyBoss Groups)
-- `quizzes`: Understanding checks for strategies, drills, and master classes
-- `quiz_questions`: Question bank with multiple choice/true-false options
-- `quiz_responses`: Track player and coach quiz attempts
-- `coach_certifications`: Track coach education progress and achievements
-- `master_class_modules`: Youth Lacrosse Coaching Master Class content structure
+The platform operates on a modern Supabase PostgreSQL database with 62 active tables organized into functional domains:
 
-### Complete Schema Tables (33 Total)
+#### ✅ Skills Academy System (WORKING)
+- **skills_academy_series** (49 records) - Workout series definitions including Wall Ball series
+- **skills_academy_workouts** (166 records) - Workout definitions with `drill_ids` column linking to drills
+- **skills_academy_drills** (167 records) - Individual drill definitions with video URLs and instructions
+- **skills_academy_user_progress** (3 records) - User progress tracking through workouts
+- **wall_ball_drill_library** (48 records) - Bite-sized segments of wall ball workout videos
 
-#### Core Content (4 tables)
-- `drills`: Team practice drills with 30+ fields including video URLs, Lacrosse Lab diagrams (5 URLs), age progressions, skill/concept/strategy associations
-- `academy_drills`: Skills Academy individual training with workout categories, skill mastery focus, understanding checks, and age-based progressions
-- `strategies`: Phase-specific game plans with execution steps, diagrams, counter-strategies, and practice requirements
-- `concepts`: Teaching concepts with visual aids, assessment criteria, and age-appropriate progressions
+#### 🏑 Practice Planning System
+- **powlax_drills** - Main POWLAX drill library (NOT `drills`)
+- **powlax_strategies** - Strategy library (NOT `strategies`)
+- **practices** - Practice plans (NOT `practice_plans`)
+- **practice_drills** - Drill instances with notes and timing modifications
+- **powlax_images** - Drill media and visual assets
+- **user_drills** - User-created custom drills
+- **user_strategies** - User-created custom strategies
 
-#### Taxonomy Foundation (7 tables)
-- `lacrosse_terms`: Universal terminology dictionary
-- `game_phases`: 9 distinct phases (Face Off, Transition Offense/Defense, Settled Offense/Defense, Man Up/Down, Ride, Clear)
-- `skills`: 100+ skills with meta-skill hierarchy and movement patterns
-- `player_situations`: 5 universal scenarios with decision trees
-- `communication_terms`: On-field calls with urgency levels
-- `movement_principles`: Biomechanical patterns with coaching cues
-- `term_variations`: Context-specific terminology by game phase
+#### 👥 Team & Organization Management
+- **clubs** (2 records) - Organization level above teams (NOT `organizations`)
+- **teams** (10 records) - Team entities with coaching assignments
+- **team_members** (25 records) - Team membership and roster management
+- **family_accounts** (1 record) - Family account management
+- **family_members** - Family member relationships
+- **parent_child_relationships** - Parent-child user links
 
-#### Relationships & Progressions (5 tables)
-- `skill_phase_applications`: How skills adapt across game phases
-- `skill_development_stages`: Age-based progressions (do_it/coach_it/own_it)
-- `phase_situation_scenarios`: Common game scenarios mapped to phases
-- `skill_progression_pathways`: Logical skill learning sequences
-- `situation_skill_options`: Available skills for specific field contexts
+#### 🔐 Authentication & User Management
+- **users** - Main user table (NOT `user_profiles`) with Supabase Auth integration
+- **user_sessions** - Active session tracking with tokens and expiry
+- **user_auth_status** - User authentication state management
+- **magic_links** (10 records) - Magic link authentication tokens
+- **registration_links** (10 records) - Registration token management
+- **registration_sessions** - Registration progress tracking
+- **user_onboarding** - Step-by-step onboarding flow
 
-#### Team & User Management (5 tables)
-- `user_profiles`: Extended profiles with parent-child relationships
-- `teams`: Full team management replacing BuddyBoss
-- `practice_plans`: Practice builder with drill sequences and templates
-- `workouts`: Skills Academy structured workouts
-- `age_bands`: 8U through 18U definitions
+#### 🎮 Gamification System
+- **user_points_wallets** - User point balances per currency type
+- **user_badges** - User badge awards (NOT `badges`)
+- **powlax_points_currencies** - Point currency definitions
+- **points_transactions_powlax** - Point transaction history (NOT `points_ledger`)
+- **powlax_player_ranks** - Player ranking system definitions
+- **user_badge_progress_powlax** - Badge progress tracking
+- **user_rank_progress_powlax** - Rank progression tracking
+- **point_types_powlax** - Point currency type definitions
+- **leaderboard** - Leaderboard rankings and competition data
 
-#### Analytics & Gamification (3 tables)
-- `user_progress`: Comprehensive tracking with skill mastery levels
-- `points_ledger`: 6 point types (Lax Credits, Attack Tokens, Defense Dollars, Midfield Medals, Flex Points, Rebound Rewards)
-- `badges` & `user_badges`: Achievement system
+#### 🔗 Integration & Webhooks
+- **webhook_queue** - Webhook processing queue with retry logic
+- **webhook_events** - Complete audit trail of webhook events
+- **membership_products** - Membership product definitions
+- **membership_entitlements** - User access rights and permissions
+- **user_subscriptions** - Subscription data and status
 
-#### Quiz & Certification System (9 tables)
-- `master_class_modules`: Youth Lacrosse Coaching Master Class content
-- `quizzes`: Understanding checks for strategies, drills, and modules
-- `quiz_questions`: Media-rich questions with explanations
-- `quiz_responses`: Detailed attempt tracking
-- `coach_certifications`: Professional development tracking
-- Plus supporting tables for prerequisites and requirements
+### Key System Relationships
 
-## 📋 Existing Development Plans
+#### Skills Academy Data Flow
+```
+skills_academy_series (49) 
+    ↓
+skills_academy_workouts (166) [drill_ids column]
+    ↓
+skills_academy_drills (167) [referenced by drill_ids]
 
-### Phase-Based Implementation Strategy
-Following 8 hours of intensive brainstorming, the project has three detailed phase plans:
+wall_ball_drill_library (48) [integrated segments]
+```
 
-- **Phase 1**: Core System & Practice Planner (see `[stage1-implementation.md]`)
-  - Enhanced practice planning with strategic depth
-  - Drill-Strategy-Concept-Skill relationships
-  - Core user management
-  
-- **Phase 2**: Skills Academy & Gamification (see `[stage2-implementation.md]`)
-  - LearnDash migration to modern React
-  - 6-tier gamification system
-  - Progress tracking and achievements
-  
-- **Phase 3**: Team Management & Community (see `[stage3-implementation.md]`)
-  - BuddyBoss replacement
-  - Advanced registration system
-  - Community features
+#### Practice Planning Structure
+```
+practices [main practice plans]
+    ↓
+practice_drills [instances with modifications]
+    ↓
+powlax_drills / user_drills [drill definitions]
+powlax_strategies / user_strategies [strategy definitions]
+```
 
-These plans provide the strategic foundation but will be validated and enhanced through the BMad method's systematic approach to ensure nothing is missed and all components integrate properly.
+#### Team Hierarchy
+```
+clubs (2) [organization level]
+    ↓
+teams (10) [team entities]
+    ↓
+team_members (25) [roster management]
+    ↓
+users [individual user accounts]
+```
 
-### Next Steps
-1. Use BMad Analyst to validate existing plans
-2. Create formal BMad documentation structure
-3. Generate PRD incorporating all phase elements
-4. Begin systematic implementation
+### 🚨 IMPORTANT: Tables That DO NOT EXIST
+
+**NEVER reference these non-existent tables:**
+- `drills`, `strategies`, `concepts`, `skills` (without powlax_ prefix)
+- `practice_plans` (use `practices`)
+- `user_profiles` (use `users`)
+- `organizations` (use `clubs`)
+- `badges` (use `user_badges`)
+- `points_ledger` (use `points_transactions_powlax`)
+- `skills_academy_workout_drills` (use `drill_ids` column)
+- `quizzes`, `quiz_questions`, `quiz_responses` (do not exist)
+- Any complex taxonomy tables (concepts, skills hierarchies)
+
+### Data Integration Status
+
+- ✅ **Skills Academy**: Fully operational with 49 series, 166 workouts, 167 drills
+- ✅ **Wall Ball**: Integrated as part of Skills Academy (48 drill segments)
+- ✅ **Teams**: Active with 2 clubs, 10 teams, 25 members
+- ✅ **Authentication**: Supabase Auth + custom users table + magic links
+- 🔄 **Practice Planning**: Tables ready, integration in progress
+- 🔄 **Gamification**: Tables created, point system activation pending
+- 🔄 **Family Accounts**: Structure ready, full implementation pending
+
+## 🚀 Current Implementation Status
+
+### ✅ Fully Operational Systems
+
+#### Skills Academy (Complete)
+- **49 workout series** covering all lacrosse fundamentals
+- **166 individual workouts** with structured progressions
+- **167 drill definitions** with video tutorials and instructions
+- **Wall Ball integration** with 48 specialized drill segments
+- **User progress tracking** system operational
+- **Series-to-workout-to-drill** relationships via `drill_ids` column
+
+#### Team Management (Active)
+- **2 clubs** with organizational structure
+- **10 teams** with coaching assignments
+- **25 team members** with roster management
+- **Family account system** supporting parent-child relationships
+
+#### Authentication System (Live)
+- **Supabase Auth** integration with custom users table
+- **Magic link authentication** (10 active links)
+- **Registration system** with token-based onboarding
+- **Session management** with security tracking
+
+### 🔄 Systems in Development
+
+#### Practice Planning System
+- **Database ready**: `practices`, `practice_drills`, `powlax_drills`, `powlax_strategies`
+- **UI components**: Practice planner interface operational
+- **Integration pending**: Connecting UI to actual database tables
+
+#### Gamification System
+- **Tables created**: Point wallets, badges, rankings, transactions
+- **Structure ready**: Currency types, player ranks, leaderboard
+- **Activation needed**: Connect to Skills Academy progress system
+
+#### Family Account Management
+- **Database schema**: Family accounts, member relationships established
+- **Parent-child links**: Relationship structure operational
+- **UI implementation**: Family dashboard and controls pending
+
+### 📈 Development Priorities
+
+1. **Practice Planner Integration**: Connect existing UI to `powlax_drills` and `powlax_strategies` tables
+2. **Gamification Activation**: Link Skills Academy progress to point system
+3. **Team Dashboard Enhancement**: Full team management interface
+4. **Family Account UI**: Parent oversight and child management features
+5. **Advanced Skills Academy**: Add quiz system and certification tracking
 
 ## 🛠️ Installation
 
@@ -237,13 +294,36 @@ npm run dev
   - Favorites system with star icons
   - Mobile-optimized with floating action button
 
-### 🚧 In Progress
-- Modal implementations for video/lab/strategies
-- Parallel drills (up to 4 concurrent activities)
-- Supabase data integration
-- Practice plan saving/loading
+### 🔄 Active Development Areas
+- **Gamification Integration**: Connecting Skills Academy progress to point rewards
+- **Practice Planner Database**: Linking UI components to `powlax_drills` and `powlax_strategies`  
+- **Team Management Enhancement**: Full roster and family account management
+- **Advanced Skills Academy**: Quiz system and progress certifications
+- **Mobile Optimization**: Enhanced mobile experience for all systems
 
-### 📁 Key Files
+### 📁 Key Implementation Files
+
+#### Skills Academy System
+- `/src/app/(authenticated)/skills-academy/` - Skills Academy pages
+- `/src/components/skills-academy/` - Workout and drill components
+- `/src/hooks/useSkillsAcademy.ts` - Skills Academy data hooks
+
+#### Practice Planning System  
 - `/src/app/(authenticated)/teams/[teamId]/practice-plans/page.tsx` - Main practice planner
 - `/src/components/practice-planner/` - All planner components
-- `/docs/technical/practice-planner-implementation-status.md` - Detailed implementation guide
+- `/src/hooks/usePracticePlans.ts` - Practice data management
+
+#### Database Integration
+- `/src/lib/supabase.ts` - Client-side database connection
+- `/src/lib/supabase-server.ts` - Server-side database operations
+- `/src/types/database.ts` - TypeScript definitions for all 62 tables
+
+#### Authentication System
+- `/src/contexts/SupabaseAuthContext.tsx` - Auth context provider
+- `/src/lib/auth-helpers.ts` - Authentication utilities
+
+### 📊 Database Verification Scripts
+- `/scripts/check-actual-tables.ts` - Verify all 62 tables exist
+- `/scripts/check-skills-academy-data.ts` - Validate Skills Academy connections
+- `/scripts/check-gamification-tables.ts` - Verify gamification system
+- `/contracts/active/database-truth-sync-002.yaml` - Complete database truth reference

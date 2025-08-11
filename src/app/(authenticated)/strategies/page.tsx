@@ -8,11 +8,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { 
   Target, Shield, Users, Zap, PlayCircle, 
-  ChevronRight, Search, Filter, BookOpen
+  ChevronRight, Search, Filter, BookOpen, Loader2
 } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useUserStrategies } from '@/hooks/useUserStrategies'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
 import VideoModal from '@/components/practice-planner/modals/VideoModal'
 import LacrosseLabModal from '@/components/practice-planner/modals/LacrosseLabModal'
 
@@ -32,6 +33,7 @@ interface Strategy {
 }
 
 export default function StrategiesPage() {
+  const { user, loading: authLoading } = useAuth()
   const { userStrategies, loading: userLoading, createUserStrategy } = useUserStrategies()
   const [powlaxStrategies, setPowlaxStrategies] = useState<Strategy[]>([])
   const [loading, setLoading] = useState(true)
@@ -67,6 +69,18 @@ export default function StrategiesPage() {
   useEffect(() => {
     fetchStrategies()
   }, [])
+
+  // Show loading spinner while authentication is being verified
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto" />
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   const fetchStrategies = async () => {
     try {

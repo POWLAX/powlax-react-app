@@ -7,8 +7,9 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { RefreshCw, CheckCircle, XCircle, AlertCircle, Upload } from 'lucide-react'
+import { RefreshCw, CheckCircle, XCircle, AlertCircle, Upload, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
 
 interface SyncResult {
   success: boolean
@@ -39,6 +40,7 @@ interface SyncStatus {
 }
 
 export default function AdminSyncPage() {
+  const { user, loading: authLoading } = useAuth()
   const [loading, setLoading] = useState(false)
   const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null)
   const [syncResults, setSyncResults] = useState<{
@@ -52,6 +54,18 @@ export default function AdminSyncPage() {
   useEffect(() => {
     fetchSyncStatus()
   }, [])
+
+  // Show loading spinner while authentication is being verified
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto" />
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   const fetchSyncStatus = async () => {
     try {

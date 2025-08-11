@@ -9,10 +9,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   Trophy, Target, Shield, Zap, Star, Award, 
   TrendingUp, Calendar, Clock, ChevronRight,
-  Flame, Medal, Crown, Gem
+  Flame, Medal, Crown, Gem, Loader2
 } from 'lucide-react'
 import Link from 'next/link'
 import { useGamificationData } from '@/hooks/useGamificationData'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
 
 // Mock data function to fix loading issues
 function getMockGamificationData() {
@@ -110,11 +111,24 @@ function getMockGamificationData() {
 }
 
 export default function PlayerGamificationPage() {
+  const { user, loading: authLoading } = useAuth()
   const [selectedTab, setSelectedTab] = useState('overview')
   // Temporarily use mock data instead of useGamificationData hook to fix loading issue
   const playerStats = getMockGamificationData()
   const loading = false
   const error = null
+
+  // Show loading spinner while authentication is being verified
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto" />
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
   
   // Commented out to fix loading issue
   // const { data: playerStats, loading, error } = useGamificationData()

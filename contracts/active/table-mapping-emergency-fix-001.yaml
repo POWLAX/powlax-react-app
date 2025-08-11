@@ -1,0 +1,272 @@
+---
+contractId: table-mapping-emergency-fix-001
+contractVersion: 1.0.0
+contractDate: 2025-01-09
+contractType: parallel-execution
+projectName: POWLAX Emergency Table Mapping Fix
+clientContext: |
+  CRITICAL: The surgical enhancements are using WRONG table names!
+  The database has 135 drills and 220 strategies but the code can't find them.
+  All recent features (admin editing, team playbook) are broken because they're
+  looking for tables that don't exist.
+
+# EXECUTION STRATEGY
+executionStrategy:
+  type: parallel
+  agentCount: 3
+  ultraThinkCompleted: true
+  ultraThinkDuration: 10
+  estimatedDuration: 90
+  priority: EMERGENCY
+  
+# ULTRA THINK PHASE (MANDATORY - 10 MINUTES MINIMUM)
+ultraThinkPhase:
+  completed: true
+  duration: 10
+  criticalFindings:
+    - "Code uses drills_powlax but table is powlax_drills (135 records)"
+    - "Code uses strategies_powlax but table is powlax_strategies (220 records)"
+    - "Code uses practice_plans but table is practices (25 records)"
+    - "Code uses teams but table is team_teams (10 records)"
+    - "Code uses user_profiles but table is users (12 records)"
+    - "Admin features broken - can't verify patrick@powlax.com"
+  
+  risksIdentified:
+    - "Breaking working features while fixing table names"
+    - "Missing table references in untested code paths"
+    - "Type mismatches after table changes"
+    - "Cascade effects on dependent components"
+    - "Auth system looking at wrong user table"
+    
+  mitigationStrategies:
+    - "Test each fix immediately after applying"
+    - "Use grep to find ALL occurrences"
+    - "Update types to match actual table schemas"
+    - "Keep backups of working code"
+    - "Verify data is accessible after fixes"
+
+# TABLE MAPPING REFERENCE
+tableMappingReference:
+  wrongToCorrect:
+    drills_powlax: powlax_drills          # 135 drills exist!
+    strategies_powlax: powlax_strategies   # 220 strategies exist!
+    practice_plans: practices              # 25 practices exist!
+    teams: team_teams                      # 10 teams exist!
+    user_profiles: users                   # 12 users including patrick@powlax.com
+    organizations: club_organizations      # Club data
+    
+  verifiedData:
+    powlax_drills: "135 records - drills are there!"
+    powlax_strategies: "220 records - strategies exist!"
+    users: "12 records - patrick@powlax.com confirmed"
+    team_teams: "10 records - teams ready"
+    practices: "25 records - practice data available"
+
+# REQUIREMENTS
+requirements:
+  critical:
+    - Fix ALL table name references in codebase
+    - Ensure admin features work for patrick@powlax.com
+    - Make practice saving work with correct tables
+    - Fix drill and strategy loading
+    - Restore team playbook functionality
+    
+  mustPreserve:
+    - All UI components unchanged
+    - Auto-save functionality
+    - Modal behaviors
+    - User experience flow
+    - Existing data in database
+
+# PARALLEL AGENTS DISTRIBUTION
+parallelAgents:
+  agent_1:
+    type: general-purpose
+    name: "Database Hooks Fixer"
+    scope: "Fix all hooks and database query files"
+    responsibilities:
+      - Fix remaining table references in hooks
+      - Update usePracticePlans to use 'practices'
+      - Update useTeams to use 'team_teams'
+      - Fix dashboard queries to use correct tables
+      - Ensure all Supabase queries use right names
+    files:
+      modify:
+        - src/hooks/usePracticePlans.ts
+        - src/hooks/useTeams.ts
+        - src/hooks/useOrganizations.ts
+        - src/hooks/useDashboardData.ts
+        - src/lib/dashboard-queries.ts
+        - src/hooks/useTeamMembers.ts
+      verify:
+        - src/hooks/useDrills.ts         # Already correct
+        - src/hooks/useStrategies.ts     # Already correct
+        - src/hooks/useAdminEdit.ts      # Already correct
+      noTouch:
+        - src/components/*
+        - src/app/*
+    deliverables:
+      - All hooks querying correct tables
+      - Dashboard data loading properly
+      - Teams functionality restored
+      - Practice plans saving correctly
+
+  agent_2:
+    type: general-purpose
+    name: "API Routes & Auth Fixer"
+    scope: "Fix API routes and authentication to use correct tables"
+    responsibilities:
+      - Fix any API routes using wrong table names
+      - Update auth context to work with 'users' table
+      - Fix WordPress user sync to correct table
+      - Ensure admin verification works
+      - Fix user role checking
+    files:
+      modify:
+        - src/app/api/*/route.ts
+        - src/contexts/JWTAuthContext.tsx
+        - src/lib/jwt-auth.ts
+        - src/lib/wordpress-auth.ts
+      read:
+        - src/lib/adminPermissions.ts
+      noTouch:
+        - src/components/*
+        - src/hooks/*
+    deliverables:
+      - API routes using correct tables
+      - Auth working with users table
+      - Admin features visible for patrick@powlax.com
+      - WordPress sync functional
+
+  agent_3:
+    type: general-purpose
+    name: "Migration Scripts Creator"
+    scope: "Create database migration scripts for missing relationships"
+    responsibilities:
+      - Create migration for team_playbooks if missing
+      - Create user_favorites table structure
+      - Document actual vs expected schemas
+      - Create data verification scripts
+      - Build fallback queries for compatibility
+    files:
+      create:
+        - supabase/migrations/002_fix_table_references.sql
+        - scripts/verify-all-tables.ts
+        - scripts/migrate-old-to-new-tables.ts
+        - docs/ACTUAL_DATABASE_SCHEMA.md
+      read:
+        - supabase/migrations/*
+        - docs/TABLE_MAPPING_FIX_PLAN.md
+      noTouch:
+        - src/components/*
+        - src/hooks/*
+    deliverables:
+      - Migration scripts for missing tables
+      - Verification scripts to test data
+      - Complete schema documentation
+      - Data migration paths
+
+# VERIFICATION CHECKLIST
+verificationChecklist:
+  immediate:
+    - [ ] Drills load in practice planner (135 drills)
+    - [ ] Strategies appear in strategies tab (220 strategies)
+    - [ ] Admin edit buttons visible for patrick@powlax.com
+    - [ ] Practice plans can be saved
+    - [ ] Teams show in team selector
+    
+  functionality:
+    - [ ] Custom drill creation works
+    - [ ] Auto-save continues functioning
+    - [ ] Study modals display data
+    - [ ] Team playbook saves strategies
+    - [ ] Print functionality works
+    
+  data:
+    - [ ] All 135 drills accessible
+    - [ ] All 220 strategies loadable
+    - [ ] 12 users in system
+    - [ ] 10 teams available
+    - [ ] 25 practices retrievable
+
+# SUCCESS METRICS
+successMetrics:
+  required:
+    - Practice planner shows drills
+    - Strategies tab populated
+    - Admin features work for patrick@powlax.com
+    - Can save practice plans
+    - No console errors about missing tables
+    
+  performance:
+    - Drill loading < 2 seconds
+    - Strategy loading < 2 seconds
+    - Page loads without errors
+    - Auto-save works every 3 seconds
+
+# TESTING COMMANDS
+testingCommands:
+  verifyTables: |
+    npx tsx scripts/verify-correct-tables.ts
+    
+  checkDrills: |
+    curl http://localhost:3000/api/drills | grep "135"
+    
+  checkAdmin: |
+    # Login as patrick@powlax.com and verify admin buttons appear
+    
+  testPracticeSave: |
+    # Create practice plan and verify it saves to 'practices' table
+
+# ROLLBACK PLAN
+rollbackPlan:
+  triggers:
+    - Data becomes inaccessible
+    - Auth completely breaks
+    - Page crashes on load
+  steps:
+    - Git revert to previous commit
+    - Restore hook files from backup
+    - Clear browser cache
+    - Restart dev server
+
+# CONTRACT STATUS
+status:
+  stage: ready_for_emergency_execution
+  severity: CRITICAL
+  lastUpdated: 2025-01-09T11:00:00Z
+  
+# AGENT PROGRESS TRACKING
+agentProgress:
+  agent_1:
+    status: not_started
+    filesFixed: []
+    blockers: []
+    
+  agent_2:
+    status: not_started
+    filesFixed: []
+    blockers: []
+    
+  agent_3:
+    status: not_started
+    filesCreated: []
+    blockers: []
+
+# NOTES
+notes: |
+  EMERGENCY FIX REQUIRED:
+  - Practice Planner has 135 drills but can't display them
+  - Admin spent hours on features that don't work
+  - Wrong table names throughout codebase
+  - patrick@powlax.com exists but admin features hidden
+  - This fix will restore ALL functionality immediately
+  
+  CORRECT TABLES CONFIRMED:
+  - powlax_drills (135 records) ✓
+  - powlax_strategies (220 records) ✓  
+  - users (12 records including patrick@powlax.com) ✓
+  - team_teams (10 teams) ✓
+  - practices (25 practices) ✓
+  
+  Once fixed, everything will work perfectly!

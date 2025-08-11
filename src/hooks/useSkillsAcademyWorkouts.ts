@@ -107,33 +107,44 @@ export function useSkillsAcademyWorkouts(seriesId: number | null) {
 
         if (error) throw error;
 
-        // Fetch drills for each workout
-        // NOTE: skills_academy_workout_drills table is currently EMPTY (0 records)
-        // This query will return no drills, causing "0 drills" display in modals
+        // Fetch drills for each workout using drill_ids array column
         const workoutsWithDrills = await Promise.all(
           (workoutsData || []).map(async (workout) => {
-            const { data: drills } = await supabase
-              .from('skills_academy_workout_drills')
-              .select(`
-                *,
-                drill:skills_academy_drills(*)
-              `)
-              .eq('workout_id', workout.id)
-              .order('sequence_order', { ascending: true });
+            let drills: any[] = [];
             
-            // TODO: Create helper function to connect skills_academy_workouts to skills_academy_drills
-            // when junction table is populated or create programmatic connection
+            // Use drill_ids array column to get drills
+            if (workout.drill_ids && workout.drill_ids.length > 0) {
+              const { data: drillsData, error: drillsError } = await supabase
+                .from('skills_academy_drills')
+                .select('*')
+                .in('id', workout.drill_ids);
+              
+              if (!drillsError && drillsData) {
+                // Create drill objects in the correct order based on drill_ids array
+                drills = workout.drill_ids.map((drillId: number, index: number) => {
+                  const drill = drillsData.find(d => d.id === drillId);
+                  if (drill) {
+                    return {
+                      id: `${workout.id}-${index}`,
+                      workout_id: workout.id,
+                      drill_id: drill.id,
+                      sequence_order: index + 1,
+                      drill: drill
+                    };
+                  }
+                  return null;
+                }).filter(Boolean);
+              }
+            }
             
             return {
               ...workout,
-              drills: drills || [] // Currently always empty array
+              drills: drills
             };
           })
         );
 
         const data = workoutsWithDrills;
-
-        if (error) throw error;
 
         setWorkouts(data || []);
 

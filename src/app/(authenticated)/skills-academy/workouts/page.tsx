@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { WallBallSeries, WallBallVariant, GroupedVariants } from '@/types/wall-ball';
+import { useAuth } from '@/contexts/SupabaseAuthContext';
 
 interface Track {
   id: string;
@@ -38,12 +39,11 @@ interface Series {
 
 export default function SkillsAcademyWorkoutsPage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [series, setSeries] = useState<Series[]>([]);
-  const [wallBallSeries, setWallBallSeries] = useState<WallBallSeries[]>([]);
-  const [wallBallVariants, setWallBallVariants] = useState<WallBallVariant[]>([]);
   const [loading, setLoading] = useState(false);
   const [showTrackSelector, setShowTrackSelector] = useState(false);
 
@@ -85,10 +85,6 @@ export default function SkillsAcademyWorkoutsPage() {
     }
   ];
 
-  useEffect(() => {
-    fetchSeriesAndWorkouts();
-  }, []);
-
   const fetchSeriesAndWorkouts = async () => {
     setLoading(true);
     try {
@@ -116,44 +112,29 @@ export default function SkillsAcademyWorkoutsPage() {
         setWorkouts(workoutsData || []);
       }
 
-      // Fetch wall ball collections (use actual table)
-      const { data: wallBallCollectionsData, error: wallBallCollectionsError } = await supabase
-        .from('powlax_wall_ball_collections')
-        .select('*')
-        .order('id', { ascending: true });
-
-      if (wallBallCollectionsError) {
-        console.error('Error fetching wall ball collections:', wallBallCollectionsError);
-      } else {
-        // Map collections to series format
-        const mappedSeries = wallBallCollectionsData?.map(collection => ({
-          id: collection.id,
-          series_name: collection.name,
-          series_type: 'wall_ball',
-          description: collection.description,
-          difficulty_level: collection.difficulty_level
-        })) || [];
-        setWallBallSeries(mappedSeries);
-        
-        // Map collections to variants format (each collection becomes multiple variants)
-        const mappedVariants = wallBallCollectionsData?.flatMap(collection => [
-          {
-            id: collection.id, // Use collection ID directly for "Full" version
-            series_id: collection.id,
-            workout_name: `${collection.name} - Full`,
-            duration_minutes: collection.duration_minutes,
-            has_coaching: collection.has_coaching,
-            collection_id: collection.id
-          }
-        ]) || [];
-        setWallBallVariants(mappedVariants);
-      }
+      // Wall ball workouts are now migrated to Skills Academy tables - no separate fetch needed
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchSeriesAndWorkouts();
+  }, []);
+
+  // Show loading spinner while authentication is being verified
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-powlax-blue mx-auto" />
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   const getWorkoutsForTrack = (trackType: string) => {
     const trackSeries = series.filter(s => s.series_type === trackType);
@@ -171,29 +152,6 @@ export default function SkillsAcademyWorkoutsPage() {
     setIsModalOpen(false);
   };
 
-  const handleWallBallVariantStart = (variantId: number) => {
-    router.push(`/skills-academy/wall-ball/${variantId}`);
-    setIsModalOpen(false);
-  };
-
-  const getWallBallWorkoutsForTrack = () => {
-    // Group wall ball variants by series, then by duration
-    const seriesGroups = wallBallSeries.map(series => {
-      const variants = wallBallVariants.filter(v => v.series_id === series.id);
-      const durations = [...new Set(variants.map(v => v.duration_minutes))].sort((a, b) => a - b);
-      
-      return {
-        series,
-        durations: durations.map(duration => ({
-          duration,
-          withCoaching: variants.find(v => v.duration_minutes === duration && v.has_coaching) || null,
-          withoutCoaching: variants.find(v => v.duration_minutes === duration && !v.has_coaching) || null
-        }))
-      };
-    });
-    
-    return seriesGroups;
-  };
 
   const getTrackIcon = (track: Track) => {
     switch (track.id) {
@@ -360,69 +318,7 @@ export default function SkillsAcademyWorkoutsPage() {
                     <span className="ml-2 text-gray-600">Loading workouts...</span>
                   </div>
                 ) : (
-                  <>
-                    {selectedTrack.seriesType === 'wall_ball' ? (
-                      // Wall Ball workouts rendering
-                      (() => {
-                        const wallBallGroups = getWallBallWorkoutsForTrack();
-                        
-                        if (wallBallGroups.length === 0) {
-                          return <p className="text-gray-500 text-center py-4">No wall ball workouts available yet.</p>;
-                        }
-                        
-                        return wallBallGroups.map(({ series: wallBallSeriesItem, durations }) => (
-                          <div
-                            key={wallBallSeriesItem.id}
-                            className="border border-gray-200 rounded-lg p-4 hover:border-powlax-blue transition-colors"
-                          >
-                            <div className="mb-3">
-                              <div className="flex items-center space-x-3 mb-2">
-                                <div className={`w-3 h-3 rounded-full ${selectedTrack.color}`}></div>
-                                <h5 className="font-medium text-gray-900">
-                                  {wallBallSeriesItem.series_name}
-                                </h5>
-                              </div>
-                              
-                              {wallBallSeriesItem.description && (
-                                <p className="text-sm text-gray-600 ml-6">
-                                  {wallBallSeriesItem.description}
-                                </p>
-                              )}
-                            </div>
-                            
-                            {/* Duration options for this wall ball series */}
-                            <div className="space-y-2">
-                              {durations.map(({ duration, withCoaching, withoutCoaching }) => (
-                                <div key={duration} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                                  <span className="font-medium text-sm">{duration} minutes</span>
-                                  <div className="flex space-x-2">
-                                    {withoutCoaching && (
-                                      <Button 
-                                        size="sm" 
-                                        className="bg-gray-600 hover:bg-gray-700 text-white text-xs"
-                                        onClick={() => handleWallBallVariantStart(withoutCoaching.id)}
-                                      >
-                                        No Coaching
-                                      </Button>
-                                    )}
-                                    {withCoaching && (
-                                      <Button 
-                                        size="sm" 
-                                        className="bg-powlax-blue hover:bg-powlax-blue/90 text-white text-xs"
-                                        onClick={() => handleWallBallVariantStart(withCoaching.id)}
-                                      >
-                                        With Coaching
-                                      </Button>
-                                    )}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        ));
-                      })()
-                    ) : (
-                      // Regular Skills Academy workouts rendering
+                      // Skills Academy workouts rendering (includes wall ball)
                       (() => {
                         const trackSeries = series
                           .filter(s => s.series_type === selectedTrack.seriesType)
@@ -437,6 +333,132 @@ export default function SkillsAcademyWorkoutsPage() {
                           return <p className="text-gray-500 text-center py-4">No workouts available for this track yet.</p>;
                         }
                         
+                        // Special handling for Wall Ball workouts
+                        if (selectedTrack.seriesType === 'wall_ball') {
+                          return trackSeries.map((seriesItem) => {
+                            // Get all workouts for this series
+                            const seriesWorkouts = workouts.filter(w => w.series_id === seriesItem.id);
+                            
+                            // Find workouts by size and coaching status
+                            const miniCoaching = seriesWorkouts.find(w => w.workout_size === 'mini');
+                            const miniNoCoaching = seriesWorkouts.find(w => w.workout_size === 'mini_no_coach');
+                            const moreCoaching = seriesWorkouts.find(w => w.workout_size === 'more');
+                            const moreNoCoaching = seriesWorkouts.find(w => w.workout_size === 'more_no_coach');
+                            const completeCoaching = seriesWorkouts.find(w => w.workout_size === 'complete');
+                            const completeNoCoaching = seriesWorkouts.find(w => w.workout_size === 'complete_no_coach');
+                            
+                            return (
+                              <div
+                                key={seriesItem.id}
+                                className="border border-gray-200 rounded-lg p-4 hover:border-orange-500 transition-colors"
+                              >
+                                <div className="mb-3">
+                                  <div className="flex items-center space-x-3 mb-2">
+                                    <div className="w-3 h-3 rounded-full bg-orange-600"></div>
+                                    <h5 className="font-medium text-gray-900">
+                                      {seriesItem.series_name}
+                                    </h5>
+                                  </div>
+                                  
+                                  {seriesItem.description && (
+                                    <p className="text-sm text-gray-600 ml-6">
+                                      {seriesItem.description}
+                                    </p>
+                                  )}
+                                </div>
+                                
+                                {/* Three columns for Mini, More, Complete */}
+                                <div className="grid grid-cols-3 gap-2 mt-3">
+                                  {/* Mini Column */}
+                                  <div className="space-y-2">
+                                    <div className="text-xs font-semibold text-gray-600 text-center mb-1">5 Minutes</div>
+                                    {miniCoaching && (
+                                      <Button 
+                                        size="sm" 
+                                        className="w-full bg-orange-600 hover:bg-orange-700 text-white py-1.5"
+                                        onClick={() => handleWorkoutStart(miniCoaching.id)}
+                                      >
+                                        <div className="flex flex-col items-center">
+                                          <span className="text-xs font-medium">With Coaching</span>
+                                        </div>
+                                      </Button>
+                                    )}
+                                    {miniNoCoaching && (
+                                      <Button 
+                                        size="sm" 
+                                        variant="outline"
+                                        className="w-full bg-white border-orange-600 text-black hover:bg-orange-50 py-1.5"
+                                        onClick={() => handleWorkoutStart(miniNoCoaching.id)}
+                                      >
+                                        <div className="flex flex-col items-center">
+                                          <span className="text-xs font-medium">No Coaching</span>
+                                        </div>
+                                      </Button>
+                                    )}
+                                  </div>
+                                  
+                                  {/* More Column */}
+                                  <div className="space-y-2">
+                                    <div className="text-xs font-semibold text-gray-600 text-center mb-1">10 Minutes</div>
+                                    {moreCoaching && (
+                                      <Button 
+                                        size="sm" 
+                                        className="w-full bg-orange-600 hover:bg-orange-700 text-white py-1.5"
+                                        onClick={() => handleWorkoutStart(moreCoaching.id)}
+                                      >
+                                        <div className="flex flex-col items-center">
+                                          <span className="text-xs font-medium">With Coaching</span>
+                                        </div>
+                                      </Button>
+                                    )}
+                                    {moreNoCoaching && (
+                                      <Button 
+                                        size="sm" 
+                                        variant="outline"
+                                        className="w-full bg-white border-orange-600 text-black hover:bg-orange-50 py-1.5"
+                                        onClick={() => handleWorkoutStart(moreNoCoaching.id)}
+                                      >
+                                        <div className="flex flex-col items-center">
+                                          <span className="text-xs font-medium">No Coaching</span>
+                                        </div>
+                                      </Button>
+                                    )}
+                                  </div>
+                                  
+                                  {/* Complete Column */}
+                                  <div className="space-y-2">
+                                    <div className="text-xs font-semibold text-gray-600 text-center mb-1">Complete</div>
+                                    {completeCoaching && (
+                                      <Button 
+                                        size="sm" 
+                                        className="w-full bg-orange-600 hover:bg-orange-700 text-white py-1.5"
+                                        onClick={() => handleWorkoutStart(completeCoaching.id)}
+                                      >
+                                        <div className="flex flex-col items-center">
+                                          <span className="text-xs font-medium">With Coaching</span>
+                                        </div>
+                                      </Button>
+                                    )}
+                                    {completeNoCoaching && (
+                                      <Button 
+                                        size="sm" 
+                                        variant="outline"
+                                        className="w-full bg-white border-orange-600 text-black hover:bg-orange-50 py-1.5"
+                                        onClick={() => handleWorkoutStart(completeNoCoaching.id)}
+                                      >
+                                        <div className="flex flex-col items-center">
+                                          <span className="text-xs font-medium">No Coaching</span>
+                                        </div>
+                                      </Button>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          });
+                        }
+                        
+                        // Regular Skills Academy workouts (non-wall ball)
                         return trackSeries.map((seriesItem) => {
                         // Get all workouts for this series
                         const seriesWorkouts = workouts.filter(w => w.series_id === seriesItem.id);
@@ -516,8 +538,6 @@ export default function SkillsAcademyWorkoutsPage() {
                         );
                       });
                       })()
-                    )}
-                  </>
                 )}
               </div>
             </div>

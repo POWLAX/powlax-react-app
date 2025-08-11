@@ -8,8 +8,8 @@ import StudyDrillModal from './modals/StudyDrillModal'
 
 interface Drill {
   id: string
-  name: string
-  duration: number
+  title: string
+  duration_minutes: number
   category: string
   drill_types?: string
   strategies?: string[]
@@ -107,7 +107,7 @@ export default function ParallelDrillPicker({
     
     Object.entries(drillsByCategory).forEach(([category, drills]) => {
       filtered[category] = drills.filter(drill => {
-        return drill.name.toLowerCase().includes(searchTerm.toLowerCase())
+        return drill.title.toLowerCase().includes(searchTerm.toLowerCase())
       })
     })
     
@@ -145,7 +145,7 @@ export default function ParallelDrillPicker({
           >
             <Plus className="h-4 w-4 text-gray-600" />
           </button>
-          <h4 className="font-medium text-sm flex-1">{drill.name}</h4>
+          <h4 className="font-medium text-sm flex-1">{drill.title}</h4>
           {isFavorite(drill.id) && (
             <Star className="h-4 w-4 text-yellow-500 fill-current" />
           )}
@@ -154,7 +154,7 @@ export default function ParallelDrillPicker({
         {/* Duration and Study button */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500">{drill.duration} min</span>
+            <span className="text-xs text-gray-500">{drill.duration_minutes} min</span>
             {drill.source === 'user' && (
               <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
                 <User className="h-3 w-3" />
@@ -264,7 +264,7 @@ export default function ParallelDrillPicker({
                 
                 {Object.values(filteredDrillsByCategory).every(drills => drills.length === 0) && (
                   <div className="text-center py-8 text-gray-500">
-                    No drills found matching "{searchTerm}"
+                    No drills found matching &quot;{searchTerm}&quot;
                   </div>
                 )}
               </div>

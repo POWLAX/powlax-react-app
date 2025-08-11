@@ -10,7 +10,7 @@ import {
   Timer, Target, Trophy, Star, Flame, 
   Video, RotateCcw, PlayCircle, PauseCircle
 } from 'lucide-react'
-import { useAuth } from '@/contexts/JWTAuthContext'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
 import { StreakCounter } from '@/components/gamification/StreakCounter'
 import { DifficultyIndicator } from '@/components/gamification/DifficultyIndicator'
 

@@ -305,80 +305,66 @@ export default function GamificationDemo() {
           </div>
 
           {/* Award Animation */}
-          <AnimatePresence>
-            {showAwardAnimation && lastScore && (
-              <div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                className="fixed inset-0 flex items-center justify-center z-50 bg-black/50"
-                onClick={() => setShowAwardAnimation(false)}
-              >
-                <div
-                  initial={{ y: 50 }}
-                  animate={{ y: 0 }}
-                  className="bg-white rounded-lg p-8 max-w-md w-full mx-4"
-                >
-                  <div className="text-center">
-                    <div
-                      initial={{ rotate: 0 }}
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 0.5 }}
-                      className="inline-block text-6xl mb-4"
-                    >
-                      🎉
-                    </div>
-                    
-                    <h2 className="text-2xl font-bold mb-4">Workout Complete!</h2>
-                    
-                    <div className="space-y-3">
-                      <div className="bg-blue-50 rounded-lg p-4">
-                        <div className="text-3xl font-bold text-blue-600">
-                          {lastScore.totalPoints} Points
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          Difficulty: {lastScore.averageDifficulty}/5.0
-                        </div>
-                      </div>
-
-                      <div className="text-left bg-gray-50 rounded-lg p-4">
-                        <div className="font-semibold mb-2">Points Earned:</div>
-                        <div className="text-sm space-y-1">
-                          {formatCategoryPoints(lastScore.categoryPoints).split(', ').map((points, i) => (
-                            <div key={i}>• {points}</div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {Object.keys(lastScore.bonusMultipliers).length > 0 && (
-                        <div className="text-left bg-green-50 rounded-lg p-4">
-                          <div className="font-semibold mb-2">Bonuses Applied:</div>
-                          <div className="text-sm space-y-1">
-                            {lastScore.bonusMultipliers.streak && (
-                              <div>• Streak Bonus: +{((lastScore.bonusMultipliers.streak - 1) * 100).toFixed(0)}%</div>
-                            )}
-                            {lastScore.bonusMultipliers.difficulty && (
-                              <div>• Difficulty Bonus: +{((lastScore.bonusMultipliers.difficulty - 1) * 100).toFixed(0)}%</div>
-                            )}
-                            {lastScore.bonusMultipliers.first_today && (
-                              <div>• First Today: +{((lastScore.bonusMultipliers.first_today - 1) * 100).toFixed(0)}%</div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <Button 
-                      onClick={() => setShowAwardAnimation(false)}
-                      className="mt-6"
-                    >
-                      Continue
-                    </Button>
+          {showAwardAnimation && lastScore && (
+            <div
+              className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 animate-in fade-in duration-300"
+              onClick={() => setShowAwardAnimation(false)}
+            >
+              <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 animate-in slide-in-from-bottom-4 duration-300">
+                <div className="text-center">
+                  <div className="inline-block text-6xl mb-4 animate-spin">
+                    🎉
                   </div>
+                  
+                  <h2 className="text-2xl font-bold mb-4">Workout Complete!</h2>
+                  
+                  <div className="space-y-3">
+                    <div className="bg-blue-50 rounded-lg p-4">
+                      <div className="text-3xl font-bold text-blue-600">
+                        {lastScore.totalPoints} Points
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Difficulty: {lastScore.averageDifficulty}/5.0
+                      </div>
+                    </div>
+
+                    <div className="text-left bg-gray-50 rounded-lg p-4">
+                      <div className="font-semibold mb-2">Points Earned:</div>
+                      <div className="text-sm space-y-1">
+                        {formatCategoryPoints(lastScore.categoryPoints).split(', ').map((points, i) => (
+                          <div key={i}>• {points}</div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {Object.keys(lastScore.bonusMultipliers).length > 0 && (
+                      <div className="text-left bg-green-50 rounded-lg p-4">
+                        <div className="font-semibold mb-2">Bonuses Applied:</div>
+                        <div className="text-sm space-y-1">
+                          {lastScore.bonusMultipliers.streak && (
+                            <div>• Streak Bonus: +{((lastScore.bonusMultipliers.streak - 1) * 100).toFixed(0)}%</div>
+                          )}
+                          {lastScore.bonusMultipliers.difficulty && (
+                            <div>• Difficulty Bonus: +{((lastScore.bonusMultipliers.difficulty - 1) * 100).toFixed(0)}%</div>
+                          )}
+                          {lastScore.bonusMultipliers.first_today && (
+                            <div>• First Today: +{((lastScore.bonusMultipliers.first_today - 1) * 100).toFixed(0)}%</div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <Button 
+                    onClick={() => setShowAwardAnimation(false)}
+                    className="mt-6"
+                  >
+                    Continue
+                  </Button>
                 </div>
               </div>
-            )}
-          </AnimatePresence>
+            </div>
+          )}
         </TabsContent>
 
         {/* Verification Tab */}

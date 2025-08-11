@@ -7,8 +7,9 @@ import { Card } from '@/components/ui/card'
 
 interface Drill {
   id: string
-  name: string
-  duration: number
+  title?: string
+  name?: string
+  duration_minutes: number
   notes?: string
   coach_instructions?: string
 }
@@ -199,7 +200,7 @@ export default function FieldModeView({ timeSlots, practiceTitle, onExit }: Fiel
                     Lane {index + 1}
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-medium">{drill.name}</h3>
+                    <h3 className="font-medium">{drill.title || drill.name}</h3>
                     {drill.notes && (
                       <p className="text-sm text-gray-600 mt-1">{drill.notes}</p>
                     )}

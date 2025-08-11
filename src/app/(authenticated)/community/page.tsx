@@ -14,8 +14,10 @@ import {
   Share2,
   MessageSquare,
   UserPlus,
-  Bell
+  Bell,
+  Loader2
 } from 'lucide-react'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
 
 // Mock community data
 const communityStats = [
@@ -113,6 +115,20 @@ const upcomingEvents = [
 ]
 
 export default function CommunityPage() {
+  const { user, loading: authLoading } = useAuth()
+
+  // Show loading spinner while authentication is being verified
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto" />
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'Training Update': return 'bg-blue-100 text-blue-800'

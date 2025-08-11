@@ -14,7 +14,6 @@ import AddCustomStrategiesModal from '@/components/practice-planner/modals/AddCu
 import StrategiesListModal from '@/components/practice-planner/modals/StrategiesListModal'
 import PrintablePracticePlan from '@/components/practice-planner/PrintablePracticePlan'
 import PracticeTemplateSelector from '@/components/practice-planner/PracticeTemplateSelector'
-import PracticeScheduleCard from '@/components/practice-planner/PracticeScheduleCard'
 import ActiveStrategiesSection from '@/components/practice-planner/ActiveStrategiesSection'
 import StudyDrillModal from '@/components/practice-planner/modals/StudyDrillModal'
 import StudyStrategyModal from '@/components/practice-planner/modals/StudyStrategyModal'
@@ -22,11 +21,13 @@ import { usePracticePlans, type TimeSlot as PracticePlanTimeSlot } from '@/hooks
 import { useDrills } from '@/hooks/useDrills'
 import { usePrint } from '@/hooks/usePrint'
 import { useStrategies } from '@/hooks/useStrategies'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
 import { toast } from 'sonner'
 
 export default function PracticePlansPage() {
   const params = useParams()
   const teamId = params.teamId as string
+  const { user } = useAuth()
   const { savePracticePlan, plans, loading: plansLoading } = usePracticePlans(teamId)
   const { drills: supabaseDrills, refreshDrills } = useDrills()
   const { isPrinting, printContent } = usePrint()
@@ -430,24 +431,113 @@ export default function PracticePlansPage() {
             </div>
           )}
 
-          {/* Practice Schedule Card with Practice Info */}
-          <div className="mb-4">
-            <PracticeScheduleCard
-              practiceDate={practiceDate}
-              setPracticeDate={setPracticeDate}
-              startTime={startTime}
-              setStartTime={setStartTime}
-              duration={duration}
-              setDuration={setDuration}
-              field={field}
-              setField={setField}
-              addSetupTime={addSetupTime}
-              setAddSetupTime={setAddSetupTime}
-              setupDuration={setupDuration}
-              setSetupDuration={setSetupDuration}
-              practiceNotes={practiceNotes}
-              setPracticeNotes={setPracticeNotes}
+          {/* Practice Schedule - Using original format until new component is ready */}
+          <div className="bg-white rounded-lg shadow-sm border p-4 mb-4">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Practice Schedule</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <Calendar className="inline h-4 w-4 mr-1" />
+                  Date:
+                </label>
+                <input
+                  type="date"
+                  value={practiceDate}
+                  onChange={(e) => setPracticeDate(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <Clock className="inline h-4 w-4 mr-1" />
+                  Start:
+                </label>
+                <input
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <MapPin className="inline h-4 w-4 mr-1" />
+                  Field:
+                </label>
+                <input
+                  type="text"
+                  value={field}
+                  onChange={(e) => setField(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center">
+                <span className="text-sm font-medium text-gray-700 mr-2">Duration:</span>
+                <input
+                  type="number"
+                  value={duration}
+                  onChange={(e) => setDuration(parseInt(e.target.value) || 0)}
+                  className="w-20 px-3 py-1 border rounded-md mr-2"
+                />
+                <span className="text-sm text-gray-600">min</span>
+                
+                <span className="text-sm font-medium text-gray-700 ml-6">End:</span>
+                <span className="text-sm text-gray-600 ml-2">
+                  {calculateEndTime(startTime, duration + (addSetupTime ? setupDuration : 0))}
+                </span>
+              </div>
+              
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="setupTime"
+                  checked={addSetupTime}
+                  onChange={(e) => setAddSetupTime(e.target.checked)}
+                  className="mr-2"
+                />
+                <label htmlFor="setupTime" className="text-sm font-medium text-gray-700">
+                  Add Setup Time
+                </label>
+                {addSetupTime && (
+                  <>
+                    <input
+                      type="number"
+                      value={setupDuration}
+                      onChange={(e) => setSetupDuration(parseInt(e.target.value) || 0)}
+                      className="w-16 px-2 py-1 border rounded-md ml-2 mr-1"
+                    />
+                    <span className="text-sm text-gray-600">min</span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Duration Progress Bar */}
+            <PracticeDurationBar 
+              totalDuration={duration}
+              usedDuration={totalDrillTime}
             />
+            
+            {/* Practice Info and Goals Accordion */}
+            <Accordion type="single" collapsible className="mt-4">
+              <AccordionItem value="practice-info">
+                <AccordionTrigger>Practice Info and Goals</AccordionTrigger>
+                <AccordionContent>
+                  <textarea
+                    placeholder="Add your practice goals and notes here..."
+                    className="w-full p-3 border rounded-md resize-none h-24"
+                    value={practiceNotes}
+                    onChange={(e) => setPracticeNotes(e.target.value)}
+                  />
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </div>
 
 
@@ -479,6 +569,7 @@ export default function PracticePlansPage() {
             onSelectStrategy={handleSelectStrategy}
             selectedStrategies={selectedStrategies.map(s => s.id)}
             isMobile={false}
+            user={user}
           />
         </div>
       </div>
@@ -501,6 +592,7 @@ export default function PracticePlansPage() {
               onSelectStrategy={handleSelectStrategy}
               selectedStrategies={selectedStrategies.map(s => s.id)}
               isMobile={true}
+              user={user}
             />
           </div>
         </div>

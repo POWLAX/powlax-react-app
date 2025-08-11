@@ -12,8 +12,10 @@ import {
   ExternalLink,
   Search,
   Filter,
-  Star
+  Star,
+  Loader2
 } from 'lucide-react'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
 
 // Mock resources data
 const resourceCategories = [
@@ -83,6 +85,20 @@ const recentResources = [
 ]
 
 export default function ResourcesPage() {
+  const { user, loading: authLoading } = useAuth()
+
+  // Show loading spinner while authentication is being verified
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto" />
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="p-6">
       {/* Header */}

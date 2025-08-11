@@ -1,13 +1,17 @@
 'use client'
 
 import { useState, useMemo, Fragment } from 'react'
-import { Filter, Plus, Video, Image, Beaker, ChevronDown, ChevronRight, Search, Play } from 'lucide-react'
+import { Filter, Plus, Video, Image, Beaker, ChevronDown, ChevronRight, Search, Play, BookOpen } from 'lucide-react'
 import { useStrategies, getStrategiesByActualCategory, searchStrategies } from '@/hooks/useStrategies'
 import VideoModal from './modals/VideoModal'
 import LacrosseLabModal from './modals/LacrosseLabModal'
 import AddCustomStrategiesModal from './modals/AddCustomStrategiesModal'
 import StudyStrategyModal from './modals/StudyStrategyModal'
 import FilterStrategiesModal from './modals/FilterStrategiesModal'
+import SaveToPlaybookModal from '@/components/team-playbook/SaveToPlaybookModal'
+import AdminToolbar from './AdminToolbar'
+import AdminEditModal from './modals/AdminEditModal'
+// UserData type no longer needed with Supabase Auth
 
 interface Strategy {
   id: string
@@ -25,12 +29,14 @@ interface StrategiesTabProps {
   onSelectStrategy: (strategy: Strategy) => void
   selectedStrategies: string[]
   isMobile?: boolean
+  user?: UserData | null
 }
 
 export default function StrategiesTab({ 
   onSelectStrategy, 
   selectedStrategies,
-  isMobile = false 
+  isMobile = false,
+  user = null
 }: StrategiesTabProps) {
   const { strategies, loading, error, refreshStrategies } = useStrategies()
   const [searchTerm, setSearchTerm] = useState('')
@@ -43,7 +49,10 @@ export default function StrategiesTab({
   const [showVideoModal, setShowVideoModal] = useState(false)
   const [showLabModal, setShowLabModal] = useState(false)
   const [showStudyStrategyModal, setShowStudyStrategyModal] = useState(false)
+  const [showSaveToPlaybookModal, setShowSaveToPlaybookModal] = useState(false)
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(null)
+  const [showAdminEditModal, setShowAdminEditModal] = useState(false)
+  const [editingStrategy, setEditingStrategy] = useState<Strategy | null>(null)
 
   const toggleCategory = (category: string) => {
     if (expandedCategories.includes(category)) {
@@ -97,6 +106,11 @@ export default function StrategiesTab({
     e.stopPropagation()
     setSelectedStrategy(strategy)
     setShowLabModal(true)
+  }
+
+  const handleAdminEdit = (strategy: Strategy) => {
+    setEditingStrategy(strategy)
+    setShowAdminEditModal(true)
   }
 
   const hasVideo = (strategy: Strategy) => {
@@ -236,7 +250,7 @@ export default function StrategiesTab({
                     {strategies.map((strategy) => (
                       <div
                         key={strategy.id}
-                        className="p-3 bg-white border rounded-md hover:bg-gray-50"
+                        className="p-3 bg-white border rounded-md hover:bg-gray-50 group relative"
                       >
                         <div className="flex flex-col gap-2">
                           {/* Title row with Plus/checkbox on left */}
@@ -264,9 +278,17 @@ export default function StrategiesTab({
                               </button>
                             )}
                             <h4 className="font-medium text-sm flex-1">{strategy.strategy_name}</h4>
+                            {/* Admin Toolbar */}
+                            <AdminToolbar
+                              user={user}
+                              itemType="strategy"
+                              item={strategy}
+                              onEdit={() => handleAdminEdit(strategy)}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            />
                           </div>
                           
-                          {/* Source Badge and Study button */}
+                          {/* Source Badge and Action buttons */}
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               {strategy.source === 'user' && (
@@ -276,18 +298,35 @@ export default function StrategiesTab({
                               )}
                             </div>
                             
-                            {/* Study button replacing all icons */}
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                setSelectedStrategy(strategy)
-                                setShowStudyStrategyModal(true)
-                              }}
-                              className="inline-flex items-center gap-1 px-2 py-1 bg-gray-900 text-white text-xs rounded border border-gray-700 hover:bg-gray-800 transition-colors"
-                            >
-                              <Play className="h-3 w-3" fill="white" />
-                              Study
-                            </button>
+                            {/* Action buttons */}
+                            <div className="flex items-center gap-1">
+                              {/* Save to Playbook button */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setSelectedStrategy(strategy)
+                                  setShowSaveToPlaybookModal(true)
+                                }}
+                                className="inline-flex items-center gap-1 px-2 py-1 bg-powlax-blue hover:bg-powlax-blue/90 text-white text-xs rounded transition-colors"
+                                title="Save to Team Playbook"
+                              >
+                                <BookOpen className="h-3 w-3" />
+                                Save
+                              </button>
+                              
+                              {/* Study button */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setSelectedStrategy(strategy)
+                                  setShowStudyStrategyModal(true)
+                                }}
+                                className="inline-flex items-center gap-1 px-2 py-1 bg-gray-900 text-white text-xs rounded border border-gray-700 hover:bg-gray-800 transition-colors"
+                              >
+                                <Play className="h-3 w-3" fill="white" />
+                                Study
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -341,8 +380,32 @@ export default function StrategiesTab({
             onClose={() => setShowStudyStrategyModal(false)}
             strategy={selectedStrategy}
           />
+          
+          <SaveToPlaybookModal
+            isOpen={showSaveToPlaybookModal}
+            onClose={() => setShowSaveToPlaybookModal(false)}
+            strategy={selectedStrategy}
+            onSuccess={() => {
+              // Optional: Show success message or refresh something
+              console.log('Strategy saved to team playbook successfully!')
+            }}
+          />
         </>
       )}
+
+      {/* Admin Edit Modal */}
+      <AdminEditModal
+        isOpen={showAdminEditModal}
+        onClose={() => setShowAdminEditModal(false)}
+        itemType="strategy"
+        item={editingStrategy}
+        user={user}
+        onSuccess={() => {
+          refreshStrategies()
+          setShowAdminEditModal(false)
+          setEditingStrategy(null)
+        }}
+      />
     </div>
   )
 }

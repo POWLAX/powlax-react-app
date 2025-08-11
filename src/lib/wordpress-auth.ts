@@ -273,14 +273,14 @@ class WordPressAuth {
   }
 
   /**
-   * Sync WordPress user data to Supabase
+   * Sync WordPress user data to Supabase (now public for use by magic link system)
    */
-  private async syncUserToSupabase(wpUser: WordPressUser, subscriptions: MemberPressSubscription[]): Promise<void> {
+  async syncUserToSupabase(wpUser: WordPressUser, subscriptions: MemberPressSubscription[]): Promise<void> {
     try {
-      // Check if user exists in Supabase
+      // Check if user exists in Supabase users table
       const { data: existingUser, error: selectError } = await supabase
         .from('users')
-        .select('id')
+        .select('id, auth_user_id')
         .eq('wordpress_id', wpUser.id)
         .single();
 
@@ -451,6 +451,144 @@ class WordPressAuth {
     }, activeSubscriptions[0].expires_at);
     
     return latestExpiration;
+  }
+
+  /**
+   * Create or link Supabase Auth user for WordPress user
+   */
+  async createSupabaseAuthUser(wpUser: WordPressUser): Promise<{ user: any; error: any }> {
+    try {
+      // Check if Supabase Auth user already exists
+      const adminClient = supabase.createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false
+          }
+        }
+      );
+
+      const { data: existingUsers } = await adminClient.auth.admin.listUsers();
+      let existingUser = existingUsers.users.find(u => u.email === wpUser.email);
+      
+      if (existingUser) {
+        // Update existing user metadata with WordPress info
+        const { data: updatedUser, error: updateError } = await adminClient.auth.admin.updateUserById(
+          existingUser.id,
+          {
+            user_metadata: {
+              ...existingUser.user_metadata,
+              wordpress_id: wpUser.id,
+              full_name: wpUser.name,
+              first_name: wpUser.first_name,
+              last_name: wpUser.last_name,
+              avatar_url: wpUser.avatar_urls?.['96'] || null,
+              roles: wpUser.roles
+            }
+          }
+        );
+        
+        if (updateError) {
+          return { user: null, error: updateError };
+        }
+        
+        return { user: updatedUser.user, error: null };
+      } else {
+        // Create new Supabase Auth user
+        const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
+          email: wpUser.email,
+          email_confirm: true,
+          user_metadata: {
+            wordpress_id: wpUser.id,
+            full_name: wpUser.name,
+            first_name: wpUser.first_name,
+            last_name: wpUser.last_name,
+            avatar_url: wpUser.avatar_urls?.['96'] || null,
+            roles: wpUser.roles,
+            username: wpUser.username
+          }
+        });
+        
+        if (createError) {
+          return { user: null, error: createError };
+        }
+        
+        return { user: newUser.user, error: null };
+      }
+    } catch (error) {
+      console.error('Error creating/linking Supabase Auth user:', error);
+      return { user: null, error };
+    }
+  }
+
+  /**
+   * Link WordPress user to existing Supabase Auth user by email
+   */
+  async linkWordPressUserByEmail(email: string): Promise<{ user: WordPressUser | null; linked: boolean }> {
+    try {
+      // Search for WordPress user by email
+      const response = await fetch(
+        `${this.baseUrl}/users?search=${encodeURIComponent(email)}`,
+        {
+          headers: this.getAuthHeaders()
+        }
+      );
+      
+      if (!response.ok) {
+        return { user: null, linked: false };
+      }
+      
+      const users = await response.json();
+      const wpUser = users.find((user: any) => 
+        user.email?.toLowerCase() === email.toLowerCase()
+      );
+      
+      if (wpUser) {
+        // Sync WordPress user to our database
+        await this.syncUserToSupabase(wpUser, []);
+        
+        // Try to get MemberPress subscriptions
+        const subscriptions = await this.getMemberPressSubscriptions(wpUser.id, '');
+        if (subscriptions.length > 0) {
+          await this.syncSubscriptions(wpUser.id, subscriptions);
+        }
+        
+        return { user: wpUser, linked: true };
+      }
+      
+      return { user: null, linked: false };
+    } catch (error) {
+      console.error('Error linking WordPress user by email:', error);
+      return { user: null, linked: false };
+    }
+  }
+
+  /**
+   * Get WordPress user by email (for magic link authentication)
+   */
+  async getWordPressUserByEmail(email: string): Promise<WordPressUser | null> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/users?search=${encodeURIComponent(email)}`,
+        {
+          headers: this.getAuthHeaders()
+        }
+      );
+      
+      if (!response.ok) {
+        return null;
+      }
+      
+      const users = await response.json();
+      return users.find((user: any) => 
+        user.email?.toLowerCase() === email.toLowerCase()
+      ) || null;
+    } catch (error) {
+      console.error('Error getting WordPress user by email:', error);
+      return null;
+    }
   }
 
   /**

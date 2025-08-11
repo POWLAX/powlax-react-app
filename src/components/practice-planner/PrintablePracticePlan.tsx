@@ -4,9 +4,9 @@ import { format } from 'date-fns'
 
 interface Drill {
   id: string
-  name: string
+  title: string
   description?: string
-  duration: number
+  duration_minutes: number
   equipment?: string[]
   notes?: string
   category?: string
@@ -166,7 +166,7 @@ export default function PrintablePracticePlan({
               {slot.drills.map((drill, drillIndex) => (
                 <div key={drill.id} className="timeline-drill border-l-4 border-orange-500 pl-4">
                   <div className="drill-name text-lg font-bold text-gray-900 mb-2">
-                    {drill.name}
+                    {drill.title}
                     {drill.category && (
                       <span className="drill-meta text-sm text-blue-600 ml-2 px-2 py-1 bg-blue-100 rounded-full">
                         {drill.category}
@@ -185,7 +185,7 @@ export default function PrintablePracticePlan({
                       </div>
                     )}
                     <div className="text-gray-600 bg-gray-100 px-2 py-1 rounded">
-                      <strong>⏱️ Duration:</strong> {drill.duration} min
+                      <strong>⏱️ Duration:</strong> {drill.duration_minutes} min
                     </div>
                   </div>
                   {drill.notes && (

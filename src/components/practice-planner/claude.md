@@ -108,9 +108,9 @@ Borders: #e5e7eb (Light gray)
 ## 🔗 **Integration Points**
 
 ### Database Tables
-- `drills_powlax` - Drill library with `drill_types` field for categorization
-- `strategies_powlax` - Strategies with game phase categories
-- `practice_plans` - Saved practice sessions
+- `powlax_drills` - Drill library with `drill_types` field for categorization
+- `powlax_strategies` - Strategies with game phase categories
+- `practices` - Saved practice sessions
 - `user_drills` - Custom user-created drills
 - `user_strategies` - Custom user-created strategies
 

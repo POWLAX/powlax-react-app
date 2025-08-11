@@ -1,0 +1,360 @@
+# DATABASE DOCUMENTATION SYNCHRONIZATION CONTRACT
+# Contract ID: database-documentation-sync-001
+# Created: 2025-01-11
+# Branch: Claude-to-Claude-Sub-Agent-Work-Flow
+
+## 🎯 CONTRACT OBJECTIVE
+Fix all database documentation, ensure consistent table usage across codebase, 
+migrate all authentication to Supabase Auth, and refactor Claude.md with accurate information.
+
+## 📊 PART 1: TABLE DISCREPANCY ANALYSIS
+
+### 🔄 TABLE MAPPING: WHAT I THOUGHT vs. WHAT IT ACTUALLY IS
+
+| Table Name | What I Thought | What It Actually Is |
+|------------|----------------|-------------------|
+| **skills_academy_workout_drills** | Doesn't exist or broken | EXISTS with proper schema but 0 records (needs population) |
+| **skills_academy_workouts** | Empty or missing | FULLY POPULATED with 166 workouts |
+| **skills_academy_drills** | Empty or missing | FULLY POPULATED with 167 drills |
+| **skills_academy_series** | Might not exist | FULLY POPULATED with 49 series |
+| **drills_powlax** | Legacy migration table with old data | DOES NOT EXIST AT ALL |
+| **strategies_powlax** | Legacy migration table with old data | DOES NOT EXIST AT ALL |
+| **concepts_powlax** | Legacy migration table | DOES NOT EXIST AT ALL |
+| **skills_powlax** | Legacy migration table | DOES NOT EXIST AT ALL |
+| **powlax_skills_academy_workouts** | Alternative Skills Academy table | DOES NOT EXIST AT ALL |
+| **powlax_skills_academy_drills** | Alternative Skills Academy table | DOES NOT EXIST AT ALL |
+| **powlax_wall_ball_collections** | Working with data (example system) | EXISTS but EMPTY (0 records) |
+| **powlax_wall_ball_drill_library** | Has wall ball drills | EXISTS but EMPTY (0 records) |
+| **powlax_wall_ball_collection_drills** | Junction table with data | EXISTS but EMPTY (0 records) |
+| **drills** | Might not exist | EXISTS but EMPTY (awaiting migration) |
+| **strategies** | Might not exist | EXISTS but EMPTY (awaiting migration) |
+| **practice_plans** | Uncertain if exists | EXISTS but EMPTY (awaiting content) |
+| **user_profiles** | Has user data | EXISTS but EMPTY (needs Supabase Auth integration) |
+| **teams** | Has some data | POPULATED with 10 teams |
+| **team_members** | Has some data | POPULATED with 25 members |
+| **points_ledger** | Gamification working | EXISTS but EMPTY (not implemented) |
+| **badges** | Gamification working | EXISTS but EMPTY (not implemented) |
+| **wordpress_groups** | WordPress migration data | DOES NOT EXIST AT ALL |
+| **wordpress_group_members** | WordPress migration data | DOES NOT EXIST AT ALL |
+
+### What Claude Assumed vs. Reality
+
+#### ❌ INCORRECT ASSUMPTIONS:
+1. **Legacy Tables Exist**
+   - ASSUMED: Tables like `drills_powlax`, `strategies_powlax` exist for migration
+   - REALITY: These tables DO NOT EXIST in current database
+   
+2. **Wall Ball Has Data**
+   - ASSUMED: Wall Ball tables are populated and working
+   - REALITY: All Wall Ball tables exist but have 0 records
+
+3. **Only 3 Tables Have Data**
+   - ASSUMED: Most tables empty, only teams/team_members have data
+   - REALITY: 10 tables have data, including full Skills Academy (167 drills, 166 workouts)
+
+4. **Skills Academy Not Connected**
+   - ASSUMED: Skills Academy tables don't exist or are incomplete
+   - REALITY: All Skills Academy tables exist, but junction table `skills_academy_workout_drills` is empty
+
+5. **Practice Planning Missing**
+   - ASSUMED: Practice planning tables might not exist
+   - REALITY: All practice planning tables exist but have 0 records
+
+#### ✅ ACTUAL DATABASE STATE:
+
+**Tables with Data (10 total):**
+- `skills_academy_drills`: 167 records (fully populated)
+- `skills_academy_workouts`: 166 records (fully populated) 
+- `skills_academy_series`: 49 records (fully populated)
+- `team_members`: 25 records
+- `teams`: 10 records
+- `registration_links`: 10 records
+- `magic_links`: 10 records
+- `practice_templates`: 3 records
+- `skills_academy_user_progress`: 2 records
+- `family_accounts`: 1 record
+
+**Empty But Existing Tables (33 total):**
+- All practice planning tables (drills, strategies, concepts, skills, etc.)
+- All Wall Ball tables (collections, drill_library, collection_drills)
+- All gamification tables (points_ledger, badges, user_badges, etc.)
+- Critical junction: `skills_academy_workout_drills` (0 records - BLOCKING ISSUE)
+
+## 📋 PART 2: CORRECT vs INCORRECT TABLE REFERENCES
+
+### CRITICAL CORRECTIONS NEEDED:
+
+#### 1. Skills Academy Tables
+**INCORRECT REFERENCES:**
+```typescript
+// Files incorrectly reference:
+'powlax_skills_academy_workouts'  // DOES NOT EXIST
+'powlax_skills_academy_drills'    // DOES NOT EXIST
+'skills_academy_powlax'            // DOES NOT EXIST
+```
+
+**CORRECT REFERENCES:**
+```typescript
+'skills_academy_series'           // 49 records
+'skills_academy_workouts'         // 166 records  
+'skills_academy_drills'           // 167 records
+'skills_academy_workout_drills'   // EXISTS but empty (needs population)
+'skills_academy_user_progress'    // 2 records
+```
+
+#### 2. Wall Ball Tables
+**INCORRECT REFERENCES:**
+```typescript
+// Some files think Wall Ball is working/populated
+'wall_ball_drills'                 // DOES NOT EXIST
+'wall_ball_workouts'               // DOES NOT EXIST
+```
+
+**CORRECT REFERENCES:**
+```typescript
+'powlax_wall_ball_collections'    // EXISTS but empty
+'powlax_wall_ball_drill_library'  // EXISTS but empty
+'powlax_wall_ball_collection_drills' // EXISTS but empty
+```
+
+#### 3. Practice Planning Tables
+**INCORRECT REFERENCES:**
+```typescript
+'drills_powlax'                    // DOES NOT EXIST
+'strategies_powlax'                // DOES NOT EXIST
+'concepts_powlax'                  // DOES NOT EXIST
+'skills_powlax'                    // DOES NOT EXIST
+```
+
+**CORRECT REFERENCES:**
+```typescript
+'drills'                           // EXISTS but empty
+'strategies'                       // EXISTS but empty
+'concepts'                         // EXISTS but empty
+'skills'                           // EXISTS but empty
+'practice_plans'                   // EXISTS but empty
+'practice_plan_drills'             // EXISTS but empty
+```
+
+#### 4. Authentication Tables
+**INCORRECT REFERENCES:**
+```typescript
+// JWT/WordPress auth references
+'wordpress_users'                  // DOES NOT EXIST
+'jwt_sessions'                     // DOES NOT EXIST
+'wp_user_profiles'                 // DOES NOT EXIST
+```
+
+**CORRECT REFERENCES:**
+```typescript
+'user_profiles'                    // EXISTS but empty (needs Supabase Auth integration)
+'magic_links'                      // 10 records
+'registration_links'               // 10 records
+'family_accounts'                  // 1 record
+// Plus Supabase Auth (auth.users table)
+```
+
+## 🚀 PART 3: SUB-AGENT EXECUTION PLAN
+
+### SPECIFIC FILES REQUIRING FIXES:
+
+#### Incorrect Table References Found:
+```
+# Legacy table references (non-existent tables):
+src/app/demo/strategies/page.tsx         - uses 'strategies_powlax'
+src/app/api/workouts/complete/route.ts   - uses 'drills_powlax'
+scripts/database/check-all-tables.ts     - references multiple non-existent tables
+scripts/database/analyze-live-database.ts - references non-existent tables
+scripts/database/check-supabase-tables.ts - references non-existent tables
+scripts/database/check-live-relationships.ts - references non-existent tables
+scripts/verify-correct-tables.ts         - has wrong table mappings
+
+# WordPress/JWT Auth (should use Supabase Auth):
+src/app/api/auth/validate/route.ts       - WordPress metadata references
+src/app/api/auth/magic-link/route.ts     - imports wordpressAuth
+src/app/api/auth/session/route.ts        - WordPress metadata
+src/hooks/useWordPressAuth.tsx           - entire file should be removed/replaced
+src/lib/wordpress-role-management.ts     - WordPress auth dependencies
+```
+
+### ULTRA THINK PHASE (5+ minutes mandatory)
+Before launching agents, evaluate:
+1. All files currently using incorrect table names
+2. Database hook dependencies
+3. Type definition mismatches
+4. Authentication flow conflicts
+5. File collision risks between agents
+
+### PARALLEL AGENT DISTRIBUTION:
+
+#### Agent 1: Database Type Definitions & Hooks
+**Type:** general-purpose
+**Scope:** Fix all TypeScript types and database hooks
+**Files:**
+- `/src/types/database.ts`
+- `/src/types/*.ts`
+- `/src/hooks/use*.ts`
+- `/src/lib/supabase*.ts`
+**No Touch:** Pages, components, authentication
+
+#### Agent 2: Skills Academy Implementation
+**Type:** general-purpose  
+**Scope:** Fix all Skills Academy pages and components
+**Files:**
+- `/src/app/(authenticated)/skills-academy/**`
+- `/src/components/skills-academy/**`
+- `/scripts/*skills-academy*.ts`
+**No Touch:** Practice planner, authentication, Wall Ball
+
+#### Agent 3: Practice Planning & Wall Ball
+**Type:** general-purpose
+**Scope:** Update practice planner and Wall Ball references
+**Files:**
+- `/src/app/(authenticated)/practice-planner/**`
+- `/src/components/practice-planner/**`
+- `/src/app/(authenticated)/wall-ball/**`
+- `/src/components/wall-ball/**`
+**No Touch:** Skills Academy, authentication
+
+#### Agent 4: Documentation Updates
+**Type:** general-purpose
+**Scope:** Update all documentation files
+**Files:**
+- `/CLAUDE.md`
+- `/src/claude.md`
+- `/src/components/claude.md`
+- `/docs/**/*.md`
+- `/README.md`
+**No Touch:** Code files, database migrations
+
+#### Agent 5: Authentication Migration
+**Type:** general-purpose
+**Scope:** Ensure all auth uses Supabase Auth
+**Files:**
+- `/src/contexts/*Auth*.tsx`
+- `/src/middleware/*.ts`
+- `/src/app/api/auth/**`
+- `/src/lib/*auth*.ts`
+**No Touch:** Database tables, UI components
+
+## 📝 PART 4: VALIDATION CHECKLIST
+
+### Pre-Execution Validation:
+- [ ] All 43 tables documented correctly
+- [ ] No references to non-existent tables
+- [ ] Type definitions match actual database
+- [ ] Authentication using Supabase Auth only
+
+### Post-Execution Tests:
+```bash
+# Test 1: Verify no incorrect table references
+grep -r "drills_powlax\|strategies_powlax\|skills_academy_powlax" src/
+
+# Test 2: Verify Skills Academy uses correct tables
+grep -r "skills_academy_workouts\|skills_academy_drills" src/
+
+# Test 3: Check for JWT/WordPress auth remnants  
+grep -r "jwt\|wordpress.*auth\|JWT" src/
+
+# Test 4: Run type checking
+npm run typecheck
+
+# Test 5: Test Skills Academy page loads
+curl -s "http://localhost:3000/skills-academy" | grep -i "workout"
+```
+
+## 🎯 PART 5: CRITICAL FIXES REQUIRED
+
+### 1. Populate Junction Table
+**URGENT:** `skills_academy_workout_drills` needs population
+- Map workout.drill_ids array to junction table records
+- Create migration script to establish relationships
+
+### 2. Remove Legacy References
+- Delete all references to non-existent `*_powlax` tables
+- Remove WordPress/JWT authentication code
+- Clean up unused imports and types
+
+### 3. Update Documentation
+- CLAUDE.md must reflect actual table structure
+- Remove all mentions of "legacy migration tables"
+- Document actual data availability
+
+## 📊 PART 6: FINAL CLAUDE.MD STRUCTURE
+
+### New CLAUDE.md Database Section Should Include:
+```markdown
+## Database Architecture (ACTUAL STATE)
+
+### ✅ Populated Tables (Data Available)
+- **Skills Academy System** (WORKING)
+  - `skills_academy_series`: 49 series definitions
+  - `skills_academy_workouts`: 166 workout templates
+  - `skills_academy_drills`: 167 drill definitions
+  - `skills_academy_workout_drills`: Junction table (NEEDS POPULATION)
+
+- **Team Management** (WORKING)
+  - `teams`: 10 teams
+  - `team_members`: 25 memberships
+  
+### ⏳ Empty Tables (Structure Ready, No Data)
+- **Practice Planning** (AWAITING DATA)
+  - All tables exist but need content migration
+  
+- **Wall Ball** (AWAITING DATA)
+  - All tables exist but need content migration
+  
+- **Gamification** (AWAITING IMPLEMENTATION)
+  - All tables exist but need feature activation
+
+### ❌ Non-Existent Tables (DO NOT USE)
+- No `*_powlax` legacy tables exist
+- No WordPress user tables exist
+- No JWT session tables exist
+```
+
+## 🔄 EXECUTION SEQUENCE
+
+1. **Ultra Think Phase** (5+ minutes)
+   - Map all file dependencies
+   - Identify collision risks
+   - Plan atomic changes
+
+2. **Parallel Execution** (5 agents simultaneously)
+   - Each agent works on exclusive file sets
+   - No overlapping modifications
+   - Document progress in real-time
+
+3. **Integration Phase** (Claude main)
+   - Review all agent outputs
+   - Run validation tests
+   - Commit atomic changes
+
+4. **Verification Phase**
+   - Test all pages load correctly
+   - Verify database queries work
+   - Confirm no TypeScript errors
+
+## ⚠️ CRITICAL WARNINGS
+
+1. **DO NOT** create new tables - only fix references
+2. **DO NOT** delete data - only update code references
+3. **MUST** preserve working Skills Academy functionality
+4. **MUST** maintain team management functionality
+5. **ALWAYS** test changes before committing
+
+## 📅 SUCCESS CRITERIA
+
+- [ ] Zero references to non-existent tables
+- [ ] All TypeScript types match actual database
+- [ ] Skills Academy pages load with real data
+- [ ] All authentication using Supabase Auth
+- [ ] Documentation 100% accurate
+- [ ] No console errors about missing tables
+- [ ] All tests passing
+
+---
+
+**Contract Status:** READY FOR ULTRA THINK
+**Estimated Completion:** 2-3 hours with parallel agents
+**Risk Level:** Medium (many file changes, but isolated domains)

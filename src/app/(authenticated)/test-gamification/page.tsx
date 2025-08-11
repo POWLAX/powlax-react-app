@@ -146,28 +146,17 @@ export default function TestGamification() {
       </div>
 
       {/* Reward Animation */}
-      <AnimatePresence>
-        {showReward && (
-          <div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.5 }}
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50"
-          >
-            <div
-              animate={{ rotate: [0, 360] }}
-              transition={{ duration: 1 }}
-              className="bg-white rounded-full p-8 shadow-2xl"
-            >
-              <div className="text-center">
-                <div className="text-6xl mb-4">🎉</div>
-                <div className="text-3xl font-bold text-blue-600">{points} Points!</div>
-                <div className="text-sm text-gray-600 mt-2">Great workout!</div>
-              </div>
+      {showReward && (
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 animate-in zoom-in-95 duration-300">
+          <div className="bg-white rounded-full p-8 shadow-2xl animate-spin">
+            <div className="text-center">
+              <div className="text-6xl mb-4">🎉</div>
+              <div className="text-3xl font-bold text-blue-600">{points} Points!</div>
+              <div className="text-sm text-gray-600 mt-2">Great workout!</div>
             </div>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
     </div>
   )
 }

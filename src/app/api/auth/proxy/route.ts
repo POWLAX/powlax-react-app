@@ -87,7 +87,8 @@ async function handleLogin(username: string, password: string) {
     const users = await searchResponse.json()
     const user = users.find((u: any) => 
       u.slug === username.toLowerCase() ||
-      u.name?.toLowerCase() === username.toLowerCase()
+      u.name?.toLowerCase() === username.toLowerCase() ||
+      u.email?.toLowerCase() === username.toLowerCase()
     )
 
     console.log(`Found ${users.length} users, looking for: ${username}`)
@@ -103,7 +104,9 @@ async function handleLogin(username: string, password: string) {
     // Now validate the password using a custom WordPress endpoint
     // Since we can't directly validate passwords via REST API, we'll use a workaround
     // Try to authenticate the user by attempting to access their own profile
-    const userCredentials = Buffer.from(`${username}:${password}`).toString('base64')
+    // Use the actual WordPress username (slug) for authentication
+    const authUsername = user.slug || username
+    const userCredentials = Buffer.from(`${authUsername}:${password}`).toString('base64')
     
     // Test if credentials work by trying to get user's own data
     const authTestResponse = await fetch(
@@ -127,7 +130,7 @@ async function handleLogin(username: string, password: string) {
         <methodCall>
           <methodName>wp.getUsersBlogs</methodName>
           <params>
-            <param><value><string>${username}</string></value></param>
+            <param><value><string>${authUsername}</string></value></param>
             <param><value><string>${password}</string></value></param>
           </params>
         </methodCall>`

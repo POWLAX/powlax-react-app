@@ -42,11 +42,22 @@ Complete React component library for POWLAX including 17 Shadcn/UI components, c
 ## 🔗 **Integration Points**
 **This area connects to:**
 - Next.js App Router pages (server/client component boundaries)
-- Supabase database for data persistence
+- Supabase database with 62 actual tables for complete system functionality
 - TanStack React Query for state management
-- Authentication contexts (useAuthContext)
-- POWLAX custom hooks (useSupabase, etc.)
+- Supabase Auth + Magic Links with custom users table
+- POWLAX custom hooks (useDrills targets powlax_drills, useStrategies targets powlax_strategies, etc.)
+- Skills Academy system with drill_ids column relationships
 - Tailwind CSS with POWLAX brand colors
+
+**Database Integration (ACTUAL SCHEMA):**
+- **Core Auth**: users, user_sessions, user_auth_status, magic_links, registration_links
+- **Registration**: registration_sessions, user_onboarding
+- **Content**: powlax_drills, user_drills, powlax_strategies, user_strategies, practices, practice_drills
+- **Teams**: clubs, teams, team_members
+- **Family**: family_accounts, family_members, parent_child_relationships
+- **Skills Academy**: skills_academy_series (49), skills_academy_workouts (166), skills_academy_drills (167), wall_ball_drill_library (48)
+- **Gamification**: user_points_wallets, user_badges, powlax_points_currencies, points_transactions_powlax, powlax_player_ranks
+- **Integration**: webhook_queue, webhook_events, membership_products, membership_entitlements
 
 **When you modify this area, also check:**
 - Server/client component usage (use 'use client' when needed)

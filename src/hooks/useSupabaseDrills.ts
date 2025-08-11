@@ -75,7 +75,7 @@ export function useSupabaseDrills() {
       
       // Try drills table first (from v3 schema)
       const { data: drillsData, error: drillsError } = await supabaseClient
-        .from('drills')
+        .from('powlax_drills')
         .select(`
           id,
           drill_id,

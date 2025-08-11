@@ -3,28 +3,20 @@
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { OnboardingProvider } from '@/contexts/OnboardingContext'
 import { QueryProvider } from '@/providers/query-provider'
-import { JWTAuthProvider } from '@/contexts/JWTAuthContext'
-import dynamic from 'next/dynamic'
-
-// Load toaster only on the client to avoid vendor-chunk SSR issues
-const ToasterProvider = dynamic(
-  () => import('@/components/providers/ToasterProvider').then((m) => m.ToasterProvider),
-  { ssr: false }
-)
+import { SupabaseAuthProvider } from '@/contexts/SupabaseAuthContext'
+import { ToasterProvider } from '@/components/providers/ToasterProvider'
 
 export default function ClientProviders({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
       <OnboardingProvider>
         <QueryProvider>
-          <JWTAuthProvider>
+          <SupabaseAuthProvider>
             {children}
             <ToasterProvider />
-          </JWTAuthProvider>
+          </SupabaseAuthProvider>
         </QueryProvider>
       </OnboardingProvider>
     </ThemeProvider>
   )
 }
-
-
