@@ -1361,4 +1361,330 @@ After Phase 004 completion, test:
 
 ---
 
-*END OF CONTRACT - Last Updated: 2025-01-16 by Claude*
+---
+
+## 🎨 **COMPREHENSIVE LAYOUT ARCHITECTURE PLAN - AUGUST 12, 2025**
+*Maximum UltraThink Analysis for Clean Page Integration*
+
+### **🎯 EXECUTIVE SUMMARY**
+
+Patrick requested a comprehensive plan to restore all original functionality (from 973-line page-broken.tsx) into the clean new page structure while ensuring the "Did It" button doesn't get covered by the menu tab and all elements fit naturally within the frame.
+
+### **📊 ORIGINAL FEATURES CATALOG (VERIFIED)**
+
+**From analysis of page-broken.tsx - ALL features to restore:**
+
+1. **Header Complex**: Workout title, drill progress (3 of 8), workout timer (05:23), credits counter (145), progress bar with integrated timer display
+2. **Point Counter**: Live 2-column point tracking with bigger images (48x48px), IMAGE-Name-Number format, real-time updates  
+3. **Drill Navigation**: Horizontal scrollable timeline, 180px minimum width cards, reference-only (non-clickable)
+4. **Video Player**: Full-width Vimeo integration, 16:9 aspect ratio, maximum width with proper padding
+5. **Footer Complex**: Drill name, ONLY sets_and_reps pill, "Did It" button with timer logic and mobile menu compensation
+6. **Animations**: Point explosions with real values, celebrations, real-time state updates
+7. **State Management**: Progress tracking, point calculations, timer enforcement, database persistence
+
+### **🏗️ VISUAL HIERARCHY STRATEGY**
+
+```
+┌─────────────────────────────────────────────┐
+│ HEADER (Fixed Height: ~80px)               │  
+│ ┌─←─┐ WORKOUT TITLE        TIMER: 05:23    │
+│ │ ↖ │ Drill 3 of 8         Credits: 145    │
+│ └───┘ ██████████░░░░ 60% [Progress+Timer]  │
+├─────────────────────────────────────────────┤
+│ POINT COUNTER (Sticky Height: ~100px)      │
+│ [IMG] Lax Credits: 45  [IMG] Attack: 12    │  
+│ [IMG] Defense: 8       [IMG] Midfield: 23  │
+├─────────────────────────────────────────────┤
+│ DRILL TIMELINE (Fixed Height: ~60px)       │
+│ [✓Drill1][●Drill2][○Drill3][○Drill4]      │
+├─────────────────────────────────────────────┤
+│ VIDEO PLAYER (Flexible Height: flex-1)     │
+│     ┌─────────────────────────────────┐     │
+│     │                                 │     │
+│     │        VIMEO VIDEO             │     │
+│     │   (Max height: calc(100vh-     │     │
+│     │        400px))                  │     │
+│     │                                 │     │
+│     └─────────────────────────────────┘     │
+├─────────────────────────────────────────────┤
+│ FOOTER (Fixed Height: ~120px + menu comp)  │
+│           Wall Ball Basics                  │
+│              [3 sets, 15 reps]             │
+│    ┌─────────────────────────────────────┐  │
+│    │          DID IT! (2:30)            │  │
+│    └─────────────────────────────────────┘  │
+│ [80px mobile padding for menu compensation] │
+└─────────────────────────────────────────────┘
+```
+
+### **🔧 CONTAINER ARCHITECTURE FRAMEWORK**
+
+#### **5-Zone Flex System (Zero-Scroll Design)**
+```tsx
+<div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+  {/* ZONE 1: HEADER (Fixed Height) */}
+  <header className="bg-white border-b border-gray-200 flex-shrink-0 px-4 py-3">
+    {/* Navigation + Title + Timer + Progress Bar with integrated timer display */}
+  </header>
+  
+  {/* ZONE 2: POINT COUNTER (Fixed Height, Sticky) */}
+  <section className="bg-white/95 backdrop-blur-sm border-b flex-shrink-0 py-3 px-4" data-point-counter>
+    {/* Patrick's 2-column layout: IMAGE(48x48px)-Name-Number format */}
+  </section>
+  
+  {/* ZONE 3: DRILL TIMELINE (Fixed Height) */}
+  <nav className="bg-white border-b flex-shrink-0 px-3 py-2">
+    {/* Horizontal scroll drill cards, 180px minimum, reference-only */}
+  </nav>
+  
+  {/* ZONE 4: VIDEO PLAYER (Flexible Height) */}
+  <main className="flex-1 bg-black px-2 py-3 md:px-6 md:py-4 flex items-center justify-center overflow-hidden">
+    {/* Centered Vimeo video with proper aspect ratio constraints */}
+  </main>
+  
+  {/* ZONE 5: FOOTER (Fixed Height + Critical Mobile Menu Compensation) */}
+  <footer className="fixed bottom-0 left-0 right-0 bg-gray-800 text-white px-4 py-4 flex-shrink-0 z-20
+                     pb-[calc(env(safe-area-inset-bottom)+80px)] md:pb-4">
+    {/* Drill name + ONLY sets_and_reps pill + Always-visible Did It button */}
+  </footer>
+</div>
+```
+
+### **📱 RESPONSIVE BREAKPOINT SPECIFICATIONS**
+
+#### **Mobile (< 768px) - PRIMARY TARGET**
+- **Header**: Compressed 3-column layout, 14px fonts, integrated progress+timer
+- **Point Counter**: 3-column grid, 48x48px images (bigger per Patrick), minimal padding
+- **Drill Timeline**: Horizontal scroll, 180px cards, touch-friendly
+- **Video**: Edge-to-edge minus 8px padding, `maxHeight: calc(100vh - 400px)`
+- **Footer**: Fixed with `pb-[80px]` (60px menu + 20px safety margin)
+
+#### **Desktop (≥ 768px) - ENHANCEMENT**
+- **Header**: Spacious layout, 18px fonts, expanded timer display
+- **Point Counter**: Same grid but generous padding, hover effects
+- **Drill Timeline**: Wider cards with hover states, better spacing
+- **Video**: Centered with max-width constraints, proper aspect ratio
+- **Footer**: Standard 16px bottom padding, no menu compensation needed
+
+### **🎯 PATRICK'S REQUIREMENTS INTEGRATION**
+
+#### **1. Progress Bar + Timer Integration (CRITICAL)**
+```tsx
+// PATRICK'S SPEC: Timer integrated within progress bar
+<div className="mt-2 relative">
+  <Progress value={progress} className="h-3 bg-gray-100" />
+  <div className="absolute inset-0 flex items-center justify-end pr-2">
+    <span className="text-xs text-white font-semibold backdrop-blur-sm bg-black/20 px-1 rounded">
+      {Math.round(progress)}% • {formatTime(workoutTimer)} • {completedDrills}/{totalDrills}
+    </span>
+  </div>
+</div>
+```
+
+#### **2. Point Counter 2-Column Layout (EXACT SPECIFICATION)**
+```tsx
+// PATRICK'S LAYOUT: IMAGE (bigger) - Name - Number of Points
+<div className="grid grid-cols-3 gap-2 py-3 px-4" data-point-counter>
+  {/* Column 1: First 2 point types */}
+  <div className="flex flex-col space-y-2">
+    {filteredPointTypes.slice(0, 2).map(type => (
+      <div key={type.slug} className="flex items-center gap-3 px-2 py-2 bg-gray-50 rounded-lg">
+        <img 
+          src={type.image_url} 
+          className="w-12 h-12 object-contain" // 48x48px per Patrick
+          alt={type.title}
+        />
+        <div className="flex-1">
+          <div className="font-medium text-sm">{type.title}</div>
+          <div className="font-bold text-lg text-powlax-blue">
+            {points[type.slug] || 0}
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+  
+  {/* Column 2: Next 2 point types */}
+  <div className="flex flex-col space-y-2">
+    {/* Same pattern */}
+  </div>
+  
+  {/* Column 3: Last point type (centered if odd) */}
+  <div className="flex flex-col justify-center">
+    {filteredPointTypes.slice(4, 5).map(type => (
+      <div className="flex items-center gap-3 px-2 py-2 bg-gray-50 rounded-lg mx-auto">
+        <img src={type.image_url} className="w-12 h-12 object-contain" />
+        <div className="text-center">
+          <div className="font-medium text-sm">{type.title}</div>
+          <div className="font-bold text-lg text-powlax-blue">
+            {points[type.slug] || 0}
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+```
+
+#### **3. Mobile Footer Compensation (CRITICAL SOLUTION)**
+```tsx
+// SOLUTION: 80px padding prevents "Did It" button from being covered by menu
+<footer className="fixed bottom-0 left-0 right-0 bg-gray-800 text-white px-4 py-4 flex-shrink-0 z-20
+                   pb-[calc(env(safe-area-inset-bottom)+80px)] md:pb-4">
+  {/* Drill Name */}
+  <div className="mb-3">
+    <h2 className="text-lg font-bold text-center">{currentDrill.title}</h2>
+  </div>
+  
+  {/* PATRICK'S REQUIREMENT: ONLY sets_and_reps column as single pill */}
+  <div className="flex justify-center mb-4">
+    {currentDrill?.sets_and_reps && (
+      <div className="bg-white/90 px-4 py-2 rounded-full">
+        <span className="font-bold text-gray-800 text-sm">
+          {currentDrill.sets_and_reps}
+        </span>
+      </div>
+    )}
+  </div>
+  
+  {/* Always-visible Did It button with timer logic */}
+  <Button 
+    data-did-it-button
+    onClick={handleDrillComplete}
+    className={`w-full h-12 text-base font-bold ${
+      canComplete ? 'bg-powlax-blue hover:bg-powlax-blue/90' : 'bg-gray-400 cursor-not-allowed'
+    }`}
+    disabled={!canComplete}
+  >
+    {canComplete ? 'Did It!' : `Wait ${formatTime(timeRemaining)}`}
+  </Button>
+</footer>
+
+{/* Video container accounts for footer height */}
+<main className="flex-1 bg-black px-2 py-3 flex items-center justify-center overflow-hidden"
+      style={{ paddingBottom: '160px' }}> {/* Account for footer */}
+```
+
+### **🎬 ANIMATION INTEGRATION STRATEGY**
+
+#### **Point Explosion Animation (PATRICK'S VIBRANT REQUIREMENT)**
+```tsx
+// Real point values, vibrant animations, drill card → point totals
+const handleDrillComplete = async () => {
+  // 1. IMMEDIATE UI UPDATE (Patrick's real-time requirement)
+  const realPointValues = currentDrill.point_values || {};
+  setUserPoints(prev => ({
+    ...prev,
+    lax_credit: (prev.lax_credit || 0) + (realPointValues.lax_credit || 0),
+    attack_token: (prev.attack_token || 0) + (realPointValues.attack_token || 0)
+  }));
+  
+  // 2. TRIGGER VIBRANT EXPLOSION ANIMATION
+  const didItButton = document.querySelector('[data-did-it-button]') as HTMLElement;
+  const pointCounter = document.querySelector('[data-point-counter]') as HTMLElement;
+  
+  if (didItButton && pointCounter) {
+    const buttonRect = didItButton.getBoundingClientRect();
+    const counterRect = pointCounter.getBoundingClientRect();
+    
+    triggerPointExplosion({
+      origin: { x: buttonRect.left + buttonRect.width/2, y: buttonRect.top + buttonRect.height/2 },
+      destination: { x: counterRect.left + counterRect.width/2, y: counterRect.top + counterRect.height/2 },
+      points: realPointValues, // Real values from drill data
+      duration: 2000, // Longer for visibility per Patrick
+      vibrant: true, // More particles, brighter colors, larger scale
+      pointTypeImages: pointTypes, // Show actual point icons
+      colors: ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4'] // Vibrant colors
+    });
+  }
+  
+  // 3. BACKGROUND DATABASE SYNC (non-blocking)
+  await syncPointsToDatabase(userId, realPointValues);
+};
+```
+
+### **⚡ PERFORMANCE OPTIMIZATION TARGETS**
+
+#### **Mobile Performance Specifications**
+- **Touch Targets**: 44px minimum (gloved hands compatible)
+- **Animation Frame Rate**: 60fps sustained during point explosions
+- **Video Loading**: < 3 seconds initial load
+- **Touch Response**: < 100ms for "Did It" button
+- **Scroll Performance**: 60fps horizontal drill timeline scrolling
+
+#### **Critical Measurements**
+- **Total Layout Height**: Exactly 100vh (no vertical scroll)
+- **Header Height**: ~80px (flexible content)
+- **Point Counter Height**: ~100px (fixed for animations)
+- **Timeline Height**: ~60px (horizontal scroll area)
+- **Footer Height**: ~120px + 80px mobile compensation
+- **Video Height**: `calc(100vh - 360px)` (remaining space)
+
+### **🔄 IMPLEMENTATION ROADMAP**
+
+#### **Phase 1: Foundation & Import Resolution**
+1. **Progressive Import Testing**: Test each of 6 commented imports individually
+2. **Clean Page Enhancement**: Replace placeholder with component structure
+3. **Container Architecture**: Implement 5-zone flex system
+
+#### **Phase 2: Core Layout Components**
+1. **Header with Integrated Timer**: Progress bar overlay with timer display
+2. **Point Counter**: Patrick's 2-column specification with bigger images
+3. **Drill Timeline**: Reference-only horizontal scroll navigation
+4. **Video Section**: Flexible height with aspect ratio constraints
+
+#### **Phase 3: Mobile Optimization & Footer**
+1. **Footer Mobile Compensation**: Critical 80px padding solution
+2. **Touch Target Optimization**: 44px minimum interactive elements
+3. **Safe Area Handling**: iPhone notch and home indicator support
+
+#### **Phase 4: Animation Integration**
+1. **Point Explosion System**: Real values, vibrant effects, proper timing
+2. **Real-time State Updates**: Immediate UI changes, background sync
+3. **Performance Optimization**: 60fps animation targets
+
+#### **Phase 5: Testing & Validation**
+1. **Responsive Testing**: 375px, 768px, 1024px breakpoints
+2. **Touch Interaction**: Actual mobile device testing
+3. **Animation Performance**: Frame rate monitoring and optimization
+
+### **🎯 SUCCESS CRITERIA CHECKLIST**
+
+#### **Layout Completeness**
+- [ ] All 7 original features restored and functional
+- [ ] 5-zone container architecture implemented
+- [ ] Zero vertical scrolling (h-screen constraint)
+- [ ] Proper element stacking and z-index layering
+
+#### **Patrick's August 12 Requirements**
+- [ ] Timer integrated within progress bar display
+- [ ] Point counter 2-column layout with 48x48px images
+- [ ] Only sets_and_reps column shown as single pill
+- [ ] Mobile footer bottom aligns with menu tab top
+- [ ] "Did It" button always visible and accessible
+- [ ] Point explosions use real drill point values
+- [ ] Animations more vibrant with larger scale and brighter colors
+
+#### **Mobile Optimization**
+- [ ] Footer never overlaps mobile navigation menu
+- [ ] Touch targets minimum 44px for field usage
+- [ ] Video maximum width with proper padding
+- [ ] 60fps animation performance sustained
+- [ ] Safe area insets properly handled
+
+#### **Technical Integration**
+- [ ] All imports resolved without module errors
+- [ ] Supabase Permanence Pattern applied consistently
+- [ ] Real-time state updates without server delays
+- [ ] Database operations using actual table schemas
+- [ ] Component integration without circular dependencies
+
+### **📋 IMPLEMENTATION NOTES**
+
+This comprehensive plan provides the exact blueprint for restoring full functionality while maintaining the clean page structure Patrick appreciates. The critical mobile menu compensation solution (80px footer padding) ensures the "Did It" button remains accessible, and the 5-zone flex architecture guarantees all elements fit naturally within the viewport frame.
+
+The plan prioritizes Patrick's specific feedback while leveraging the Supabase Permanence Pattern for reliable data operations and real-time user experience.
+
+---
+
+*END OF CONTRACT - Last Updated: 2025-08-12 by Claude*
