@@ -31,6 +31,25 @@
   display: none;  /* Chrome, Safari and Opera */
 }
 
+/* Skills Academy Workout Mobile Layout Fixes */
+@media (max-width: 768px) {
+  /* Ensure workout page footer aligns with mobile menu */
+  .skills-workout-footer {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 4rem) !important;
+  }
+  
+  /* Mobile menu spacing for workout pages */
+  .skills-workout-container {
+    padding-bottom: 4rem;
+  }
+  
+  /* Video player maximum width optimization */
+  .skills-video-container iframe {
+    width: calc(100% - 0.5rem) !important;
+    max-width: 100% !important;
+  }
+}
+
 /* Field Visibility Utilities for Outdoor Coaching */
 @layer utilities {
   /* High contrast text for field visibility */

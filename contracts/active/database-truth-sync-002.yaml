@@ -10,90 +10,92 @@ Remove all references to non-existent tables and deprecated systems.
 
 ## 📊 PART 1: THE ACTUAL DATABASE TRUTH
 
-### ✅ TABLES IN ACTIVE USE (HOLY BIBLE)
+### ✅ TABLES IN ACTIVE USE (HOLY BIBLE) - 61 TOTAL TABLES
 
 #### SKILLS ACADEMY CORE (WORKING)
-- **skills_academy_drills** (167 records) - Skills Academy drill library
+- **skills_academy_drills** (167 records) - PRIMARY drill library (position_drills is DUPLICATE)
 - **skills_academy_series** (49 records) - Workout series definitions (includes Wall Ball series)
 - **skills_academy_workouts** (166 records) - Workout definitions with `drill_ids` column linking to drills
-- **skills_academy_user_progress** (3 records) - User progress tracking (NOT YET connected to points_wallets)
+- **skills_academy_user_progress** (5 records) - User progress tracking
 - **wall_ball_drill_library** (48 records) - Bite-sized segments of wall ball workout videos
 
 #### PRACTICE PLANNING (ACTIVE)
-- **powlax_drills** - Main POWLAX drill library
-- **powlax_strategies** - Strategy library
-- **practices** - THE REAL practice plans table (can edit in Supabase)
-- **practice_drills** - Drill instances with notes and modifications
-- **powlax_images** - Drill media images (just renamed from drill_media)
-- **user_drills** - User-created drills
-- **user_strategies** - User-created strategies
+- **powlax_drills** (135 records) - Main POWLAX drill library
+- **powlax_strategies** (220 records) - Strategy library
+- **practices** (34 records) - THE REAL practice plans table
+- **practice_drills** (32 records) - Drill instances with notes and modifications
+- **powlax_images** (4 records) - Drill media images
+- **user_drills** (6 records) - User-created drills with team_share/club_share arrays
+- **user_strategies** (4 records) - User-created strategies with team_share/club_share arrays
 
 #### TEAM MANAGEMENT (WORKING)
-- **clubs** (2 records) - Organization level above teams
-- **teams** (10 records) - Team entities
-- **team_members** (25 records) - Team membership
+- **clubs** (3 records) - Organization level above teams
+- **teams** (14 records) - Team entities
+- **team_members** (26 records) - Team membership
 
 #### USER & AUTH (ACTIVE)
-- **users** - Main user table (NOT user_profiles!)
-- **user_sessions** - Session management
-- **user_auth_status** - User authentication state
-- **magic_links** (10 records) - Magic link authentication
+- **users** (14 records) - Main user table (NOT user_profiles!)
+- **user_sessions** (0 records) - Session management
+- **user_auth_status** (14 records) - User authentication state
+- **magic_links** (16 records) - Magic link authentication
 - **registration_links** (10 records) - Registration tokens
-- **registration_sessions** - Registration process tracking
+- **registration_sessions** (0 records) - Registration process tracking
 
 #### FAMILY MANAGEMENT (ACTIVE)
-- **family_accounts** (1 record) - Family account management
-- **family_members** - Family member relationships
-- **parent_child_relationships** - Parent-child user links
+- **family_accounts** (2 records) - Family account management
+- **family_members** (2 records) - Family member relationships
+- **parent_child_relationships** (5 records) - Parent-child user links
 
 #### GAMIFICATION (PARTIALLY ACTIVE)
-- **powlax_points_currencies** - Point currency definitions
-- **points_transactions_powlax** - Point transaction history
-- **powlax_player_ranks** - Player ranking definitions
-- **user_badges** - Earned badges
-- **user_badge_progress_powlax** - Badge progress tracking
-- **user_rank_progress_powlax** - Rank progression
-- **user_points_wallets** - User point balances (NOT YET connected to skills_academy_user_progress)
-- **point_types_powlax** - Point currency types
-- **leaderboard** - Leaderboard rankings (points not yet showing)
+- **powlax_points_currencies** (7 records) - Point currency definitions
+- **points_transactions_powlax** (0 records) - Point transaction history
+- **powlax_player_ranks** (10 records) - Player ranking definitions
+- **user_badges** (3 records) - Earned badges
+- **user_badge_progress_powlax** (0 records) - Badge progress tracking
+- **user_rank_progress_powlax** (0 records) - Rank progression
+- **user_points_wallets** (1 records) - User point balances
+- **point_types_powlax** (9 records) - Point currency types
+- **leaderboard** (14 records) - Leaderboard rankings
 
 #### MEMBERSHIP (ACTIVE)
-- **membership_entitlements** - User access rights
-- **membership_products** - Membership product definitions
-- **user_subscriptions** - Subscription data
+- **membership_entitlements** (7 records) - User access rights
+- **membership_products** (12 records) - Membership product definitions
+- **user_subscriptions** (0 records) - Subscription data
 
 #### MISC ACTIVE
-- **age_bands** - Age progression for drills, strategies, and skills
-- **drill_point_summary** - Point values for drills
-- **drill_lab_urls** - Lacrosse Lab URL associations
-- **user_favorites** - User favorites
-- **user_onboarding** - Onboarding progress
-- **user_events** - User event tracking
-- **user_activity_log** - Activity tracking (empty - may not track admin/dev)
+- **age_bands** (0 records) - Age progression for drills, strategies, and skills
+- **drill_point_summary** (167 records) - Point values for drills
+- **drill_lab_urls** (179 records) - Lacrosse Lab URL associations
+- **user_favorites** (5 records) - User favorites
+- **user_onboarding** (0 records) - Onboarding progress
+- **user_events** (0 records) - User event tracking
+- **user_activity_log** (0 records) - Activity tracking
 
 #### WEBHOOKS (ACTIVE)
-- **webhook_events** - Webhook event log
-- **webhook_queue** - Webhook processing queue
-- **webhook_queue_stats** - Webhook statistics
-- **webhook_recent_failures** - Failed webhook tracking
-- **wp_sync_log** - WordPress sync tracking
+- **webhook_events** (0 records) - Webhook event log
+- **webhook_queue** (138 records) - Webhook processing queue
+- **webhook_queue_stats** (1 records) - Webhook statistics
+- **webhook_recent_failures** (0 records) - Failed webhook tracking
+- **wp_sync_log** (0 records) - WordPress sync tracking
+
+#### LEGACY TABLES (STILL HAVE DATA - DO NOT DELETE)
+- **drill_game_states** (214 records) - Legacy drill-gamestate relationships (ACTIVE DATA!)
+- **game_states** (6 records) - Game state definitions (ACTIVE DATA!)
+- **practice_summary** (34 records) - Practice summaries (ACTIVE DATA!)
+- **skills_academy_workouts_backup** (192 records) - Backup data
 
 ### ⚠️ DEPRECATED/NOT IN USE (DO NOT REFERENCE)
-- **drill_game_states** - Old WordPress backend connections (DEPRECATED)
-- **drill_lacrosse_lab** - NOT IN USE
-- **game_states** - Old WordPress system (moved to drills/strategies directly)
-- **position_drills** - Duplicate of skills_academy_drills (DO NOT USE)
-- **powlax_academy_workout_collections** - NOT IN USE
-- **powlax_academy_workout_item_answers** - NOT IN USE
-- **powlax_academy_workout_items** - NOT IN USE
-- **powlax_workout_drill_sequences** - NOT IN USE
-- **workout_drill_mapping** - NOT IN USE (use skills_academy_workouts.drill_ids)
-- **workout_drill_relationships** - NOT IN USE (use skills_academy_workouts.drill_ids)
+- **position_drills** (167 records) - DUPLICATE of skills_academy_drills (DO NOT USE)
+- **drill_lacrosse_lab** (0 records) - NOT IN USE
+- **powlax_academy_workout_collections** (0 records) - NOT IN USE
+- **powlax_academy_workout_item_answers** (0 records) - NOT IN USE
+- **powlax_academy_workout_items** (0 records) - NOT IN USE
+- **powlax_workout_drill_sequences** (0 records) - NOT IN USE
+- **workout_drill_mapping** (0 records) - NOT IN USE (use skills_academy_workouts.drill_ids)
+- **workout_drill_relationships** (0 records) - NOT IN USE (use skills_academy_workouts.drill_ids)
 
-### 🔄 UNCLEAR/NEEDS INVESTIGATION
-- **practice_summary** - Possibly duplicate of `practices` (linked to deprecated items?)
-- **practice_templates** (3 records) - MOCK DATA placeholder, will update later
-- **skills_academy_workouts_backup** - Backup with extras to upload later
+### 🔄 TEMPLATES/MISC
+- **practice_templates** (3 records) - Practice templates
 
 ### ❌ TABLES THAT DO NOT EXIST (STOP LOOKING FOR THESE!)
 - **drills** - DOES NOT EXIST (use `powlax_drills`)
@@ -125,37 +127,43 @@ Remove all references to non-existent tables and deprecated systems.
 
 ## 📋 PART 2: CRITICAL RELATIONSHIPS TO UNDERSTAND
 
-### Skills Academy Relationships
+### ✅ VERIFIED WORKING INTEGRATIONS (FROM ACTUAL PAGES)
+
+#### Skills Academy System
 ```
 skills_academy_series (49) 
     ↓
-skills_academy_workouts (166) [contains drill_ids array]
+skills_academy_workouts (166) [contains drill_ids array - NO JUNCTION TABLE!]
     ↓
-skills_academy_drills (167) [referenced by drill_ids]
+skills_academy_drills (167) [PRIMARY drill table - position_drills is duplicate]
 
-wall_ball_drill_library (48) - Segments of wall ball workout videos
-```
-
-### Practice Planning Relationships
-```
-practices (main practice plans)
-    ↓
-practice_drills (instances with notes/modifications)
-    ↓
-powlax_drills / user_drills (drill definitions)
-powlax_strategies / user_strategies (strategy definitions)
+wall_ball_drill_library (48) - Integrated within Skills Academy system
 ```
 
-### User Hierarchy
+#### Practice Planning System (VERIFIED WORKING)
 ```
-clubs (2)
+practices (34 records) - Main practice plans table
     ↓
-teams (10)
+practice_drills (32 records) - Drill instances with notes/modifications
     ↓
-team_members (25)
-    ↓
-users (main user table)
+powlax_drills (135 records) / user_drills (6 records) - Drill definitions
+powlax_strategies (220 records) / user_strategies (4 records) - Strategy definitions
 ```
+
+#### User/Team Hierarchy
+```
+clubs (3)
+    ↓
+teams (14)
+    ↓
+team_members (26)
+    ↓
+users (14) - Main user table
+```
+
+#### Verified RPC Functions
+- `award_drill_points` - Awards points for drill completion
+- `get_user_points` - Gets user point balances
 
 ## 🔧 PART 3: CODE FIXES REQUIRED
 

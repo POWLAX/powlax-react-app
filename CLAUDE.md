@@ -1,8 +1,8 @@
 # CLAUDE.md - POWLAX Project Context
 
-**Last Updated:** January 11, 2025  
+**Last Updated:** August 12, 2025  
 **Branch:** Claude-to-Claude-Sub-Agent-Work-Flow  
-**Database Truth:** contracts/active/database-truth-sync-002.yaml (62 actual tables)
+**Database Truth:** contracts/active/database-truth-sync-002.yaml (61 actual tables)
 
 ---
 
@@ -29,43 +29,53 @@
 
 **Source:** `contracts/active/database-truth-sync-002.yaml`
 
-### ✅ Active Tables with Data (62 Total)
+### ✅ Active Tables with Data (61 Total)
 
 #### Skills Academy Core (WORKING)
 - **skills_academy_series** (49 records) - Workout series definitions
 - **skills_academy_workouts** (166 records) - Workout definitions with `drill_ids` column
-- **skills_academy_drills** (167 records) - Skills Academy drill library
-- **skills_academy_user_progress** (3 records) - User progress tracking
+- **skills_academy_drills** (167 records) - PRIMARY drill library (position_drills is DUPLICATE)
+- **skills_academy_user_progress** (5 records) - User progress tracking
 - **wall_ball_drill_library** (48 records) - Wall ball workout video segments
 
 **Key Relationship:** Use `drill_ids` column in workouts, NOT junction tables
 
-#### Practice Planning (ACTIVE)
-- **powlax_drills** - Main POWLAX drill library (NOT `drills`)
-- **powlax_strategies** - Strategy library (NOT `strategies`)
-- **practices** - THE REAL practice plans table (NOT `practice_plans`)
-- **practice_drills** - Drill instances with notes and modifications
-- **powlax_images** - Drill media images
-- **user_drills** - User-created drills
-- **user_strategies** - User-created strategies
+#### Practice Planning (VERIFIED WORKING)
+- **powlax_drills** (135 records) - Main POWLAX drill library (NOT `drills`)
+- **powlax_strategies** (220 records) - Strategy library (NOT `strategies`)
+- **practices** (34 records) - THE REAL practice plans table (NOT `practice_plans`)
+- **practice_drills** (32 records) - Drill instances with notes and modifications
+- **powlax_images** (4 records) - Drill media images
+- **user_drills** (6 records) - User-created drills with team_share/club_share arrays
+- **user_strategies** (4 records) - User-created strategies with team_share/club_share arrays
 
 #### Team Management (WORKING)
-- **clubs** (2 records) - Organization level above teams (NOT `organizations`)
-- **teams** (10 records) - Team entities
-- **team_members** (25 records) - Team membership
+- **clubs** (3 records) - Organization level above teams (NOT `organizations`)
+- **teams** (14 records) - Team entities
+- **team_members** (26 records) - Team membership
 
 #### User & Auth (ACTIVE)
-- **users** - Main user table (NOT `user_profiles`!)
-- **user_sessions** - Session management
-- **magic_links** (10 records) - Magic link authentication
+- **users** (14 records) - Main user table (NOT `user_profiles`!)
+- **user_sessions** (0 records) - Session management
+- **magic_links** (16 records) - Magic link authentication
 - **registration_links** (10 records) - Registration tokens
 
 #### Gamification (PARTIALLY ACTIVE)
-- **powlax_points_currencies** - Point currency definitions
-- **points_transactions_powlax** - Point transaction history (NOT `points_ledger`)
-- **user_points_wallets** - User point balances
-- **user_badges** - Earned badges (NOT `badges`)
-- **powlax_player_ranks** - Player ranking definitions
+- **powlax_points_currencies** (7 records) - Point currency definitions
+- **points_transactions_powlax** (0 records) - Point transaction history (NOT `points_ledger`)
+- **user_points_wallets** (1 records) - User point balances
+- **user_badges** (3 records) - Earned badges (NOT `badges`)
+- **powlax_player_ranks** (10 records) - Player ranking definitions
+- **point_types_powlax** (9 records) - Point currency types
+- **leaderboard** (14 records) - Leaderboard rankings
+
+### ⚠️ LEGACY TABLES (STILL HAVE DATA - DO NOT DELETE)
+- **drill_game_states** (214 records) - Legacy drill-gamestate relationships
+- **game_states** (6 records) - Game state definitions
+- **practice_summary** (34 records) - Practice summaries
+
+### ❌ DEPRECATED TABLES (DO NOT USE)
+- **position_drills** (167 records) - DUPLICATE of skills_academy_drills
 
 ### ❌ TABLES THAT DO NOT EXIST (NEVER REFERENCE THESE!)
 - `drills`, `strategies`, `concepts`, `skills` - DO NOT EXIST
@@ -80,12 +90,10 @@
 
 ## 📱 CURRENT PAGE STATUS
 
-### ✅ WORKING PAGES
-- `/demo/*` - All demo pages functional
-- `/skills-academy` - Marketing page with position tracks
-- `/(authenticated)/strategies` - Strategy browser working
-- `/(authenticated)/details/[type]/[id]` - Detail pages working
-- `/(authenticated)/skills-academy/workout/[id]` - Has quiz-style interface (needs refinement)
+### ✅ VERIFIED WORKING PAGES (CONFIRMED TABLE INTEGRATIONS)
+- `/practiceplan` & `/teams/[teamId]/practiceplan` - Practice planner using powlax_drills, user_drills, powlax_strategies, practices tables
+- `/skills-academy/workouts` - Workout browser using skills_academy_series, skills_academy_workouts tables
+- `/skills-academy/workout/[id]` - Full workout player using skills_academy_drills, wall_ball_drill_library, RPC functions
 
 ### 🔧 NEEDS WORK (See MASTER_CONTRACTs)
 - `/dashboard` - Currently shows fake data with no links to real data

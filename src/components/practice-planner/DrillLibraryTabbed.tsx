@@ -5,8 +5,7 @@ import { Filter, Plus, Star, ChevronDown, ChevronRight, Video, Link, Beaker, Use
 import { useDrills } from '@/hooks/useDrills'
 import { useFavorites } from '@/hooks/useFavorites'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import AddCustomDrillModal from './AddCustomDrillModal'
-import EditCustomDrillModal from './EditCustomDrillModal'
+import AddCustomDrillModal from './modals/AddCustomDrillModal'
 import FilterDrillsModal from './FilterDrillsModal'
 import VideoModal from './modals/VideoModal'
 import LinksModal from './modals/LinksModal'
@@ -14,9 +13,6 @@ import StrategiesModal from './modals/StrategiesModal'
 import LacrosseLabModal, { hasLabUrls } from './modals/LacrosseLabModal'
 import StudyDrillModal from './modals/StudyDrillModal'
 import StrategiesTab from './StrategiesTab'
-import AdminToolbar from './AdminToolbar'
-import AdminEditModal from './modals/AdminEditModal'
-import { useAdminEdit } from '@/hooks/useAdminEdit'
 // Using proper Supabase User type
 interface User {
   id: string
@@ -86,8 +82,6 @@ export default function DrillLibraryTabbed({
   const [showLacrosseLabModal, setShowLacrosseLabModal] = useState(false)
   const [showStudyDrillModal, setShowStudyDrillModal] = useState(false)
   const [selectedDrill, setSelectedDrill] = useState<Drill | null>(null)
-  const [showAdminEditModal, setShowAdminEditModal] = useState(false)
-  const [editingDrill, setEditingDrill] = useState<Drill | null>(null)
   
   // Filter state
   const [selectedGamePhases, setSelectedGamePhases] = useState<string[]>([])
@@ -207,11 +201,6 @@ export default function DrillLibraryTabbed({
     setShowLacrosseLabModal(true)
   }
 
-  const handleAdminEdit = (drill: Drill) => {
-    setEditingDrill(drill)
-    setShowAdminEditModal(true)
-  }
-
   const clearFilters = () => {
     setSelectedGamePhases([])
     setSelectedDrillTypes([])
@@ -298,6 +287,27 @@ export default function DrillLibraryTabbed({
             </button>
           )}
           <h4 className="font-medium text-sm flex-1">{drill.title}</h4>
+          
+          {/* Edit button for any drill - show for drill owner or admin */}
+          {user && (
+            (drill.user_id === user.id) || 
+            (user.role === 'administrator' || user.role === 'admin')
+          ) && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setEditingCustomDrill(drill)
+                setShowEditDrillModal(true)
+              }}
+              className="p-1 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+              title="Edit this drill"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </button>
+          )}
+          
           {/* Favorite button */}
           <button
             onClick={(e) => handleToggleFavorite(drill, e)}
@@ -308,14 +318,6 @@ export default function DrillLibraryTabbed({
               className={`h-4 w-4 ${isFavorite(drill.id, 'drill') ? 'fill-yellow-400 text-yellow-400' : ''}`} 
             />
           </button>
-          {/* Admin Toolbar */}
-          <AdminToolbar
-            user={user}
-            itemType="drill"
-            item={drill}
-            onEdit={() => handleAdminEdit(drill)}
-            className="opacity-0 group-hover:opacity-100 transition-opacity"
-          />
         </div>
         
         {/* Source Badge and Study button */}
@@ -327,22 +329,6 @@ export default function DrillLibraryTabbed({
                   <User className="h-3 w-3" />
                   Custom
                 </span>
-                {/* Edit button for user-owned drills */}
-                {user && drill.user_id === user.id && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      // TODO: Open EditCustomDrillModal
-                      console.log('Edit drill:', drill.id)
-                    }}
-                    className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-                    title="Edit this custom drill"
-                  >
-                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                  </button>
-                )}
               </div>
             )}
           </div>
@@ -497,22 +483,18 @@ export default function DrillLibraryTabbed({
       
       {/* Modals */}
       <AddCustomDrillModal
-        isOpen={showAddDrillModal}
-        onClose={() => setShowAddDrillModal(false)}
+        isOpen={showAddDrillModal || showEditDrillModal}
+        onClose={() => {
+          setShowAddDrillModal(false)
+          setShowEditDrillModal(false)
+          setEditingCustomDrill(null)
+        }}
         onAdd={(drill) => {
           onAddDrill(drill)
           setShowAddDrillModal(false)
         }}
         onDrillCreated={() => refreshDrills()}
-      />
-      
-      <EditCustomDrillModal
-        isOpen={showEditDrillModal}
-        onClose={() => {
-          setShowEditDrillModal(false)
-          setEditingCustomDrill(null)
-        }}
-        drill={editingCustomDrill}
+        editDrill={editingCustomDrill}
         onDrillUpdated={() => refreshDrills()}
       />
       
@@ -566,19 +548,6 @@ export default function DrillLibraryTabbed({
         </>
       )}
 
-      {/* Admin Edit Modal */}
-      <AdminEditModal
-        isOpen={showAdminEditModal}
-        onClose={() => setShowAdminEditModal(false)}
-        itemType="drill"
-        item={editingDrill}
-        user={user}
-        onSuccess={() => {
-          refreshDrills()
-          setShowAdminEditModal(false)
-          setEditingDrill(null)
-        }}
-      />
     </div>
   )
 }

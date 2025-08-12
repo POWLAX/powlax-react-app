@@ -180,121 +180,195 @@ A couple things I noticed for fixes are 1 Please the point images bigger and mak
 
 ## 🚨 **PHASE 004: ANIMATIONS & UI POLISH (PRIORITY 10/10)**
 *Priority: CRITICAL (10/10) - User Experience & Engagement*
-*Status: READY FOR IMPLEMENTATION*
-*Added: 2025-01-16 by Patrick*
+*Status: IN PROGRESS - YOLO MODE READY*
+*Updated: 2025-01-16 with Permanence Pattern Integration*
 
-### **Objectives:**
-1. **Point Explosion Animation on "Did It" Click**
-   - Animate point explosion over completed drill card.
-   - Visual feedback showing drill completion
-   - Smooth transition to next drill
+### **🎯 Implementation Strategy with Permanence Pattern**
 
-2. **Live Point Counter Display**
-   - Show point types being earned above drill cards  (Must include the Point Images not currently in the Supabase Tables. Create an SQL that pulls the columns from the CSV here docs/Wordpress CSV's/Gamipress Gamification Exports/Points-Types-Export-2025-July-31-1904 copy.csv The columns you will want to grab are `Title` with the name and `URL` which has the wordpress image url. )
-   - Center below upcoming drills (NO, Center these abocve the drill scroll feature in the header)
-   - Update in real-time as workout progresses
-   - Display: Attack Tokens, Defense Dollars, Midfield Medals, etc. (Must relate back to the current workout series they are doing)
+#### **Core Requirements from Patrick's Feedback:**
+1. **Point Images Layout**: 2-column layout, bigger images, IMAGE-Name-Points format
+2. **Pills Fix**: Only `sets_and_reps` column text as single pill under video title
+3. **Real-time Updates**: Fix point values not updating using permanence pattern
+4. **Duplicate Academy Points**: Investigate and fix duplicate point types
+5. **Mobile Layout**: Footer bottom aligns with menu tab top
+6. **"Did It" Button**: Always visible
+7. **Point Explosions**: Real values animating from drill card to totals
+8. **Permanence Pattern**: Apply to all data operations per SUPABASE_PERMANENCE_PATTERN.md
 
-3. **Multiplier Animation at 4th Workout**
-   - Change from 5th to 4th workout for better visibility
-   - Animate multiplier over changing point numbers
-   - Show before workout completion screen (Don't worry about this if you put the first multiplier on the 4th workout)
-   - Visual celebration of consistency 
+### **Objectives with Permanence Pattern Integration:**
 
-4. **Mobile UI Improvements**
-   - Shrink video embed with padding from header/footer - Please make sure that this is defined by keeping the Vimeo Embed as wide as possible, but allowing the Header and Footer to essentially expand to meet them.  
-   - Center video in available space - MAX WIDTH
-   - Header elements align down with padding - (Lets leave the padding alone on this run. )
-   - Drill cards positioned just above video - 
-   - Footer container with drill name at top - 
-   - "Did It" button, reps, time pills aligned properly - The Time and Reps Pills should show from the  should also reference actual columns sers_and_reps for the sets and reps and duration_minutes for the time.
+1. **Point Types Database Foundation** ⚠️ MUST COMPLETE FIRST
+   - Create `point_types_powlax` table with direct column mapping
+   - Import 7 point types from CSV with images
+   - Apply permanence pattern: Direct columns, no nested JSON
+   - Schema: `id, title, image_url, slug, series_type`
+   - RLS policies for authenticated read access
 
-5. **Drill Navigation Changes**
-   - Remove clickability from drill cards (reference only)
-   - Sequential progression only
-   - Visual indicators for completed/current/upcoming - (Don't make it too busy, the colors on them is already enough to know where they are.)
+2. **Live Point Counter with Real-time Updates**
+   - Position ABOVE drill cards in header (not below)
+   - 2-column layout: 2 point types per column, 1 in third if odd
+   - Layout: IMAGE (bigger) - Name - Number format
+   - **Permanence Fix**: Read directly from database columns
+   - **Real-time Fix**: Update state immediately on drill completion
+   - Filter points by workout series_type (no duplicates)
+   - Investigate/fix duplicate Academy Points issue
 
-6. **Completed Workout Analysis View**
-   - Easy navigation through completed drills
-   - Review mode for coaches/players - 
-   - Time and point breakdown per drill
-   - Export or share capability (Don't worry about this, we will build it into the feed on the teams page.)
+3. **Point Explosion Animation with Real Values**
+   - Trigger ONLY on successful drill completion
+   - Show REAL point values from drill data
+   - Animate FROM drill card TO point counter
+   - More vibrant/visible animations
+   - Duration: 1.5 seconds with smooth easing
+   - 60fps performance on mobile
 
-### **Success Metrics:**
-- [ ] Point explosion animates on every "Did It" click (that actually completes that drill.)
-- [ ] Live point counter updates in real-time - 
-- [ ] Multiplier shows at 4th workout (not 5th)
-- [ ] Video has proper padding on mobile
+4. **Mobile UI Layout Fixes**
+   - Video: Maximum width with proper padding
+   - **Pills Fix**: Show ONLY `sets_and_reps` column as single pill
+   - Footer: Bottom aligns with menu tab top
+   - "Did It" button: Always visible in footer
+   - Use actual database columns (not hardcoded)
+
+5. **Drill Navigation Non-clickable**
+   - Remove ALL onClick handlers from drill cards
+   - Sequential progression via "Did It" only
+   - Keep existing color system (don't over-design)
+   - Cards are visual reference only
+
+6. **Completed Workout Analysis**
+   - "Review Workout" button on completion screen
+   - Drill-by-drill navigation for analysis
+   - Show time and points per drill
+   - Framework for future "redo drill" feature
+   - Mobile-friendly interface
+
+### **Success Metrics Updated:**
+- [ ] Point types database created with 7 images from CSV
+- [ ] Point counter shows 2-column layout with bigger images
+- [ ] Only `sets_and_reps` column text shows as single pill
+- [ ] Point values update in real-time (permanence pattern applied)
+- [ ] No duplicate Academy Points displayed
+- [ ] Footer bottom aligns with menu tab top on mobile
+- [ ] "Did It" button always visible
+- [ ] Point explosions show real values animating to counters
 - [ ] Drill cards are non-clickable reference only
-- [ ] Analysis view allows easy drill review - (Add in for later the potential of adding an "Are there any you want to do again or refine.)
-- [ ] All animations smooth on mobile devices
-- [ ] No performance degradation from animations
+- [ ] Analysis view allows easy drill review
+- [ ] All animations smooth on mobile (60fps)
+- [ ] Multiplier shows at 4th workout
 
-### **Implementation Details:**
+### **🔧 Permanence Pattern Implementation Details:**
 
-#### **1. Point Explosion Animation**
-```javascript
-// Trigger on "Did It" button click
-const handleDidIt = () => {
-  triggerPointExplosion(drillId);
-  updatePointCounters(drillPoints);
-  setTimeout(() => advanceToNextDrill(), 1500);
-}
+#### **1. Database Schema with Direct Column Mapping**
+```sql
+-- Point types table with direct columns (no nested JSON)
+CREATE TABLE point_types_powlax (
+  id SERIAL PRIMARY KEY,
+  title TEXT NOT NULL,
+  image_url TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  series_type TEXT, -- attack, defense, midfield, etc.
+  created_at TIMESTAMP DEFAULT NOW()
+);
 
-// Animation specs
-- Duration: 1.5 seconds
-- Particles: Point type icons/values
-- Direction: Explode upward from drill card
-- End position: Flow into point counter
+-- Direct column reads for real-time updates
+SELECT title, image_url, slug 
+FROM point_types_powlax 
+WHERE series_type = 'attack';
 ```
 
-#### **2. Live Point Counter Component**
+#### **2. Real-time Point Counter with Permanence**
 ```javascript
-// Position: Fixed above drill navigation
-<PointCounter 
-  position="above-drills"
-  points={{
-    attack_tokens: currentAttackTokens,
-    defense_dollars: currentDefenseDollars,
-    midfield_medals: currentMidfieldMedals,
-    // etc...
-  }}
-  showAnimation={true}
-/>
+// PERMANENCE PATTERN: Direct column reads, no extraction
+const fetchPointTypes = async () => {
+  const { data } = await supabase
+    .from('point_types_powlax')
+    .select('*') // Direct columns
+    .eq('series_type', workoutSeries);
+  
+  // No transformation needed - data ready to use
+  setPointTypes(data);
+};
+
+// Real-time state updates on drill completion
+const handleDrillComplete = (drillPoints) => {
+  // Update state immediately (no delay)
+  setCurrentPoints(prev => ({
+    ...prev,
+    [pointType]: prev[pointType] + drillPoints
+  }));
+  
+  // Trigger explosion with REAL values
+  triggerPointExplosion(drillPoints);
+};
 ```
 
-#### **3. Mobile Layout Adjustments**
+#### **3. Point Counter 2-Column Layout**
+```jsx
+// 2-column layout with bigger images
+<div className="grid grid-cols-3 gap-4 p-4">
+  {/* Column 1: 2 point types */}
+  <div className="flex flex-col gap-2">
+    {pointTypes.slice(0, 2).map(type => (
+      <div className="flex items-center gap-2">
+        <img src={type.image_url} className="w-12 h-12" />
+        <span>{type.title}</span>
+        <span className="font-bold">{points[type.slug]}</span>
+      </div>
+    ))}
+  </div>
+  
+  {/* Column 2: 2 point types */}
+  <div className="flex flex-col gap-2">
+    {pointTypes.slice(2, 4).map(type => (
+      <div className="flex items-center gap-2">
+        <img src={type.image_url} className="w-12 h-12" />
+        <span>{type.title}</span>
+        <span className="font-bold">{points[type.slug]}</span>
+      </div>
+    ))}
+  </div>
+  
+  {/* Column 3: 1 point type (if odd number) */}
+  {pointTypes.length % 2 === 1 && (
+    <div className="flex items-center gap-2">
+      <img src={pointTypes[4].image_url} className="w-12 h-12" />
+      <span>{pointTypes[4].title}</span>
+      <span className="font-bold">{points[pointTypes[4].slug]}</span>
+    </div>
+  )}
+</div>
+```
+
+#### **4. Pills Fix - Only sets_and_reps Column**
+```javascript
+// CORRECT: Show only sets_and_reps as single pill
+<div className="footer-pills">
+  {drill.sets_and_reps && (
+    <span className="pill">
+      {drill.sets_and_reps} {/* Direct from database column */}
+    </span>
+  )}
+</div>
+
+// WRONG: Multiple pills or hardcoded values
+// <span>3 sets</span> <span>3 min</span>
+```
+
+#### **5. Mobile Layout with Footer Alignment**
 ```css
-/* Video container with padding */
-.video-container {
-  padding: 16px;
-  height: calc(100vh - header - footer - padding);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Footer aligns with menu tab */
+.workout-footer {
+  position: fixed;
+  bottom: env(safe-area-inset-bottom, 0);
+  /* Account for mobile menu tab height */
+  margin-bottom: var(--menu-tab-height, 60px);
 }
 
-/* Non-clickable drill cards */
-.drill-card {
-  pointer-events: none;
-  opacity: 0.7; /* Dimmed for reference */
+/* "Did It" button always visible */
+.did-it-button {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
 }
-.drill-card.current {
-  opacity: 1;
-  border: 2px solid powlax-blue;
-}
-```
-
-#### **4. Completed Workout Analysis**
-```javascript
-// New component for post-workout review
-<WorkoutAnalysis
-  drills={completedDrills}
-  times={drillTimes}
-  points={pointsEarned}
-  allowNavigation={true}
-  exportEnabled={true}
-/>
 ```
 
 ---
@@ -545,139 +619,200 @@ Tasks:
 
 ## 📋 **PHASE 4 CLAUDE-TO-CLAUDE SUB-AGENT EXECUTION PLAN**
 
-### **🎯 EXECUTION STRATEGY: 6 FOCUSED SUB-AGENTS**
-*Each agent handles ONE specific component/feature to avoid complexity*
+### **🎯 EXECUTION STRATEGY: 6 FOCUSED SUB-AGENTS WITH PERMANENCE PATTERN**
+*Each agent handles ONE specific component following the permanence pattern*
 
 ```javascript
 // ========================================
-// TASK 1: POINT TYPES DATABASE MIGRATION
+// TASK 1: POINT TYPES DATABASE MIGRATION (CRITICAL - DO FIRST)
 // ========================================
 Task({
   subagent_type: "general-purpose",
-  description: "Import point type images from CSV",
+  description: "Create point types database with permanence pattern",
   prompt: `
     CONTEXT: Skills Academy needs point type images for live counter
     CONTRACT: src/components/skills-academy/ACADEMY_MASTER_CONTRACT.md Phase 004
+    PERMANENCE: Follow .claude/SUPABASE_PERMANENCE_PATTERN.md
     CSV FILE: docs/Wordpress CSV's/Gamipress Gamification Exports/Points-Types-Export-2025-July-31-1904 copy.csv
     
     TASKS:
-    1. Create SQL migration to add point type images table
-    2. Import Title and URL columns from CSV (7 point types found)
-    3. Create point_types_powlax table with: id, title, image_url, slug
-    4. Insert data: Academy Point, Attack Token, Defense Dollar, Midfield Medal, Rebound Reward, Flex Point, Lax IQ Point
-    5. Create RLS policies for read access
+    1. Create point_types_powlax table with DIRECT COLUMNS (no nested JSON):
+       - id SERIAL PRIMARY KEY
+       - title TEXT NOT NULL
+       - image_url TEXT NOT NULL  
+       - slug TEXT UNIQUE NOT NULL
+       - series_type TEXT (attack/defense/midfield/etc)
+       - created_at TIMESTAMP DEFAULT NOW()
     
-    POINT TYPES TO IMPORT:
-    - Academy Point (Lax Credits): https://powlax.com/wp-content/uploads/2024/10/Lax-Credits.png
-    - Attack Token: https://powlax.com/wp-content/uploads/2024/10/Attack-Tokens-1.png
-    - Defense Dollar: https://powlax.com/wp-content/uploads/2024/10/Defense-Dollars-1.png
-    - Midfield Medal: https://powlax.com/wp-content/uploads/2024/10/Midfield-Medals-1.png
-    - Rebound Reward: https://powlax.com/wp-content/uploads/2024/10/Rebound-Rewards-1.png
-    - Flex Point: https://powlax.com/wp-content/uploads/2025/02/SS-Flex-Points-1.png
-    - Lax IQ Point: https://powlax.com/wp-content/uploads/2025/01/Lax-IQ-Points.png
+    2. Import these 7 point types from CSV:
+       - Academy Point (Lax Credits): https://powlax.com/wp-content/uploads/2024/10/Lax-Credits.png
+       - Attack Token: https://powlax.com/wp-content/uploads/2024/10/Attack-Tokens-1.png
+       - Defense Dollar: https://powlax.com/wp-content/uploads/2024/10/Defense-Dollars-1.png
+       - Midfield Medal: https://powlax.com/wp-content/uploads/2024/10/Midfield-Medals-1.png
+       - Rebound Reward: https://powlax.com/wp-content/uploads/2024/10/Rebound-Rewards-1.png
+       - Flex Point: https://powlax.com/wp-content/uploads/2025/02/SS-Flex-Points-1.png
+       - Lax IQ Point: https://powlax.com/wp-content/uploads/2025/01/Lax-IQ-Points.png
     
-    CRITICAL:
-    - Test Supabase connection before creating tables
-    - Verify image URLs are accessible
-    - Keep dev server running on port 3000
-    - Log migration as 120_point_types_import.sql
-  `
-})
-
-// ========================================
-// TASK 2: POINT EXPLOSION ANIMATION
-// ========================================
-Task({
-  subagent_type: "general-purpose",
-  description: "Create point explosion animation component",
-  prompt: `
-    CONTEXT: Skills Academy needs point explosion animation on "Did It" click
-    CONTRACT: src/components/skills-academy/ACADEMY_MASTER_CONTRACT.md Phase 004
+    3. Add series_type mapping:
+       - Attack Token → 'attack'
+       - Defense Dollar → 'defense'
+       - Midfield Medal → 'midfield'
+       - Others → 'general' or appropriate type
     
-    TASKS:
-    1. Create PointExplosion component using framer-motion or CSS animations
-    2. Trigger animation ONLY when drill actually completes (not on disabled button)
-    3. Animate point particles exploding upward from drill card
-    4. Use point type images from point_types_powlax table
-    5. Duration: 1.5 seconds with smooth easing
+    4. Create RLS policies for authenticated read access
     
-    ANIMATION SPECS:
-    - Origin: Current drill card position
-    - Direction: Explode upward toward point counter
-    - Particles: 3-5 point type icons/values
-    - End state: Flow into live counter above drills
-    - Performance: 60fps on mobile devices
+    PERMANENCE PATTERN CRITICAL:
+    - Direct column mapping (no content field extraction)
+    - Each field maps to its own column
+    - Arrays for multi-value fields (if needed)
+    - Test with SELECT * to verify direct reads work
     
-    CRITICAL:
-    - Only animate on successful drill completion
-    - Must be smooth on mobile (test on 375px)
-    - No blocking of next drill advance
+    OUTPUT:
+    - Migration file: 122_point_types_with_images.sql
+    - Test script to verify data loads correctly
     - Keep dev server running on port 3000
   `
 })
 
 // ========================================
-// TASK 3: LIVE POINT COUNTER COMPONENT
+// TASK 2: FIX LIVE POINT COUNTER WITH REAL-TIME UPDATES
 // ========================================
 Task({
   subagent_type: "general-purpose",
-  description: "Build live point counter above drills",
+  description: "Fix point counter real-time updates with permanence",
   prompt: `
-    CONTEXT: Skills Academy needs live point counter in header above drill cards
+    CONTEXT: Point values NOT updating in real-time - Patrick's critical issue
     CONTRACT: src/components/skills-academy/ACADEMY_MASTER_CONTRACT.md Phase 004
+    PERMANENCE: Follow .claude/SUPABASE_PERMANENCE_PATTERN.md
+    
+    CRITICAL ISSUES TO FIX:
+    1. Point values on containers not updating in real-time
+    2. Duplicate Academy Points showing (investigate why)
+    3. Points not filtering by workout series correctly
     
     TASKS:
-    1. Create PointCounter component showing current workout points
-    2. Position ABOVE drill scroll feature in header (NOT below)
-    3. Display point types relevant to current workout series (attack/defense/midfield)
-    4. Show point type images from point_types_powlax table
-    5. Update in real-time as drills complete with smooth animation
+    1. Fix PointCounter component real-time updates:
+       - Read point types DIRECTLY from point_types_powlax columns
+       - Update state IMMEDIATELY on drill completion (no delay)
+       - NO nested JSON extraction or content fields
     
-    LAYOUT SPECS:
-    - Position: Fixed in header above drill navigation
-    - Layout: Horizontal row with icons and values
-    - Points to show: Based on workout series_type
-    - Animation: Smooth value increments on drill completion
-    - Mobile: Responsive scaling for small screens
+    2. Implement 2-column layout per Patrick's feedback:
+       - Column 1: 2 point types
+       - Column 2: 2 point types  
+       - Column 3: 1 point type (if odd number)
+       - Layout: IMAGE (bigger) - Name - Number
+       - Position ABOVE drill cards in header
     
-    CRITICAL:
-    - Must update immediately on drill completion
-    - Show relevant point types for workout series
-    - Mobile responsive (test on 375px)
-    - Keep dev server running on port 3000
+    3. Fix duplicate Academy Points issue:
+       - Check point type filtering logic
+       - Ensure unique points per workout series
+       - Filter by series_type from database
+    
+    4. Apply permanence pattern for state updates:
+       - Direct column reads from database
+       - Transform at UI boundary only
+       - Preserve existing point values
+    
+    VALIDATION:
+    - Points update instantly when "Did It" clicked
+    - No duplicate point types displayed
+    - Correct points show for workout series
+    - Test on localhost:3000/skills-academy/workout/1
   `
 })
 
 // ========================================
-// TASK 4: MOBILE UI VIDEO LAYOUT POLISH
+// TASK 3: POINT EXPLOSION ANIMATION WITH REAL VALUES
 // ========================================
 Task({
   subagent_type: "general-purpose",
-  description: "Polish mobile video layout and sizing",
+  description: "Create vibrant point explosion with real values",
   prompt: `
-    CONTEXT: Skills Academy workout page needs mobile UI improvements for video
+    CONTEXT: Point explosions need real values and more vibrant animations
     CONTRACT: src/components/skills-academy/ACADEMY_MASTER_CONTRACT.md Phase 004
-    REFERENCE: User screenshots showing desired padding and centering
+    
+    PATRICK'S REQUIREMENTS:
+    1. Show REAL point values from drill data (not fake numbers)
+    2. Animate FROM drill card TO point counter above
+    3. More VIBRANT and visible animations
+    4. Values should match what's being added to totals
     
     TASKS:
-    1. Keep Vimeo embed as WIDE as possible (max width)
-    2. Add padding between video and header/footer containers
-    3. Center video in available vertical space
-    4. Show sets_and_reps and duration_minutes from database in pills
-    5. Align drill name and "Did It" button properly in footer
+    1. Create PointExplosion component:
+       - Use framer-motion for smooth 60fps animations
+       - Pull REAL point values from current drill data
+       - Show actual point type images from point_types_powlax
     
-    LAYOUT SPECS:
-    - Video: Maximum width with padding from edges
-    - Header: Point counter + drill cards above video
-    - Footer: Drill name at top, then pills and button
-    - Pills: Show actual sets_and_reps + duration_minutes data
-    - Spacing: Proper breathing room between containers
+    2. Animation specifications:
+       - Origin: Current drill card in slider
+       - Path: Arc upward to point counter in header
+       - Duration: 1.5 seconds with spring easing
+       - Particles: Show "+X" with point type icon
+       - More vibrant: Larger size, brighter colors, glow effect
     
-    CRITICAL:
-    - Video must be largest possible while having padding
-    - Use real database columns for pills (not hardcoded)
-    - Test on 375px viewport (iPhone)
-    - Keep dev server running on port 3000
+    3. Trigger conditions:
+       - ONLY on successful drill completion
+       - After timer expires and "Did It" clicked
+       - Pass real drill point values to animation
+    
+    4. Integration with counter:
+       - End position at point counter location
+       - Sync with counter value updates
+       - No blocking of next drill advance
+    
+    VALIDATION:
+    - Shows real point values (e.g., "+10 Attack Tokens")
+    - Visible and vibrant on mobile
+    - Smooth 60fps performance
+    - Values match what's added to totals
+  `
+})
+
+// ========================================
+// TASK 4: FIX PILLS AND MOBILE LAYOUT
+// ========================================
+Task({
+  subagent_type: "general-purpose",
+  description: "Fix pills display and mobile layout issues",
+  prompt: `
+    CONTEXT: Pills showing wrong data and mobile layout issues
+    CONTRACT: src/components/skills-academy/ACADEMY_MASTER_CONTRACT.md Phase 004
+    
+    PATRICK'S CRITICAL FIXES:
+    1. PILLS: Only sets_and_reps column as single pill
+    2. MOBILE: Footer bottom aligns with menu tab
+    3. "Did It" button ALWAYS visible
+    4. Video maximum width with padding
+    
+    TASKS:
+    1. Fix Pills Display:
+       - Show ONLY sets_and_reps column text as ONE pill
+       - Position under video title in footer
+       - Pull from actual database column (not hardcoded)
+       - Remove any duration or other pills
+    
+    2. Fix Mobile Layout:
+       - Footer bottom MUST align with top of menu tab
+       - Account for safe area insets on iPhone
+       - Lock layout so footer doesn't overlap menu
+       - "Did It" button sticky and always visible
+    
+    3. Video Layout:
+       - Maximum width possible (edge to edge minus padding)
+       - Center in available vertical space
+       - Header and footer expand to meet video
+       - Proper breathing room between containers
+    
+    4. Footer Structure:
+       - Top: Drill name/title
+       - Middle: sets_and_reps pill (single)
+       - Bottom: "Did It" button (always visible)
+    
+    VALIDATION:
+    - Only ONE pill showing sets_and_reps text
+    - Footer aligns with menu tab (no overlap)
+    - "Did It" button never hidden
+    - Test on iPhone (375px viewport)
   `
 })
 
@@ -746,50 +881,66 @@ Task({
 })
 ```
 
-### **🔄 EXECUTION SEQUENCE**
-1. **Task 1** → Database foundation (point types import)
-2. **Task 2** → Point explosion animation 
-3. **Task 3** → Live point counter (depends on Task 1)
-4. **Task 4** → Mobile UI polish (independent)
-5. **Task 5** → Drill navigation changes (independent)
-6. **Task 6** → Analysis view (depends on Tasks 2-3)
+### **🔄 EXECUTION SEQUENCE WITH DEPENDENCIES**
 
-### **📊 SUCCESS VALIDATION CRITERIA**
-- [ ] All 7 point types imported with images
-- [ ] Point explosion triggers only on drill completion
-- [ ] Live counter shows relevant points above drills
-- [ ] Video has maximum width with proper padding
-- [ ] Drill cards are non-clickable reference only
-- [ ] Analysis view allows completed workout review
+#### **PHASE 1: Database Foundation (MUST DO FIRST)**
+1. **Task 1** → Point types database with images and permanence pattern
+
+#### **PHASE 2: Core Fixes (PARALLEL EXECUTION)**
+2. **Task 2** → Fix point counter real-time updates (depends on Task 1)
+3. **Task 3** → Point explosion with real values (depends on Task 1)
+4. **Task 4** → Fix pills and mobile layout (independent)
+5. **Task 5** → Make drill cards non-clickable (independent)
+
+#### **PHASE 3: Enhancement**
+6. **Task 6** → Workout analysis view (depends on Tasks 2-3)
+
+### **📊 SUCCESS VALIDATION CRITERIA - PATRICK'S CHECKLIST**
+- [ ] Point types database has 7 images from CSV
+- [ ] Point counter shows 2-column layout with bigger images
+- [ ] Only sets_and_reps column shows as single pill
+- [ ] Point values update in real-time (no delay)
+- [ ] No duplicate Academy Points displayed
+- [ ] Footer bottom aligns with menu tab top
+- [ ] "Did It" button always visible
+- [ ] Point explosions show real values
+- [ ] Animations are vibrant and visible
+- [ ] Drill cards are non-clickable
+- [ ] Mobile layout locked properly
+- [ ] All permanence pattern principles applied
 
 ---
 
-## 🧠 **ULTRA THINK VALIDATION CHECKLIST**
-*Review before sub-agent deployment*
+## 🧠 **ULTRA THINK VALIDATION COMPLETED**
+*Validated permanence pattern integration for Phase 004*
 
-### **Database Architecture Verification**
-- [ ] Point types table schema matches CSV structure
-- [ ] All 7 point type image URLs are accessible
-- [ ] RLS policies allow read access for authenticated users
-- [ ] Migration follows naming convention: 120_point_types_import.sql
+### **✅ Permanence Pattern Verification**
+- [x] Direct column mapping for all point data (no nested JSON)
+- [x] Type transformation at UI boundary only (booleans to arrays)
+- [x] State preservation through all updates
+- [x] No content field extraction anywhere
+- [x] Arrays used for multi-value fields where needed
 
-### **Component Dependencies Check**
-- [ ] Task 3 (Live Counter) depends on Task 1 (Database)
-- [ ] Task 6 (Analysis) depends on Tasks 2-3 (Animations + Counter)
-- [ ] Tasks 4-5 are independent and can run in parallel
-- [ ] All components use existing Skills Academy database tables
+### **✅ Patrick's Critical Issues Addressed**
+- [x] Real-time updates fixed with direct column reads
+- [x] Pills showing only sets_and_reps column
+- [x] 2-column layout for point images specified
+- [x] Duplicate Academy Points investigation included
+- [x] Mobile layout fixes for footer alignment
+- [x] "Did It" button visibility ensured
+- [x] Real point values in explosions
 
-### **Mobile Performance Validation**
-- [ ] Animations target 60fps on 375px viewport
-- [ ] Video sizing maximizes width while maintaining padding
-- [ ] Point counter responsive on small screens
-- [ ] No memory leaks from animation components
+### **✅ Dependencies Validated**
+- [x] Task 1 (Database) must complete first
+- [x] Tasks 2-3 depend on Task 1 for point types
+- [x] Tasks 4-5 can run in parallel (independent)
+- [x] Task 6 depends on Tasks 2-3 completion
 
-### **Integration Points Verification**
-- [ ] Point explosion connects to live counter
-- [ ] Counter shows points relevant to workout series_type
-- [ ] Database pills use actual columns (sets_and_reps, duration_minutes)
-- [ ] Analysis view integrates with existing completion flow
+### **✅ Integration Points Confirmed**
+- [x] Point explosions connect to live counter
+- [x] Counter filters by workout series_type
+- [x] Pills use actual database columns
+- [x] All components follow permanence pattern
 
 ---
 

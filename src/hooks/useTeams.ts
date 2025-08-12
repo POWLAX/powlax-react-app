@@ -57,7 +57,13 @@ export function useTeams() {
         
         const { data: clubTeams, error: clubTeamsError } = await supabase
           .from('teams')
-          .select('*')
+          .select(`
+            *,
+            clubs:club_id (
+              id,
+              name
+            )
+          `)
           .eq('club_id', userData.club_id)
         
         if (clubTeamsError) {
@@ -96,7 +102,13 @@ export function useTeams() {
         // Fetch teams data for teams the user is a member of
         const { data: memberTeams, error: teamsError } = await supabase
           .from('teams')
-          .select('*')
+          .select(`
+            *,
+            clubs:club_id (
+              id,
+              name
+            )
+          `)
           .in('id', teamIds)
         
         if (teamsError) {

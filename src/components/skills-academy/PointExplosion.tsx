@@ -100,42 +100,49 @@ export default function PointExplosion({
         {particles.map((particle, index) => (
           <motion.div
             key={particle.id}
-            className="absolute flex items-center bg-white rounded-full shadow-lg border-2 border-powlax-blue px-3 py-1"
+            className="absolute flex items-center bg-gradient-to-r from-yellow-300 via-orange-400 to-red-400 rounded-full shadow-2xl border-4 border-white px-5 py-3"
+            style={{
+              boxShadow: '0 12px 35px rgba(255, 165, 0, 0.8), 0 0 30px rgba(255, 215, 0, 0.9), 0 0 15px rgba(255, 255, 0, 0.6)',
+              filter: 'drop-shadow(0 6px 15px rgba(255, 140, 0, 0.8))',
+              background: 'linear-gradient(45deg, #FFD700, #FF8C00, #FF6B35, #FF4500)'
+            }}
             initial={{
-              x: particle.x - 40, // Center the particle
-              y: particle.y - 15,
+              x: particle.x - 50, // Center the particle
+              y: particle.y - 20,
               scale: 0,
-              opacity: 0
+              opacity: 0,
+              rotate: 0
             }}
             animate={{
               x: [
-                particle.x - 40,
-                particle.x - 40 + (Math.random() - 0.5) * 80, // Reduced random movement for mobile
-                Math.min(window.innerWidth / 2 - 40, window.innerWidth - 80) // End near center, mobile safe
+                particle.x - 50,
+                particle.x - 50 + (Math.random() - 0.5) * 120, // More dramatic movement
+                window.innerWidth / 2 - 50 // End at center where point counter is
               ],
               y: [
-                particle.y - 15,
-                particle.y - 80 - Math.random() * 40, // Reduced arc for mobile
-                Math.max(60, window.innerHeight * 0.1) // End near header, mobile safe
+                particle.y - 20,
+                particle.y - 140 - Math.random() * 80, // Even higher arc for more drama
+                Math.max(140, window.innerHeight * 0.20) // End at point counter area (below header, above drill nav)
               ],
-              scale: [0, 1.1, 0.9],
-              opacity: [0, 1, 0.9, 0]
+              scale: [0, 1.5, 1.3, 1.0, 0.7], // Much larger scale for more vibrant effect
+              opacity: [0, 1, 1, 0.8, 0],
+              rotate: [0, 360, 720] // More rotation for extra vibrant effect
             }}
             transition={{
               duration: duration / 1000,
-              ease: [0.25, 0.46, 0.45, 0.94], // Custom easing for smooth explosion
-              delay: index * 0.08, // Slightly faster stagger for mobile
-              times: [0, 0.3, 0.7, 1] // More controlled timing
+              ease: [0.175, 0.885, 0.32, 1.4], // Extra bouncy, vibrant easing
+              delay: index * 0.08, // Faster stagger for more impact
+              times: [0, 0.15, 0.4, 0.7, 0.9, 1] // More keyframes for smoother animation
             }}
           >
             <div className="flex items-center space-x-2">
               {particle.icon_url && (
-                <div className="relative w-4 h-4">
+                <div className="relative w-10 h-10"> {/* Much larger icons for visibility */}
                   <Image
                     src={particle.icon_url}
                     alt={particle.display_name}
                     fill
-                    className="object-contain"
+                    className="object-contain drop-shadow-lg"
                     onError={() => {
                       // Fallback to emoji if image fails
                       console.warn(`Failed to load point icon: ${particle.icon_url}`)
@@ -143,10 +150,36 @@ export default function PointExplosion({
                   />
                 </div>
               )}
-              <span className="text-sm font-bold text-powlax-blue">
+              <span className="text-xl font-black text-white drop-shadow-lg"> {/* Even larger, bolder text */}
                 +{particle.value}
               </span>
             </div>
+            
+            {/* Enhanced sparkle effects for extra vibrancy */}
+            <motion.div
+              className="absolute -top-2 -right-2 w-4 h-4 bg-white rounded-full"
+              animate={{
+                scale: [0, 1.2, 0],
+                opacity: [0, 1, 0]
+              }}
+              transition={{
+                duration: 0.8,
+                repeat: 3,
+                delay: index * 0.08
+              }}
+            />
+            <motion.div
+              className="absolute -bottom-1 -left-1 w-3 h-3 bg-yellow-300 rounded-full"
+              animate={{
+                scale: [0, 0.8, 0],
+                opacity: [0, 0.8, 0]
+              }}
+              transition={{
+                duration: 0.6,
+                repeat: 2,
+                delay: index * 0.08 + 0.2
+              }}
+            />
           </motion.div>
         ))}
       </AnimatePresence>

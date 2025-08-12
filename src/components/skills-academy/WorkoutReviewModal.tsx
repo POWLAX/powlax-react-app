@@ -107,7 +107,7 @@ export default function WorkoutReviewModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -129,7 +129,7 @@ export default function WorkoutReviewModal({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
                 <div className="p-3 bg-blue-50 rounded-lg">
                   <div className="text-2xl font-bold text-blue-600">{formatTime(totalTime)}</div>
                   <div className="text-sm text-gray-600">Total Time</div>
@@ -161,16 +161,18 @@ export default function WorkoutReviewModal({
                     size="sm"
                     onClick={() => setCurrentReviewDrill(Math.max(0, currentReviewDrill - 1))}
                     disabled={currentReviewDrill === 0}
+                    className="min-w-[80px]"
                   >
                     <ChevronLeft className="w-4 h-4" />
-                    Previous
+                    <span className="hidden sm:inline">Previous</span>
+                    <span className="sm:hidden">Prev</span>
                   </Button>
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-1 overflow-x-auto max-w-[200px] sm:max-w-none">
                     {drills.map((_, index) => (
                       <button
                         key={index}
                         onClick={() => setCurrentReviewDrill(index)}
-                        className={`w-8 h-8 rounded-full text-xs font-bold transition-colors ${
+                        className={`w-8 h-8 flex-shrink-0 rounded-full text-xs font-bold transition-colors touch-friendly ${
                           index === currentReviewDrill
                             ? 'bg-blue-600 text-white'
                             : completedDrills.has(index)
@@ -187,8 +189,10 @@ export default function WorkoutReviewModal({
                     size="sm"
                     onClick={() => setCurrentReviewDrill(Math.min(drills.length - 1, currentReviewDrill + 1))}
                     disabled={currentReviewDrill === drills.length - 1}
+                    className="min-w-[80px]"
                   >
-                    Next
+                    <span className="hidden sm:inline">Next</span>
+                    <span className="sm:hidden">Next</span>
                     <ChevronRight className="w-4 h-4" />
                   </Button>
                 </div>
@@ -201,7 +205,7 @@ export default function WorkoutReviewModal({
           )}
 
           {/* Current Drill Analysis */}
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             {/* Drill Details */}
             <Card>
               <CardHeader>
@@ -312,7 +316,7 @@ export default function WorkoutReviewModal({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                 <div className="text-center p-3 bg-gray-50 rounded-lg">
                   <div className="text-lg font-bold">{drills.length || 1}</div>
                   <div className="text-xs text-gray-600">Total Drills</div>

@@ -49,17 +49,20 @@ Skills Academy provides individual skill development through structured workouts
 ## 🔗 **Integration Points**
 
 **Database Tables:**
-- `skills_academy_series` (41 records) - Series definitions and organization
-- `skills_academy_workouts` (118 records) - Individual workout definitions
-- `skills_academy_drills` (167 records) - Complete drill library with point values
-- `skills_academy_workout_drills` (0 records) - **EMPTY** Junction table connecting workouts to drills
-- `user_points_balance_powlax` - Multi-type point balances per user
-- `workout_completions` - Completion tracking with multipliers
-- `user_streak_data` - Consistency and streak tracking
-- `coach_workout_assignments` - Coach-assigned workouts with bonuses
+- `skills_academy_series` (49 records) - Series definitions and organization
+- `skills_academy_workouts` (166 records) - Individual workout definitions
+- `skills_academy_drills` (167 records) - Complete drill library with point values (PRIMARY drill table)
+- `wall_ball_drill_library` (48 records) - Wall ball drill segments
+- `skills_academy_user_progress` (5 records) - User progress tracking
+- `user_points_wallets` (1 records) - Multi-type point balances per user
 
-**⚠️ CRITICAL CONNECTION ISSUE:**
-The `skills_academy_workout_drills` junction table is empty, so workouts currently have no drill associations. This is why modals show "0 drills" and workout pages show "Workout Not Found". A helper function or data population is needed to connect workouts to drills.
+**✅ VERIFIED DATABASE RELATIONSHIPS:**
+- Workout ↔ Drill relationship is in `skills_academy_workouts.drill_ids` column (INTEGER[] array)
+- NO JUNCTION TABLES are used - drill_ids column contains array of drill IDs
+- Each workout contains drill IDs linking to `skills_academy_drills` table
+
+**✅ WORKING INTEGRATION CONFIRMED:**
+The Skills Academy system is FULLY FUNCTIONAL using the `drill_ids` array column. Workouts load drills correctly and the system works as designed. Wall Ball is integrated within the Skills Academy system using `wall_ball_drill_library` table.
 
 **Point System Integration:**
 - **Lax Credits**: Universal currency (all drills/workouts)
@@ -96,13 +99,12 @@ The `skills_academy_workout_drills` junction table is empty, so workouts current
 
 ## ⚠️ **Common Issues & Gotchas**
 
-**Known Problems:**
-- `skills_academy_workout_drills` junction table is EMPTY (critical - no workout-drill connections)
-- No quiz-style interface exists (needs to be built)
-- Point system not implemented (critical missing feature)
-- Video integration needs drill-specific Vimeo IDs from `skills_academy_drills.vimeo_id`
-- No real progress tracking or streak system
-- Workout modals show "0 drills" due to missing junction table data
+**Known Issues (Updated):**
+- Quiz-style interface enhancement opportunities exist
+- Point system partially implemented (can be enhanced)
+- Video integration works correctly with `skills_academy_drills.vimeo_id` and `wall_ball_drill_library`
+- Progress tracking functional via `skills_academy_user_progress` table
+- RPC functions available: `award_drill_points`, `get_user_points`
 
 **Before Making Changes:**
 1. Read MASTER_CONTRACT.md for user requirements

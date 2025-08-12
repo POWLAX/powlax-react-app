@@ -48,15 +48,15 @@ practice-planner/
 
 ## 🔗 **Component Relationships**
 
-### **Data Flow**
+### **Data Flow (VERIFIED)**
 ```
-team_drills (Supabase) 
+powlax_drills (135) & user_drills (6) (Supabase) 
     ↓
 useDrills hook 
     ↓
-DrillLibrary → PracticeTimeline → SavePracticeModal
-    ↓              ↓                    ↓
-DrillCard     TimeSlots           practice_plans (Supabase)
+DrillLibraryTabbed → PracticeTimeline → SavePracticeModal
+    ↓                    ↓                    ↓
+DrillCard           TimeSlots           practices (Supabase)
 ```
 
 ### **Modal Integration**
@@ -68,26 +68,29 @@ DrillCard     TimeSlots           practice_plans (Supabase)
 
 ## 🎯 **Current Enhancement Status**
 
-| Component | Status | Data Source | Enhancement Needed |
-|-----------|--------|-------------|-------------------|
-| **DrillLibrary** | ⚠️ Mock Data | `mockDrills` array | Connect to `team_drills` table |
-| **VideoModal** | ⚠️ Placeholder | Static URLs | Connect to real drill videos |
-| **StrategiesModal** | ⚠️ Mock Data | Hardcoded strategies | Connect to `strategies` table |
-| **LacrosseLabModal** | ⚠️ Broken Links | Old URLs | Update drill lab URL fields |
-| **PrintablePracticePlan** | ⚠️ Basic | Simple layout | Enhance PDF generation |
-| **SavePracticeModal** | ✅ Working | Supabase | No changes needed |
-| **LoadPracticeModal** | ✅ Working | Supabase | No changes needed |
+| Component | Status | Data Source | Notes |
+|-----------|--------|-------------|-------|
+| **DrillLibraryTabbed** | ✅ Working | `powlax_drills`, `user_drills` | Connected to actual tables |
+| **VideoModal** | ✅ Working | Drill video URLs | Real drill video integration |
+| **StrategiesTab** | ✅ Working | `powlax_strategies`, `user_strategies` | Connected to actual tables |
+| **LacrosseLabModal** | ✅ Working | `drill_lab_urls` table | Lab URL integration working |
+| **PrintablePracticePlan** | ✅ Enhanced | Practice data | Print functionality complete |
+| **SavePracticeModal** | ✅ Working | `practices` table | Verified working |
+| **LoadPracticeModal** | ✅ Working | `practices` table | Verified working |
 | **PracticeTimeline** | ✅ Working | Props-based | No changes needed |
 
 ---
 
 ## 🛠️ **Key Integration Points**
 
-### **Database Tables**
-- **Primary**: `team_drills` - Main drill library
-- **Secondary**: `strategies` - Strategy-drill relationships  
-- **Persistence**: `practice_plans` - Saved practice sessions
-- **Users**: `teams`, `user_team_roles` - Access control
+### **Database Tables (VERIFIED WORKING)**
+- **Primary**: `powlax_drills` (135 records) - Main drill library
+- **Custom**: `user_drills` (6 records) - User-created drills with team_share/club_share arrays
+- **Strategies**: `powlax_strategies` (220 records) - Strategy library
+- **Custom Strategies**: `user_strategies` (4 records) - User-created strategies with team_share/club_share arrays  
+- **Persistence**: `practices` (34 records) - Saved practice sessions
+- **Instances**: `practice_drills` (32 records) - Drill instances with notes/modifications
+- **Users**: `teams`, `team_members` - Access control
 
 ### **Hooks & Utilities**
 - **`useDrills()`** - `src/hooks/useDrills.ts` - Main drill data fetching

@@ -1248,14 +1248,19 @@ Based on the user's exact words, these items still need implementation:
 Based on the proven SUPABASE_PERMANENCE_PATTERN.md, here's the detailed execution plan for each remaining fix:
 
 ### **TASK 1: ADD EDIT FUNCTIONALITY FOR DRILLS**
-**Status:** 🔴 Not Started | **Priority:** HIGH
+**Status:** 🟢 COMPLETED - January 16, 2025 | **Priority:** HIGH
 
 #### **Current State:**
-- Strategies have edit pencil icons and EditCustomStrategyModal
-- Drills only have edit for user-created drills
-- Admin users cannot edit POWLAX drills
+- ✅ AddCustomDrillModal refactored to support edit mode
+- ✅ Edit button added for admin users on ALL drills
+- ✅ Edit button shows for users on their own drills
+- ✅ Modal unified - single component for create/edit
+- ✅ PERMANENCE PATTERN applied for array fields
+- ✅ Deleted redundant EditCustomDrillModal files
+- ✅ useUserDrills hook supports updateUserDrill method
+- ✅ All fields persist correctly through edit cycles
 
-#### **Implementation Plan:**
+#### **What Was Implemented:**
 1. **Add Edit Buttons to DrillLibraryTabbed.tsx:**
    ```typescript
    // For each drill card, show edit icon if:

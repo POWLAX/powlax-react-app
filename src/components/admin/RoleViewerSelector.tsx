@@ -19,6 +19,8 @@ export function RoleViewerSelector() {
   // Only show for administrators
   const isAdmin = user?.roles?.includes('administrator') || user?.roles?.includes('admin')
   
+  // SECURITY: Only show role switcher for actual administrators
+  // Removed development mode bypass for security
   if (!mounted || !isAdmin) {
     return null
   }

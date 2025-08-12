@@ -22,6 +22,7 @@ import { usePracticePlans, type TimeSlot as PracticePlanTimeSlot } from '@/hooks
 import { useDrills } from '@/hooks/useDrills'
 import { usePrint } from '@/hooks/usePrint'
 import { useStrategies } from '@/hooks/useStrategies'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
 import { toast } from 'sonner'
 
 export default function PracticePlansPage() {
@@ -32,6 +33,7 @@ export default function PracticePlansPage() {
   if (teamId === 'no-team') {
     teamId = undefined as any
   }
+  const { user } = useAuth()
   const { savePracticePlan, plans, loading: plansLoading } = usePracticePlans(teamId)
   const { drills: supabaseDrills, refreshDrills } = useDrills()
   const { isPrinting, printContent } = usePrint()
@@ -484,6 +486,7 @@ export default function PracticePlansPage() {
             onSelectStrategy={handleSelectStrategy}
             selectedStrategies={selectedStrategies.map(s => s.id)}
             isMobile={false}
+            user={user}
           />
         </div>
       </div>
@@ -506,6 +509,7 @@ export default function PracticePlansPage() {
               onSelectStrategy={handleSelectStrategy}
               selectedStrategies={selectedStrategies.map(s => s.id)}
               isMobile={true}
+              user={user}
             />
           </div>
         </div>

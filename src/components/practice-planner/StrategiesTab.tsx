@@ -8,7 +8,6 @@ import { useFavorites } from '@/hooks/useFavorites'
 import VideoModal from './modals/VideoModal'
 import LacrosseLabModal from './modals/LacrosseLabModal'
 import AddCustomStrategiesModal from './modals/AddCustomStrategiesModal'
-import EditCustomStrategyModal from './modals/EditCustomStrategyModal'
 import StudyStrategyModal from './modals/StudyStrategyModal'
 import FilterStrategiesModal from './modals/FilterStrategiesModal'
 import SaveToPlaybookModal from '@/components/team-playbook/SaveToPlaybookModal'
@@ -719,35 +718,22 @@ export default function StrategiesTab({
         }}
       />
 
-      {/* Add Custom Strategy Modal - RESTORED */}
-      {showAddModal && (
-        <AddCustomStrategiesModal
-          isOpen={showAddModal}
-          onClose={() => setShowAddModal(false)}
-          onAdd={(strategy) => {
-            // Refresh strategies after adding
-            refreshStrategies()
-            setShowAddModal(false)
-          }}
-        />
-      )}
-
-      {/* VERSION 2 - Full version with onSuccess callback (like AddCustomDrillModal pattern) */}
-      {showEditModal && editingUserStrategy && (
-        <EditCustomStrategyModal
-          isOpen={showEditModal}
-          onClose={() => {
-            setShowEditModal(false)
-            setEditingUserStrategy(null)
-          }}
-          strategy={editingUserStrategy}
-          onSuccess={() => {
-            refreshStrategies()
-            setShowEditModal(false)
-            setEditingUserStrategy(null)
-          }}
-        />
-      )}
+      {/* Unified modal for both create and edit */}
+      <AddCustomStrategiesModal
+        isOpen={showAddModal || showEditModal}
+        onClose={() => {
+          setShowAddModal(false)
+          setShowEditModal(false)
+          setEditingUserStrategy(null)
+        }}
+        onStrategyCreated={() => refreshStrategies()}
+        editStrategy={editingUserStrategy}
+        onStrategyUpdated={() => {
+          refreshStrategies()
+          setShowEditModal(false)
+          setEditingUserStrategy(null)
+        }}
+      />
     </div>
   )
 }

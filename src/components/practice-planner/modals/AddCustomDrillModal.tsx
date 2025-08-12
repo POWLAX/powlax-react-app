@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -43,16 +43,21 @@ interface AddCustomDrillModalProps {
   onClose: () => void
   onAdd?: (drill: any) => void
   onDrillCreated?: () => void
+  editDrill?: any // If provided, we're in edit mode
+  onDrillUpdated?: () => void
 }
 
 export default function AddCustomDrillModal({ 
   isOpen, 
   onClose, 
   onAdd,
-  onDrillCreated 
+  onDrillCreated,
+  editDrill,
+  onDrillUpdated 
 }: AddCustomDrillModalProps) {
-  const { createUserDrill, loading: creating } = useUserDrills()
+  const { createUserDrill, updateUserDrill, loading: creating } = useUserDrills()
   const { user } = useAuth()
+  const isEditMode = !!editDrill
   
   // Form state - all essential fields for drills
   const [title, setTitle] = useState('')
@@ -80,6 +85,47 @@ export default function AddCustomDrillModal({
   const [isPublic, setIsPublic] = useState(false)
   const [teamShare, setTeamShare] = useState(false)
   const [clubShare, setClubShare] = useState(false)
+  
+  // PERMANENCE PATTERN: Preserve array IDs through edits
+  const [teamShareIds, setTeamShareIds] = useState<number[]>([])
+  const [clubShareIds, setClubShareIds] = useState<number[]>([])
+
+  // Pre-populate fields when editing
+  useEffect(() => {
+    if (editDrill) {
+      setTitle(editDrill.title || '')
+      setContent(editDrill.content || editDrill.notes || '')
+      setDurationMinutes(editDrill.duration_minutes || editDrill.duration || 10)
+      setCategory(editDrill.category || 'Custom')
+      setEquipment(editDrill.equipment || '')
+      setTags(editDrill.tags || editDrill.drill_types || '')
+      setGamePhase(editDrill.game_phase || (Array.isArray(editDrill.game_states) ? editDrill.game_states[0] : ''))
+      
+      // Video and media
+      setVideoUrl(editDrill.video_url || '')
+      setDrillLabUrl1(editDrill.drill_lab_url_1 || '')
+      setDrillLabUrl2(editDrill.drill_lab_url_2 || '')
+      setDrillLabUrl3(editDrill.drill_lab_url_3 || '')
+      setDrillLabUrl4(editDrill.drill_lab_url_4 || '')
+      setDrillLabUrl5(editDrill.drill_lab_url_5 || '')
+      
+      // Age appropriateness
+      setDoItAges(editDrill.do_it_ages || '')
+      setCoachItAges(editDrill.coach_it_ages || '')
+      setOwnItAges(editDrill.own_it_ages || '')
+      
+      // Sharing - PERMANENCE PATTERN
+      setIsPublic(editDrill.is_public || false)
+      
+      // Extract arrays and set checkbox states
+      const teamIds = Array.isArray(editDrill.team_share) ? editDrill.team_share : []
+      const clubIds = Array.isArray(editDrill.club_share) ? editDrill.club_share : []
+      setTeamShareIds(teamIds)
+      setClubShareIds(clubIds)
+      setTeamShare(teamIds.length > 0)
+      setClubShare(clubIds.length > 0)
+    }
+  }, [editDrill])
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault()
@@ -138,10 +184,10 @@ export default function AddCustomDrillModal({
         coach_it_ages: coachItAges.trim() || null,
         own_it_ages: ownItAges.trim() || null,
         
-        // Sharing - send arrays as expected by fixed hook
+        // Sharing - PERMANENCE PATTERN: send arrays not booleans
         is_public: isPublic,
-        team_share: teamShare ? [] : [], // Empty arrays for now - can enhance later with actual team IDs
-        club_share: clubShare ? [] : [],
+        team_share: teamShare ? teamShareIds : [],
+        club_share: clubShare ? clubShareIds : [],
         
         // Additional fields for compatibility
         drill_types: tags.trim() || '',
@@ -150,12 +196,34 @@ export default function AddCustomDrillModal({
         status: 'active'
       }
 
-      const createdDrill = await createUserDrill(drillData)
+      let resultDrill
+      
+      if (isEditMode && editDrill?.id) {
+        // Update existing drill
+        resultDrill = await updateUserDrill(editDrill.id, drillData)
+        
+        // Call update callback
+        if (onDrillUpdated) {
+          onDrillUpdated()
+        }
+        
+        toast.success('Drill updated successfully!')
+      } else {
+        // Create new drill
+        resultDrill = await createUserDrill(drillData)
+        
+        // Call created callback
+        if (onDrillCreated) {
+          onDrillCreated()
+        }
+        
+        toast.success('Custom drill created successfully!')
+      }
 
-      // Also add to practice planner immediately if onAdd is provided
-      if (onAdd) {
+      // Also add to practice planner immediately if onAdd is provided (only for new drills)
+      if (onAdd && !isEditMode && resultDrill) {
         const practiceReadyDrill = {
-          id: `user-${createdDrill.id}`,
+          id: `user-${resultDrill.id}`,
           name: title.trim(),
           title: title.trim(),
           duration: durationMinutes,
@@ -179,13 +247,6 @@ export default function AddCustomDrillModal({
         }
         onAdd(practiceReadyDrill)
       }
-
-      // Call the created callback if provided
-      if (onDrillCreated) {
-        onDrillCreated()
-      }
-
-      toast.success('Custom drill created successfully!')
       
       // Reset form
       resetForm()
@@ -222,9 +283,11 @@ export default function AddCustomDrillModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[700px] bg-white max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-[#003366]">Add Custom Drill</DialogTitle>
+          <DialogTitle className="text-[#003366]">
+            {isEditMode ? 'Edit Drill' : 'Add Custom Drill'}
+          </DialogTitle>
           <DialogDescription>
-            Create a custom drill with complete details
+            {isEditMode ? 'Update the drill details' : 'Create a custom drill with complete details'}
           </DialogDescription>
         </DialogHeader>
 
@@ -499,7 +562,7 @@ export default function AddCustomDrillModal({
               className="bg-[#003366] hover:bg-[#002244] text-white"
               disabled={creating}
             >
-              {creating ? 'Adding Drill...' : 'Add Drill'}
+              {creating ? (isEditMode ? 'Updating...' : 'Adding...') : (isEditMode ? 'Update Drill' : 'Add Drill')}
             </Button>
           </DialogFooter>
         </form>

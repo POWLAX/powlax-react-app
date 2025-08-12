@@ -1,0 +1,843 @@
+{
+  "timestamp": "2025-08-12T15:59:41.182Z",
+  "existingTables": [
+    {
+      "name": "skills_academy_drills",
+      "recordCount": 167,
+      "columns": [
+        "id",
+        "original_id",
+        "title",
+        "vimeo_id",
+        "drill_category",
+        "equipment_needed",
+        "age_progressions",
+        "space_needed",
+        "complexity",
+        "sets_and_reps",
+        "duration_minutes",
+        "point_values",
+        "tags",
+        "created_at",
+        "updated_at",
+        "video_url"
+      ]
+    },
+    {
+      "name": "skills_academy_series",
+      "recordCount": 49,
+      "columns": [
+        "id",
+        "series_name",
+        "series_slug",
+        "series_type",
+        "series_code",
+        "description",
+        "skill_focus",
+        "position_focus",
+        "difficulty_level",
+        "color_scheme",
+        "display_order",
+        "is_featured",
+        "is_active",
+        "is_premium",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    {
+      "name": "skills_academy_workouts",
+      "recordCount": 166,
+      "columns": [
+        "id",
+        "series_id",
+        "workout_name",
+        "workout_size",
+        "drill_count",
+        "description",
+        "estimated_duration_minutes",
+        "original_json_id",
+        "original_json_name",
+        "is_active",
+        "created_at",
+        "updated_at",
+        "drill_ids"
+      ]
+    },
+    {
+      "name": "skills_academy_user_progress",
+      "recordCount": 5,
+      "columns": [
+        "id",
+        "user_id",
+        "workout_id",
+        "current_drill_index",
+        "drills_completed",
+        "total_drills",
+        "started_at",
+        "last_activity_at",
+        "completed_at",
+        "total_time_seconds",
+        "status",
+        "completion_percentage",
+        "points_earned"
+      ]
+    },
+    {
+      "name": "wall_ball_drill_library",
+      "recordCount": 48,
+      "columns": [
+        "id",
+        "drill_name",
+        "drill_slug",
+        "strong_hand_video_url",
+        "strong_hand_vimeo_id",
+        "off_hand_video_url",
+        "off_hand_vimeo_id",
+        "both_hands_video_url",
+        "both_hands_vimeo_id",
+        "description",
+        "coaching_points",
+        "common_mistakes",
+        "difficulty_level",
+        "skill_focus",
+        "drill_type",
+        "equipment_needed",
+        "wall_distance_feet",
+        "recommended_reps",
+        "is_active",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    {
+      "name": "powlax_drills",
+      "recordCount": 135,
+      "columns": [
+        "id",
+        "wp_post_id",
+        "title",
+        "content",
+        "category",
+        "duration_minutes",
+        "video_url",
+        "custom_url",
+        "notes",
+        "difficulty_level",
+        "created_at",
+        "updated_at",
+        "raw_wp_data",
+        "equipment",
+        "space_needed",
+        "min_players",
+        "max_players",
+        "lacrosse_lab_urls",
+        "lacrosse_lab_embeds",
+        "lab_urls",
+        "lab_embeds",
+        "game_states",
+        "tags",
+        "status"
+      ]
+    },
+    {
+      "name": "powlax_strategies",
+      "recordCount": 220,
+      "columns": [
+        "id",
+        "strategy_id",
+        "reference_id",
+        "strategy_categories",
+        "strategy_name",
+        "lacrosse_lab_links",
+        "description",
+        "embed_codes",
+        "do_it_ages",
+        "coach_it_ages",
+        "own_it_ages",
+        "has_pdf",
+        "target_audience",
+        "lesson_category",
+        "master_pdf_url",
+        "vimeo_id",
+        "vimeo_link",
+        "pdf_shortcode",
+        "thumbnail_urls",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    {
+      "name": "practices",
+      "recordCount": 34,
+      "columns": [
+        "id",
+        "wp_post_id",
+        "coach_id",
+        "team_id",
+        "name",
+        "practice_date",
+        "start_time",
+        "duration_minutes",
+        "field_location",
+        "goals",
+        "notes",
+        "created_at",
+        "updated_at",
+        "raw_wp_data",
+        "created_by",
+        "date",
+        "duration",
+        "drills"
+      ]
+    },
+    {
+      "name": "practice_drills",
+      "recordCount": 32,
+      "columns": [
+        "id",
+        "practice_id",
+        "drill_id",
+        "sort_order",
+        "duration_minutes",
+        "notes",
+        "completed"
+      ]
+    },
+    {
+      "name": "powlax_images",
+      "recordCount": 4,
+      "columns": [
+        "id",
+        "drill_id",
+        "image_url",
+        "thumbnail_url",
+        "sort_order",
+        "wp_attachment_id"
+      ]
+    },
+    {
+      "name": "user_drills",
+      "recordCount": 6,
+      "columns": [
+        "id",
+        "user_id",
+        "wp_id",
+        "title",
+        "content",
+        "drill_types",
+        "drill_category",
+        "drill_duration",
+        "drill_video_url",
+        "drill_notes",
+        "game_states",
+        "drill_emphasis",
+        "game_phase",
+        "do_it_ages",
+        "coach_it_ages",
+        "own_it_ages",
+        "vimeo_url",
+        "featured_image",
+        "status",
+        "slug",
+        "raw_data",
+        "team_share",
+        "club_share",
+        "is_public",
+        "created_at",
+        "updated_at",
+        "duration_minutes",
+        "category",
+        "video_url",
+        "drill_lab_url_1",
+        "drill_lab_url_2",
+        "drill_lab_url_3",
+        "drill_lab_url_4",
+        "drill_lab_url_5",
+        "equipment",
+        "tags"
+      ]
+    },
+    {
+      "name": "user_strategies",
+      "recordCount": 4,
+      "columns": [
+        "id",
+        "user_id",
+        "strategy_id",
+        "reference_id",
+        "strategy_categories",
+        "strategy_name",
+        "lacrosse_lab_links",
+        "description",
+        "embed_codes",
+        "see_it_ages",
+        "coach_it_ages",
+        "own_it_ages",
+        "has_pdf",
+        "target_audience",
+        "lesson_category",
+        "master_pdf_url",
+        "vimeo_id",
+        "vimeo_link",
+        "pdf_shortcode",
+        "thumbnail_urls",
+        "team_share",
+        "club_share",
+        "is_public",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    {
+      "name": "clubs",
+      "recordCount": 3,
+      "columns": [
+        "id",
+        "name",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    {
+      "name": "teams",
+      "recordCount": 14,
+      "columns": [
+        "id",
+        "club_id",
+        "name",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    {
+      "name": "team_members",
+      "recordCount": 26,
+      "columns": [
+        "id",
+        "team_id",
+        "user_id",
+        "role",
+        "created_at",
+        "status"
+      ]
+    },
+    {
+      "name": "users",
+      "recordCount": 14,
+      "columns": [
+        "id",
+        "wp_user_id",
+        "email",
+        "display_name",
+        "role",
+        "club_id",
+        "created_at",
+        "updated_at",
+        "metadata",
+        "roles",
+        "wordpress_id",
+        "auth_user_id",
+        "first_name",
+        "last_name",
+        "phone",
+        "date_of_birth",
+        "emergency_contact",
+        "player_position",
+        "graduation_year",
+        "profile_image_url",
+        "account_type",
+        "age_group",
+        "privacy_settings",
+        "notification_preferences",
+        "name_display_settings"
+      ]
+    },
+    {
+      "name": "user_sessions",
+      "recordCount": 0,
+      "columns": []
+    },
+    {
+      "name": "user_auth_status",
+      "recordCount": 14,
+      "columns": [
+        "user_id",
+        "email",
+        "auth_user_id",
+        "email_verified",
+        "last_sign_in_at",
+        "has_active_session"
+      ]
+    },
+    {
+      "name": "magic_links",
+      "recordCount": 16,
+      "columns": [
+        "id",
+        "token",
+        "email",
+        "wordpress_user_id",
+        "supabase_user_id",
+        "expires_at",
+        "used_at",
+        "created_at"
+      ]
+    },
+    {
+      "name": "registration_links",
+      "recordCount": 10,
+      "columns": [
+        "id",
+        "token",
+        "target_type",
+        "target_id",
+        "default_role",
+        "expires_at",
+        "max_uses",
+        "used_count",
+        "created_by",
+        "created_at"
+      ]
+    },
+    {
+      "name": "registration_sessions",
+      "recordCount": 0,
+      "columns": []
+    },
+    {
+      "name": "family_accounts",
+      "recordCount": 2,
+      "columns": [
+        "id",
+        "primary_parent_id",
+        "family_name",
+        "billing_parent_id",
+        "emergency_contact",
+        "family_settings",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    {
+      "name": "family_members",
+      "recordCount": 2,
+      "columns": [
+        "id",
+        "family_id",
+        "user_id",
+        "role_in_family",
+        "permissions",
+        "created_at"
+      ]
+    },
+    {
+      "name": "parent_child_relationships",
+      "recordCount": 5,
+      "columns": [
+        "id",
+        "parent_id",
+        "child_id",
+        "relationship_type",
+        "permissions",
+        "is_primary_guardian",
+        "emergency_contact",
+        "notes",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    {
+      "name": "powlax_points_currencies",
+      "recordCount": 7,
+      "columns": [
+        "currency",
+        "display_name",
+        "legacy_currency"
+      ]
+    },
+    {
+      "name": "points_transactions_powlax",
+      "recordCount": 0,
+      "columns": []
+    },
+    {
+      "name": "powlax_player_ranks",
+      "recordCount": 10,
+      "columns": [
+        "id",
+        "title",
+        "description",
+        "icon_url",
+        "rank_order",
+        "lax_credits_required",
+        "gender",
+        "metadata",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    {
+      "name": "user_badges",
+      "recordCount": 3,
+      "columns": [
+        "id",
+        "user_id",
+        "badge_key",
+        "badge_name",
+        "awarded_at",
+        "source"
+      ]
+    },
+    {
+      "name": "user_badge_progress_powlax",
+      "recordCount": 0,
+      "columns": []
+    },
+    {
+      "name": "user_rank_progress_powlax",
+      "recordCount": 0,
+      "columns": []
+    },
+    {
+      "name": "user_points_wallets",
+      "recordCount": 1,
+      "columns": [
+        "id",
+        "user_id",
+        "currency",
+        "balance",
+        "updated_at"
+      ]
+    },
+    {
+      "name": "point_types_powlax",
+      "recordCount": 9,
+      "columns": [
+        "id",
+        "name",
+        "display_name",
+        "plural_name",
+        "slug",
+        "icon_url",
+        "description",
+        "conversion_rate",
+        "is_active",
+        "metadata",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    {
+      "name": "leaderboard",
+      "recordCount": 14,
+      "columns": [
+        "user_id",
+        "display_name",
+        "role",
+        "club_id",
+        "total_events",
+        "total_points",
+        "drills_completed",
+        "practices_attended"
+      ]
+    },
+    {
+      "name": "membership_entitlements",
+      "recordCount": 7,
+      "columns": [
+        "id",
+        "user_id",
+        "club_id",
+        "team_id",
+        "entitlement_key",
+        "status",
+        "starts_at",
+        "expires_at",
+        "source",
+        "metadata",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    {
+      "name": "membership_products",
+      "recordCount": 12,
+      "columns": [
+        "wp_membership_id",
+        "product_slug",
+        "entitlement_key",
+        "scope",
+        "create_behavior",
+        "default_role",
+        "metadata"
+      ]
+    },
+    {
+      "name": "user_subscriptions",
+      "recordCount": 0,
+      "columns": []
+    },
+    {
+      "name": "age_bands",
+      "recordCount": 0,
+      "columns": []
+    },
+    {
+      "name": "drill_point_summary",
+      "recordCount": 167,
+      "columns": [
+        "id",
+        "title",
+        "complexity",
+        "lax_credits",
+        "attack_tokens",
+        "midfield_medals",
+        "defense_dollars",
+        "tag_count"
+      ]
+    },
+    {
+      "name": "drill_lab_urls",
+      "recordCount": 179,
+      "columns": [
+        "id",
+        "drill_id",
+        "lab_url",
+        "embed_code",
+        "sort_order"
+      ]
+    },
+    {
+      "name": "user_favorites",
+      "recordCount": 5,
+      "columns": [
+        "user_id",
+        "drill_id",
+        "created_at",
+        "item_id",
+        "item_type"
+      ]
+    },
+    {
+      "name": "user_onboarding",
+      "recordCount": 0,
+      "columns": []
+    },
+    {
+      "name": "user_events",
+      "recordCount": 0,
+      "columns": []
+    },
+    {
+      "name": "user_activity_log",
+      "recordCount": 0,
+      "columns": []
+    },
+    {
+      "name": "webhook_events",
+      "recordCount": 0,
+      "columns": []
+    },
+    {
+      "name": "webhook_queue",
+      "recordCount": 138,
+      "columns": [
+        "id",
+        "webhook_id",
+        "source",
+        "event_type",
+        "payload",
+        "status",
+        "attempts",
+        "max_attempts",
+        "last_error",
+        "next_retry_at",
+        "created_at",
+        "started_at",
+        "completed_at",
+        "metadata"
+      ]
+    },
+    {
+      "name": "webhook_queue_stats",
+      "recordCount": 1,
+      "columns": [
+        "status",
+        "count",
+        "oldest",
+        "newest",
+        "avg_attempts"
+      ]
+    },
+    {
+      "name": "webhook_recent_failures",
+      "recordCount": 0,
+      "columns": []
+    },
+    {
+      "name": "wp_sync_log",
+      "recordCount": 0,
+      "columns": []
+    },
+    {
+      "name": "drill_game_states",
+      "recordCount": 214,
+      "columns": [
+        "drill_id",
+        "game_state_id"
+      ]
+    },
+    {
+      "name": "drill_lacrosse_lab",
+      "recordCount": 0,
+      "columns": []
+    },
+    {
+      "name": "game_states",
+      "recordCount": 6,
+      "columns": [
+        "id",
+        "name",
+        "slug",
+        "description"
+      ]
+    },
+    {
+      "name": "position_drills",
+      "recordCount": 167,
+      "columns": [
+        "id",
+        "original_id",
+        "title",
+        "vimeo_id",
+        "drill_category",
+        "equipment_needed",
+        "age_progressions",
+        "space_needed",
+        "complexity",
+        "sets_and_reps",
+        "duration_minutes",
+        "point_values",
+        "tags",
+        "created_at",
+        "updated_at",
+        "primary_position"
+      ]
+    },
+    {
+      "name": "powlax_academy_workout_collections",
+      "recordCount": 0,
+      "columns": []
+    },
+    {
+      "name": "powlax_academy_workout_item_answers",
+      "recordCount": 0,
+      "columns": []
+    },
+    {
+      "name": "powlax_academy_workout_items",
+      "recordCount": 0,
+      "columns": []
+    },
+    {
+      "name": "powlax_workout_drill_sequences",
+      "recordCount": 0,
+      "columns": []
+    },
+    {
+      "name": "workout_drill_mapping",
+      "recordCount": 0,
+      "columns": []
+    },
+    {
+      "name": "workout_drill_relationships",
+      "recordCount": 0,
+      "columns": []
+    },
+    {
+      "name": "practice_summary",
+      "recordCount": 34,
+      "columns": [
+        "id",
+        "name",
+        "practice_date",
+        "coach_id",
+        "coach_name",
+        "drill_count",
+        "total_duration",
+        "created_at"
+      ]
+    },
+    {
+      "name": "practice_templates",
+      "recordCount": 3,
+      "columns": [
+        "id",
+        "name",
+        "description",
+        "age_group",
+        "duration_minutes",
+        "category",
+        "drill_sequence",
+        "coaching_tips",
+        "equipment_needed",
+        "is_public",
+        "is_official",
+        "organization_id",
+        "created_by",
+        "created_at",
+        "updated_at",
+        "usage_count",
+        "rating",
+        "tags"
+      ]
+    },
+    {
+      "name": "skills_academy_workouts_backup",
+      "recordCount": 192,
+      "columns": [
+        "id",
+        "original_id",
+        "title",
+        "workout_type",
+        "duration_minutes",
+        "point_values",
+        "tags",
+        "description",
+        "drill_count",
+        "created_at",
+        "updated_at",
+        "drill_ids"
+      ]
+    }
+  ],
+  "nonExistentTables": [
+    "drills",
+    "strategies",
+    "concepts",
+    "skills",
+    "drill_strategies",
+    "strategy_concepts",
+    "concept_skills",
+    "practice_plans",
+    "practice_plan_drills",
+    "powlax_wall_ball_collections",
+    "powlax_wall_ball_drill_library",
+    "organizations",
+    "badges",
+    "points_ledger",
+    "point_types",
+    "player_ranks",
+    "user_profiles",
+    "skills_academy_workout_drills",
+    "drills_powlax",
+    "strategies_powlax",
+    "team_playbooks",
+    "playbook_plays",
+    "achievements",
+    "quizzes",
+    "quiz_questions",
+    "quiz_responses"
+  ]
+}

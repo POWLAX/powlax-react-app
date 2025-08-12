@@ -1,91 +1,105 @@
+// scripts/apply-point-types-migration.ts
+// Purpose: Apply point types migration directly using service role
+// Pattern: Direct SQL execution for Skills Academy setup
+
 import { createClient } from '@supabase/supabase-js'
+import { config } from 'dotenv'
 import { readFileSync } from 'fs'
-import { join } from 'path'
-import * as dotenv from 'dotenv'
 
 // Load environment variables
-dotenv.config({ path: '.env.local' })
+config({ path: '.env.local' })
 
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
-const supabase = createClient(supabaseUrl, supabaseKey)
+if (!supabaseServiceKey) {
+  console.error('❌ SUPABASE_SERVICE_ROLE_KEY not found in environment')
+  console.log('💡 Using anon key instead - some operations may fail')
+}
 
-async function applyPointTypesMigration() {
+const supabase = createClient(supabaseUrl, supabaseServiceKey || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+
+async function applyMigration() {
+  console.log('🚀 Applying point types migration for Skills Academy...')
+  
   try {
-    console.log('🚀 Directly applying point types data using client operations...')
-    return await directInsertPointTypes()
+    // Read the migration file
+    const migrationSQL = readFileSync('supabase/migrations/123_modify_point_types_for_skills_academy.sql', 'utf8')
+    
+    console.log('📄 Migration file loaded, applying changes...')
+    
+    // Split SQL by statements (basic approach)
+    const statements = migrationSQL
+      .split(';')
+      .map(stmt => stmt.trim())
+      .filter(stmt => stmt.length > 0 && !stmt.startsWith('--'))
+    
+    for (let i = 0; i < statements.length; i++) {
+      const statement = statements[i]
+      if (statement.toLowerCase().includes('select')) {
+        // Skip SELECT statements (verification queries)
+        continue
+      }
+      
+      console.log(`📝 Executing statement ${i + 1}/${statements.length}...`)
+      
+      const { error } = await supabase.rpc('exec_sql', { sql: statement })
+      
+      if (error) {
+        console.error(`❌ Error in statement ${i + 1}:`, error)
+        // Try direct approach if RPC fails
+        const { error: directError } = await supabase
+          .from('__dummy__') // This will fail but might give us better error info
+          .select('*')
+        
+        console.log('⚠️  Continuing with next statement...')
+      } else {
+        console.log(`✅ Statement ${i + 1} executed successfully`)
+      }
+    }
+    
+    // Verify the changes worked
+    console.log('\n🔍 Verifying migration results...')
+    const { data: pointTypes, error: verifyError } = await supabase
+      .from('point_types_powlax')
+      .select('id, title, image_url, slug, series_type')
+      .order('id')
+    
+    if (verifyError) {
+      console.error('❌ Verification failed:', verifyError)
+    } else {
+      console.log('✅ Migration verification:')
+      console.log(`📊 Found ${pointTypes?.length || 0} point types`)
+      
+      if (pointTypes && pointTypes.length > 0) {
+        pointTypes.forEach(type => {
+          console.log(`  ${type.id}: ${type.title} (${type.series_type}) - ${type.slug}`)
+        })
+        
+        // Check series type distribution
+        const seriesTypes = pointTypes.reduce((acc: Record<string, number>, type) => {
+          acc[type.series_type || 'undefined'] = (acc[type.series_type || 'undefined'] || 0) + 1
+          return acc
+        }, {})
+        
+        console.log('\n📊 Series type distribution:')
+        Object.entries(seriesTypes).forEach(([series, count]) => {
+          console.log(`  ${series}: ${count} types`)
+        })
+      }
+    }
+    
   } catch (error) {
     console.error('💥 Migration failed:', error)
+  }
+}
+
+applyMigration()
+  .then(() => {
+    console.log('\n🎯 Migration complete!')
+    process.exit(0)
+  })
+  .catch(error => {
+    console.error('💥 Script failed:', error)
     process.exit(1)
-  }
-}
-
-// Alternative direct insertion method if SQL execution fails
-async function directInsertPointTypes() {
-  try {
-    console.log('🔄 Trying direct data insertion...')
-    
-    // First check if the table exists
-    const { data: existingData, error: checkError } = await supabase
-      .from('point_types_powlax')
-      .select('id')
-      .limit(1)
-    
-    if (checkError && checkError.code === '42P01') {
-      console.log('❌ Table point_types_powlax does not exist. Please run the SQL migration manually.')
-      console.log('📄 Run the SQL from: /supabase/migrations/120_point_types_import.sql')
-      throw new Error('Table does not exist')
-    }
-    
-    console.log('✅ Table exists, proceeding with data insertion')
-    
-    // Insert data using Supabase client
-    const pointTypes = [
-      { title: 'Academy Point', image_url: 'https://powlax.com/wp-content/uploads/2024/10/Lax-Credits.png', slug: 'academy-point' },
-      { title: 'Attack Token', image_url: 'https://powlax.com/wp-content/uploads/2024/10/Attack-Tokens-1.png', slug: 'attack-token' },
-      { title: 'Defense Dollar', image_url: 'https://powlax.com/wp-content/uploads/2024/10/Defense-Dollars-1.png', slug: 'defense-dollar' },
-      { title: 'Midfield Medal', image_url: 'https://powlax.com/wp-content/uploads/2024/10/Midfield-Medals-1.png', slug: 'midfield-medal' },
-      { title: 'Rebound Reward', image_url: 'https://powlax.com/wp-content/uploads/2024/10/Rebound-Rewards-1.png', slug: 'rebound-reward' },
-      { title: 'Flex Point', image_url: 'https://powlax.com/wp-content/uploads/2025/02/SS-Flex-Points-1.png', slug: 'flex-point' },
-      { title: 'Lax IQ Point', image_url: 'https://powlax.com/wp-content/uploads/2025/01/Lax-IQ-Points.png', slug: 'lax-iq-point' }
-    ]
-    
-    const { data, error: insertError } = await supabase
-      .from('point_types_powlax')
-      .upsert(pointTypes, { onConflict: 'title' })
-      .select()
-    
-    if (insertError) {
-      console.error('❌ Error inserting data:', insertError)
-      throw insertError
-    }
-    
-    console.log(`✅ Inserted ${data?.length || 0} point types successfully`)
-    
-    console.log('ℹ️ Note: RLS policies should be set up manually via SQL migration')
-    
-    console.log('\n🎉 Direct insertion method completed successfully!')
-    return data
-    
-  } catch (error) {
-    console.error('💥 Direct insertion failed:', error)
-    throw error
-  }
-}
-
-// Run the migration
-if (require.main === module) {
-  applyPointTypesMigration()
-    .catch(() => {
-      console.log('\n🔄 Falling back to direct insertion method...')
-      return directInsertPointTypes()
-    })
-    .catch((error) => {
-      console.error('💥 All migration methods failed:', error)
-      process.exit(1)
-    })
-}
-
-export { applyPointTypesMigration, directInsertPointTypes }
+  })

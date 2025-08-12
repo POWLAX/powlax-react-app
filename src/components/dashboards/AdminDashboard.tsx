@@ -36,79 +36,56 @@ interface AdminDashboardProps {
 }
 
 export function AdminDashboard({ user }: AdminDashboardProps) {
-  // State for real data
-  const [dashboardData, setDashboardData] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [children, setChildren] = useState<any[]>([])
-  const [stats, setStats] = useState({
-    totalUsers: 0,
-    totalDrills: 167, // From Skills Academy
-    totalTeams: 0,
-    totalWorkouts: 166,
-    activeChildren: 0
+  // Use only mock data for now - no database queries
+  const [stats] = useState({
+    totalUsers: 42,     // Mock: Total users
+    totalDrills: 167,   // From Skills Academy
+    totalTeams: 8,      // Mock: Team count
+    totalWorkouts: 166, // From Skills Academy
+    activeChildren: 2   // Mock: Children count for Patrick
   })
 
-  // Fetch real data on mount
-  useEffect(() => {
-    fetchDashboardData()
-  }, [user])
-
-  async function fetchDashboardData() {
-    try {
-      // Fetch user counts
-      const { count: userCount } = await supabase
-        .from('users')
-        .select('*', { count: 'exact', head: true })
-
-      // Fetch team counts
-      const { count: teamCount } = await supabase
-        .from('teams')
-        .select('*', { count: 'exact', head: true })
-
-      // Fetch Patrick's children if he has parent role
-      let childrenData: any[] = []
-      if (user.roles?.includes('parent') || user.account_type === 'family_admin') {
-        const { data: relationships } = await supabase
-          .from('parent_child_relationships')
-          .select(`
-            *,
-            child:users!child_id (
-              *,
-              wallet:user_points_wallets (*),
-              badges:user_badges (*),
-              progress:skills_academy_user_progress (*)
-            )
-          `)
-          .eq('parent_id', user.id)
-
-        if (relationships) {
-          childrenData = relationships.map(rel => rel.child).filter(Boolean)
-        }
-      }
-
-      // Fetch recent user activity
-      const { data: recentUsers } = await supabase
-        .from('users')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(5)
-
-      setStats({
-        totalUsers: userCount || 0,
-        totalDrills: 167,
-        totalTeams: teamCount || 0,
-        totalWorkouts: 166,
-        activeChildren: childrenData.length
-      })
-
-      setChildren(childrenData)
-      setDashboardData({ recentUsers })
-      setLoading(false)
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error)
-      setLoading(false)
+  // Mock children data for Patrick (admin who is also a parent)
+  const [children] = useState([
+    {
+      id: '1',
+      display_name: 'Alex Chapla (MOCK)',
+      first_name: 'Alex',
+      age_group: 'u12',
+      player_position: 'Attack',
+      wallet: [{ balance: 850 }],
+      badges: [{ name: 'Wall Ball Warrior' }, { name: 'Practice Star' }],
+      progress: [
+        { status: 'completed', workout_id: 1 },
+        { status: 'completed', workout_id: 2 },
+        { status: 'completed', workout_id: 3 }
+      ]
+    },
+    {
+      id: '2',
+      display_name: 'Sam Chapla (MOCK)',
+      first_name: 'Sam',
+      age_group: 'u10',
+      player_position: 'Midfield',
+      wallet: [{ balance: 720 }],
+      badges: [{ name: 'First Goal' }],
+      progress: [
+        { status: 'completed', workout_id: 1 },
+        { status: 'completed', workout_id: 2 }
+      ]
     }
+  ])
+
+  // Mock dashboard data
+  const dashboardData = {
+    recentUsers: [
+      { email: 'coach.smith@mock.com', created_at: '2025-01-12T10:00:00Z' },
+      { email: 'player.jones@mock.com', created_at: '2025-01-12T09:30:00Z' },
+      { email: 'parent.wilson@mock.com', created_at: '2025-01-12T09:00:00Z' }
+    ]
   }
+
+  const loading = false // Never show loading spinner
 
   // Use real data when available, otherwise fall back to mock
   const mockData = {

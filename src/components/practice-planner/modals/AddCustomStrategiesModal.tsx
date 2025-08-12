@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -20,16 +20,21 @@ interface AddCustomStrategiesModalProps {
   onClose: () => void
   onAdd?: (strategy: any) => void
   onStrategyCreated?: () => void
+  editStrategy?: any // If provided, we're in edit mode
+  onStrategyUpdated?: () => void
 }
 
 export default function AddCustomStrategiesModal({ 
   isOpen, 
   onClose, 
   onAdd,
-  onStrategyCreated 
+  onStrategyCreated,
+  editStrategy,
+  onStrategyUpdated 
 }: AddCustomStrategiesModalProps) {
-  const { createUserStrategy, loading: creating } = useUserStrategies()
+  const { createUserStrategy, updateUserStrategy, loading: creating } = useUserStrategies()
   const { user } = useAuth()
+  const isEditMode = !!editStrategy
   
   // Form state - essential fields matching the drill modal pattern
   const [strategyName, setStrategyName] = useState('')
@@ -45,6 +50,25 @@ export default function AddCustomStrategiesModal({
   const [seeItAges, setSeeItAges] = useState('')
   const [coachItAges, setCoachItAges] = useState('')
   const [ownItAges, setOwnItAges] = useState('')
+
+  // Pre-populate fields when editing
+  useEffect(() => {
+    if (editStrategy) {
+      setStrategyName(editStrategy.strategy_name || editStrategy.name || '')
+      setDescription(editStrategy.description || '')
+      setGamePhase(editStrategy.game_phase || '')
+      setVideoUrl(editStrategy.video_url || '')
+      setLacrosseLab1(editStrategy.drill_lab_url_1 || '')
+      setLacrosseLab2(editStrategy.drill_lab_url_2 || '')
+      setLacrosseLab3(editStrategy.drill_lab_url_3 || '')
+      setLacrosseLab4(editStrategy.drill_lab_url_4 || '')
+      setLacrosseLab5(editStrategy.drill_lab_url_5 || '')
+      setTargetAudience(editStrategy.target_audience || '')
+      setSeeItAges(editStrategy.see_it_ages || '')
+      setCoachItAges(editStrategy.coach_it_ages || '')
+      setOwnItAges(editStrategy.own_it_ages || '')
+    }
+  }, [editStrategy])
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault()
@@ -92,33 +116,48 @@ export default function AddCustomStrategiesModal({
         club_share: []
       }
 
-      const createdStrategy = await createUserStrategy(strategyData)
-
-      // Also add to practice planner immediately if onAdd is provided
-      if (onAdd) {
-        const practiceReadyStrategy = {
-          id: `user-${createdStrategy.id}`,
-          strategy_name: strategyName.trim(),
-          description: description.trim(),
-          lesson_category: gamePhase,
-          strategy_categories: gamePhase,
-          vimeo_link: videoUrl.trim() || undefined,
-          lacrosse_lab_links: lacrosseLabLinks.length > 0 ? lacrosseLabLinks : undefined,
-          target_audience: targetAudience || undefined,
-          see_it_ages: seeItAges || undefined,
-          coach_it_ages: coachItAges || undefined,
-          own_it_ages: ownItAges || undefined,
-          source: 'user' as const
+      let resultStrategy
+      
+      if (isEditMode && editStrategy?.id) {
+        // Update existing strategy
+        resultStrategy = await updateUserStrategy(editStrategy.id, strategyData)
+        
+        // Call update callback
+        if (onStrategyUpdated) {
+          onStrategyUpdated()
         }
-        onAdd(practiceReadyStrategy)
-      }
+        
+        toast.success('Strategy updated successfully!')
+      } else {
+        // Create new strategy
+        resultStrategy = await createUserStrategy(strategyData)
+        
+        // Also add to practice planner immediately if onAdd is provided (only for new strategies)
+        if (onAdd && resultStrategy) {
+          const practiceReadyStrategy = {
+            id: `user-${resultStrategy.id}`,
+            strategy_name: strategyName.trim(),
+            description: description.trim(),
+            lesson_category: gamePhase,
+            strategy_categories: gamePhase,
+            vimeo_link: videoUrl.trim() || undefined,
+            lacrosse_lab_links: lacrosseLabLinks.length > 0 ? lacrosseLabLinks : undefined,
+            target_audience: targetAudience || undefined,
+            see_it_ages: seeItAges || undefined,
+            coach_it_ages: coachItAges || undefined,
+            own_it_ages: ownItAges || undefined,
+            source: 'user' as const
+          }
+          onAdd(practiceReadyStrategy)
+        }
 
-      // Call the created callback if provided
-      if (onStrategyCreated) {
-        onStrategyCreated()
-      }
+        // Call the created callback if provided
+        if (onStrategyCreated) {
+          onStrategyCreated()
+        }
 
-      toast.success('Custom strategy created successfully!')
+        toast.success('Custom strategy created successfully!')
+      }
       
       // Reset form
       resetForm()
@@ -149,9 +188,11 @@ export default function AddCustomStrategiesModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px] bg-white max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-[#003366]">Add Custom Strategy</DialogTitle>
+          <DialogTitle className="text-[#003366]">
+            {isEditMode ? 'Edit Strategy' : 'Add Custom Strategy'}
+          </DialogTitle>
           <DialogDescription>
-            Create a custom strategy with essential details
+            {isEditMode ? 'Update the strategy details' : 'Create a custom strategy with essential details'}
           </DialogDescription>
         </DialogHeader>
 
@@ -340,7 +381,7 @@ export default function AddCustomStrategiesModal({
               className="bg-[#003366] hover:bg-[#002244] text-white"
               disabled={creating}
             >
-              {creating ? 'Adding Strategy...' : 'Add Strategy'}
+              {creating ? (isEditMode ? 'Updating...' : 'Adding Strategy...') : (isEditMode ? 'Update Strategy' : 'Add Strategy')}
             </Button>
           </DialogFooter>
         </form>

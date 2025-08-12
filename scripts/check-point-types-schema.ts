@@ -1,59 +1,71 @@
+// scripts/check-point-types-schema.ts
+// Purpose: Check actual schema of point_types_powlax table
+
 import { createClient } from '@supabase/supabase-js'
-import * as dotenv from 'dotenv'
+import { config } from 'dotenv'
 
-dotenv.config({ path: '.env.local' })
+// Load environment variables
+config({ path: '.env.local' })
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
+const supabase = createClient(supabaseUrl, supabaseKey)
 
-async function checkPointTypesSchema() {
+async function checkSchema() {
   console.log('🔍 Checking point_types_powlax table schema...')
   
   try {
-    // Try to get some data to see what columns exist
-    const { data, error } = await supabase
+    // Try to get some raw data to see structure
+    console.log('📊 Checking actual data structure...')
+    const { data: rawData, error: dataError } = await supabase
       .from('point_types_powlax')
       .select('*')
-      .limit(1)
-    
-    if (error) {
-      console.log('❌ Error accessing table:', error.message)
-      
-      // Let's check if it's named differently
-      const possibleTables = ['point_types', 'powlax_point_types', 'user_point_types']
-      
-      for (const tableName of possibleTables) {
-        try {
-          const { data: testData, error: testError } = await supabase
-            .from(tableName)
-            .select('*')
-            .limit(1)
-          
-          if (!testError && testData) {
-            console.log(`✅ Found table: ${tableName}`)
-            console.log('Columns:', Object.keys(testData[0] || {}))
-            console.log('Sample data:', testData[0])
-          }
-        } catch (e) {
-          // Silent fail
-        }
-      }
+      .limit(3)
+
+    if (dataError) {
+      console.error('❌ Error fetching data:', dataError)
     } else {
-      console.log('✅ Table accessible')
-      console.log('Data count:', data.length)
-      if (data.length > 0) {
-        console.log('Columns:', Object.keys(data[0]))
-        console.log('Sample data:', data[0])
+      console.log('📝 Raw data sample:')
+      if (rawData && rawData.length > 0) {
+        rawData.forEach((row, index) => {
+          console.log(`Row ${index + 1}:`, JSON.stringify(row, null, 2))
+        })
+        
+        // Show what keys are actually available
+        console.log('\n🔑 Available keys in first row:', Object.keys(rawData[0]))
       } else {
-        console.log('Table is empty')
+        console.log('⚠️  No data found in table')
       }
     }
-    
+
+    // Check if we can select specific columns
+    console.log('\n🎯 Testing specific column access...')
+    const { data: specificData, error: specificError } = await supabase
+      .from('point_types_powlax')
+      .select('id, title, image_url, slug, series_type')
+      .limit(1)
+
+    if (specificError) {
+      console.error('❌ Error with specific columns:', specificError)
+    } else {
+      console.log('✅ Specific columns accessible:')
+      if (specificData && specificData.length > 0) {
+        console.log(JSON.stringify(specificData[0], null, 2))
+      }
+    }
+
   } catch (error) {
-    console.error('💥 Error:', error)
+    console.error('💥 Schema check failed:', error)
   }
 }
 
-checkPointTypesSchema()
+checkSchema()
+  .then(() => {
+    console.log('\n🎯 Schema check complete!')
+    process.exit(0)
+  })
+  .catch(error => {
+    console.error('💥 Script failed:', error)
+    process.exit(1)
+  })
