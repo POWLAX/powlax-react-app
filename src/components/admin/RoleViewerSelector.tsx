@@ -2,10 +2,9 @@
 
 import { useAuth } from '@/contexts/SupabaseAuthContext'
 import { useRoleViewer } from '@/contexts/RoleViewerContext'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Eye, X, Shield } from 'lucide-react'
+import { Crown, User, Users, Heart, Building2, X, Clipboard, UserCheck } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 export function RoleViewerSelector() {
@@ -24,55 +23,101 @@ export function RoleViewerSelector() {
     return null
   }
 
-  const currentRoleLabel = availableRoles.find(r => r.value === viewingRole)?.label || 'Admin (Actual Role)'
+  // Icon mapping for each role
+  const getRoleIcon = (roleValue: string | null) => {
+    switch (roleValue) {
+      case null:
+        return Crown
+      case 'player':
+        return User
+      case 'team_coach':
+        return Clipboard
+      case 'parent':
+        return Users
+      case 'club_director':
+        return Building2
+      default:
+        return Crown
+    }
+  }
+
+  // Get role color
+  const getRoleColor = (roleValue: string | null, isActive: boolean) => {
+    if (!isActive) return 'text-gray-400'
+    
+    switch (roleValue) {
+      case null:
+        return 'text-blue-600'
+      case 'player':
+        return 'text-green-600'
+      case 'team_coach':
+        return 'text-purple-600'
+      case 'parent':
+        return 'text-pink-600'
+      case 'club_director':
+        return 'text-orange-600'
+      default:
+        return 'text-blue-600'
+    }
+  }
 
   return (
-    <div className={`fixed top-4 right-4 z-[9999] flex items-center gap-2 p-3 rounded-lg shadow-lg backdrop-blur-sm transition-all ${
+    <div className={`fixed top-0 left-1/2 transform -translate-x-1/2 z-[9999] transition-all ${
       isViewingAs 
-        ? 'bg-orange-50/95 border-2 border-orange-400 dark:bg-orange-950/95 dark:border-orange-600' 
-        : 'bg-white/95 border border-gray-200 dark:bg-gray-900/95 dark:border-gray-700'
-    }`}>
-      {/* Admin Shield Icon */}
-      <Shield className={`w-5 h-5 ${isViewingAs ? 'text-orange-600' : 'text-blue-600'}`} />
+        ? 'bg-orange-50/95 border-b-2 border-orange-400 dark:bg-orange-950/95 dark:border-orange-600' 
+        : 'bg-white/95 border-b border-gray-200 dark:bg-gray-900/95 dark:border-gray-700'
+    } backdrop-blur-sm shadow-lg`}>
       
-      {/* View As Label */}
-      <div className="flex items-center gap-2">
-        {isViewingAs && (
-          <Badge variant="outline" className="bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-900 dark:text-orange-200 dark:border-orange-700">
-            <Eye className="w-3 h-3 mr-1" />
-            Viewing as
+      {/* Viewing As Badge */}
+      {isViewingAs && (
+        <div className="flex justify-center">
+          <Badge variant="outline" className="bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-900 dark:text-orange-200 dark:border-orange-700 text-xs">
+            Viewing as {availableRoles.find(r => r.value === viewingRole)?.label}
           </Badge>
-        )}
-        
-        {/* Role Selector */}
-        <Select value={viewingRole || 'null'} onValueChange={(value) => setViewingRole(value === 'null' ? null : value as any)}>
-          <SelectTrigger className={`w-[180px] ${isViewingAs ? 'border-orange-400' : ''}`}>
-            <SelectValue>{currentRoleLabel}</SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {availableRoles.map((role) => (
-              <SelectItem key={role.value || 'admin'} value={role.value || 'null'}>
-                <div className="flex items-center gap-2">
-                  {role.value === null && <Shield className="w-4 h-4 text-blue-600" />}
-                  <span>{role.label}</span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Quick Exit Button */}
-        {isViewingAs && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={clearViewingRole}
-            className="text-orange-600 hover:text-orange-700 hover:bg-orange-100 dark:hover:bg-orange-900"
-            title="Exit View As Mode (Ctrl+Shift+R)"
-          >
-            <X className="w-4 h-4" />
-          </Button>
-        )}
+        </div>
+      )}
+      
+      {/* Role Navigation Icons */}
+      <div className="flex items-center justify-center px-4">
+        <div className="flex items-center gap-1">
+          {availableRoles.map((role) => {
+            const IconComponent = getRoleIcon(role.value)
+            const isActive = viewingRole === role.value
+            const colorClass = getRoleColor(role.value, isActive)
+            
+            return (
+              <Button
+                key={role.value || 'admin'}
+                variant="ghost"
+                size="sm"
+                onClick={() => setViewingRole(role.value)}
+                className={`p-2 h-auto min-w-[60px] ${
+                  isActive 
+                    ? 'bg-gray-100 dark:bg-gray-800' 
+                    : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                }`}
+                title={`Switch to ${role.label} view`}
+              >
+                <span className={`text-sm ${isActive ? 'font-medium' : ''} ${colorClass}`}>
+                  {role.value === 'club_director' ? 'Direct' : role.label.split(' ')[0]}
+                </span>
+              </Button>
+            )
+          })}
+          
+          {/* Quick Exit Button */}
+          {isViewingAs && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearViewingRole}
+              className="p-2 h-auto min-w-[60px] text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 ml-2"
+              title="Exit View As Mode (Ctrl+Shift+R)"
+            >
+              <span className="text-sm">Exit</span>
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   )

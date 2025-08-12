@@ -9,20 +9,21 @@ import { Loader2, AlertCircle } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
-  const { login, error, user } = useAuth()
+  const { login, error, user, logout } = useAuth()
   const [formData, setFormData] = useState({
     username: '',
     password: '',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [loginError, setLoginError] = useState<string | null>(null)
+  const [allowLogin, setAllowLogin] = useState(false)
 
-  // Redirect if already logged in
+  // Check if user is already logged in but allow override
   useEffect(() => {
-    if (user) {
-      router.push('/dashboard')
+    if (user && !allowLogin) {
+      // Don't auto-redirect, show logged-in message instead
     }
-  }, [user, router])
+  }, [user, allowLogin])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -47,16 +48,46 @@ export default function LoginPage() {
     }
   }
 
+  const handleLogoutAndRelogin = async () => {
+    await logout()
+    setAllowLogin(true)
+    setFormData({ username: '', password: '' })
+    setLoginError(null)
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">Welcome to POWLAX</CardTitle>
           <CardDescription className="text-center">
-            Sign in with your POWLAX account
+            {user && !allowLogin ? 'You are already logged in' : 'Sign in with your POWLAX account'}
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Show logged-in status if user is already authenticated */}
+          {user && !allowLogin ? (
+            <div className="space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                <p className="text-sm text-blue-900 font-medium">
+                  Logged in as: {user.display_name?.split(' ')[0] || user.full_name?.split(' ')[0] || user.email?.split('@')[0]}
+                </p>
+                <button
+                  onClick={handleLogoutAndRelogin}
+                  className="text-sm text-blue-600 hover:text-blue-800 underline mt-2"
+                >
+                  Not you? Click here to sign in with a different account
+                </button>
+              </div>
+              
+              <Button
+                onClick={() => router.push('/dashboard')}
+                className="w-full"
+              >
+                Continue to Dashboard
+              </Button>
+            </div>
+          ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             {(error || loginError) && (
               <div className="bg-red-50 border border-red-200 rounded-md p-3 flex items-start gap-2">
@@ -134,6 +165,7 @@ export default function LoginPage() {
               </p>
             </div>
           </form>
+          )}
         </CardContent>
       </Card>
     </div>

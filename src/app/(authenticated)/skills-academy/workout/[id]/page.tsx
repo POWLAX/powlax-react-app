@@ -18,6 +18,10 @@ import WorkoutErrorBoundary from '@/components/skills-academy/WorkoutErrorBounda
 import { useWorkoutSession } from '@/hooks/useSkillsAcademyWorkouts'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/SupabaseAuthContext'
+import PointExplosion from '@/components/skills-academy/PointExplosion'
+import { usePointTypes } from '@/hooks/usePointTypes'
+import PointCounter from '@/components/skills-academy/PointCounter'
+import WorkoutReviewModal from '@/components/skills-academy/WorkoutReviewModal'
 
 // Helper function to extract Vimeo ID from drill data
 function extractVimeoId(drill: any): string | null {
@@ -80,8 +84,9 @@ async function getWallBallVideoId(workout: any): Promise<string | null> {
   return null;
 }
 
-// Test user ID for development  
-const TEST_USER_ID = 'test-user-12345'
+
+
+// Removed TEST_USER_ID - now using real authenticated users only
 
 function WorkoutPageContent() {
   const params = useParams()
@@ -95,6 +100,9 @@ function WorkoutPageContent() {
   // Get workout data
   const { session, loading, error } = useWorkoutSession(workoutId)
   
+  // Get point types for animation
+  const { pointTypes } = usePointTypes()
+  
   // Check if this is a wall ball workout (single video)
   const [isWallBallWorkout, setIsWallBallWorkout] = useState(false)
   const [wallBallVimeoId, setWallBallVimeoId] = useState<string | null>(null)
@@ -107,16 +115,45 @@ function WorkoutPageContent() {
   
   // Points tracking
   const [localTotalPoints, setLocalTotalPoints] = useState(0)
+  const [userPoints, setUserPoints] = useState<any>({
+    lax_credit: 0,
+    attack_token: 0,
+    defense_dollar: 0,
+    midfield_medal: 0,
+    rebound_reward: 0,
+    flex_points: 0,
+    lax_iq_points: 0
+  })
   
   // Local state for UI
   const [completedDrills, setCompletedDrills] = useState<Set<number>>(new Set())
   const [isCompleted, setIsCompleted] = useState(false)
   const [drillTimer, setDrillTimer] = useState(0)
   const [showCelebration, setShowCelebration] = useState(false)
+  
+  // Point explosion animation state
+  const [showPointExplosion, setShowPointExplosion] = useState(false)
+  const [explosionOrigin, setExplosionOrigin] = useState<HTMLElement | null>(null)
+  const [explosionPoints, setExplosionPoints] = useState<Record<string, number>>({})
+  
+  // Review workout state
+  const [showReviewModal, setShowReviewModal] = useState(false)
+  
+  // Timer enforcement state - Agent 1
+  const [drillStartTime, setDrillStartTime] = useState<number | null>(null)
+  const [drillTimeElapsed, setDrillTimeElapsed] = useState(0)
+  const [drillTimes, setDrillTimes] = useState<Record<number, {
+    drill_name: string
+    started_at: number
+    completed_at?: number
+    actual_seconds: number
+    required_seconds: number
+  }>>({})
+  
 
-  // Use auth context user or fallback to TEST_USER_ID
+  // Use auth context user only
   useEffect(() => {
-    setUserId(user?.id || TEST_USER_ID)
+    setUserId(user?.id || null)
   }, [user])
   
   useEffect(() => {
@@ -146,6 +183,22 @@ function WorkoutPageContent() {
     fetchSeriesInfo()
   }, [session?.workout?.series_id])
 
+  // Fetch user points on mount
+  useEffect(() => {
+    const fetchUserPoints = async () => {
+      if (!userId) return;
+      
+      const { data, error } = await supabase
+        .rpc('get_user_points', { p_user_id: userId });
+      
+      if (!error && data) {
+        setUserPoints(data);
+      }
+    };
+    
+    fetchUserPoints();
+  }, [userId]);
+
   // Timer effect - always running during workout
   useEffect(() => {
     if (!isCompleted) {
@@ -155,6 +208,55 @@ function WorkoutPageContent() {
       return () => clearInterval(interval)
     }
   }, [isCompleted])
+  
+  // Drill timer enforcement effect - Agent 1
+  useEffect(() => {
+    if (drillStartTime && !completedDrills.has(localCurrentDrillIndex) && !isCompleted) {
+      const interval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - drillStartTime) / 1000)
+        setDrillTimeElapsed(elapsed)
+      }, 1000)
+      return () => clearInterval(interval)
+    }
+  }, [drillStartTime, localCurrentDrillIndex, completedDrills, isCompleted])
+  
+  // Start timer when drill loads or changes - Agent 1
+  useEffect(() => {
+    if (!isCompleted && !completedDrills.has(localCurrentDrillIndex)) {
+      const startTime = Date.now()
+      setDrillStartTime(startTime)
+      setDrillTimeElapsed(0)
+      
+      // Store drill info for timing tracking
+      const currentDrill = session?.drills?.[localCurrentDrillIndex]
+      if (currentDrill) {
+        const drillName = isWallBallWorkout 
+          ? (session?.workout?.workout_name || 'Wall Ball Workout')
+          : (currentDrill?.drill?.title || currentDrill?.title || `Drill ${localCurrentDrillIndex + 1}`)
+        
+        // Calculate required time based on drill type
+        let requiredSeconds: number
+        if (isWallBallWorkout) {
+          // Wall Ball: full estimated_duration_minutes
+          requiredSeconds = (session?.workout?.estimated_duration_minutes || 10) * 60
+        } else {
+          // Regular drills: (duration_minutes - 1) × 60
+          const durationMinutes = currentDrill?.drill?.duration_minutes || currentDrill?.duration_minutes || 3
+          requiredSeconds = Math.max((durationMinutes - 1), 1) * 60 // Minimum 1 minute
+        }
+        
+        setDrillTimes(prev => ({
+          ...prev,
+          [localCurrentDrillIndex]: {
+            drill_name: drillName,
+            started_at: startTime,
+            actual_seconds: 0,
+            required_seconds: requiredSeconds
+          }
+        }))
+      }
+    }
+  }, [localCurrentDrillIndex, isCompleted, completedDrills, isWallBallWorkout, session?.workout, session?.drills])
   
   // Save progress periodically (every 30 seconds)
   useEffect(() => {
@@ -214,45 +316,139 @@ function WorkoutPageContent() {
   const currentDrillIndex = localCurrentDrillIndex
   const totalPoints = localTotalPoints
 
-  // Save progress to database
+  // Save progress to database using Supabase RPC
   const saveProgress = async (isComplete = false) => {
     if (!userId || !workout) return;
     
     try {
-      const response = await fetch('/api/workouts/progress', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: userId,
-          workout_id: workoutId,
-          current_drill_index: currentDrillIndex,
-          drills_completed: completedDrills.size,
-          total_drills: drills.length,
-          total_time_seconds: drillTimer,
-          points_earned: totalPoints,
-          status: isComplete ? 'completed' : 'in_progress',
-          completion_percentage: (completedDrills.size / drills.length) * 100
-        })
-      });
+      // Get current drill - check both drill object structure and direct drill access
+      const currentDrill = drills[currentDrillIndex];
+      const drillId = currentDrill?.drill?.id || currentDrill?.id;
       
-      if (!response.ok) {
-        console.error('Failed to save progress');
+      if (!drillId) {
+        console.error('No drill ID found for current drill');
+        return;
+      }
+      
+      // Call Supabase RPC function directly to award points
+      const { data: points, error } = await supabase
+        .rpc('award_drill_points', {
+          p_user_id: userId,
+          p_drill_id: drillId,
+          p_drill_count: completedDrills.size + 1,
+          p_workout_id: workoutId
+        });
+      
+      if (error) {
+        console.error('Error awarding points:', error);
+        return;
+      }
+      
+      // Update local state with points earned
+      if (points?.lax_credit) {
+        setLocalTotalPoints(prevPoints => {
+          const newTotal = prevPoints + (points.lax_credit || 0);
+          return newTotal;
+        });
+        
+        // Update user points display with all possible point types
+        setUserPoints(prevPoints => ({
+          ...prevPoints,
+          lax_credit: (prevPoints.lax_credit || 0) + (points.lax_credit || 0),
+          academy_points: (prevPoints.academy_points || 0) + (points.academy_points || points.lax_credit || 0),
+          attack_token: (prevPoints.attack_token || 0) + (points.attack_token || 0),
+          defense_dollar: (prevPoints.defense_dollar || 0) + (points.defense_dollar || 0),
+          midfield_medal: (prevPoints.midfield_medal || 0) + (points.midfield_medal || 0),
+          rebound_reward: (prevPoints.rebound_reward || 0) + (points.rebound_reward || 0),
+          flex_points: (prevPoints.flex_points || 0) + (points.flex_points || 0),
+          lax_iq_points: (prevPoints.lax_iq_points || 0) + (points.lax_iq_points || 0)
+        }));
+      }
+      
+      // If workout complete, save completion record
+      if (isComplete) {
+        const { error: completionError } = await supabase
+          .from('workout_completions')
+          .insert({
+            user_id: userId,
+            workout_id: workoutId,
+            series_id: workout.series_id,
+            drill_ids: Array.from(completedDrills),
+            drills_completed: completedDrills.size,
+            total_drills: drills.length,
+            points_earned: points,
+            time_taken_seconds: drillTimer
+          });
+        
+        if (completionError) {
+          console.error('Error saving completion:', completionError);
+        }
       }
     } catch (error) {
-      console.error('Error saving progress:', error);
+      console.error('Error in saveProgress:', error);
     }
   }
 
   const handleMarkComplete = async () => {
+    const currentDrill = drills[currentDrillIndex]
+    const drillId = currentDrill?.drill?.id || currentDrill?.id || `drill_${currentDrillIndex}`
+    const drillName = currentDrill?.drill?.title || currentDrill?.title || `Drill ${currentDrillIndex + 1}`
+    
+    // Calculate required time based on drill type (Agent 2: Time Breakdown)
+    let requiredSeconds = 120 // Default 2 minutes
+    if (isWallBallWorkout) {
+      // Wall Ball uses full estimated duration
+      requiredSeconds = (session?.workout?.estimated_duration_minutes || 2) * 60
+    } else if (currentDrill?.drill?.duration_minutes) {
+      // Regular drills use (duration_minutes - 1) * 60
+      requiredSeconds = Math.max((currentDrill.drill.duration_minutes - 1) * 60, 60)
+    }
+    
+    // Timer enforcement - Agent 1 & Agent 2: Record completion time
+    let actualSeconds = drillTimer
+    if (drillStartTime) {
+      const completionTime = Date.now()
+      actualSeconds = Math.floor((completionTime - drillStartTime) / 1000)
+      
+      setDrillTimes(prev => ({
+        ...prev,
+        [localCurrentDrillIndex]: {
+          ...prev[localCurrentDrillIndex],
+          completed_at: completionTime,
+          actual_seconds: actualSeconds
+        }
+      }))
+    }
+    
     const newCompleted = new Set(completedDrills)
-    newCompleted.add(currentDrillIndex)
+    newCompleted.add(localCurrentDrillIndex)
     setCompletedDrills(newCompleted)
     
-    const pointsForDrill = 10
-    setLocalTotalPoints(prev => prev + pointsForDrill)
+    // Trigger point explosion animation before saving progress
+    const didItButton = document.querySelector('[data-did-it-button]') as HTMLElement
+    if (didItButton) {
+      setExplosionOrigin(didItButton)
+      
+      // Calculate points that will be awarded (simplified for animation)
+      const basePoints = 25 // Base points per drill
+      const pointsToShow = {
+        academy_point: basePoints,
+        lax_credit: basePoints
+      }
+      setExplosionPoints(pointsToShow)
+      setShowPointExplosion(true)
+      
+      // Hide explosion after animation
+      setTimeout(() => {
+        setShowPointExplosion(false)
+      }, 1500)
+    }
+    
+    // Points are now calculated and awarded in saveProgress function
+    // setLocalTotalPoints will be updated by saveProgress
     
     // Save progress to database
-    const isLastDrill = currentDrillIndex === drills.length - 1
+    const isLastDrill = localCurrentDrillIndex === drills.length - 1
     if (isLastDrill) {
       await saveProgress(true) // Mark as complete
       setIsCompleted(true)
@@ -266,10 +462,14 @@ function WorkoutPageContent() {
     }
   }
 
-  const handleDrillSelect = (index: number) => {
-    setLocalCurrentDrillIndex(index)
-    setShowDrillsDropdown(false)
-  }
+  // Drill cards are now reference-only - no selection allowed
+  // const handleDrillSelect = (index: number) => {
+  //   setLocalCurrentDrillIndex(index)
+  //   setShowDrillsDropdown(false)
+  //   // Reset timer when manually selecting a drill - Agent 1
+  //   setDrillStartTime(null)
+  //   setDrillTimeElapsed(0)
+  // }
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -421,17 +621,62 @@ function WorkoutPageContent() {
               </CardContent>
             </Card>
 
+            {/* Time Breakdown Card - Agent 2 */}
+            <Card className="border-2 border-blue-500">
+              <CardHeader className="text-center pb-2">
+                <CardTitle className="flex items-center justify-center gap-2">
+                  <Activity className="w-6 h-6 text-blue-500" />
+                  Workout Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div className="p-3 bg-blue-50 rounded-lg">
+                    <div className="text-xl font-bold text-blue-600">{formatTime(drillTimer)}</div>
+                    <div className="text-xs text-gray-600">Total Time</div>
+                  </div>
+                  <div className="p-3 bg-green-50 rounded-lg">
+                    <div className="text-xl font-bold text-green-600">{drills.length}</div>
+                    <div className="text-xs text-gray-600">Drills Complete</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Action Buttons */}
-            <div className="flex gap-2">
-              <Button asChild className="flex-1">
-                <Link href="/skills-academy/workouts">More Workouts</Link>
+            <div className="space-y-2">
+              <Button 
+                onClick={() => setShowReviewModal(true)}
+                variant="outline" 
+                className="w-full"
+              >
+                <Activity className="w-4 h-4 mr-2" />
+                Review Workout
               </Button>
-              <Button asChild variant="outline" className="flex-1">
-                <Link href="/dashboard">Dashboard</Link>
-              </Button>
+              <div className="flex gap-2">
+                <Button asChild className="flex-1">
+                  <Link href="/skills-academy/workouts">More Workouts</Link>
+                </Button>
+                <Button asChild variant="outline" className="flex-1">
+                  <Link href="/dashboard">Dashboard</Link>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
+        
+        {/* Review Workout Modal */}
+        <WorkoutReviewModal
+          isOpen={showReviewModal}
+          onClose={() => setShowReviewModal(false)}
+          workout={workout}
+          drills={drills}
+          drillTimes={drillTimes}
+          totalPoints={finalPoints}
+          totalTime={drillTimer}
+          completedDrills={completedDrills}
+          isWallBallWorkout={isWallBallWorkout}
+        />
       </div>
     )
   }
@@ -441,6 +686,18 @@ function WorkoutPageContent() {
 
   return (
     <WorkoutErrorBoundary>
+      <PointExplosion
+        isVisible={showPointExplosion}
+        originElement={explosionOrigin}
+        points={explosionPoints}
+        pointTypes={pointTypes.map(pt => ({
+          name: pt.name,
+          display_name: pt.display_name,
+          icon_url: pt.icon_url
+        }))}
+        onAnimationComplete={() => setShowPointExplosion(false)}
+        duration={1500}
+      />
       <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
         {/* Mobile optimization: Ensure no scrolling */}
         {/* Compact Header with Workout Name - Mobile Optimized */}
@@ -459,8 +716,13 @@ function WorkoutPageContent() {
                 Drill {currentDrillIndex + 1} of {drills.length}
               </div>
             </div>
-            <div className="text-xs md:text-sm font-semibold text-powlax-blue">
-              {formatTime(drillTimer)}
+            <div className="text-right">
+              <div className="text-xs md:text-sm font-semibold text-powlax-blue">
+                {formatTime(drillTimer)}
+              </div>
+              <div className="text-xs text-gray-600">
+                Credits: {userPoints.lax_credit || 0}
+              </div>
             </div>
           </div>
           
@@ -470,23 +732,37 @@ function WorkoutPageContent() {
           </div>
         </div>
 
+        {/* Live Point Counter - Above drill navigation */}
+        <PointCounter 
+          points={userPoints}
+          seriesType={workout?.series?.series_type || seriesInfo?.series_type}
+          animate={true}
+        />
+
         {/* Compact Drill Navigation - Mobile Optimized (Hide for wall ball) */}
         {!isWallBallWorkout && (
           <div className="bg-white px-3 py-2 border-b border-gray-200 flex-shrink-0">
             <div className="overflow-x-auto scrollbar-hide">
               <div className="flex space-x-2">
                 {drills.map((drill: any, index: number) => (
-                <button
+                <div
                   key={index}
-                  onClick={() => handleDrillSelect(index)}
                   className={`relative flex-shrink-0 px-2 py-2 rounded-lg border-2 transition-all duration-300 text-left ${
                     completedDrills.has(index) 
                       ? 'border-green-500 bg-green-50' 
                       : index === currentDrillIndex 
                       ? 'border-powlax-blue bg-blue-50' 
-                      : 'border-gray-300 bg-white hover:border-gray-400'
+                      : 'border-gray-300 bg-white'
                   }`}
                   style={{ minWidth: '180px' }}
+                  role="status"
+                  aria-label={`Drill ${index + 1} reference: ${drill?.drill?.title || drill?.title || `Exercise ${index + 1}`} - ${
+                    completedDrills.has(index) 
+                      ? 'Completed' 
+                      : index === currentDrillIndex 
+                      ? 'Current' 
+                      : 'Upcoming'
+                  }`}
                 >
                   {/* Celebration animation for completed drills */}
                   {completedDrills.has(index) && (
@@ -515,105 +791,143 @@ function WorkoutPageContent() {
                         ? 'text-powlax-blue' 
                         : 'text-gray-700'
                     }`}>
-                      {drill?.drill?.drill_name || drill?.drill?.title || `Exercise ${index + 1}`}
+                      {drill?.drill?.title || drill?.title || `Exercise ${index + 1}`}
                     </span>
                   </div>
-                </button>
+                </div>
                 ))}
               </div>
             </div>
           </div>
         )}
 
-        {/* Main Content Area */}
+        {/* Main Content Area - Mobile optimized with proper spacing */}
         <div className="flex-1 overflow-hidden flex flex-col">
-          {/* Video Player */}
-          <div className="flex-1 bg-black">
-            {(() => {
-              // For wall ball workouts, use the full workout video
-              if (isWallBallWorkout && wallBallVimeoId) {
-                return (
-                  <iframe
-                    src={`https://player.vimeo.com/video/${wallBallVimeoId}?badge=0&autopause=0&player_id=0&app_id=58479`}
-                    className="w-full h-full"
-                    frameBorder="0"
-                    allow="autoplay; fullscreen; picture-in-picture"
-                    allowFullScreen
-                    title={workout?.workout_name || 'Wall Ball Workout'}
-                  />
-                )
-              }
-              
-              // For regular workouts, use drill videos
-              const drill = currentDrill?.drill
-              const vimeoId = extractVimeoId(drill)
-              
-              if (vimeoId) {
-                return (
-                  <iframe
-                    src={`https://player.vimeo.com/video/${vimeoId}?badge=0&autopause=0&player_id=0&app_id=58479`}
-                    className="w-full h-full"
-                    frameBorder="0"
-                    allow="autoplay; fullscreen; picture-in-picture"
-                    allowFullScreen
-                    title={drill?.drill_name || 'Drill Video'}
-                  />
-                )
-              } else {
-                return (
-                  <div className="flex items-center justify-center h-full bg-gray-900">
-                    <div className="text-center">
-                      <PlayCircle className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                      <p className="text-gray-400">Video coming soon</p>
-                      <p className="text-sm text-gray-500 mt-2">{drill?.drill_name || drill?.title}</p>
+          {/* Video Player - Maximum width with padding and vertical centering */}
+          <div className="flex-1 bg-black px-4 py-3 md:px-6 md:py-4 flex items-center justify-center">
+            <div className="w-full max-w-full h-full flex items-center justify-center">
+              {(() => {
+                // For wall ball workouts, use the full workout video
+                if (isWallBallWorkout && wallBallVimeoId) {
+                  return (
+                    <iframe
+                      src={`https://player.vimeo.com/video/${wallBallVimeoId}?badge=0&autopause=0&player_id=0&app_id=58479`}
+                      className="w-full h-auto max-w-full rounded-lg"
+                      style={{ aspectRatio: '16/9', maxHeight: '70vh' }}
+                      frameBorder="0"
+                      allow="autoplay; fullscreen; picture-in-picture"
+                      allowFullScreen
+                      title={workout?.workout_name || 'Wall Ball Workout'}
+                    />
+                  )
+                }
+                
+                // For regular workouts, use drill videos
+                const drill = currentDrill?.drill
+                const vimeoId = extractVimeoId(drill)
+                
+                if (vimeoId) {
+                  return (
+                    <iframe
+                      src={`https://player.vimeo.com/video/${vimeoId}?badge=0&autopause=0&player_id=0&app_id=58479`}
+                      className="w-full h-auto max-w-full rounded-lg"
+                      style={{ aspectRatio: '16/9', maxHeight: '70vh' }}
+                      frameBorder="0"
+                      allow="autoplay; fullscreen; picture-in-picture"
+                      allowFullScreen
+                      title={drill?.title || 'Drill Video'}
+                    />
+                  )
+                } else {
+                  return (
+                    <div className="flex items-center justify-center h-full bg-gray-900 w-full">
+                      <div className="text-center">
+                        <PlayCircle className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                        <p className="text-gray-400">Video coming soon</p>
+                        <p className="text-sm text-gray-500 mt-2">{drill?.title}</p>
+                      </div>
                     </div>
-                  </div>
-                )
-              }
-            })()}
+                  )
+                }
+              })()}
+            </div>
           </div>
 
-          {/* Compact Drill Info and Action - Mobile Optimized */}
-          <div className="bg-gray-800 text-white px-4 py-3 flex-shrink-0">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-bold flex-1 pr-4">
+          {/* Footer: Drill Info and Action - Mobile Optimized with proper alignment */}
+          <div className="bg-gray-800 text-white px-4 py-4 flex-shrink-0">
+            {/* Drill Name at Top */}
+            <div className="mb-3">
+              <h2 className="text-lg font-bold text-center">
                 {isWallBallWorkout 
                   ? (workout?.workout_name || 'Wall Ball Workout')
-                  : (currentDrill?.drill?.drill_name || currentDrill?.drill?.title || `Drill ${currentDrillIndex + 1}`)}
+                  : (currentDrill?.drill?.title || currentDrill?.title || `Drill ${currentDrillIndex + 1}`)}
               </h2>
+            </div>
+            
+            {/* Pills showing actual database fields with better spacing */}
+            <div className="flex justify-center space-x-3 mb-4">
+              {/* Duration pill - always show duration */}
+              <div className="bg-white/90 px-3 py-1.5 rounded-full text-xs">
+                <span className="font-bold text-gray-800">
+                  {currentDrill?.drill?.duration_minutes || currentDrill?.duration_minutes || 3} min
+                </span>
+              </div>
               
-              <div className="flex space-x-2 text-black">
-                {currentDrill?.drill_duration_seconds && (
-                  <div className="bg-white/90 px-2 py-1 rounded text-xs">
-                    <span className="font-bold">{currentDrill.drill_duration_seconds}s</span>
-                  </div>
-                )}
-                {currentDrill?.repetitions && (
-                  <div className="bg-white/90 px-2 py-1 rounded text-xs">
-                    <span className="font-bold">{currentDrill.repetitions} reps</span>
-                  </div>
-                )}
+              {/* Sets and Reps pill - show actual database sets_and_reps */}
+              <div className="bg-white/90 px-3 py-1.5 rounded-full text-xs">
+                <span className="font-bold text-gray-800">
+                  {currentDrill?.drill?.sets_and_reps || currentDrill?.sets_and_reps || '3 sets'}
+                </span>
               </div>
             </div>
             
-            {/* Action Button - Integrated into info card */}
-            <Button 
-              onClick={isWallBallWorkout ? () => {
-                setIsCompleted(true)
-                setTimeout(() => setShowCelebration(true), 500)
-              } : handleMarkComplete}
-              className="w-full h-12 text-base font-bold bg-powlax-blue hover:bg-powlax-blue/90 text-white"
-              disabled={!isWallBallWorkout && completedDrills.has(currentDrillIndex)}
-            >
-              {(!isWallBallWorkout && completedDrills.has(currentDrillIndex)) ? (
-                <>
-                  <CheckCircle className="w-5 h-5 mr-2 text-white" />
-                  <span className="text-white">Completed</span>
-                </>
-              ) : (
-                <span className="text-white">Did It!</span>
-              )}
-            </Button>
+            {/* Action Button - Integrated into info card with Timer Enforcement - Agent 1 */}
+            {(() => {
+              // Calculate required time based on drill type - Agent 1
+              let requiredSeconds: number
+              if (isWallBallWorkout) {
+                // Wall Ball: full estimated_duration_minutes
+                requiredSeconds = (workout?.estimated_duration_minutes || 10) * 60
+              } else {
+                // Regular drills: (duration_minutes - 1) × 60
+                const currentDrill = drills[currentDrillIndex]
+                const durationMinutes = currentDrill?.drill?.duration_minutes || currentDrill?.duration_minutes || 3
+                requiredSeconds = Math.max((durationMinutes - 1), 1) * 60 // Minimum 1 minute
+              }
+              
+              const timeRemaining = Math.max(0, requiredSeconds - drillTimeElapsed)
+              const canMarkComplete = drillTimeElapsed >= requiredSeconds
+              const isAlreadyCompleted = completedDrills.has(currentDrillIndex)
+              
+              return (
+                <Button 
+                  data-did-it-button
+                  onClick={isWallBallWorkout ? () => {
+                    setIsCompleted(true)
+                    setTimeout(() => setShowCelebration(true), 500)
+                  } : handleMarkComplete}
+                  className={`w-full h-12 text-base font-bold text-white ${
+                    canMarkComplete || isAlreadyCompleted
+                      ? 'bg-powlax-blue hover:bg-powlax-blue/90' 
+                      : 'bg-gray-400 cursor-not-allowed'
+                  }`}
+                  disabled={!canMarkComplete && !isAlreadyCompleted}
+                >
+                  {isAlreadyCompleted ? (
+                    <>
+                      <CheckCircle className="w-5 h-5 mr-2 text-white" />
+                      <span className="text-white">Completed</span>
+                    </>
+                  ) : canMarkComplete ? (
+                    <span className="text-white">Did It!</span>
+                  ) : (
+                    <span className="text-white">
+                      Wait {Math.ceil(timeRemaining / 60)}m {timeRemaining % 60}s
+                    </span>
+                  )}
+                </Button>
+              )
+            })()}
           </div>
         </div>
 

@@ -1,0 +1,51 @@
+# Page snapshot
+
+```yaml
+- complementary:
+  - button:
+    - img
+  - img "POWLAX"
+  - img
+  - text: Search drills, strategies... ⌘K
+  - navigation:
+    - link "Dashboard":
+      - /url: /dashboard
+      - img
+      - text: Dashboard
+    - link "Teams":
+      - /url: /teams
+      - img
+      - text: Teams
+    - link "Practice Planner":
+      - /url: /practiceplan
+      - img
+      - text: Practice Planner
+    - link "Academy":
+      - /url: /skills-academy/workouts
+      - img
+      - text: Academy
+    - link "Resources":
+      - /url: /resources
+      - img
+      - text: Resources
+- main:
+  - img
+  - text: Workout Error
+  - paragraph: Something went wrong with your workout session. Don't worry - your progress is safe!
+  - strong: "What happened:"
+  - text: The workout runner encountered an unexpected error. This might be due to network issues or temporary system problems.
+  - button "Try Again":
+    - img
+    - text: Try Again
+  - link "Home":
+    - /url: /skills-academy
+    - img
+    - text: Home
+  - group: Error Details (Development)
+- region "Notifications alt+T"
+- alert
+- img
+- text: 1 error
+- button "Hide Errors":
+  - img
+```

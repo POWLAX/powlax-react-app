@@ -41,13 +41,15 @@ interface EditCustomStrategyModalProps {
   onClose: () => void
   strategy: Strategy | null
   onStrategyUpdated?: () => void
+  onSuccess?: () => void  // Added to match AddCustomDrillModal pattern
 }
 
 export default function EditCustomStrategyModal({ 
   isOpen, 
   onClose, 
   strategy,
-  onStrategyUpdated 
+  onStrategyUpdated,
+  onSuccess 
 }: EditCustomStrategyModalProps) {
   const { updateUserStrategy, loading: updating } = useUserStrategies()
   const { user } = useAuth()
@@ -69,6 +71,9 @@ export default function EditCustomStrategyModal({
   const [teamShare, setTeamShare] = useState(false)
   const [clubShare, setClubShare] = useState(false)
   const [isPublic, setIsPublic] = useState(false)
+  // Store the actual arrays separately to preserve IDs
+  const [teamShareIds, setTeamShareIds] = useState<number[]>([])
+  const [clubShareIds, setClubShareIds] = useState<number[]>([])
 
   // Populate form when strategy changes
   useEffect(() => {
@@ -90,8 +95,14 @@ export default function EditCustomStrategyModal({
       setSeeItAges(strategy.see_it_ages || '')
       setCoachItAges(strategy.coach_it_ages || '')
       setOwnItAges(strategy.own_it_ages || '')
-      setTeamShare(Array.isArray(strategy.team_share) && strategy.team_share.length > 0)
-      setClubShare(Array.isArray(strategy.club_share) && strategy.club_share.length > 0)
+      
+      // Handle team/club share arrays
+      const teamIds = Array.isArray(strategy.team_share) ? strategy.team_share : []
+      const clubIds = Array.isArray(strategy.club_share) ? strategy.club_share : []
+      setTeamShareIds(teamIds)
+      setClubShareIds(clubIds)
+      setTeamShare(teamIds.length > 0)
+      setClubShare(clubIds.length > 0)
       setIsPublic(strategy.is_public || false)
     }
   }, [strategy, isOpen])
@@ -152,8 +163,8 @@ export default function EditCustomStrategyModal({
         coach_it_ages: coachItAges.trim() || null,
         own_it_ages: ownItAges.trim() || null,
         has_pdf: false, // Keep existing or default to false
-        team_share: teamShare,
-        club_share: clubShare,
+        team_share: teamShare ? teamShareIds : [],  // Use preserved IDs or empty array
+        club_share: clubShare ? clubShareIds : [],  // Use preserved IDs or empty array
         is_public: isPublic
       }
 
@@ -161,14 +172,21 @@ export default function EditCustomStrategyModal({
       const strategyId = strategy.id.toString().replace('user-', '')
       await updateUserStrategy(strategyId, strategyData)
 
-      // Close modal and trigger refresh
-      onClose()
-      
+      // Call success callbacks
       if (onStrategyUpdated) {
         onStrategyUpdated()
       }
       
+      if (onSuccess) {
+        onSuccess()
+      }
+      
       toast.success('Strategy updated successfully!')
+      
+      // Close modal if no callback closes it
+      if (!onSuccess) {
+        onClose()
+      }
     } catch (error) {
       console.error('Error updating strategy:', error)
       toast.error('Failed to update strategy')
@@ -192,6 +210,8 @@ export default function EditCustomStrategyModal({
     setTeamShare(false)
     setClubShare(false)
     setIsPublic(false)
+    setTeamShareIds([])
+    setClubShareIds([])
   }
 
   const handleClose = () => {

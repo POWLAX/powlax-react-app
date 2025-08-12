@@ -384,6 +384,137 @@ export default function StrategiesTab({
             )}
           </div>
 
+          {/* User Strategies Section */}
+          {filteredUserStrategies.length > 0 && (
+            <div className="border rounded-lg mb-4">
+              <button
+                onClick={() => toggleCategory('User Strategies')}
+                className={`w-full px-4 py-3 flex items-center justify-between bg-green-50 hover:bg-green-100 rounded-t-lg transition-all ${
+                  expandedCategories.includes('User Strategies') ? 'sticky top-0 -mx-4 px-8 z-20 shadow-md border-b bg-white' : ''
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  {expandedCategories.includes('User Strategies') ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                  <Plus className="h-4 w-4 text-green-600" />
+                  <span className="font-medium text-green-800">User Strategies</span>
+                  <span className="text-sm text-green-600">({filteredUserStrategies.length})</span>
+                </div>
+              </button>
+              
+              {expandedCategories.includes('User Strategies') && (
+                <div className="p-2 space-y-2">
+                  {filteredUserStrategies.map((strategy) => (
+                    <div
+                      key={strategy.id}
+                      className="p-3 bg-white border rounded-md hover:bg-gray-50 group relative border-green-200"
+                    >
+                      <div className="flex flex-col gap-2">
+                        {/* Title row with Plus/checkbox on left */}
+                        <div className="flex items-center gap-2">
+                          {isMobile ? (
+                            <input
+                              type="checkbox"
+                              checked={selectedStrategies.includes(strategy.id.toString())}
+                              onChange={(e) => {
+                                e.stopPropagation()
+                                handleStrategySelect(strategy)
+                              }}
+                              className="flex-shrink-0"
+                            />
+                          ) : (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleStrategySelect(strategy)
+                              }}
+                              className="p-1 border border-gray-300 hover:bg-gray-50 rounded flex-shrink-0"
+                              title="Add to Practice"
+                            >
+                              <Plus className="h-4 w-4 text-gray-600" />
+                            </button>
+                          )}
+                          <h4 className="font-medium text-sm flex-1">{strategy.strategy_name}</h4>
+                          
+                          {/* Edit button for user-owned strategies */}
+                          {strategy.user_id === user?.id && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleEditUserStrategy(strategy)
+                              }}
+                              className="p-1 text-gray-400 hover:text-blue-600 transition-colors flex-shrink-0"
+                              title="Edit strategy"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </button>
+                          )}
+                          
+                          {/* Favorite button */}
+                          <button
+                            onClick={(e) => handleToggleFavorite(strategy, e)}
+                            className="p-1 text-gray-400 hover:text-yellow-500 transition-colors flex-shrink-0"
+                            title={isFavorite(strategy.id.toString(), 'strategy') ? 'Remove from favorites' : 'Add to favorites'}
+                          >
+                            <Star 
+                              className={`h-4 w-4 ${isFavorite(strategy.id.toString(), 'strategy') ? 'fill-yellow-400 text-yellow-400' : ''}`} 
+                            />
+                          </button>
+                        </div>
+                        
+                        {/* Description and Action buttons */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+                              Custom
+                            </span>
+                            {strategy.lesson_category && (
+                              <span className="text-xs text-gray-500">
+                                {strategy.lesson_category}
+                              </span>
+                            )}
+                          </div>
+                          
+                          {/* Action buttons */}
+                          <div className="flex items-center gap-1">
+                            {/* Save to Playbook button */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setSelectedStrategy(strategy)
+                                setShowSaveToPlaybookModal(true)
+                              }}
+                              className="inline-flex items-center gap-1 px-2 py-1 bg-powlax-blue hover:bg-powlax-blue/90 text-white text-xs rounded transition-colors"
+                              title="Save to Team Playbook"
+                            >
+                              <BookOpen className="h-3 w-3" />
+                              Save
+                            </button>
+                            
+                            {/* Study button */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setSelectedStrategy(strategy)
+                                setShowStudyStrategyModal(true)
+                              }}
+                              className="inline-flex items-center gap-1 px-2 py-1 bg-gray-900 text-white text-xs rounded border border-gray-700 hover:bg-gray-800 transition-colors"
+                            >
+                              <Play className="h-3 w-3" fill="white" />
+                              Study
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           
           {/* POWLAX Strategies */}
           {filteredStrategies.length === 0 ? (
@@ -520,12 +651,13 @@ export default function StrategiesTab({
 
       {/* Modals */}
       
-      <EditCustomStrategyModal
+      {/* VERSION 1 - Simple version with onStrategyUpdated */}
+      {/* <EditCustomStrategyModal
         isOpen={showEditModal}
         onClose={() => setShowEditModal(false)}
         strategy={editingUserStrategy}
         onStrategyUpdated={refreshStrategies}
-      />
+      /> */}
       
       <FilterStrategiesModal
         isOpen={showFilterModal}
@@ -580,7 +712,7 @@ export default function StrategiesTab({
         itemType="strategy"
         item={editingStrategy}
         user={user}
-        onSuccess={() => {
+        onSave={() => {
           refreshStrategies()
           setShowAdminEditModal(false)
           setEditingStrategy(null)
@@ -594,13 +726,13 @@ export default function StrategiesTab({
           onClose={() => setShowAddModal(false)}
           onAdd={(strategy) => {
             // Refresh strategies after adding
-            fetchUserStrategies()
+            refreshStrategies()
             setShowAddModal(false)
           }}
         />
       )}
 
-      {/* Edit Custom Strategy Modal */}
+      {/* VERSION 2 - Full version with onSuccess callback (like AddCustomDrillModal pattern) */}
       {showEditModal && editingUserStrategy && (
         <EditCustomStrategyModal
           isOpen={showEditModal}
@@ -610,7 +742,7 @@ export default function StrategiesTab({
           }}
           strategy={editingUserStrategy}
           onSuccess={() => {
-            fetchUserStrategies()
+            refreshStrategies()
             setShowEditModal(false)
             setEditingUserStrategy(null)
           }}

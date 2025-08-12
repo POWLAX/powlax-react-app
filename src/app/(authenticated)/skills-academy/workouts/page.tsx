@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
-  PlayCircle, X, Users, Clock, Target, Shield, Zap, Loader2, Circle
+  PlayCircle, X, Users, Clock, Target, Shield, Zap, Loader2, Circle, Sparkles
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { WallBallSeries, WallBallVariant, GroupedVariants } from '@/types/wall-ball';
@@ -124,17 +124,18 @@ export default function SkillsAcademyWorkoutsPage() {
     fetchSeriesAndWorkouts();
   }, []);
 
-  // Show loading spinner while authentication is being verified
-  if (authLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-powlax-blue mx-auto" />
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
+  // Temporarily bypass auth loading check to fix infinite loading issue
+  // The authenticated layout already handles auth protection
+  // if (authLoading) {
+  //   return (
+  //     <div className="flex items-center justify-center min-h-screen">
+  //       <div className="text-center">
+  //         <Loader2 className="w-8 h-8 animate-spin text-powlax-blue mx-auto" />
+  //         <p className="mt-4 text-gray-600">Loading...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   const getWorkoutsForTrack = (trackType: string) => {
     const trackSeries = series.filter(s => s.series_type === trackType);
@@ -174,11 +175,21 @@ export default function SkillsAcademyWorkoutsPage() {
     <div className="flex flex-col min-h-screen">
       {/* Desktop Content */}
       <div className="hidden md:block container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Skills Academy Workouts</h1>
-          <p className="text-gray-600">
-            Choose your training focus and start building lacrosse skills
-          </p>
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Skills Academy Workouts</h1>
+            <p className="text-gray-600">
+              Choose your training focus and start building lacrosse skills
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => router.push('/skills-academy/animations')}
+            className="flex items-center space-x-2"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>View Animations</span>
+          </Button>
         </div>
 
         {/* Track Cards Grid - Desktop */}
@@ -219,10 +230,22 @@ export default function SkillsAcademyWorkoutsPage() {
       {/* Mobile View - Just a welcome message until button is clicked */}
       <div className="md:hidden flex-1 p-4">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Skills Academy Workouts</h1>
-          <p className="text-gray-600">
-            Choose your training focus and start building lacrosse skills
-          </p>
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Skills Academy Workouts</h1>
+              <p className="text-gray-600">
+                Choose your training focus and start building lacrosse skills
+              </p>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => router.push('/skills-academy/animations')}
+              className="ml-2"
+            >
+              <Sparkles className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
         
         {/* Show basic info or placeholder */}

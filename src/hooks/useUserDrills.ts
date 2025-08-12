@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 
 interface UserDrill {
+  // Database fields
   id: string
   user_id: string
+  wp_id?: number
   title: string
   content?: string
   drill_types?: string
@@ -22,15 +24,26 @@ interface UserDrill {
   vimeo_url?: string
   featured_image?: string
   status?: string
-  team_share?: number[]
-  club_share?: number[]
+  slug?: string
+  raw_data?: any
+  team_share?: number[] | boolean
+  club_share?: number[] | boolean
   is_public?: boolean
   created_at?: string
   updated_at?: string
+  duration_minutes?: number
+  category?: string
+  video_url?: string
+  drill_lab_url_1?: string
+  drill_lab_url_2?: string
+  drill_lab_url_3?: string
+  drill_lab_url_4?: string
+  drill_lab_url_5?: string
+  equipment?: string
+  tags?: string
   // Normalized fields for practice planner compatibility
   name: string
   duration: number
-  category: string
   strategies?: string[]
   concepts?: string[]
   skills?: string[]
@@ -68,8 +81,9 @@ export function useUserDrills() {
       }
 
       // Transform user_drills data to match practice planner format
+      // Use actual database columns that exist
       const transformedDrills = data.map((drill: any) => ({
-        // Original user_drills fields
+        // Original user_drills fields from database
         id: drill.id?.toString(),
         user_id: drill.user_id,
         title: drill.title,
@@ -79,7 +93,7 @@ export function useUserDrills() {
         drill_duration: drill.drill_duration,
         drill_video_url: drill.drill_video_url,
         drill_notes: drill.drill_notes,
-        game_states: drill.game_states,
+        game_states: drill.game_states || [],
         drill_emphasis: drill.drill_emphasis,
         game_phase: drill.game_phase,
         do_it_ages: drill.do_it_ages,
@@ -93,15 +107,28 @@ export function useUserDrills() {
         is_public: drill.is_public || false,
         created_at: drill.created_at,
         updated_at: drill.updated_at,
-
-        // Normalized fields for practice planner compatibility
+        
+        // Additional database columns that exist
+        duration_minutes: drill.duration_minutes,
+        category: drill.category,
+        video_url: drill.video_url,
+        equipment: drill.equipment,
+        tags: drill.tags,
+        
+        // Lacrosse Lab URLs (all 5 columns)
+        drill_lab_url_1: drill.drill_lab_url_1,
+        drill_lab_url_2: drill.drill_lab_url_2,
+        drill_lab_url_3: drill.drill_lab_url_3,
+        drill_lab_url_4: drill.drill_lab_url_4,
+        drill_lab_url_5: drill.drill_lab_url_5,
+        
+        // Legacy compatibility fields for practice planner
         name: drill.title,
-        duration: parseDuration(drill.drill_duration) || 10,
-        category: mapDrillCategory(drill.drill_category || drill.drill_types) || 'skill',
+        duration: drill.duration_minutes || 10,
         strategies: extractStrategies(drill),
         concepts: extractConcepts(drill),
         skills: extractSkills(drill),
-        notes: drill.drill_notes || drill.content || ''
+        notes: drill.content || drill.drill_notes || ''
       }))
 
       console.log(`Loaded ${transformedDrills.length} user drills`)
@@ -115,18 +142,68 @@ export function useUserDrills() {
     }
   }
 
-  const createUserDrill = async (drillData: Partial<UserDrill>) => {
+  const createUserDrill = async (drillData: any) => {
     try {
+      // FIXED: Save ALL fields to their database columns, following strategy pattern
       const { data, error } = await supabase
         .from('user_drills')
         .insert([{
+          user_id: drillData.user_id,
           title: drillData.title || 'New Drill',
-          content: drillData.content,
-          drill_category: drillData.drill_category || drillData.category,
-          drill_duration: drillData.drill_duration || `${drillData.duration || 10} minutes`,
-          drill_notes: drillData.drill_notes || drillData.notes,
-          drill_video_url: drillData.drill_video_url,
-          is_public: drillData.is_public || false
+          content: drillData.content || '',
+          
+          // Duration fields (both legacy and new)
+          duration_minutes: drillData.duration_minutes || drillData.duration || 10,
+          drill_duration: `${drillData.duration_minutes || drillData.duration || 10} minutes`,
+          
+          // Category fields (both legacy and new)
+          category: drillData.category || 'Custom',
+          drill_category: drillData.drill_category || drillData.category || 'Custom',
+          
+          // Video fields (both legacy and new)
+          video_url: drillData.video_url || null,
+          drill_video_url: drillData.drill_video_url || drillData.video_url || null,
+          vimeo_url: drillData.vimeo_url || null,
+          
+          // Lacrosse Lab URLs (all 5 columns)
+          drill_lab_url_1: drillData.drill_lab_url_1 || null,
+          drill_lab_url_2: drillData.drill_lab_url_2 || null,
+          drill_lab_url_3: drillData.drill_lab_url_3 || null,
+          drill_lab_url_4: drillData.drill_lab_url_4 || null,
+          drill_lab_url_5: drillData.drill_lab_url_5 || null,
+          
+          // Equipment and tags
+          equipment: drillData.equipment || '',
+          tags: drillData.tags || '',
+          
+          // Notes fields (both legacy and new)
+          drill_notes: drillData.drill_notes || drillData.notes || drillData.content || '',
+          
+          // Drill types and emphasis
+          drill_types: drillData.drill_types || '',
+          drill_emphasis: drillData.drill_emphasis || '',
+          
+          // Game states and phases
+          game_states: drillData.game_states || [],
+          game_phase: drillData.game_phase || '',
+          
+          // Age appropriateness
+          do_it_ages: drillData.do_it_ages || drillData.see_it_ages || '',
+          coach_it_ages: drillData.coach_it_ages || '',
+          own_it_ages: drillData.own_it_ages || '',
+          
+          // Visibility and sharing
+          is_public: drillData.is_public || false,
+          status: drillData.status || 'active',
+          
+          // CRITICAL FIX: Send arrays, not booleans!
+          team_share: Array.isArray(drillData.team_share) ? drillData.team_share : 
+                     (drillData.team_share === true ? [] : []),
+          club_share: Array.isArray(drillData.club_share) ? drillData.club_share : 
+                     (drillData.club_share === true ? [] : []),
+          
+          // Media
+          featured_image: drillData.featured_image || null
         }])
         .select()
         .single()
@@ -147,17 +224,91 @@ export function useUserDrills() {
 
   const updateUserDrill = async (drillId: string, updates: Partial<UserDrill>) => {
     try {
+      // FIXED: Handle ALL fields including arrays, following successful strategy pattern
+      const updateData: any = {}
+      
+      // Basic fields
+      if (updates.title !== undefined) updateData.title = updates.title
+      if (updates.content !== undefined) updateData.content = updates.content
+      
+      // Duration fields (both legacy and new)
+      if (updates.duration_minutes !== undefined || updates.duration !== undefined) {
+        const duration = updates.duration_minutes || updates.duration || 10
+        updateData.duration_minutes = duration
+        updateData.drill_duration = `${duration} minutes`
+      }
+      
+      // Category fields (both legacy and new)
+      if (updates.category !== undefined) {
+        updateData.category = updates.category
+        updateData.drill_category = updates.category
+      }
+      if (updates.drill_category !== undefined) updateData.drill_category = updates.drill_category
+      
+      // Video fields (both legacy and new)
+      if (updates.video_url !== undefined) {
+        updateData.video_url = updates.video_url
+        updateData.drill_video_url = updates.video_url
+      }
+      if (updates.drill_video_url !== undefined) updateData.drill_video_url = updates.drill_video_url
+      if (updates.vimeo_url !== undefined) updateData.vimeo_url = updates.vimeo_url
+      
+      // Lacrosse Lab URLs (all 5 columns)
+      if (updates.drill_lab_url_1 !== undefined) updateData.drill_lab_url_1 = updates.drill_lab_url_1
+      if (updates.drill_lab_url_2 !== undefined) updateData.drill_lab_url_2 = updates.drill_lab_url_2
+      if (updates.drill_lab_url_3 !== undefined) updateData.drill_lab_url_3 = updates.drill_lab_url_3
+      if (updates.drill_lab_url_4 !== undefined) updateData.drill_lab_url_4 = updates.drill_lab_url_4
+      if (updates.drill_lab_url_5 !== undefined) updateData.drill_lab_url_5 = updates.drill_lab_url_5
+      
+      // Equipment and tags
+      if (updates.equipment !== undefined) updateData.equipment = updates.equipment
+      if (updates.tags !== undefined) updateData.tags = updates.tags
+      
+      // Notes fields (both legacy and new)
+      if (updates.notes !== undefined || updates.drill_notes !== undefined) {
+        const notes = updates.drill_notes || updates.notes || ''
+        updateData.drill_notes = notes
+      }
+      
+      // Drill types and emphasis
+      if (updates.drill_types !== undefined) updateData.drill_types = updates.drill_types
+      if (updates.drill_emphasis !== undefined) updateData.drill_emphasis = updates.drill_emphasis
+      
+      // Game states and phases
+      if (updates.game_states !== undefined) updateData.game_states = updates.game_states
+      if (updates.game_phase !== undefined) updateData.game_phase = updates.game_phase
+      
+      // Age appropriateness
+      if (updates.do_it_ages !== undefined) updateData.do_it_ages = updates.do_it_ages
+      if (updates.coach_it_ages !== undefined) updateData.coach_it_ages = updates.coach_it_ages
+      if (updates.own_it_ages !== undefined) updateData.own_it_ages = updates.own_it_ages
+      
+      // Visibility and sharing
+      if (updates.is_public !== undefined) updateData.is_public = updates.is_public
+      if (updates.status !== undefined) updateData.status = updates.status
+      
+      // CRITICAL FIX: Handle team_share and club_share as arrays, not booleans
+      if ('team_share' in updates) {
+        updateData.team_share = Array.isArray(updates.team_share) 
+          ? updates.team_share 
+          : (updates.team_share === true ? [] : [])
+      }
+      
+      if ('club_share' in updates) {
+        updateData.club_share = Array.isArray(updates.club_share) 
+          ? updates.club_share 
+          : (updates.club_share === true ? [] : [])
+      }
+      
+      // Media
+      if (updates.featured_image !== undefined) updateData.featured_image = updates.featured_image
+      
+      // Set updated timestamp
+      updateData.updated_at = new Date().toISOString()
+
       const { error } = await supabase
         .from('user_drills')
-        .update({
-          title: updates.title,
-          content: updates.content,
-          drill_category: updates.drill_category || updates.category,
-          drill_duration: updates.drill_duration || `${updates.duration || 10} minutes`,
-          drill_notes: updates.drill_notes || updates.notes,
-          drill_video_url: updates.drill_video_url,
-          is_public: updates.is_public
-        })
+        .update(updateData)
         .eq('id', drillId)
 
       if (error) {
@@ -250,7 +401,15 @@ export function useUserDrills() {
   }
 }
 
-// Helper functions
+// Helper function for legacy compatibility
+function extractDurationMinutes(content: string | null): number {
+  if (!content) return 10
+  
+  const durationMatch = content.match(/Duration:\s*(\d+)\s*minutes?/i)
+  return durationMatch ? parseInt(durationMatch[1], 10) : 10
+}
+
+// Legacy helper functions (kept for compatibility)
 function parseDuration(durationText: string | null): number {
   if (!durationText) return 10
   

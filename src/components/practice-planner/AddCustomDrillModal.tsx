@@ -52,31 +52,59 @@ export default function AddCustomDrillModal({ isOpen, onClose, onAdd, onDrillCre
     }
 
     try {
-      // Create drill in database with essential fields only
+      // Create drill data using ONLY existing table columns
+      // Available columns: id, user_id, title, content, created_at, updated_at, game_states, is_public, team_share, club_share
+      
+      // Combine all the form data into the content field since individual fields don't exist
+      let fullContent = content.trim() || `Custom drill: ${title.trim()}`
+      
+      // Add additional details to content field
+      if (durationMinutes !== 10) {
+        fullContent += `\n\nDuration: ${durationMinutes} minutes`
+      }
+      
+      if (category !== 'custom') {
+        fullContent += `\nCategory: ${category}`
+      }
+      
+      if (videoUrl.trim()) {
+        fullContent += `\nVideo URL: ${videoUrl.trim()}`
+      }
+      
+      const labUrls = [drillLabUrl1, drillLabUrl2, drillLabUrl3, drillLabUrl4, drillLabUrl5]
+        .filter(url => url.trim())
+        .map(url => url.trim())
+      
+      if (labUrls.length > 0) {
+        fullContent += `\nLacrosse Lab URLs:\n${labUrls.map((url, i) => `${i + 1}. ${url}`).join('\n')}`
+      }
+      
+      if (equipment.trim()) {
+        fullContent += `\nEquipment: ${equipment.trim()}`
+      }
+      
       const drillData = {
+        user_id: user?.id || null, // Safe access with fallback
         title: title.trim(),
+        content: fullContent,
         duration_minutes: durationMinutes,
         category: category,
-        content: content.trim() || `Custom drill: ${title.trim()}`,
-        notes: '', // Empty for simplified version
-        coach_instructions: '', // Empty for simplified version
-        video_url: videoUrl.trim() || null,
-        drill_lab_url_1: drillLabUrl1.trim() || null,
-        drill_lab_url_2: drillLabUrl2.trim() || null,
-        drill_lab_url_3: drillLabUrl3.trim() || null,
-        drill_lab_url_4: drillLabUrl4.trim() || null,
-        drill_lab_url_5: drillLabUrl5.trim() || null,
-        equipment: equipment.trim() ? equipment.split(',').map(e => e.trim()).filter(Boolean) : [],
-        tags: '', // Empty for simplified version
-        game_states: [], // Empty for simplified version
-        user_id: user.id,
-        is_public: false, // Default to private for simplified version
-        team_share: undefined,
-        club_share: undefined,
-        drill_category: category,
-        drill_duration: `${durationMinutes} minutes`,
-        drill_notes: '',
-        drill_video_url: videoUrl.trim() || null
+        video_url: videoUrl || null,
+        drill_lab_url_1: drillLabUrl1 || null,
+        drill_lab_url_2: drillLabUrl2 || null,
+        drill_lab_url_3: drillLabUrl3 || null,
+        drill_lab_url_4: drillLabUrl4 || null,
+        drill_lab_url_5: drillLabUrl5 || null,
+        equipment: equipment || '',
+        tags: '',
+        game_states: [], // Empty array - field exists
+        is_public: false, // Default to private
+        team_share: [], // Empty array - field exists
+        club_share: [] // Empty array - field exists
+      }
+
+      if (!user?.id) {
+        throw new Error('You must be logged in to create custom drills')
       }
 
       const createdDrill = await createUserDrill(drillData)
@@ -89,14 +117,10 @@ export default function AddCustomDrillModal({ isOpen, onClose, onAdd, onDrillCre
         duration_minutes: durationMinutes,
         duration: durationMinutes, // Legacy compatibility
         category: 'Custom Drills',
-        notes: '',
-        coach_instructions: '',
+        content: fullContent,
+        notes: fullContent, // Use combined content as notes for legacy compatibility
+        coach_instructions: '', // Empty - not stored separately
         video_url: videoUrl.trim() || undefined,
-        drill_lab_url_1: drillLabUrl1.trim() || undefined,
-        drill_lab_url_2: drillLabUrl2.trim() || undefined,
-        drill_lab_url_3: drillLabUrl3.trim() || undefined,
-        drill_lab_url_4: drillLabUrl4.trim() || undefined,
-        drill_lab_url_5: drillLabUrl5.trim() || undefined,
         isCustom: true,
         source: 'user' as const,
         user_id: createdDrill.user_id

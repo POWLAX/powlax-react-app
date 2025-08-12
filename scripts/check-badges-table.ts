@@ -41,7 +41,7 @@ async function checkBadgesTable() {
     // Get a sample of existing badges
     const { data, error: selectError } = await supabase
       .from('badges_powlax')
-      .select('id, original_id, title, category')
+      .select('id, title, category, points_required, icon_url')
       .limit(5)
     
     if (selectError) {

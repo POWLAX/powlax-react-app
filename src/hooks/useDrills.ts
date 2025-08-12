@@ -161,11 +161,11 @@ export function useDrills() {
       const transformedUserDrills = userDrills.map((drill: any) => ({
         id: `user-${drill.id}`,
         drill_id: drill.id?.toString(),
-        title: drill.name || drill.title || 'Unnamed Custom Drill', // 🚨 FIXED: Use 'title' as primary
-        name: drill.name || drill.title || 'Unnamed Custom Drill', // Legacy compatibility
-        duration_minutes: parseDuration(drill.drill_duration) || 10, // 🚨 FIXED: Use 'duration_minutes' as primary
-        duration: parseDuration(drill.drill_duration) || 10, // Legacy compatibility
-        category: 'Custom Drills', // User drills always go in Custom Drills category
+        title: drill.title || 'Unnamed Custom Drill', // 🚨 FIXED: Use actual database column 'title'
+        name: drill.title || 'Unnamed Custom Drill', // Legacy compatibility
+        duration_minutes: drill.duration_minutes || 10, // 🚨 FIXED: Use actual database column 'duration_minutes'
+        duration: drill.duration_minutes || 10, // Legacy compatibility
+        category: drill.category || 'Custom Drills', // Use database category or default
         subcategory: drill.drill_category,
         drill_types: drill.drill_types,
         
@@ -177,21 +177,34 @@ export function useDrills() {
         concept_ids: extractConceptsFromGameStates(parseArrayField(drill.game_states)),
         game_phase_ids: parseArrayField(drill.game_phase),
         
-        // Video and media URLs
-        videoUrl: drill.vimeo_url,
+        // Video and media URLs (use actual database columns)
+        video_url: drill.video_url, // 🚨 FIXED: Use actual column name
+        videoUrl: drill.video_url || drill.vimeo_url, // Legacy compatibility
         drill_video_url: drill.drill_video_url,
         vimeo_url: drill.vimeo_url,
         featured_image: drill.featured_image,
+        
+        // Lacrosse Lab URLs from database columns
+        drill_lab_url_1: drill.drill_lab_url_1,
+        drill_lab_url_2: drill.drill_lab_url_2,
+        drill_lab_url_3: drill.drill_lab_url_3,
+        drill_lab_url_4: drill.drill_lab_url_4,
+        drill_lab_url_5: drill.drill_lab_url_5,
+        lab_urls: [drill.drill_lab_url_1, drill.drill_lab_url_2, drill.drill_lab_url_3, drill.drill_lab_url_4, drill.drill_lab_url_5].filter(Boolean),
+        
+        // Equipment from database column
+        equipment: drill.equipment,
+        equipment_needed: drill.equipment ? drill.equipment.split(',').map(e => e.trim()) : [],
+        tags: drill.tags,
         
         // Metadata extracted from drill fields
         intensity_level: drill.drill_emphasis,
         min_players: parseNumber(drill.do_it_ages),
         max_players: parseNumber(drill.own_it_ages),
-        equipment_needed: parseArrayField(drill.drill_types),
         
         // Coaching information
         coach_instructions: drill.content || drill.drill_notes || '',
-        notes: drill.drill_notes || drill.content || '',
+        notes: drill.content || drill.drill_notes || '', // Use content as primary notes
         content: drill.content,
         
         // Age-appropriate information

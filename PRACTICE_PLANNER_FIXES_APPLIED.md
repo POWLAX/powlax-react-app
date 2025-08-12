@@ -1,79 +1,48 @@
-# ✅ Practice Planner Fixes Applied
+# 🔧 PRACTICE PLANNER FIXES APPLIED - January 12, 2025
 
-## Issues Fixed:
+## Issues Identified & Fixed
 
-### 1. Build Error - Duplicate Declaration ✅
-**Problem:** `showEditModal` was declared twice in StrategiesTab.tsx
-**Solution:** Removed duplicate declaration on line 73
+### 1. ✅ Custom Drill Creation - user_id NULL Constraint
+**Error:** "Failed to create drill: null value in column user_id violates not-null constraint"
 
-### 2. Invalid UUID Error ✅ 
-**Problem:** URL `/teams/1/practice-plans` uses "1" which is not a valid UUID
-**Solution:** Added UUID validation in page.tsx - now handles non-UUID team IDs gracefully
+**Fix Applied:**
+- Updated AddCustomDrillModal.tsx to include user_id and all required fields
+- Added safety check for user authentication
+- File: `src/components/practice-planner/AddCustomDrillModal.tsx`
 
-### 3. Authentication & Save Issues 🔧
-**Root Cause:** No users in auth.users table, only in public.users
-**Migration Needed:** Run Migration 112 to fix foreign key constraints
+### 2. ✅ Favorites System - Authentication Check  
+**Error:** "Please sign in to save favorites" even when logged in
 
-## Quick Access URLs:
+**Fix Applied:**
+- Removed hardcoded database skip in useFavorites.ts
+- Added offline mode fallback with localStorage
+- File: `src/hooks/useFavorites.ts`
 
-### Working URLs (use one of these):
-- `http://localhost:3000/teams/practice-plans` (no team ID - loads all practices)
-- `http://localhost:3000/teams/d6b72e87-8fab-4f4c-9921-260501605ee2/practice-plans` (valid UUID)
+### 3. ✅ RLS Policy & Database Issues
+**Error:** "new row violates row-level security policy"
 
-### Broken URL (don't use):
-- ❌ `http://localhost:3000/teams/1/practice-plans` (now handled gracefully)
+**Fix Applied:**
+- Created Migration 115 to fix all RLS policies and constraints
+- File: `supabase/migrations/115_comprehensive_practice_planner_fix.sql`
 
-## Database Fix Still Needed:
+## 🚀 TO FIX ALL ISSUES - RUN MIGRATION 115
 
-Run this migration in Supabase Dashboard to fix save/load:
+1. Go to Supabase Dashboard → SQL Editor
+2. Copy contents of: `supabase/migrations/115_comprehensive_practice_planner_fix.sql`
+3. Paste and click Run
+4. Test all features
 
-```sql
--- Migration 112: Fix foreign key constraints
-ALTER TABLE practices 
-DROP CONSTRAINT IF EXISTS practices_created_by_fkey;
+## What Migration 115 Fixes:
+- user_drills table structure and foreign keys
+- user_strategies table structure  
+- user_favorites table creation
+- All RLS policies simplified
+- Foreign keys now reference public.users (not auth.users)
 
-ALTER TABLE practices
-ADD CONSTRAINT practices_created_by_fkey 
-FOREIGN KEY (created_by) 
-REFERENCES public.users(id) 
-ON DELETE SET NULL;
+## After Migration, Test:
+- Create custom drill
+- Save practice plan
+- Load saved plans
+- Add/remove favorites
 
-ALTER TABLE practices
-DROP CONSTRAINT IF EXISTS practices_coach_id_fkey;
-
-ALTER TABLE practices
-ADD CONSTRAINT practices_coach_id_fkey
-FOREIGN KEY (coach_id)
-REFERENCES public.users(id)
-ON DELETE SET NULL;
-
--- Update RLS policy
-DROP POLICY IF EXISTS "Users can manage their own practices" ON practices;
-
-CREATE POLICY "Users can manage their own practices" ON practices
-    FOR ALL 
-    TO authenticated 
-    USING (
-      created_by IN (
-        SELECT id FROM public.users 
-        WHERE auth_user_id = auth.uid()
-      )
-    )
-    WITH CHECK (
-      created_by IN (
-        SELECT id FROM public.users 
-        WHERE auth_user_id = auth.uid()
-      )
-    );
-```
-
-## Testing Status:
-- ✅ Build compiles successfully
-- ✅ Page loads without errors
-- ✅ Invalid team IDs handled gracefully
-- 🔧 Save/Load needs migration to work
-
-## Next Steps:
-1. Run Migration 112 in Supabase Dashboard
-2. Test with chaplalalacrosse22@gmail.com account
-3. Verify save/load functionality works
+All code fixes have been applied. Database migration required for full functionality.

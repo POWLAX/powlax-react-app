@@ -5,6 +5,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Star, BookOpen, Play, Target, ChevronLeft, ChevronRight, Loader2, Download, Maximize2 } from 'lucide-react'
+import { useFavorites } from '@/hooks/useFavorites'
+import { toast } from 'sonner'
 
 interface Drill {
   id: string
@@ -39,6 +41,7 @@ interface StudyDrillModalProps {
 }
 
 export default function StudyDrillModal({ isOpen, onClose, drill, onUpdateDrill }: StudyDrillModalProps) {
+  const { toggleFavorite, isFavorite } = useFavorites()
   const [embedUrl, setEmbedUrl] = useState('')
   const [editingNotes, setEditingNotes] = useState(false)
   const [tempNotes, setTempNotes] = useState(drill?.notes || '')
@@ -156,10 +159,15 @@ export default function StudyDrillModal({ isOpen, onClose, drill, onUpdateDrill 
               </button>
             )}
             <button 
-              onClick={() => {/* TODO: Add favorite functionality */}}
+              onClick={async () => {
+                if (drill) {
+                  await toggleFavorite(drill.id, 'drill')
+                }
+              }}
               className="p-1.5 hover:bg-gray-100 rounded"
+              title={drill && isFavorite(drill.id, 'drill') ? 'Remove from favorites' : 'Add to favorites'}
             >
-              <Star className="h-6 w-6 text-gray-400 hover:text-yellow-500" />
+              <Star className={`h-6 w-6 ${drill && isFavorite(drill.id, 'drill') ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400 hover:text-yellow-500'}`} />
             </button>
           </div>
         </DialogHeader>
