@@ -36,7 +36,7 @@ export default function DashboardPage() {
     case 'player':
       return <PlayerDashboard user={user} />
     case 'team_coach':
-      return <CoachDashboard user={user} />
+      return <CoachDashboard />
     case 'parent':
       return <ParentDashboard user={user} />
     case 'club_director':

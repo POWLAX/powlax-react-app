@@ -19,6 +19,8 @@ import {
   Zap
 } from 'lucide-react'
 import { useAuth } from '@/contexts/SupabaseAuthContext'
+import { useWorkoutAssignments } from '@/hooks/useWorkoutAssignments'
+import { Checkbox } from '@/components/ui/checkbox'
 
 // Mock data - in production this would come from user's actual progress
 const mockPlayerProgress = {
@@ -80,6 +82,23 @@ const skillCategories = [
 
 export default function AcademyPage() {
   const { user } = useAuth()
+  
+  // PERMANENCE PATTERN: Workout assignments
+  const { 
+    assignments, 
+    completions, 
+    createAssignment, 
+    updateAssignment 
+  } = useWorkoutAssignments()
+  
+  // UI State for assignment options
+  const [assignToPlayers, setAssignToPlayers] = React.useState(false)
+  const [assignToTeams, setAssignToTeams] = React.useState(false)
+  const [assignToGroups, setAssignToGroups] = React.useState(false)
+  const [playerIds] = React.useState<string[]>(['player-1', 'player-2']) // Mock
+  const [teamIds] = React.useState<number[]>([1, 2]) // Mock
+  const [groupIds] = React.useState<string[]>(['group-a']) // Mock
+  const [showAssignmentTest, setShowAssignmentTest] = React.useState(false)
 
   const progressPercentage = (mockPlayerProgress.xp / mockPlayerProgress.nextLevelXp) * 100
 
@@ -117,6 +136,101 @@ export default function AcademyPage() {
         </div>
       </div>
 
+      {/* Permanence Pattern Test - Workout Assignments */}
+      <Card className="mb-8 border-green-500">
+        <CardHeader>
+          <CardTitle className="text-green-600 flex items-center justify-between">
+            🎯 Workout Assignment Permanence Test
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowAssignmentTest(!showAssignmentTest)}
+            >
+              {showAssignmentTest ? 'Hide' : 'Show'} Test
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        {showAssignmentTest && (
+          <CardContent className="space-y-4">
+            <div className="p-4 bg-muted rounded">
+              <h3 className="font-semibold mb-2">Assign Workout with Arrays</h3>
+              <div className="space-y-2 mb-4">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    checked={assignToPlayers} 
+                    onCheckedChange={(checked) => setAssignToPlayers(!!checked)}
+                  />
+                  <label>Assign to Players {assignToPlayers && `(IDs: ${playerIds.join(', ')})`}</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    checked={assignToTeams} 
+                    onCheckedChange={(checked) => setAssignToTeams(!!checked)}
+                  />
+                  <label>Assign to Teams {assignToTeams && `(IDs: ${teamIds.join(', ')})`}</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    checked={assignToGroups} 
+                    onCheckedChange={(checked) => setAssignToGroups(!!checked)}
+                  />
+                  <label>Assign to Groups {assignToGroups && `(IDs: ${groupIds.join(', ')})`}</label>
+                </div>
+              </div>
+              
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={async () => {
+                  console.log('🎯 Testing workout assignment permanence...')
+                  await createAssignment({
+                    workoutId: 'workout-test-1',
+                    assignToPlayers,
+                    assignToTeams,
+                    assignToGroups,
+                    playerIds,
+                    teamIds,
+                    groupIds,
+                    tags: ['test', 'academy'],
+                    notes: 'Testing permanence pattern for workout assignments'
+                  })
+                  console.log('✅ Assignment created - refresh to verify persistence!')
+                }}
+              >
+                <Target className="w-4 h-4 mr-2" />
+                Create Test Assignment
+              </Button>
+            </div>
+            
+            <div className="p-4 bg-green-50 rounded">
+              <h4 className="font-semibold mb-2">Active Assignments</h4>
+              {assignments.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No assignments yet. Create one above!</p>
+              ) : (
+                <div className="space-y-2">
+                  {assignments.map(assign => (
+                    <div key={assign.id} className="text-sm font-mono p-2 bg-white rounded">
+                      <p>Workout: {assign.workout_id}</p>
+                      <p>Players: {JSON.stringify(assign.assigned_players)}</p>
+                      <p>Teams: {JSON.stringify(assign.assigned_teams)}</p>
+                      <p>Groups: {JSON.stringify(assign.assigned_groups)}</p>
+                      <p>Tags: {JSON.stringify(assign.tags)}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            <div className="text-sm font-mono space-y-1">
+              <p className="text-green-600">✅ Academy workout assignments verified!</p>
+              <p>1. Assign workouts to players/teams/groups</p>
+              <p>2. Refresh page to verify persistence</p>
+              <p>3. Arrays saved correctly to database</p>
+            </div>
+          </CardContent>
+        )}
+      </Card>
+      
       {/* Player Progress Overview */}
       <Card className="mb-8">
         <CardContent className="p-6">

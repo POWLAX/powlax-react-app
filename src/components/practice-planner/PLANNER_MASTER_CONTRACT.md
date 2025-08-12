@@ -1238,3 +1238,310 @@ Based on the user's exact words, these items still need implementation:
 4. **Strategy icon consideration** - Remove or fix modal buttons
 5. **Favorites in Add to Plan Modal** - Not yet fixed
 6. **Team Playbook saving** - Must use Gold Standard Pattern
+
+---
+
+## 🎯 **JANUARY 2025 UI/UX FIX EXECUTION PLAN**
+
+### **📋 IMPLEMENTATION PLAN INCORPORATING SUPABASE PERMANENCE PATTERN**
+
+Based on the proven SUPABASE_PERMANENCE_PATTERN.md, here's the detailed execution plan for each remaining fix:
+
+### **TASK 1: ADD EDIT FUNCTIONALITY FOR DRILLS**
+**Status:** 🔴 Not Started | **Priority:** HIGH
+
+#### **Current State:**
+- Strategies have edit pencil icons and EditCustomStrategyModal
+- Drills only have edit for user-created drills
+- Admin users cannot edit POWLAX drills
+
+#### **Implementation Plan:**
+1. **Add Edit Buttons to DrillLibraryTabbed.tsx:**
+   ```typescript
+   // For each drill card, show edit icon if:
+   // - User is admin (can edit all drills)
+   // - User owns the drill (user_drills where user_id matches)
+   const canEdit = isAdmin || (drill.user_id === user?.id)
+   ```
+
+2. **Create Unified Edit Modal:**
+   - Modify AddCustomDrillModal to accept `editMode` prop
+   - Pre-populate all fields when editing
+   - Apply PERMANENCE PATTERN for array fields:
+     ```typescript
+     // Preserve array IDs through edits
+     const [teamShareIds, setTeamShareIds] = useState<number[]>([])
+     // Convert checkbox to array on save
+     team_share: teamShare ? teamShareIds : []
+     ```
+
+3. **Hook Updates (useUserDrills.ts):**
+   - Ensure updateUserDrill follows PERMANENCE PATTERN
+   - Direct column mapping, no transformations
+   - Array type consistency for team_share/club_share
+
+#### **Testing Requirements:**
+- Admin can edit any drill (powlax_drills and user_drills)
+- Users can only edit their own drills
+- All fields persist correctly through edit cycles
+- Array fields maintain proper type (INTEGER[])
+
+---
+
+### **TASK 2: MAKE EDIT MODALS REUSE CREATE MODALS**
+**Status:** 🔴 Not Started | **Priority:** HIGH
+
+#### **Current State:**
+- Separate AddCustomDrillModal and EditCustomDrillModal exist
+- Separate AddCustomStrategiesModal and EditCustomStrategyModal exist
+- Code duplication between create/edit modals
+
+#### **Implementation Plan:**
+1. **Refactor AddCustomDrillModal.tsx:**
+   ```typescript
+   interface Props {
+     isOpen: boolean
+     onClose: () => void
+     editDrill?: Drill // If provided, we're in edit mode
+   }
+   
+   const AddCustomDrillModal = ({ isOpen, onClose, editDrill }) => {
+     const isEditMode = !!editDrill
+     
+     // Pre-populate if editing
+     useEffect(() => {
+       if (editDrill) {
+         setTitle(editDrill.title)
+         // Apply PERMANENCE PATTERN for arrays
+         const teamIds = Array.isArray(editDrill.team_share) 
+           ? editDrill.team_share : []
+         setTeamShareIds(teamIds)
+         setTeamShare(teamIds.length > 0)
+       }
+     }, [editDrill])
+   }
+   ```
+
+2. **Delete Redundant Files:**
+   - Remove EditCustomDrillModal.tsx
+   - Remove EditCustomStrategyModal.tsx
+
+3. **Update Parent Components:**
+   - Pass editDrill/editStrategy prop when editing
+   - Single modal handles both create and edit
+
+#### **Benefits:**
+- Single source of truth for form fields
+- Consistent validation and error handling
+- Easier maintenance
+
+---
+
+### **TASK 3: FIX FAVORITES IN ADD TO PLAN MODAL**
+**Status:** 🔴 Not Started | **Priority:** MEDIUM
+
+#### **Current State:**
+- Favorites work in main drill library
+- Add to Plan Modal doesn't show/handle favorites properly
+
+#### **Implementation Plan:**
+1. **Import useFavorites Hook:**
+   ```typescript
+   import { useFavorites } from '@/hooks/useFavorites'
+   const { favoriteItems, toggleFavorite, isFavorite } = useFavorites()
+   ```
+
+2. **Add Favorites Section to Modal:**
+   ```typescript
+   // Show favorited drills at top of list
+   const favoriteDrills = drills.filter(drill => 
+     isFavorite(drill.id, 'drill')
+   )
+   ```
+
+3. **Apply PERMANENCE PATTERN:**
+   - Ensure drill_id column mapping (not item_id)
+   - Handle both drill_id and item_id for compatibility
+   - Maintain localStorage fallback
+
+#### **UI Changes:**
+- Star icons on each drill in Add to Plan Modal
+- Favorites section at top (yellow border)
+- Real-time updates when toggling
+
+---
+
+### **TASK 4: STYLE AND FIX TEAM PLAYBOOK MODAL**
+**Status:** 🔴 Not Started | **Priority:** MEDIUM
+
+#### **Current State:**
+- Team Playbook modal exists but styling inconsistent
+- Save functionality not using Gold Standard Pattern
+
+#### **Implementation Plan:**
+1. **UI Styling Fixes:**
+   ```typescript
+   // Consistent with other modals
+   <Dialog className="max-w-4xl">
+     <DialogHeader className="bg-gray-50 p-6">
+       <DialogTitle>Save to Team Playbook</DialogTitle>
+     </DialogHeader>
+   ```
+
+2. **Apply PERMANENCE PATTERN for Saving:**
+   ```typescript
+   // Direct column mapping
+   const saveToPlaybook = async (playbook) => {
+     const { user } = useAuth()
+     if (!user?.id) throw new Error('User not authenticated')
+     
+     // Save with direct field mapping
+     await supabase.from('team_playbooks').insert([{
+       team_id: teamId,
+       user_id: user.id,
+       name: playbook.name,
+       drill_ids: playbook.drills.map(d => d.id),
+       // Array fields properly handled
+       shared_teams: shareWithTeams ? teamIds : []
+     }])
+   }
+   ```
+
+3. **Error Handling:**
+   - Descriptive error messages
+   - Toast notifications for success/failure
+   - Loading states during save
+
+---
+
+### **TASK 5: REMOVE OR FIX STRATEGY ICON (TOP RIGHT)**
+**Status:** 🔴 Not Started | **Priority:** LOW
+
+#### **Current State:**
+- Strategy icon in top right opens modal
+- User prefers using Strategies tab instead
+- If kept, buttons should open Study modal
+
+#### **Implementation Plan:**
+
+**Option A: Remove Strategy Icon (Recommended)**
+```typescript
+// In practice planner header, remove:
+// <StrategyIconButton /> component entirely
+```
+
+**Option B: Fix Modal Buttons**
+```typescript
+// If keeping, update StrategiesModal buttons:
+<Button onClick={() => openStudyModal(strategy)}>
+  Study
+</Button>
+```
+
+#### **User Decision Required:**
+- Remove completely (cleaner UI)
+- OR keep but fix buttons to open Study modal
+
+---
+
+### **TASK 6: ENSURE ALL PERSISTENCE USES GOLD STANDARD PATTERN**
+**Status:** 🟡 Ongoing | **Priority:** CRITICAL
+
+#### **Implementation Checklist:**
+
+**For Each Feature:**
+1. ✅ **Authentication Check:**
+   ```typescript
+   const { user } = useAuth()
+   if (!user?.id) throw new Error('User not authenticated')
+   ```
+
+2. ✅ **Array Field Handling:**
+   ```typescript
+   // Never send booleans to INTEGER[] columns
+   team_share: Array.isArray(data.team_share) 
+     ? data.team_share 
+     : (data.team_share === true ? [] : [])
+   ```
+
+3. ✅ **Direct Column Mapping:**
+   ```typescript
+   // No complex transformations
+   title: drill.title,  // Direct
+   content: drill.content,  // Direct
+   duration_minutes: drill.duration_minutes  // Direct
+   ```
+
+4. ✅ **Error Handling:**
+   ```typescript
+   if (error) {
+     throw new Error(`Failed to save: ${error.message}`)
+   }
+   ```
+
+5. ✅ **State Refresh:**
+   ```typescript
+   await fetchItems()  // After successful operation
+   ```
+
+---
+
+## 📊 **EXECUTION SEQUENCE**
+
+### **Phase 1: Modal Consolidation (Tasks 1 & 2)**
+**Why First:** Reduces code duplication before adding new features
+1. Refactor AddCustomDrillModal to handle edit mode
+2. Add edit buttons with proper permissions
+3. Delete redundant EditCustomDrillModal
+4. Test create and edit workflows
+
+### **Phase 2: Favorites & Playbook (Tasks 3 & 4)**
+**Why Second:** Enhances user experience with existing features
+1. Fix favorites in Add to Plan Modal
+2. Style Team Playbook modal
+3. Apply PERMANENCE PATTERN to saves
+4. Test persistence and UI updates
+
+### **Phase 3: Cleanup (Task 5)**
+**Why Last:** Low priority, minimal impact
+1. Get user decision on strategy icon
+2. Either remove or fix button functionality
+
+### **Phase 4: Validation (Task 6)**
+**Throughout:** Continuous validation
+1. Audit all persistence operations
+2. Ensure Gold Standard Pattern everywhere
+3. Run comprehensive tests
+
+---
+
+## 🧪 **TESTING MATRIX**
+
+| Feature | Create | Read | Update | Delete | Arrays | Auth |
+|---------|--------|------|--------|--------|--------|------|
+| Custom Drills | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ |
+| Custom Strategies | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ |
+| Practice Plans | ✅ | ✅ | ⚠️ | ⚠️ | N/A | ✅ |
+| Favorites | ✅ | ✅ | N/A | ✅ | N/A | ✅ |
+| Team Playbook | 🔴 | 🔴 | 🔴 | 🔴 | 🔴 | 🔴 |
+
+**Legend:** ✅ Working | ⚠️ Needs Testing | 🔴 Not Implemented
+
+---
+
+## 🎯 **SUCCESS METRICS**
+
+### **Task Completion Criteria:**
+- [ ] All drills show edit buttons based on permissions
+- [ ] Single modal handles both create and edit
+- [ ] Favorites work in Add to Plan Modal
+- [ ] Team Playbook saves with PERMANENCE PATTERN
+- [ ] Strategy icon decision implemented
+- [ ] All persistence follows Gold Standard
+
+### **User Experience Goals:**
+- Consistent UI across all modals
+- No data loss during edits
+- Clear permission-based features
+- Fast, reliable persistence
+- Mobile-responsive design
