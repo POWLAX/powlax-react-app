@@ -35,29 +35,33 @@ export default function PointCounter({
   const [touchedPoint, setTouchedPoint] = useState<string | null>(null)
   const [touchPosition, setTouchPosition] = useState<{ x: number, y: number } | null>(null)
 
-  // Get relevant point types and eliminate duplicates
+  // Get relevant point types based on series type
   const getRelevantPointTypes = (series?: string) => {
     if (!pointTypes.length) return []
 
-    // Filter out duplicate Academy Points - only keep one (prefer lax_credit)
+    // Filter out duplicate Academy Points - only keep one (prefer academy_points)
     const uniquePointTypes = pointTypes.filter((type, index, array) => {
-      // If this is an Academy Point variant, only keep lax_credit
+      // If this is an Academy Point variant, only keep academy_points
       if (type.display_name?.toLowerCase().includes('academy')) {
-        return type.name === 'lax_credit'
+        return type.name === 'academy_points' || type.name === 'academy_point'
       }
       return true
     })
 
-    // Map series types to relevant point types
+    // Per user requirements:
+    // - All drills always give Academy Points
+    // - Series-specific points are only earned if on that track
     const seriesPointMap: Record<string, string[]> = {
-      'attack': ['lax_credit', 'attack_token', 'lax_iq_point'],
-      'defense': ['lax_credit', 'defense_dollar', 'rebound_reward'], 
-      'midfield': ['lax_credit', 'midfield_medal', 'flex_point'],
-      'wall_ball': ['lax_credit', 'rebound_reward', 'lax_iq_point'],
-      'goalie': ['lax_credit', 'defense_dollar', 'rebound_reward']
+      'attack': ['academy_points', 'attack_token'],  // Attack series only
+      'defense': ['academy_points', 'defense_dollar'], // Defense series only
+      'midfield': ['academy_points', 'midfield_medal'], // Midfield series only
+      'goalie': ['academy_points', 'rebound_reward'], // Goalie series only
+      'wall_ball': ['academy_points', 'rebound_reward'], // Wall Ball gives Rebound Rewards
+      'solid_start': ['academy_points'] // Basic series only gives Academy Points
     }
 
-    const relevantTypes = seriesPointMap[series || ''] || ['lax_credit', 'lax_iq_point', 'flex_point']
+    // Default to just Academy Points if no series type specified
+    const relevantTypes = seriesPointMap[series || ''] || ['academy_points']
     
     return uniquePointTypes.filter(type => 
       relevantTypes.some(relevant => 
@@ -85,16 +89,16 @@ export default function PointCounter({
       }
     })
 
-    // If no specific types found, show lax credits at minimum
+    // If no specific types found, show academy points at minimum
     if (newDisplayPoints.length === 0) {
-      const laxCreditType = pointTypes.find(t => t.name === 'lax_credit')
+      const academyPointType = pointTypes.find(t => t.name === 'academy_points' || t.name === 'academy_point')
       
-      if (laxCreditType) {
+      if (academyPointType) {
         newDisplayPoints.push({
-          type: 'lax_credit',
-          value: points.lax_credit || points.academy_points || 0,
-          icon: laxCreditType.icon_url || laxCreditType.image_url || '',
-          displayName: laxCreditType.display_name || laxCreditType.title || 'Lax Credits'
+          type: 'academy_points',
+          value: points.academy_points || points.academy_point || 0,
+          icon: academyPointType.icon_url || academyPointType.image_url || '',
+          displayName: academyPointType.display_name || academyPointType.title || 'Academy Points'
         })
       }
     }
@@ -181,6 +185,8 @@ export default function PointCounter({
           {displayPoints.map((point) => (
             <div 
               key={point.type}
+              data-point-type={point.type}
+              data-point-icon
               className={`relative flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 transition-all duration-300 ${
                 animatingPoints.has(point.type) 
                   ? 'scale-110 bg-blue-100 shadow-lg' 

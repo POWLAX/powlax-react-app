@@ -133,13 +133,13 @@ export default function PlaybookCard({
           </Badge>
           <div className="flex items-center gap-1">
             {playbook.lacrosse_lab_links && (
-              <Target className="h-4 w-4 text-green-600" title="Has diagram" />
+              <Target className="h-4 w-4 text-green-600" />
             )}
             {playbook.vimeo_link && (
-              <Play className="h-4 w-4 text-blue-600" title="Has video" />
+              <Play className="h-4 w-4 text-blue-600" />
             )}
             {playbook.master_pdf_url && (
-              <FileText className="h-4 w-4 text-red-600" title="Has PDF" />
+              <FileText className="h-4 w-4 text-red-600" />
             )}
           </div>
         </div>

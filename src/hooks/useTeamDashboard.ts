@@ -4,21 +4,17 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useSupabase } from '@/hooks/useSupabase'
 
+// Using practices table for events (team_events table doesn't exist)
 export interface TeamEvent {
   id: string
   team_id: string
-  event_type: 'practice' | 'game' | 'tournament' | 'meeting'
-  title: string
-  start_time: string
-  end_time: string
-  location: string
-  description?: string
-  weather_conditions?: {
-    temp?: number
-    conditions?: string
-    wind?: string
-  }
-  created_by: string
+  coach_id: string
+  name: string
+  practice_date: string
+  start_time: string | null
+  duration_minutes: number | null
+  is_public: boolean
+  created_at: string
 }
 
 export interface TeamStats {
@@ -60,26 +56,27 @@ export function useTeamDashboard(teamId: string) {
     if (user && teamId) {
       fetchDashboardData()
       
-      // Set up real-time subscriptions
-      const eventsSub = supabase
-        .channel('team-events')
+      // Set up real-time subscriptions for practices table
+      const practicesSub = supabase
+        .channel('team-practices')
         .on('postgres_changes', 
-          { event: '*', schema: 'public', table: 'team_events', filter: `team_id=eq.${teamId}` },
+          { event: '*', schema: 'public', table: 'practices', filter: `team_id=eq.${teamId}` },
           () => fetchUpcomingEvents()
         )
         .subscribe()
 
-      const activitySub = supabase
-        .channel('team-activity')
+      // Subscribe to user progress for activity updates
+      const progressSub = supabase
+        .channel('user-progress')
         .on('postgres_changes',
-          { event: '*', schema: 'public', table: 'team_activity_feed', filter: `team_id=eq.${teamId}` },
+          { event: 'INSERT', schema: 'public', table: 'skills_academy_user_progress' },
           () => fetchRecentActivity()
         )
         .subscribe()
 
       return () => {
-        eventsSub.unsubscribe()
-        activitySub.unsubscribe()
+        practicesSub.unsubscribe()
+        progressSub.unsubscribe()
       }
     }
   }, [user, teamId])
@@ -102,204 +99,275 @@ export function useTeamDashboard(teamId: string) {
 
   const fetchUpcomingEvents = async () => {
     try {
-      // Mock data for now - replace with actual Supabase query
-      const mockEvents: TeamEvent[] = [
-        {
-          id: '1',
-          team_id: teamId,
-          event_type: 'practice',
-          title: 'Team Practice',
-          start_time: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow
-          end_time: new Date(Date.now() + 24 * 60 * 60 * 1000 + 90 * 60 * 1000).toISOString(),
-          location: 'Field 2',
-          description: 'Focus on shooting and transition offense',
-          weather_conditions: {
-            temp: 72,
-            conditions: 'Sunny',
-            wind: '5 mph'
-          },
-          created_by: user!.id
-        },
-        {
-          id: '2',
-          team_id: teamId,
-          event_type: 'game',
-          title: 'vs Eagles',
-          start_time: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days
-          end_time: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000).toISOString(),
-          location: 'Memorial Stadium',
-          created_by: user!.id
-        }
-      ]
-
-      setUpcomingEvents(mockEvents)
-
-      /* 
-      // Actual Supabase implementation:
+      // Query real practices table
       const { data, error } = await supabase
-        .from('team_events')
+        .from('practices')
         .select('*')
         .eq('team_id', teamId)
-        .gte('start_time', new Date().toISOString())
+        .gte('practice_date', new Date().toISOString().split('T')[0])
+        .order('practice_date', { ascending: true })
         .order('start_time', { ascending: true })
         .limit(5)
 
-      if (error) throw error
-      setUpcomingEvents(data || [])
-      */
+      if (error) {
+        console.error('Error fetching practices:', error)
+        setUpcomingEvents([])
+        return
+      }
+
+      // Transform practices data to TeamEvent format
+      const events: TeamEvent[] = (data || []).map(practice => ({
+        id: practice.id,
+        team_id: practice.team_id,
+        coach_id: practice.coach_id,
+        name: practice.name || '(No Name)',
+        practice_date: practice.practice_date,
+        start_time: practice.start_time,
+        duration_minutes: practice.duration_minutes,
+        is_public: practice.is_public || false,
+        created_at: practice.created_at
+      }))
+
+      setUpcomingEvents(events)
     } catch (err: any) {
-      console.error('Error fetching events:', err)
+      console.error('Error fetching upcoming practices:', err)
+      setUpcomingEvents([])
     }
   }
 
   const fetchTeamStats = async () => {
     try {
-      // Mock data for now - replace with actual aggregation queries
-      const mockStats: TeamStats = {
-        total_practices: 24,
-        attendance_rate: 85,
-        skills_completed: 67,
-        team_level_progress: 73,
-        recent_achievements: [
-          {
-            type: 'badge',
-            title: 'Passing Master',
-            date: '2025-01-05',
-            user_name: 'Mike Johnson'
-          },
-          {
-            type: 'milestone',
-            title: '50 Practices Attended',
-            date: '2025-01-04',
-            user_name: 'Sarah Wilson'
-          }
-        ]
+      // Get team members first
+      const { data: members, error: membersError } = await supabase
+        .from('team_members')
+        .select('user_id')
+        .eq('team_id', teamId)
+
+      if (membersError || !members) {
+        console.error('Error fetching team members:', membersError)
+        setTeamStats(null)
+        return
       }
 
-      setTeamStats(mockStats)
+      const memberIds = members.map(m => m.user_id)
 
-      /*
-      // Actual implementation would aggregate from multiple tables:
-      // - practice_attendance for attendance_rate
-      // - user_badge_progress_powlax for skills_completed
-      // - team_activity_feed for recent_achievements
-      */
+      // Get total practices count
+      const { count: practiceCount } = await supabase
+        .from('practices')
+        .select('*', { count: 'exact', head: true })
+        .eq('team_id', teamId)
+
+      // Get skills completed by team members
+      const { data: progressData, error: progressError } = await supabase
+        .from('skills_academy_user_progress')
+        .select('*')
+        .in('user_id', memberIds)
+        .eq('status', 'completed')
+
+      // Get recent badges earned by team members
+      const { data: badgesData, error: badgesError } = await supabase
+        .from('user_badges')
+        .select(`
+          *,
+          users!user_badges_user_id_fkey (
+            display_name,
+            first_name,
+            last_name
+          )
+        `)
+        .in('user_id', memberIds)
+        .order('earned_at', { ascending: false })
+        .limit(5)
+
+      // Calculate stats
+      const stats: TeamStats = {
+        total_practices: practiceCount || 0,
+        attendance_rate: 0, // No attendance table exists yet
+        skills_completed: progressData?.length || 0,
+        team_level_progress: Math.min(100, Math.round(((progressData?.length || 0) / (memberIds.length * 10)) * 100)),
+        recent_achievements: (badgesData || []).map(badge => ({
+          type: 'badge',
+          title: badge.badge_name || 'Achievement',
+          date: badge.earned_at,
+          user_name: badge.users?.display_name || 
+                     `${badge.users?.first_name || ''} ${badge.users?.last_name || ''}`.trim() ||
+                     'Team Member'
+        }))
+      }
+
+      setTeamStats(stats)
     } catch (err: any) {
       console.error('Error fetching team stats:', err)
+      setTeamStats(null)
     }
   }
 
   const fetchRecentActivity = async () => {
     try {
-      // Mock data for now
-      const mockActivity: ActivityItem[] = [
-        {
-          id: '1',
-          team_id: teamId,
-          user_id: 'user1',
-          user_name: 'Coach Johnson',
-          activity_type: 'practice_created',
-          activity_data: {
-            title: 'Created practice for tomorrow',
-            description: '4:00 PM at Field 2',
-            icon: 'calendar-plus'
-          },
-          created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // 2 hours ago
-        },
-        {
-          id: '2',
-          team_id: teamId,
-          user_id: 'user2',
-          user_name: 'Mike Johnson',
-          activity_type: 'badge_earned',
-          activity_data: {
-            title: 'Earned Passing Master badge',
-            icon: 'trophy'
-          },
-          created_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString() // 4 hours ago
-        },
-        {
-          id: '3',
-          team_id: teamId,
-          user_id: 'user3',
-          user_name: 'Sarah Wilson',
-          activity_type: 'announcement',
-          activity_data: {
-            title: 'Posted team reminder',
-            description: 'Don\'t forget cleats for tomorrow\'s practice',
-            icon: 'megaphone'
-          },
-          created_at: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString() // 6 hours ago
-        }
-      ]
+      // Get team members
+      const { data: members, error: membersError } = await supabase
+        .from('team_members')
+        .select('user_id')
+        .eq('team_id', teamId)
 
-      setRecentActivity(mockActivity)
+      if (membersError || !members) {
+        console.error('Error fetching team members:', membersError)
+        setRecentActivity([])
+        return
+      }
 
-      /*
-      // Actual implementation:
-      const { data, error } = await supabase
-        .from('team_activity_feed')
+      const memberIds = members.map(m => m.user_id)
+
+      // Fetch recent skill completions
+      const { data: skillsData, error: skillsError } = await supabase
+        .from('skills_academy_user_progress')
         .select(`
           *,
-          user:users(name, email)
+          users!skills_academy_user_progress_user_id_fkey (
+            display_name,
+            first_name,
+            last_name
+          ),
+          skills_academy_workouts (
+            name
+          )
         `)
-        .eq('team_id', teamId)
-        .order('created_at', { ascending: false })
-        .limit(10)
+        .in('user_id', memberIds)
+        .eq('status', 'completed')
+        .order('completed_at', { ascending: false })
+        .limit(5)
 
-      if (error) throw error
-      setRecentActivity(data || [])
-      */
+      // Fetch recent badges earned
+      const { data: badgesData, error: badgesError } = await supabase
+        .from('user_badges')
+        .select(`
+          *,
+          users!user_badges_user_id_fkey (
+            display_name,
+            first_name,
+            last_name
+          )
+        `)
+        .in('user_id', memberIds)
+        .order('earned_at', { ascending: false })
+        .limit(5)
+
+      // Combine and format activities
+      const activities: ActivityItem[] = []
+
+      // Add skill completions
+      if (skillsData) {
+        skillsData.forEach(skill => {
+          const userName = skill.users?.display_name || 
+                          `${skill.users?.first_name || ''} ${skill.users?.last_name || ''}`.trim() ||
+                          'Team Member'
+          activities.push({
+            id: `skill-${skill.id}`,
+            team_id: teamId,
+            user_id: skill.user_id,
+            user_name: userName,
+            activity_type: 'skill_completed',
+            activity_data: {
+              title: `Completed ${skill.skills_academy_workouts?.name || 'workout'}`,
+              description: `Earned ${skill.points_earned || 0} points`,
+              icon: 'target'
+            },
+            created_at: skill.completed_at
+          })
+        })
+      }
+
+      // Add badge earnings
+      if (badgesData) {
+        badgesData.forEach(badge => {
+          const userName = badge.users?.display_name || 
+                          `${badge.users?.first_name || ''} ${badge.users?.last_name || ''}`.trim() ||
+                          'Team Member'
+          activities.push({
+            id: `badge-${badge.id}`,
+            team_id: teamId,
+            user_id: badge.user_id,
+            user_name: userName,
+            activity_type: 'badge_earned',
+            activity_data: {
+              title: `Earned ${badge.badge_name || 'Achievement'} badge`,
+              description: `${badge.points_awarded || 0} points awarded`,
+              icon: 'trophy'
+            },
+            created_at: badge.earned_at
+          })
+        })
+      }
+
+      // Sort by date and limit
+      activities.sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )
+
+      setRecentActivity(activities.slice(0, 10))
     } catch (err: any) {
       console.error('Error fetching recent activity:', err)
+      setRecentActivity([])
     }
   }
 
-  const createEvent = async (eventData: Omit<TeamEvent, 'id' | 'team_id' | 'created_by'>) => {
+  const createEvent = async (eventData: Omit<TeamEvent, 'id' | 'team_id' | 'coach_id' | 'created_at'>) => {
     try {
-      // Mock success for now
-      const newEvent: TeamEvent = {
-        ...eventData,
-        id: Date.now().toString(),
-        team_id: teamId,
-        created_by: user!.id
-      }
-
-      setUpcomingEvents([newEvent, ...upcomingEvents])
-      return { data: newEvent, error: null }
-
-      /*
-      // Actual implementation:
+      // Create practice in practices table
       const { data, error } = await supabase
-        .from('team_events')
+        .from('practices')
         .insert([{
-          ...eventData,
           team_id: teamId,
-          created_by: user!.id
+          coach_id: user!.id,
+          name: eventData.name,
+          practice_date: eventData.practice_date,
+          start_time: eventData.start_time,
+          duration_minutes: eventData.duration_minutes,
+          is_public: eventData.is_public || false
         }])
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Error creating practice:', error)
+        return { data: null, error: error.message }
+      }
+
+      // Refresh events list
+      await fetchUpcomingEvents()
       return { data, error: null }
-      */
     } catch (err: any) {
-      console.error('Error creating event:', err)
+      console.error('Error creating practice:', err)
       return { data: null, error: err.message }
     }
   }
 
   const sendAnnouncement = async (title: string, content: string, priority: 'low' | 'medium' | 'high' | 'urgent' = 'medium') => {
     try {
-      // Mock success - add to activity feed
+      // Since team_announcements table doesn't exist, we'll return a placeholder
+      // In production, this would need a proper announcements table
+      console.log('Announcement feature not yet implemented - needs announcements table')
+      console.log('Title:', title, 'Content:', content, 'Priority:', priority)
+      
+      // For now, just add to local state as a placeholder
+      const { data: userData } = await supabase
+        .from('users')
+        .select('display_name, first_name, last_name')
+        .eq('id', user!.id)
+        .single()
+
+      const userName = userData?.display_name || 
+                      `${userData?.first_name || ''} ${userData?.last_name || ''}`.trim() ||
+                      'Coach'
+
       const newActivity: ActivityItem = {
         id: Date.now().toString(),
         team_id: teamId,
         user_id: user!.id,
-        user_name: 'Coach', // Would get from user data
+        user_name: userName,
         activity_type: 'announcement',
         activity_data: {
-          title: `Posted announcement: ${title}`,
+          title: `(LOCAL ONLY) ${title}`,
           description: content.substring(0, 100),
           icon: 'megaphone'
         },
@@ -308,25 +376,8 @@ export function useTeamDashboard(teamId: string) {
 
       setRecentActivity([newActivity, ...recentActivity])
       return { success: true, error: null }
-
-      /*
-      // Actual implementation:
-      const { error } = await supabase
-        .from('team_announcements')
-        .insert([{
-          team_id: teamId,
-          author_id: user!.id,
-          title,
-          content,
-          priority,
-          target_roles: ['player', 'parent', 'coach']
-        }])
-
-      if (error) throw error
-      return { success: true, error: null }
-      */
     } catch (err: any) {
-      console.error('Error sending announcement:', err)
+      console.error('Error with announcement:', err)
       return { success: false, error: err.message }
     }
   }

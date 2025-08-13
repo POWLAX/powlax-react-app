@@ -102,11 +102,13 @@ function WorkoutPageContent() {
   
   // Points tracking with real-time updates
   const [userPoints, setUserPoints] = useState<any>({
-    lax_credit: 0,
+    academy_points: 0,
     attack_token: 0,
     defense_dollar: 0,
     midfield_medal: 0,
-    lax_iq_point: 0
+    rebound_reward: 0,
+    lax_iq_point: 0,
+    flex_point: 0
   })
   const [localTotalPoints, setLocalTotalPoints] = useState(0)
   
@@ -238,28 +240,53 @@ function WorkoutPageContent() {
     setCompletedDrills(newCompleted)
     
     // IMMEDIATE state update for real-time point counter (Patrick's requirement)
-    const drillPointValues = currentDrill?.drill?.point_values || currentDrill?.point_values || {
-      lax_credit: 10
+    // Get drill point values - map lax_credit to academy_points
+    const rawPointValues = currentDrill?.drill?.point_values || currentDrill?.point_values || {}
+    
+    // Convert lax_credit to academy_points and ensure minimum 10 points
+    const drillPointValues = {
+      academy_points: Math.max(10, rawPointValues.lax_credit || rawPointValues.academy_points || 10),
+      attack_token: rawPointValues.attack_token || 0,
+      defense_dollar: rawPointValues.defense_dollar || 0,
+      midfield_medal: rawPointValues.midfield_medal || 0,
+      rebound_reward: rawPointValues.rebound_reward || 0,
+      lax_iq_point: rawPointValues.lax_iq_point || 0,
+      flex_point: rawPointValues.flex_point || 0
     }
     
     // Update points immediately in UI
     setUserPoints((prevPoints: any) => ({
       ...prevPoints,
-      lax_credit: (prevPoints.lax_credit || 0) + (drillPointValues.lax_credit || 10),
-      attack_token: (prevPoints.attack_token || 0) + (drillPointValues.attack_token || 0),
-      defense_dollar: (prevPoints.defense_dollar || 0) + (drillPointValues.defense_dollar || 0),
-      midfield_medal: (prevPoints.midfield_medal || 0) + (drillPointValues.midfield_medal || 0),
-      lax_iq_point: (prevPoints.lax_iq_point || 0) + (drillPointValues.lax_iq_point || 0)
+      academy_points: (prevPoints.academy_points || 0) + drillPointValues.academy_points,
+      attack_token: (prevPoints.attack_token || 0) + drillPointValues.attack_token,
+      defense_dollar: (prevPoints.defense_dollar || 0) + drillPointValues.defense_dollar,
+      midfield_medal: (prevPoints.midfield_medal || 0) + drillPointValues.midfield_medal,
+      rebound_reward: (prevPoints.rebound_reward || 0) + drillPointValues.rebound_reward,
+      lax_iq_point: (prevPoints.lax_iq_point || 0) + drillPointValues.lax_iq_point,
+      flex_point: (prevPoints.flex_point || 0) + drillPointValues.flex_point
     }))
     
-    setLocalTotalPoints(prev => prev + (drillPointValues.lax_credit || 10))
+    setLocalTotalPoints(prev => prev + drillPointValues.academy_points)
     
-    // Trigger point explosion animation with REAL values
+    // Trigger point explosion animation from the Did It button
+    // Animation will travel to the header points display
     const didItButton = document.querySelector('[data-did-it-button]') as HTMLElement
+    
     if (didItButton) {
       setExplosionOrigin(didItButton)
       setExplosionPoints(drillPointValues)
       setShowPointExplosion(true)
+      
+      // Optional: Add visual feedback that points are going to header
+      const headerPoints = document.querySelector('[data-header-points]') as HTMLElement
+      if (headerPoints) {
+        setTimeout(() => {
+          headerPoints.classList.add('animate-pulse')
+          setTimeout(() => {
+            headerPoints.classList.remove('animate-pulse')
+          }, 1000)
+        }, 1500) // Pulse header when points arrive
+      }
       
       setTimeout(() => {
         setShowPointExplosion(false)
@@ -437,8 +464,8 @@ function WorkoutPageContent() {
         duration={2000}
       />
       
-      {/* 5-ZONE CONTAINER ARCHITECTURE */}
-      <div className="h-full flex flex-col bg-gray-50 overflow-hidden">
+      {/* 5-ZONE CONTAINER ARCHITECTURE WITH STICKY FOOTER */}
+      <div className="h-screen flex flex-col bg-gray-50">
         
         {/* ZONE 1: HEADER */}
         <header className="bg-white border-b border-gray-200 flex-shrink-0 px-4 py-3">
@@ -453,10 +480,46 @@ function WorkoutPageContent() {
                   : workout?.workout_name || 'Loading...'}
               </h1>
             </div>
-            <div className="text-right">
-              <div className="text-xs font-semibold text-blue-600">
-                Credits: {userPoints.lax_credit || 0}
+            <div className="flex items-center gap-2" data-header-points>
+              {/* Academy Points - always shown */}
+              <div className="flex items-center gap-1">
+                <div className="w-5 h-5 relative">
+                  <img 
+                    src="/images/points/academy-point.png" 
+                    alt="Academy Points"
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                  <div className="hidden w-5 h-5 bg-yellow-500 rounded-full flex items-center justify-center">
+                    <span className="text-[8px] font-bold text-white">AP</span>
+                  </div>
+                </div>
+                <span className="text-xs font-bold text-gray-700">{userPoints.academy_points || 0}</span>
               </div>
+              
+              {/* Show series-specific points if earned */}
+              {(seriesInfo?.series_type === 'midfield' && userPoints.midfield_medal > 0) && (
+                <div className="flex items-center gap-1">
+                  <div className="w-5 h-5 relative">
+                    <img 
+                      src="/images/points/midfield-medal.png" 
+                      alt="Midfield Medal"
+                      className="w-full h-full object-contain"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                    <div className="hidden w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                      <span className="text-[8px] font-bold text-white">MM</span>
+                    </div>
+                  </div>
+                  <span className="text-xs font-bold text-gray-700">{userPoints.midfield_medal}</span>
+                </div>
+              )}
             </div>
           </div>
         </header>
@@ -537,16 +600,15 @@ function WorkoutPageContent() {
           </div>
         </div>
         
-        {/* ZONE 4: VIDEO PLAYER - Maximized to fill available space */}
-        <main className="flex-1 bg-black flex flex-col overflow-hidden">
-          {/* Video Container - fills all available space */}
-          <div className="flex-1 relative">
+        {/* ZONE 4: VIDEO PLAYER - Fills remaining space with max dimensions */}
+        <main className="flex-1 bg-black flex items-center justify-center min-h-0 overflow-hidden">
+          <div className="relative w-full h-full max-w-full max-h-full">
             {(() => {
               if (isWallBallWorkout && wallBallVimeoId) {
                 return (
                   <iframe
                     src={`https://player.vimeo.com/video/${wallBallVimeoId}?badge=0&autopause=0&player_id=0&app_id=58479`}
-                    className="absolute inset-0 w-full h-full"
+                    className="w-full h-full"
                     frameBorder="0"
                     allow="autoplay; fullscreen; picture-in-picture"
                     allowFullScreen
@@ -562,7 +624,7 @@ function WorkoutPageContent() {
                 return (
                   <iframe
                     src={`https://player.vimeo.com/video/${vimeoId}?badge=0&autopause=0&player_id=0&app_id=58479`}
-                    className="absolute inset-0 w-full h-full"
+                    className="w-full h-full"
                     frameBorder="0"
                     allow="autoplay; fullscreen; picture-in-picture"
                     allowFullScreen
@@ -571,7 +633,7 @@ function WorkoutPageContent() {
                 )
               } else {
                 return (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
+                  <div className="w-full h-full flex items-center justify-center bg-gray-900">
                     <div className="text-center">
                       <PlayCircle className="w-16 h-16 mx-auto mb-4 text-gray-400" />
                       <p className="text-gray-400">Video coming soon</p>
@@ -582,13 +644,10 @@ function WorkoutPageContent() {
               }
             })()}
           </div>
-          
-          {/* FOOTER SPACER: Matches exact footer height to prevent overlap */}
-          <div className="flex-shrink-0 h-[calc(env(safe-area-inset-bottom)+80px)] md:h-32"></div>
         </main>
         
-        {/* ZONE 5: FOOTER with 80px mobile padding and ONLY sets_and_reps pill */}
-        <footer className="fixed bottom-0 left-0 right-0 md:left-64 bg-gray-800 text-white px-4 py-2 md:py-4 flex-shrink-0 z-10
+        {/* ZONE 5: STICKY FOOTER - Not fixed, part of flex layout */}
+        <footer className="bg-gray-800 text-white px-4 py-2 md:py-4 flex-shrink-0 
                          pb-[calc(env(safe-area-inset-bottom)+80px)] md:pb-4">
           {/* Drill Name */}
           <div className="mb-1 md:mb-1.5">
@@ -601,13 +660,13 @@ function WorkoutPageContent() {
           
           {/* ONLY sets_and_reps pill (Patrick's requirement) */}
           <div className="flex justify-center mb-1 md:mb-2">
-            {(currentDrill?.drill?.sets_and_reps || currentDrill?.sets_and_reps) && (
+            {(currentDrill?.drill?.sets_and_reps) ? (
               <div className="bg-white/90 px-4 py-2 rounded-full">
                 <span className="font-bold text-gray-800 text-sm">
-                  {currentDrill?.drill?.sets_and_reps || currentDrill?.sets_and_reps}
+                  {currentDrill.drill.sets_and_reps}
                 </span>
               </div>
-            )}
+            ) : null}
           </div>
           
           {/* Always-visible Did It button with timer enforcement */}
@@ -633,7 +692,7 @@ function WorkoutPageContent() {
               <span>Did It!</span>
             ) : (
               <span>
-                Wait {Math.ceil(timeRemaining / 60)}m {timeRemaining % 60}s
+                Wait {formatTime(timeRemaining)}
               </span>
             )}
           </Button>

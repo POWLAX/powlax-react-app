@@ -65,10 +65,10 @@ export default function BottomNavigation() {
           </nav>
         )}
         
-        {/* Menu toggle button - always visible */}
+        {/* Menu toggle button - always visible with top border for contrast */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full bg-gray-800 text-white py-3 flex items-center justify-center gap-2"
+          className="w-full bg-gray-800 text-white py-3 flex items-center justify-center gap-2 border-t-2 border-gray-600"
         >
           {isExpanded ? (
             <ChevronDown className="h-5 w-5" />

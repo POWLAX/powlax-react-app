@@ -26,26 +26,40 @@ interface ProgressOverviewProps {
 export function ProgressOverview({ team, members, stats }: ProgressOverviewProps) {
   const players = members.filter(m => m.role === 'player')
   
-  // Mock detailed stats - would come from database aggregation
+  // Calculate real stats from team data
   const detailedStats = {
     skills_mastery: {
-      passing: 78,
-      shooting: 65,
-      defense: 82,
-      field_vision: 71
+      // These would need aggregation from skills_academy_user_progress
+      // For now, show as 0 until proper aggregation is implemented
+      passing: 0,
+      shooting: 0,
+      defense: 0,
+      field_vision: 0
     },
-    team_chemistry: 85,
-    practice_consistency: stats?.attendance_rate || 85,
-    recent_improvement: 12, // percentage increase this month
-    top_performers: [
-      { name: 'Mike Johnson', skill: 'Passing', progress: 95 },
-      { name: 'Sarah Wilson', skill: 'Defense', progress: 88 },
-      { name: 'Tom Davis', skill: 'Shooting', progress: 82 }
-    ],
+    team_chemistry: 0, // No data source for this yet
+    practice_consistency: stats?.attendance_rate || 0,
+    recent_improvement: 0, // Would need historical data to calculate
+    top_performers: stats?.recent_achievements?.slice(0, 3).map(achievement => ({
+      name: achievement.user_name,
+      skill: achievement.title,
+      progress: 0 // Would need skill-specific progress data
+    })) || [],
     upcoming_milestones: [
-      { title: '100 Team Practices', current: 89, target: 100 },
-      { title: 'Advanced Offense Mastery', current: 67, target: 80 },
-      { title: 'Perfect Attendance Month', current: 85, target: 95 }
+      { 
+        title: `${stats?.total_practices || 0} Team Practices`, 
+        current: stats?.total_practices || 0, 
+        target: Math.ceil((stats?.total_practices || 0) / 10) * 10 + 10 
+      },
+      { 
+        title: 'Skills Completed', 
+        current: stats?.skills_completed || 0, 
+        target: Math.ceil((stats?.skills_completed || 0) / 10) * 10 + 10 
+      },
+      { 
+        title: 'Team Progress', 
+        current: stats?.team_level_progress || 0, 
+        target: 100 
+      }
     ]
   }
 

@@ -35,6 +35,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import MembershipCapabilityDisplay from '@/components/admin/MembershipCapabilityDisplay'
+import { DocumentationHelper, InlineDocumentation } from './DocumentationHelper'
 import CompleteUserEditor from '@/components/admin/CompleteUserEditor'
 import BulkOperationsPanel from '@/components/admin/BulkOperationsPanel'
 import CSVImportPanel from '@/components/admin/CSVImportPanel'
@@ -47,7 +48,7 @@ interface User {
   display_name?: string
   roles: string[]
   created_at: string
-  last_sign_in_at?: string
+  updated_at?: string
 }
 
 interface UserStats {
@@ -97,7 +98,7 @@ export default function UsersTabContent() {
           display_name,
           roles,
           created_at,
-          last_sign_in_at
+          updated_at
         `)
         .order('created_at', { ascending: false })
       
@@ -222,6 +223,11 @@ export default function UsersTabContent() {
 
   return (
     <div className="space-y-6">
+      {/* Documentation Helper */}
+      <div className="flex justify-end mb-4">
+        <DocumentationHelper feature="users" />
+      </div>
+
       {/* Stats Overview */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card>
@@ -267,17 +273,22 @@ export default function UsersTabContent() {
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5" />
               User Management
+              <InlineDocumentation 
+                tableName="users" 
+                action="Query and manage user accounts"
+                fields={['email', 'display_name', 'roles[]']}
+              />
             </div>
             <div className="flex items-center gap-2">
-              <Button onClick={handleRefresh} variant="outline" size="sm">
+              <Button onClick={handleRefresh} variant="outline" size="sm" title="Refresh data from users and team_members tables">
                 <RefreshCw className="h-4 w-4 mr-1" />
                 Refresh
               </Button>
-              <Button onClick={handleImport} variant="outline" size="sm">
+              <Button onClick={handleImport} variant="outline" size="sm" title="Bulk import users - creates records in users table">
                 <Upload className="h-4 w-4 mr-1" />
                 Import
               </Button>
-              <Button onClick={handleExport} variant="outline" size="sm">
+              <Button onClick={handleExport} variant="outline" size="sm" title="Export user data from users, team_members, and membership_entitlements tables">
                 <Download className="h-4 w-4 mr-1" />
                 Export
               </Button>
@@ -373,9 +384,18 @@ export default function UsersTabContent() {
                           onCheckedChange={handleSelectAll}
                         />
                       </TableHead>
-                      <TableHead>User</TableHead>
-                      <TableHead>Roles</TableHead>
-                      <TableHead>Membership</TableHead>
+                      <TableHead>
+                        User
+                        <InlineDocumentation tableName="users" fields={['email', 'display_name']} />
+                      </TableHead>
+                      <TableHead>
+                        Roles
+                        <InlineDocumentation tableName="users" fields={['roles[]']} />
+                      </TableHead>
+                      <TableHead>
+                        Membership
+                        <InlineDocumentation tableName="membership_entitlements" />
+                      </TableHead>
                       <TableHead>Last Login</TableHead>
                       <TableHead>Created</TableHead>
                       <TableHead>Actions</TableHead>
@@ -431,8 +451,8 @@ export default function UsersTabContent() {
                         
                         <TableCell>
                           <div className="text-sm">
-                            {user.last_sign_in_at 
-                              ? new Date(user.last_sign_in_at).toLocaleDateString()
+                            {user.updated_at 
+                              ? new Date(user.updated_at).toLocaleDateString()
                               : 'Never'
                             }
                           </div>
@@ -450,6 +470,7 @@ export default function UsersTabContent() {
                               variant="outline"
                               size="sm"
                               onClick={() => handleEditUser(user.id)}
+                              title="Edit user profile, roles, team assignments, and membership entitlements"
                             >
                               <Edit className="h-4 w-4 mr-1" />
                               Edit
@@ -458,7 +479,7 @@ export default function UsersTabContent() {
                               variant="outline"
                               size="sm"
                               onClick={() => handleSendMagicLink(user.id, user.email)}
-                              title="Send magic link"
+                              title="Generate magic link (magic_links table) and send via email"
                             >
                               <Link2 className="h-4 w-4" />
                             </Button>

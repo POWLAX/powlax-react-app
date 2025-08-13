@@ -39,6 +39,20 @@ contractTemplate:
     mobileResponsive: true
     performanceTarget: 3
     
+  # ===== NO MOCK DATA POLICY =====
+  dataIntegrityPolicy:
+    noMockData: true  # CRITICAL: Production ready MVP requirement
+    requirements:
+      - NO hardcoded mock users, teams, or clubs in codebase
+      - NO fake WordPress associations or connections
+      - NO returning mock data from hooks or components
+      - ONLY real data from actual database tables
+      - IF testing needed, use "(MOCK)" prefix in actual database
+    rationale:
+      - Mock data creates false positives
+      - MVP requires real WordPress → Supabase → Frontend flow
+      - Debugging impossible with mixed real/fake data
+    
   # ===== EXECUTION STRATEGY (For Big Projects) =====
   executionStrategy:
     type: sequential  # sequential (default) | parallel

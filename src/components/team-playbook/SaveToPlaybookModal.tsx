@@ -43,7 +43,7 @@ export default function SaveToPlaybookModal({
 
       const success = await saveToPlaybook({
         team_id: selectedTeamId,
-        strategy_id: strategy.id,
+        strategy_id: strategy.id.toString(),
         strategy_source: strategy.source,
         custom_name: customName || undefined,
         team_notes: teamNotes || undefined

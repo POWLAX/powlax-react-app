@@ -48,26 +48,27 @@ export function TeamRoster({ team, members, canTakeAttendance, upcomingEvent }: 
   const [attendanceMode, setAttendanceMode] = useState(false)
   const [attendance, setAttendance] = useState<Record<string, 'present' | 'absent' | 'excused' | 'late'>>({})
 
-  // Mock player stats - would come from database aggregation
+  // Use actual member data from team_members table
   const playerStats: PlayerStats[] = members
     .filter(m => m.role === 'player')
     .map(m => ({
       user_id: m.user_id,
-      attendance_rate: Math.floor(Math.random() * 30) + 70, // 70-100%
-      skills_completed: Math.floor(Math.random() * 50) + 10, // 10-60
-      recent_badges: ['Passing Master', 'Team Player'].slice(0, Math.floor(Math.random() * 3)),
-      position: ['Attack', 'Midfield', 'Defense', 'Goalie'][Math.floor(Math.random() * 4)],
-      jersey_number: (Math.floor(Math.random() * 99) + 1).toString()
+      attendance_rate: 0, // No attendance table exists yet
+      skills_completed: 0, // Will be fetched separately if needed
+      recent_badges: [], // Will be fetched separately if needed
+      position: m.position || 'Player',
+      jersey_number: m.jersey_number || '--'
     }))
 
   const getPlayerStats = (userId: string) => {
+    const member = members.find(m => m.user_id === userId)
     return playerStats.find(s => s.user_id === userId) || {
       user_id: userId,
-      attendance_rate: 85,
-      skills_completed: 25,
+      attendance_rate: 0,
+      skills_completed: 0,
       recent_badges: [],
-      position: 'Player',
-      jersey_number: '--'
+      position: member?.position || 'Player',
+      jersey_number: member?.jersey_number || '--'
     }
   }
 

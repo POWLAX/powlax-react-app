@@ -257,6 +257,9 @@ export function useWorkoutSession(workoutId: number | null, userId?: string) {
                   description: drill.description || '',
                   video_url: drill.video_url, // NEW: Use the complete video URL
                   vimeo_id: drill.vimeo_id,
+                  sets_and_reps: drill.sets_and_reps, // ADD THIS FIELD
+                  duration_minutes: drill.duration_minutes,
+                  point_values: drill.point_values, // Include point values too
                   both_hands_vimeo_id: drill.vimeo_id,
                   strong_hand_vimeo_id: drill.vimeo_id,
                   off_hand_vimeo_id: drill.vimeo_id,

@@ -27,6 +27,30 @@
 
 ## 🔄 **PENDING APPROVAL**
 
+### **Resources Implementation - Stage 5**
+- **Contract ID:** `resources-implementation-001`
+- **Created:** 2025-01-16
+- **Scope:** Production content upload, database migration execution, remove mock data
+- **Status:** DRAFT - Needs user approval
+- **Approval Required:** YES
+- **Based On:** RESOURCES_MASTER_PLAN.md (Stages 1-4 complete)
+
+### **Management System Enhancement**
+- **Contract ID:** `management-enhancement-001`
+- **Created:** 2025-01-16
+- **Scope:** Advanced bulk operations, real-time analytics, workflow automation
+- **Status:** DRAFT - Needs user approval
+- **Approval Required:** YES
+- **Based On:** Management_Master_Plan.md (Core implementation complete)
+
+### **Dashboard System Optimization**
+- **Contract ID:** `dashboard-optimization-001`
+- **Created:** 2025-01-16
+- **Scope:** WebSocket real-time updates, custom widgets, export functionality
+- **Status:** DRAFT - Needs user approval
+- **Approval Required:** YES
+- **Based On:** DASHBOARD_MASTER_PLAN.md (Basic functionality complete)
+
 ### **Skills Academy Quiz Interface**
 - **Contract ID:** `skills-academy-quiz-001`
 - **Created:** 2025-01-16
@@ -114,6 +138,24 @@ async function checkContractApproval(taskDescription: string) {
 ---
 
 ## 🚦 **QUICK REFERENCE**
+
+**Resources System:**
+- Stage 5 Implementation: ❓ Needs approval (resources-implementation-001)
+- Production content upload: ❓ Needs approval
+- Database migration: ❓ Needs approval
+- Mock data removal: ❓ Needs approval
+
+**Management System:**
+- Advanced bulk operations: ❓ Needs approval (management-enhancement-001)
+- Real-time analytics: ❓ Needs approval
+- Workflow automation: ❓ Needs approval
+- Performance optimization: ❓ Needs approval
+
+**Dashboard System:**
+- WebSocket real-time updates: ❓ Needs approval (dashboard-optimization-001)
+- Custom widgets: ❓ Needs approval
+- Export functionality: ❓ Needs approval
+- Mobile optimization: ❓ Needs approval
 
 **Practice Planner Issues:**
 - Modal fixes: ✅ APPROVED (practice-planner-modal-fix-001)

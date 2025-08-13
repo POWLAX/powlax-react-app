@@ -94,56 +94,8 @@ export function RecentActivity({ activity, team, canManage }: RecentActivityProp
     ? activity 
     : activity.filter(item => item.activity_type === filter)
 
-  // Mock additional activity items for a richer feed
-  const mockAdditionalActivity: ActivityItem[] = [
-    {
-      id: '4',
-      team_id: team.id,
-      user_id: 'user4',
-      user_name: 'Emma Brown',
-      activity_type: 'skill_completed',
-      activity_data: {
-        title: 'Completed Shooting Fundamentals',
-        description: 'Advanced to next level',
-        icon: 'target'
-      },
-      created_at: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: '5',
-      team_id: team.id,
-      user_id: 'user5',
-      user_name: 'Coach Smith',
-      activity_type: 'attendance_taken',
-      activity_data: {
-        title: 'Recorded practice attendance',
-        description: '18 of 20 players present',
-        icon: 'users'
-      },
-      created_at: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: '6',
-      team_id: team.id,
-      user_id: 'user6',
-      user_name: 'Parent Association',
-      activity_type: 'photo_shared',
-      activity_data: {
-        title: 'Shared 8 practice photos',
-        description: 'Team scrimmage highlights',
-        icon: 'camera'
-      },
-      created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-    }
-  ]
-
-  const allActivity = [...activity, ...mockAdditionalActivity].sort((a, b) => 
-    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  )
-
-  const finalActivity = filter === 'all' 
-    ? allActivity 
-    : allActivity.filter(item => item.activity_type === filter)
+  // Use real activity data from hooks - no mock data
+  const finalActivity = filteredActivity
 
   return (
     <Card>
@@ -245,7 +197,7 @@ export function RecentActivity({ activity, team, canManage }: RecentActivityProp
             })}
             
             {/* Load More Button */}
-            {allActivity.length > 8 && (
+            {activity.length > 8 && (
               <div className="text-center pt-4 border-t border-gray-100">
                 <Button variant="outline" size="sm" className="w-full">
                   View All Activity ({allActivity.length})

@@ -18,6 +18,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { PlayerStatsCard } from '@/components/teams/PlayerStatsCard'
+import TeamPlaybookSection from '@/components/teams/dashboard/TeamPlaybookSection'
 import type { Team, UserTeamRole } from '@/types/teams'
 import type { TeamEvent, TeamStats, ActivityItem } from '@/hooks/useTeamDashboard'
 
@@ -38,33 +40,20 @@ export function PlayerView({
   teamStats, 
   recentActivity 
 }: PlayerViewProps) {
-  // Mock player-specific data
-  const playerStats = {
-    level: 'Intermediate',
-    points: 1247,
-    rank: 'Silver Striker',
-    skills_completed: 23,
-    total_skills: 50,
-    badges_earned: 8,
-    attendance_rate: 92,
-    recent_badges: [
-      { name: 'Passing Master', earned_date: '2025-01-05', icon: '🎯' },
-      { name: 'Team Player', earned_date: '2025-01-03', icon: '🤝' },
-      { name: 'Practice Streak', earned_date: '2025-01-01', icon: '🔥' }
-    ],
-    skill_progress: {
-      passing: 85,
-      shooting: 72,
-      defense: 68,
-      field_vision: 79,
-      fitness: 83
-    },
-    goals: [
-      { title: 'Complete Shooting Course', progress: 72, target: 100 },
-      { title: 'Earn Defense Badge', progress: 40, target: 100 },
-      { title: 'Perfect Practice Week', progress: 85, target: 100 }
-    ]
+  // Mock skill progress data for age-appropriate content display
+  const skillProgress = {
+    passing: 85,
+    shooting: 72,
+    defense: 68,
+    field_vision: 79,
+    fitness: 83
   }
+  
+  const personalGoals = [
+    { title: 'Complete Shooting Course', progress: 72, target: 100 },
+    { title: 'Earn Defense Badge', progress: 40, target: 100 },
+    { title: 'Perfect Practice Week', progress: 85, target: 100 }
+  ]
 
   const getAgeAppropriateContent = () => {
     switch (ageGroup) {
@@ -118,7 +107,16 @@ export function PlayerView({
 
   return (
     <div className="space-y-6">
-      {/* Player Header - Age-appropriate design */}
+      {/* Player Stats Card - Real data integration */}
+      <PlayerStatsCard
+        userId={player?.user_id || ''}
+        teamId={team.id}
+        showEditProfile={true}
+        playerName={player?.user?.name || 'Player'}
+        teamName={team.name}
+      />
+
+      {/* Player Header - Age-appropriate design with simplified info */}
       <Card className={`bg-gradient-to-r ${ageContent.primaryColor} text-white overflow-hidden relative`}>
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16" />
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12" />
@@ -139,20 +137,8 @@ export function PlayerView({
                   <span>#{player?.jersey_number || '00'}</span>
                   <span>•</span>
                   <span>{player?.position || 'Player'}</span>
-                  <span>•</span>
-                  <span>{playerStats.level}</span>
                 </div>
               </div>
-            </div>
-            
-            <div className="text-right">
-              {ageContent.gamification.showRank && (
-                <Badge className="bg-white/20 text-white mb-2">
-                  {playerStats.rank}
-                </Badge>
-              )}
-              <div className="text-3xl font-bold">{playerStats.points}</div>
-              <div className="text-sm text-white/80">Total Points</div>
             </div>
           </div>
           
@@ -161,37 +147,6 @@ export function PlayerView({
           </div>
         </CardContent>
       </Card>
-
-      {/* Quick Stats - Age-appropriate complexity */}
-      <div className="grid gap-4 md:grid-cols-4">
-        {ageContent.gamification.emphasizeBadges && (
-          <Card className="p-4 text-center bg-yellow-50 border-yellow-200">
-            <Trophy className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-gray-900">{playerStats.badges_earned}</div>
-            <div className="text-sm text-gray-600">Badges Earned</div>
-          </Card>
-        )}
-        
-        <Card className="p-4 text-center">
-          <Target className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-          <div className="text-2xl font-bold text-gray-900">
-            {playerStats.skills_completed}/{playerStats.total_skills}
-          </div>
-          <div className="text-sm text-gray-600">Skills</div>
-        </Card>
-        
-        <Card className="p-4 text-center bg-green-50 border-green-200">
-          <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
-          <div className="text-2xl font-bold text-gray-900">{playerStats.attendance_rate}%</div>
-          <div className="text-sm text-gray-600">Attendance</div>
-        </Card>
-        
-        <Card className="p-4 text-center">
-          <TrendingUp className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-          <div className="text-2xl font-bold text-gray-900">+12%</div>
-          <div className="text-sm text-gray-600">This Month</div>
-        </Card>
-      </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main Content */}
@@ -240,7 +195,7 @@ export function PlayerView({
               {ageContent.gamification.simpleProgress ? (
                 // Youth: Simple visual progress
                 <div className="grid grid-cols-2 gap-4">
-                  {Object.entries(playerStats.skill_progress).slice(0, 4).map(([skill, progress]) => (
+                  {Object.entries(skillProgress).slice(0, 4).map(([skill, progress]) => (
                     <div key={skill} className="text-center p-4 bg-gray-50 rounded-lg">
                       <div className="text-4xl mb-2">
                         {progress >= 80 ? '🌟' : progress >= 60 ? '⭐' : '📈'}
@@ -253,7 +208,7 @@ export function PlayerView({
               ) : (
                 // Older: Detailed progress bars
                 <div className="space-y-4">
-                  {Object.entries(playerStats.skill_progress).map(([skill, progress]) => (
+                  {Object.entries(skillProgress).map(([skill, progress]) => (
                     <div key={skill} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="capitalize font-medium text-gray-700">{skill}</span>
@@ -276,7 +231,7 @@ export function PlayerView({
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {playerStats.goals.map((goal, index) => (
+              {personalGoals.map((goal, index) => (
                 <div key={index} className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-gray-900">{goal.title}</span>
@@ -296,34 +251,7 @@ export function PlayerView({
 
         {/* Sidebar */}
         <div className="space-y-6">
-          {/* Recent Badges - Prominent for younger players */}
-          {ageContent.gamification.emphasizeBadges && (
-            <Card>
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center space-x-2">
-                  <Award className="h-5 w-5 text-yellow-500" />
-                  <span>Recent Badges</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {playerStats.recent_badges.map((badge, index) => (
-                  <div key={index} className="flex items-center space-x-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                    <div className="text-2xl">{badge.icon}</div>
-                    <div>
-                      <p className="font-medium text-gray-900">{badge.name}</p>
-                      <p className="text-sm text-gray-600">
-                        {new Date(badge.earned_date).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                
-                <Button variant="outline" size="sm" className="w-full">
-                  View All Badges ({playerStats.badges_earned})
-                </Button>
-              </CardContent>
-            </Card>
-          )}
+          {/* Note: Badges are now displayed in PlayerStatsCard above with real data */}
 
           {/* Skills Academy Quick Access */}
           <Card className="border-l-4 border-l-green-500">
@@ -353,6 +281,13 @@ export function PlayerView({
               </div>
             </CardContent>
           </Card>
+
+          {/* Team Playbook Section */}
+          <TeamPlaybookSection 
+            teamId={team.id}
+            teamName={team.name}
+            isCoach={false}
+          />
 
           {/* Team Connection - For middle/teen groups */}
           {ageGroup !== 'youth' && (

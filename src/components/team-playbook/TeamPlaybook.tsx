@@ -318,7 +318,7 @@ export default function TeamPlaybook({
                           playbook={playbook}
                           onOpenStrategy={handleOpenStrategy}
                           onDelete={handleDeleteStrategy}
-                          currentUserId={currentUserId}
+                          currentUserId={currentUserId || undefined}
                         />
                       ))}
                     </div>
@@ -338,7 +338,7 @@ export default function TeamPlaybook({
             setShowStudyModal(false)
             setSelectedStrategy(null)
           }}
-          strategy={selectedStrategy}
+          strategy={selectedStrategy as any}
         />
       )}
     </div>

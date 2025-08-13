@@ -6,6 +6,43 @@
 
 ---
 
+## 🚨 CRITICAL: NO MOCK DATA POLICY - PRODUCTION READY MVP
+
+**ABSOLUTELY NO HARDCODED MOCK DATA IN THE CODEBASE!**
+
+### MANDATORY DATA INTEGRITY RULES:
+- **NO CREATION OF MOCK USERS, TEAMS, OR CLUBS** - All deleted, causes false positives
+- **NO HARDCODED DATA** - Nothing that represents a "real" user but isn't
+- **NO FAKE WORDPRESS ASSOCIATIONS** - Creates false positives for integration testing
+- **REAL DATA ONLY** - Use actual WordPress users, actual team data, actual connections
+
+### IF DATA IS NEEDED FOR TESTING:
+1. **USE (MOCK) PREFIX/SUFFIX** - Clearly mark test data: "(MOCK) Team Alpha", "Test User (MOCK)"
+2. **ADD TO ACTUAL TABLES** - Insert mock data into Supabase with (MOCK) labels
+3. **REQUEST REAL DATA** - Ask user to create actual test scenarios through WordPress
+4. **NO FRONTEND HARDCODING** - Never return fake data from hooks or components
+
+### WHY THIS MATTERS:
+- **False positives kill production readiness** - Can't trust what's working
+- **MVP requires real data flow** - WordPress → Supabase → Frontend
+- **Debugging becomes impossible** - Can't distinguish real issues from mock data issues
+
+### EXAMPLES:
+```typescript
+// ❌ NEVER DO THIS
+const mockTeams = [
+  { id: 1, name: "Team Alpha", club: "Club OS" },
+  { id: 2, name: "Team HQ", club: "POWLAX" }
+];
+
+// ✅ CORRECT - Query real data or clearly marked mock data
+const { data: teams } = await supabase
+  .from('teams')
+  .select('*'); // Returns real teams or "(MOCK) Team Name" entries
+```
+
+---
+
 ## 🚨 CRITICAL: Server Management Requirements
 
 **MANDATORY FOR ALL WORK:**
@@ -54,6 +91,50 @@ npm run dev
 1. **`AI_FRAMEWORK_ERROR_PREVENTION.md`** - Critical error prevention for AI assistants
 2. **`contracts/active/database-truth-sync-002.yaml`** - Database truth (62 actual tables)
 3. **Component-specific MASTER_CONTRACT.md and claude.md files** for targeted work
+
+---
+
+## 🔌 SUPABASE MCP (Model Context Protocol) INTEGRATION
+
+### Why Use Supabase MCP?
+The `database-truth-sync-002.yaml` file becomes outdated quickly. The MCP provides Claude Code with:
+- **Live database schema** - Real-time table structures, not outdated migration files
+- **Actual table inspection** - See what tables really exist vs. what's documented
+- **Direct SQL queries** - Test queries and verify data structures
+- **No more sync issues** - Eliminates discrepancies between documentation and reality
+
+### Setup Instructions
+The Supabase MCP has been configured to connect directly to the POWLAX database:
+
+```bash
+# Already configured for this project:
+claude mcp add supabase -- npx -y @bytebase/dbhub \
+--dsn "postgresql://postgres:[PASSWORD]@db.avvpyjwytcmtoiyrbibb.supabase.co:5432/postgres?sslmode=require"
+```
+
+### Connection Details
+- **Host:** db.avvpyjwytcmtoiyrbibb.supabase.co
+- **Port:** 5432
+- **Database:** postgres
+- **SSL:** Required
+
+### Using the MCP
+Once configured, Claude Code can:
+- Query table schemas: `SELECT * FROM information_schema.tables WHERE table_schema = 'public'`
+- Inspect table structures: `\d table_name`
+- Verify relationships and constraints
+- Check actual data counts and samples
+
+### Troubleshooting
+If MCP connection fails:
+1. **Restart Claude Code** - MCPs often need a restart to initialize
+2. **Check credentials** - Ensure password is URL-encoded (# = %23)
+3. **Fallback to scripts** - Use `npx tsx scripts/check-actual-tables.ts` if MCP unavailable
+
+### Alternative MCP Servers
+- **@bytebase/dbhub** - Universal database gateway (currently configured)
+- **@crystaldba/postgres-mcp** - PostgreSQL-specific with performance analysis
+- Custom Supabase MCP can be built using MCP SDK for RLS-aware queries
 
 ---
 

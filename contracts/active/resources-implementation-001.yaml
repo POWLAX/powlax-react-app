@@ -1,0 +1,218 @@
+# Resources Page Implementation Contract
+# Based on RESOURCES_MASTER_PLAN.md - Stage 5 Implementation
+
+contractTemplate:
+  type: ENHANCED_CONTRACT
+  version: 1.0.0
+  
+  # ===== BASIC CONTRACT INFORMATION =====
+  metadata:
+    contractId: "resources-implementation-001"
+    title: "Resources Page Implementation - Stage 5 Production Content"
+    created: "2025-01-16"
+    status: "DRAFT"
+    priority: "HIGH"
+    estimatedHours: 8
+    
+  # ===== ORIGINAL CONTRACT FORMAT =====
+  parameters:
+    component: "Resources Page"
+    currentIssue: "Stage 4 complete, need Stage 5 production content and database execution"
+    basedOnPlan: "RESOURCES_MASTER_PLAN.md"
+    
+  intent:
+    goal: "Complete Resources page implementation with production content and database execution"
+    scope: 
+      - Execute database migration in Supabase Dashboard
+      - Upload actual resource content (PDFs, videos, templates)
+      - Create production content management workflow
+      - Remove all mock data indicators
+      - Implement content approval system
+    outOfScope: 
+      - New features not in original plan
+      - UI/UX changes to existing components
+      - Database schema modifications
+    assumptions:
+      - Stages 1-4 are complete and functional
+      - Database migration file exists and is tested
+      - Content upload infrastructure is available
+    risks:
+      - Database migration could fail
+      - Content upload performance issues
+      - CDN integration complexity
+      
+  deliverables:
+    code:
+      files:
+        - "Manual SQL execution in Supabase Dashboard"
+        - "Content upload scripts"
+        - "Admin content management interface"
+      functions:
+        - "executeResourcesMigration()"
+        - "uploadResourceContent()"
+        - "manageContentApproval()"
+    tests:
+      unit:
+        - "Database migration verification"
+        - "Content upload validation"
+      integration:
+        - "End-to-end resource workflow"
+        - "Content management system"
+    documentation:
+      - "Production deployment guide"
+      - "Content management workflow"
+      
+  successCriteria:
+    functional:
+      - "Database migration executed successfully"
+      - "Real content replaces all mock data"
+      - "Content upload system functional"
+      - "Admin can manage resources"
+      - "Users can access real resources"
+    performance:
+      - "Page loads in <2 seconds"
+      - "Resource downloads <3 seconds"
+      - "Search filters <100ms"
+    quality:
+      - "No mock data indicators visible"
+      - "All permanence patterns working"
+      - "Mobile responsive"
+    testing:
+      - "All Playwright tests pass"
+      - "No console errors"
+      - "Production content accessible"
+      
+  qualityGates:
+    buildMustPass: true
+    lintMaxErrors: 0
+    testCoverage: 80
+    mobileResponsive: true
+    performanceTarget: 2
+    
+  # ===== EXECUTION STRATEGY =====
+  executionStrategy:
+    type: sequential
+    
+    parallelExecution:
+      enabled: false
+      agentCount: 1
+      
+  # ===== PRD REQUIREMENTS SECTION =====
+  prdRequirements:
+    description: "Production-ready Resources page with real content and database"
+    
+    pageRequirements:
+      mustHave:
+        - name: "Database Migration Executed"
+          exists: false
+          tested: false
+          notes: "Run 100_resources_permanence_tables.sql in Supabase Dashboard"
+          
+        - name: "Real PDF Resources"
+          exists: false
+          tested: false
+          notes: "Upload actual coaching PDFs, remove mock indicators"
+          
+        - name: "Real Video Content"
+          exists: false
+          tested: false
+          notes: "Upload training videos with thumbnails"
+          
+        - name: "Template Resources"
+          exists: false
+          tested: false
+          notes: "Practice plan templates, drill sheets"
+          
+        - name: "Content Management Interface"
+          exists: false
+          tested: false
+          notes: "Admin can upload, approve, organize resources"
+          
+        - name: "No Mock Data Visible"
+          exists: false
+          tested: false
+          notes: "All (MOCK) indicators removed from UI"
+          
+        - name: "Resource Sharing Working"
+          exists: false
+          tested: false
+          notes: "Permanence pattern functional with real data"
+          
+        - name: "Collections System"
+          exists: false
+          tested: false
+          notes: "Users can create and manage resource folders"
+          
+      niceToHave:
+        - name: "CDN Integration"
+          exists: false
+          priority: medium
+          
+        - name: "Bulk Upload Tool"
+          exists: false
+          priority: low
+          
+    verificationMethod:
+      manual:
+        - "Execute SQL migration in Supabase Dashboard"
+        - "Upload test resources through admin interface"
+        - "Verify no mock data shows to end users"
+        - "Test sharing and favorites with real data"
+        
+      automated:
+        - "Run resources-integration.spec.ts"
+        - "Verify database tables created"
+        - "Check content accessibility"
+        
+    completionCriteria:
+      - "All mustHave items marked exists: true"
+      - "Database migration successful"
+      - "Production content uploaded"
+      - "No mock data visible to users"
+      - "All permanence patterns working"
+      
+  # ===== TRACKING =====
+  tracking:
+    lastChecked: ""
+    checkedBy: ""
+    completionPercentage: 0
+    blockers: []
+    
+  # ===== REFERENCES =====
+  references:
+    originalPlan: "RESOURCES_MASTER_PLAN.md"
+    completedStages: "Stages 1-4 complete per plan"
+    migrationFile: "supabase/migrations/100_resources_permanence_tables.sql"
+    components: "src/components/resources/"
+    hook: "src/hooks/useResourceFavorites.ts"
+    page: "src/app/(authenticated)/resources/page.tsx"
+    
+  # ===== AGENT INSTRUCTIONS =====
+  agentInstructions:
+    approach: |
+      This contract focuses on Stage 5 implementation from the Resources Master Plan.
+      The foundation (Stages 1-4) is complete. Focus on:
+      1. Database migration execution
+      2. Real content upload
+      3. Production workflow setup
+      4. Mock data removal
+      
+    keyFiles:
+      - "RESOURCES_MASTER_PLAN.md (reference only)"
+      - "supabase/migrations/100_resources_permanence_tables.sql"
+      - "src/components/resources/"
+      - "src/hooks/useResourceFavorites.ts"
+      
+    criticalRules:
+      - "Follow Supabase Permanence Pattern exactly"
+      - "Preserve all existing array transformations"
+      - "No mock data in production"
+      - "Test database migration before applying"
+      
+  # ===== COMPLETION WORKFLOW =====
+  workflow:
+    phase1: "Execute database migration"
+    phase2: "Upload production content"
+    phase3: "Create admin management interface"
+    phase4: "Remove mock data indicators"
+    phase5: "Production testing and validation"

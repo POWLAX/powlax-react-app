@@ -1,5 +1,22 @@
 # POWLAX - Modern Lacrosse Training Platform
 
+## 🚨 CRITICAL: NO MOCK DATA POLICY - PRODUCTION READY MVP
+
+**ABSOLUTELY NO HARDCODED MOCK DATA ALLOWED!**
+
+### Data Integrity Requirements:
+- ❌ **NO** hardcoded users, teams, or clubs in the codebase
+- ❌ **NO** fake WordPress associations or connections
+- ❌ **NO** returning mock data from hooks or components
+- ✅ **ONLY** real data from actual database tables
+- ✅ **IF NEEDED**: Use "(MOCK)" prefix/suffix in actual Supabase tables
+- ✅ **REAL FLOW**: WordPress → Supabase → Frontend
+
+### Why This Matters:
+Mock data creates false positives that destroy production readiness. We need to see actual data flow to trust what's working.
+
+---
+
 ## 🚨 BRANCH-SPECIFIC REQUIREMENTS
 
 **Claude-to-Claude-Sub-Agent-Work-Flow Branch**: This branch must be run exclusively on port 3002 to avoid conflicts with other development branches.
@@ -10,11 +27,16 @@ npm run dev -- -p 3002
 
 ## 🤖 AI Assistant Users - START HERE
 
-**CRITICAL**: If you're using ChatGPT, Cursor, GitHub Copilot, or any AI assistant:
+**CRITICAL**: If you're using ChatGPT, Cursor, GitHub Copilot, Claude Code, or any AI assistant:
 
 1. **Read First**: [AI_FRAMEWORK_ERROR_PREVENTION.md](./AI_FRAMEWORK_ERROR_PREVENTION.md)
 2. **Project Guide**: [CLAUDE.md](./CLAUDE.md)  
 3. **Quick Start**: [AI_INIT_PROMPT.md](./AI_INIT_PROMPT.md)
+
+### For Claude Code Users
+- **Supabase MCP Integration**: Direct database access configured (see below)
+- `.claude.json` contains MCP server configuration
+- Use `CLAUDE.md` for project-specific instructions
 
 ### For Cursor Users
 - `.cursorrules` file is configured with project rules
@@ -27,6 +49,32 @@ npm run dev -- -p 3002
 ```bash
 npm run lint  # Run this before AND after AI changes
 ```
+
+## 🔌 Claude Code MCP (Model Context Protocol) Integration
+
+### Direct Database Access
+Claude Code has been configured with direct Supabase database access via MCP, eliminating reliance on potentially outdated migration files or documentation.
+
+**Benefits:**
+- Live schema inspection - see actual table structures in real-time
+- Direct SQL queries - verify data and relationships
+- No sync issues - always working with current database state
+- Faster development - no guessing about table names or structures
+
+**Configuration:**
+```bash
+# MCP server configured for POWLAX Supabase database
+claude mcp add supabase -- npx -y @bytebase/dbhub \
+--dsn "postgresql://postgres:[PASSWORD]@db.avvpyjwytcmtoiyrbibb.supabase.co:5432/postgres?sslmode=require"
+```
+
+**Usage:** When using Claude Code, it can directly query your database to:
+- Verify table existence before writing queries
+- Check column names and types
+- Understand relationships and constraints
+- Test queries before implementing them in code
+
+**Fallback:** If MCP is unavailable, use: `npx tsx scripts/check-actual-tables.ts`
 
 ## Overview
 POWLAX is a comprehensive lacrosse training ecosystem built on modern React/Next.js with Supabase backend. The platform features a complete Skills Academy system with 49 workout series, 166 workouts, and 167 drills, plus integrated team management, practice planning, and gamification systems. All data is stored in a robust 62-table PostgreSQL database providing real-time performance and scalability.

@@ -1,7 +1,15 @@
+⚠️ **CONTRACT MIGRATION NOTICE**
+**This plan has been converted to a formal contract. Please use the contract instead:**
+**→ CONTRACT: `/contracts/active/dashboard-optimization-001.yaml`**
+**→ This document remains for reference only**
+
+---
+
 # 🎯 DASHBOARD MASTER PLAN
 **Last Updated:** January 12, 2025  
 **Status:** ✅ COMPLETE - Role Switcher Functional  
-**Location:** `/src/components/dashboards/`
+**Location:** `/src/components/dashboards/`  
+**CONTRACT STATUS:** ⚠️ SUPERSEDED BY dashboard-optimization-001.yaml
 
 ---
 

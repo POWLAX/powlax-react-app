@@ -33,7 +33,7 @@ import {
   Link
 } from 'lucide-react'
 import { useViewAsAuth } from '@/hooks/useViewAsAuth'
-import { resourceDataProvider, type Resource, RESOURCE_CATEGORIES } from '@/lib/resources-data-provider'
+import { resourceDataProvider, type Resource } from '@/lib/resources-data-provider-real'
 import { useResourceFavorites } from '@/hooks/useResourceFavorites'
 import { Checkbox } from '@/components/ui/checkbox'
 import { 
@@ -96,7 +96,7 @@ export default function ResourcesPage() {
   const { user, loading: authLoading } = useViewAsAuth()
   const [resources, setResources] = useState<Resource[]>([])
   const [recentResources, setRecentResources] = useState<Resource[]>([])
-  const [categories, setCategories] = useState<typeof RESOURCE_CATEGORIES.coach>([])
+  const [categories, setCategories] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -137,32 +137,32 @@ export default function ResourcesPage() {
     return user.role || 'player'
   }
 
-  // Load resources based on user role
+  // Load resources from database (NO MOCK DATA)
   useEffect(() => {
     const loadResources = async () => {
       setLoading(true)
       try {
         const role = getUserRole()
         
-        // Get role-specific resources
+        // Get REAL resources from database
+        // If tables don't exist, returns empty array (no fallback mock data)
         const roleResources = await resourceDataProvider.getResourcesForRole(role)
         setResources(roleResources)
         
-        // Get categories for role
-        const roleCategories = resourceDataProvider.getCategoriesForRole(role)
-        setCategories(roleCategories)
+        // Get categories from actual database resources
+        const dbCategories = await resourceDataProvider.getCategories()
+        setCategories(dbCategories)
         
-        // Get user favorites if logged in
+        // Get user's real interactions if logged in
         if (user?.id) {
-          // Using local mock favorites for now
+          // Get actual favorites from database
           const userFavorites = await resourceDataProvider.getUserFavorites(user.id)
-          // setFavorites would go here if we had local state
           
-          // Get recently viewed
+          // Get real recently viewed resources
           const recent = await resourceDataProvider.getRecentlyViewed(user.id)
           setRecentResources(recent)
-        } else {
-          // For demo, show first few as recent
+        } else if (roleResources.length > 0) {
+          // Show first few resources if not logged in
           setRecentResources(roleResources.slice(0, 4))
         }
       } catch (error) {
@@ -460,41 +460,52 @@ export default function ResourcesPage() {
         )}
       </Card>
 
-      {/* Legacy Category Cards - Compact View */}
-      {processedResources.length === 0 && (
+      {/* Category Browse - Shows actual database categories */}
+      {processedResources.length === 0 && categories.length > 0 && (
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4">Browse by Category</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {categories.map((category) => {
-              const Icon = iconMap[category.icon] || BookOpen
-              const categoryResources = resources.filter(r => 
-                r.category.toLowerCase().includes(category.name.toLowerCase())
-              )
+              const categoryResources = resources.filter(r => r.category === category)
               
               return (
                 <Card 
-                  key={category.id} 
+                  key={category} 
                   className="hover:shadow-lg transition-shadow cursor-pointer"
-                  onClick={() => setFilters(prev => ({ ...prev, category: category.name }))}
+                  onClick={() => setFilters(prev => ({ ...prev, category }))}
                 >
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div className="bg-blue-50 p-3 rounded-lg">
-                        <Icon className="h-6 w-6 text-blue-600" />
+                        <BookOpen className="h-6 w-6 text-blue-600" />
                       </div>
                       <Badge variant="outline">{categoryResources.length}</Badge>
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      {category.name}
+                      {category}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      Training materials and resources
+                      {categoryResources.length} resource{categoryResources.length !== 1 ? 's' : ''} available
                     </p>
                   </CardContent>
                 </Card>
               )
             })}
           </div>
+        </div>
+      )}
+      
+      {/* No Data Message - Only shows if database is truly empty */}
+      {processedResources.length === 0 && resources.length === 0 && !loading && (
+        <div className="text-center py-12 bg-gray-50 rounded-lg">
+          <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No Resources Available</h3>
+          <p className="text-gray-600 mb-4">
+            The resource library is empty. Please check back later or contact your administrator.
+          </p>
+          <p className="text-sm text-gray-500">
+            To add test data, run: <code className="bg-gray-100 px-2 py-1 rounded">npx tsx scripts/seed-resources-database.ts</code>
+          </p>
         </div>
       )}
 
@@ -556,17 +567,19 @@ export default function ResourcesPage() {
         ).slice(0, 3)}
       />
 
-      {/* Mock Data Indicator */}
-      <div className="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+      {/* Stage 5 Status - Real Data Only */}
+      <div className="mt-8 p-4 bg-green-50 rounded-lg border border-green-200">
         <div className="flex items-start">
-          <div className="bg-gray-200 p-2 rounded-full mr-3">
-            <BookOpen className="h-4 w-4 text-gray-600" />
+          <div className="bg-green-100 p-2 rounded-full mr-3">
+            <BookOpen className="h-4 w-4 text-green-600" />
           </div>
           <div>
-            <h4 className="font-medium text-gray-800">Resource Library - Stage 4 Complete</h4>
+            <h4 className="font-medium text-gray-800">Resource Library - Stage 5: Real Data Only</h4>
             <p className="text-sm text-gray-600 mt-1">
-              ✅ New resource components integrated with filter, search, and modal functionality. 
-              Permanence pattern implemented for favorites. Ready for real content.
+              ✅ NO MOCK DATA: All resources come from the database. 
+              {resources.length > 0 ? 
+                `Displaying ${resources.length} resources from powlax_resources table.` : 
+                'Database is empty. Run seed script to add test data marked with "(MOCK)".'}
             </p>
           </div>
         </div>

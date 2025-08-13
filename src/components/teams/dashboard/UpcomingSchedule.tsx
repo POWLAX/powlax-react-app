@@ -32,12 +32,11 @@ interface UpcomingScheduleProps {
 export function UpcomingSchedule({ events, team, canManage }: UpcomingScheduleProps) {
   const [newEventOpen, setNewEventOpen] = useState(false)
   const [newEvent, setNewEvent] = useState({
-    title: '',
-    event_type: 'practice' as 'practice' | 'game' | 'tournament' | 'meeting',
+    name: '',
+    practice_date: '',
     start_time: '',
-    end_time: '',
-    location: '',
-    description: ''
+    duration_minutes: 90,
+    is_public: false
   })
   const { createEvent } = useTeamDashboard(team.id)
 
@@ -96,22 +95,23 @@ export function UpcomingSchedule({ events, team, canManage }: UpcomingSchedulePr
   }
 
   const handleCreateEvent = async () => {
-    if (!newEvent.title || !newEvent.start_time || !newEvent.end_time) return
+    if (!newEvent.name || !newEvent.practice_date) return
 
     const result = await createEvent({
-      ...newEvent,
-      start_time: new Date(newEvent.start_time).toISOString(),
-      end_time: new Date(newEvent.end_time).toISOString()
+      name: newEvent.name,
+      practice_date: newEvent.practice_date,
+      start_time: newEvent.start_time || null,
+      duration_minutes: newEvent.duration_minutes || null,
+      is_public: newEvent.is_public
     })
 
     if (result.data) {
       setNewEvent({
-        title: '',
-        event_type: 'practice',
+        name: '',
+        practice_date: '',
         start_time: '',
-        end_time: '',
-        location: '',
-        description: ''
+        duration_minutes: 90,
+        is_public: false
       })
       setNewEventOpen(false)
     }
@@ -138,72 +138,55 @@ export function UpcomingSchedule({ events, team, canManage }: UpcomingSchedulePr
                   <DialogTitle>Create New Event</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium">Event Title</label>
-                      <Input
-                        placeholder="e.g., Team Practice"
-                        value={newEvent.title}
-                        onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Event Type</label>
-                      <Select 
-                        value={newEvent.event_type} 
-                        onValueChange={(value: typeof newEvent.event_type) => 
-                          setNewEvent({ ...newEvent, event_type: value })
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="practice">Practice</SelectItem>
-                          <SelectItem value="game">Game</SelectItem>
-                          <SelectItem value="tournament">Tournament</SelectItem>
-                          <SelectItem value="meeting">Meeting</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                  <div>
+                    <label className="text-sm font-medium">Practice Name</label>
+                    <Input
+                      placeholder="e.g., Team Practice"
+                      value={newEvent.name}
+                      onChange={(e) => setNewEvent({ ...newEvent, name: e.target.value })}
+                    />
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium">Start Time</label>
+                      <label className="text-sm font-medium">Practice Date</label>
                       <Input
-                        type="datetime-local"
+                        type="date"
+                        value={newEvent.practice_date}
+                        onChange={(e) => setNewEvent({ ...newEvent, practice_date: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Start Time (Optional)</label>
+                      <Input
+                        type="time"
                         value={newEvent.start_time}
                         onChange={(e) => setNewEvent({ ...newEvent, start_time: e.target.value })}
                       />
                     </div>
-                    <div>
-                      <label className="text-sm font-medium">End Time</label>
-                      <Input
-                        type="datetime-local"
-                        value={newEvent.end_time}
-                        onChange={(e) => setNewEvent({ ...newEvent, end_time: e.target.value })}
-                      />
-                    </div>
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium">Location</label>
+                    <label className="text-sm font-medium">Duration (minutes)</label>
                     <Input
-                      placeholder="e.g., Field 2"
-                      value={newEvent.location}
-                      onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
+                      type="number"
+                      placeholder="90"
+                      value={newEvent.duration_minutes}
+                      onChange={(e) => setNewEvent({ ...newEvent, duration_minutes: parseInt(e.target.value) || 90 })}
                     />
                   </div>
 
-                  <div>
-                    <label className="text-sm font-medium">Description (Optional)</label>
-                    <Textarea
-                      placeholder="Additional details about the event..."
-                      value={newEvent.description}
-                      onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
-                      rows={3}
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="is_public"
+                      checked={newEvent.is_public}
+                      onChange={(e) => setNewEvent({ ...newEvent, is_public: e.target.checked })}
+                      className="h-4 w-4"
                     />
+                    <label htmlFor="is_public" className="text-sm font-medium">
+                      Make this practice public
+                    </label>
                   </div>
 
                   <div className="flex justify-end space-x-2">
@@ -238,8 +221,8 @@ export function UpcomingSchedule({ events, team, canManage }: UpcomingSchedulePr
           <div className="space-y-4">
             {events.slice(0, 3).map((event) => {
               const WeatherIcon = getWeatherIcon(event.weather_conditions?.conditions)
-              const eventDate = formatEventDate(event.start_time)
-              const isHighPriority = isToday(event.start_time) || isTomorrow(event.start_time)
+              const eventDate = formatEventDate(event.practice_date)
+              const isHighPriority = isToday(event.practice_date) || isTomorrow(event.practice_date)
               
               return (
                 <div 
@@ -253,12 +236,12 @@ export function UpcomingSchedule({ events, team, canManage }: UpcomingSchedulePr
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-1">
-                        <h3 className="font-semibold text-gray-900">{event.title}</h3>
+                        <h3 className="font-semibold text-gray-900">{event.name || 'Practice'}</h3>
                         <Badge 
                           variant="outline" 
-                          className={`capitalize text-xs ${getEventTypeColor(event.event_type)}`}
+                          className={`capitalize text-xs ${event.is_public ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}`}
                         >
-                          {event.event_type}
+                          {event.is_public ? 'Public' : 'Team Only'}
                         </Badge>
                         {isHighPriority && (
                           <Badge variant="default" className="bg-powlax-orange text-white">
@@ -272,44 +255,30 @@ export function UpcomingSchedule({ events, team, canManage }: UpcomingSchedulePr
                           <Clock className="h-3 w-3" />
                           <span>
                             {!isHighPriority && `${eventDate} • `}
-                            {new Date(event.start_time).toLocaleTimeString([], { 
-                              hour: '2-digit', 
-                              minute: '2-digit' 
-                            })} - {new Date(event.end_time).toLocaleTimeString([], { 
-                              hour: '2-digit', 
-                              minute: '2-digit' 
-                            })}
+                            {event.start_time ? 
+                              event.start_time.substring(0, 5) : 
+                              'Time TBD'
+                            }
+                            {event.duration_minutes && ` (${event.duration_minutes} min)`}
                           </span>
                         </div>
                         
-                        {event.location && (
+                        {event.duration_minutes && (
                           <div className="flex items-center space-x-1">
-                            <MapPin className="h-3 w-3" />
-                            <span>{event.location}</span>
+                            <Clock className="h-3 w-3" />
+                            <span>{event.duration_minutes} minutes</span>
                           </div>
                         )}
                       </div>
 
-                      {event.description && (
-                        <p className="text-sm text-gray-600 mt-2 line-clamp-2">
-                          {event.description}
+                      {event.created_at && (
+                        <p className="text-xs text-gray-500 mt-2">
+                          Created {new Date(event.created_at).toLocaleDateString()}
                         </p>
                       )}
                     </div>
 
-                    {/* Weather conditions for outdoor events */}
-                    {event.weather_conditions && (
-                      <div className="ml-4 flex flex-col items-center space-y-1 text-xs text-gray-600">
-                        <WeatherIcon className="h-5 w-5" />
-                        <div className="text-center">
-                          <div className="font-medium">{event.weather_conditions.temp}°F</div>
-                          <div className="flex items-center space-x-1">
-                            <Wind className="h-3 w-3" />
-                            <span>{event.weather_conditions.wind}</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                    {/* Remove weather since it's not in practices table */}
                   </div>
 
                   {/* Action buttons for high priority events */}
@@ -319,9 +288,9 @@ export function UpcomingSchedule({ events, team, canManage }: UpcomingSchedulePr
                         <Edit className="h-3 w-3 mr-1" />
                         Edit
                       </Button>
-                      {isToday(event.start_time) && (
+                      {isToday(event.practice_date) && (
                         <Button size="sm" className="text-xs bg-green-600 hover:bg-green-700">
-                          Start Event
+                          Start Practice
                         </Button>
                       )}
                     </div>

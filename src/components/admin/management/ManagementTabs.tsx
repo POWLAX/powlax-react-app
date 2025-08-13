@@ -14,6 +14,8 @@ import {
 } from 'lucide-react'
 import UsersTabContent from './UsersTabContent'
 import MemberpressStatusPanel from '../MemberpressStatusPanel'
+import MagicLinkPanel from '../MagicLinkPanel'
+import { DocumentationHelper } from './DocumentationHelper'
 import ClubsManagementTab from '../platform/ClubsManagementTab'
 import TeamHQManagementTab from '../platform/TeamHQManagementTab'
 import CoachingKitManagementTab from '../platform/CoachingKitManagementTab'
@@ -66,28 +68,18 @@ export default function ManagementTabs({ children, defaultTab = 'roles' }: Manag
       
       {/* Memberpress Sync Tab */}
       <TabsContent value="memberpress" className="space-y-4">
+        <div className="flex justify-end mb-4">
+          <DocumentationHelper feature="memberpress" />
+        </div>
         <MemberpressStatusPanel />
       </TabsContent>
       
       {/* Magic Links Tab */}
       <TabsContent value="magic-links" className="space-y-4">
-        <Card className="bg-white rounded-lg border border-gray-200 shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-gray-900">
-              <Link className="h-5 w-5" />
-              Magic Link Management
-            </CardTitle>
-            <CardDescription>
-              Generate and manage magic links for user authentication
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-600">
-              Create registration links, manage authentication flows, and track link usage.
-              Features coming in Phase 2.
-            </p>
-          </CardContent>
-        </Card>
+        <div className="flex justify-end mb-4">
+          <DocumentationHelper feature="magicLinks" />
+        </div>
+        <MagicLinkPanel />
       </TabsContent>
       
       {/* Clubs Tab */}
@@ -97,16 +89,25 @@ export default function ManagementTabs({ children, defaultTab = 'roles' }: Manag
       
       {/* Teams Tab */}
       <TabsContent value="teams" className="space-y-4">
+        <div className="flex justify-end mb-4">
+          <DocumentationHelper feature="teams" />
+        </div>
         <TeamHQManagementTab />
       </TabsContent>
       
       {/* Coaching Kit Tab */}
       <TabsContent value="coaching" className="space-y-4">
+        <div className="flex justify-end mb-4">
+          <DocumentationHelper feature="coaching" />
+        </div>
         <CoachingKitManagementTab />
       </TabsContent>
       
       {/* Analytics Tab */}
       <TabsContent value="analytics" className="space-y-4">
+        <div className="flex justify-end mb-4">
+          <DocumentationHelper feature="analytics" />
+        </div>
         <PlatformAnalyticsDashboard />
       </TabsContent>
     </Tabs>

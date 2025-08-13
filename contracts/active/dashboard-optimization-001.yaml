@@ -1,0 +1,210 @@
+# Dashboard System Optimization Contract
+# Based on DASHBOARD_MASTER_PLAN.md - Performance and Feature Enhancements
+
+contractTemplate:
+  type: ENHANCED_CONTRACT
+  version: 1.0.0
+  
+  # ===== BASIC CONTRACT INFORMATION =====
+  metadata:
+    contractId: "dashboard-optimization-001"
+    title: "Dashboard System Optimization - Advanced Features"
+    created: "2025-01-16"
+    status: "DRAFT"
+    priority: "MEDIUM"
+    estimatedHours: 10
+    
+  # ===== ORIGINAL CONTRACT FORMAT =====
+  parameters:
+    component: "Dashboard System"
+    currentIssue: "Dashboard master plan complete, need optimizations and advanced features"
+    basedOnPlan: "DASHBOARD_MASTER_PLAN.md"
+    
+  intent:
+    goal: "Optimize and enhance completed Dashboard system with advanced capabilities"
+    scope: 
+      - WebSocket real-time updates
+      - Advanced analytics integration
+      - Custom dashboard widgets
+      - Export functionality
+      - Performance optimizations
+      - Enhanced mobile experience
+    outOfScope: 
+      - Basic dashboard functionality (complete)
+      - Role-based routing (working)
+      - Authentication system changes
+    assumptions:
+      - Dashboard Master Plan implementation is complete
+      - All 6 dashboard components functional
+      - Role switcher working
+      - Mock data system operational
+    risks:
+      - WebSocket implementation complexity
+      - Performance impact from real-time updates
+      - Mobile optimization challenges
+      
+  deliverables:
+    code:
+      files:
+        - "WebSocket integration for real-time updates"
+        - "Custom widget system"
+        - "Export functionality components"
+        - "Performance optimization utilities"
+      functions:
+        - "initializeWebSocketConnection()"
+        - "createCustomWidget()"
+        - "exportDashboardData()"
+        - "optimizeDashboardQueries()"
+    tests:
+      unit:
+        - "WebSocket connection tests"
+        - "Widget creation tests"
+      integration:
+        - "Real-time update tests"
+        - "Export functionality tests"
+    documentation:
+      - "WebSocket implementation guide"
+      - "Custom widget development guide"
+      
+  successCriteria:
+    functional:
+      - "Real-time updates working across all dashboards"
+      - "Custom widgets configurable by users"
+      - "Export functionality for all data types"
+      - "Performance improvements measurable"
+    performance:
+      - "Dashboard load time <1.5 seconds (improved from <2s)"
+      - "Real-time updates <100ms latency"
+      - "Export generation <5 seconds"
+    quality:
+      - "No regression in existing functionality"
+      - "Mobile experience enhanced"
+      - "Error handling for connection issues"
+    testing:
+      - "All existing Playwright tests pass"
+      - "New real-time features tested"
+      - "Performance benchmarks met"
+      
+  qualityGates:
+    buildMustPass: true
+    lintMaxErrors: 0
+    testCoverage: 85
+    mobileResponsive: true
+    performanceTarget: 1.5
+    
+  # ===== EXECUTION STRATEGY =====
+  executionStrategy:
+    type: sequential
+    
+    parallelExecution:
+      enabled: false
+      agentCount: 1
+      
+  # ===== PRD REQUIREMENTS SECTION =====
+  prdRequirements:
+    description: "Optimized Dashboard system with real-time capabilities and advanced features"
+    
+    pageRequirements:
+      mustHave:
+        - name: "WebSocket Real-time Updates"
+          exists: false
+          tested: false
+          notes: "Live data updates without page refresh"
+          
+        - name: "Performance Optimizations"
+          exists: false
+          tested: false
+          notes: "Improved load times, query optimization, caching"
+          
+        - name: "Export Functionality"
+          exists: false
+          tested: false
+          notes: "PDF/CSV export for all dashboard data"
+          
+        - name: "Enhanced Mobile Experience"
+          exists: false
+          tested: false
+          notes: "Improved touch interactions, better responsive design"
+          
+        - name: "Advanced Analytics Integration"
+          exists: false
+          tested: false
+          notes: "Connect to real analytics data, not mock"
+          
+        - name: "Custom Widget System"
+          exists: false
+          tested: false
+          notes: "Users can customize their dashboard layout"
+          
+      niceToHave:
+        - name: "Dark Mode Support"
+          exists: false
+          priority: medium
+          
+        - name: "Keyboard Shortcuts"
+          exists: false
+          priority: low
+          
+    verificationMethod:
+      manual:
+        - "Test real-time updates across all dashboards"
+        - "Verify export functionality works"
+        - "Test mobile experience on various devices"
+        - "Validate custom widget creation"
+        
+      automated:
+        - "Run dashboard-verification.spec.ts"
+        - "Performance testing suite"
+        - "WebSocket connection tests"
+        
+    completionCriteria:
+      - "All mustHave items functional"
+      - "Performance targets exceeded"
+      - "Real-time updates working reliably"
+      - "Export functionality complete"
+      
+  # ===== TRACKING =====
+  tracking:
+    lastChecked: ""
+    checkedBy: ""
+    completionPercentage: 0
+    blockers: []
+    
+  # ===== REFERENCES =====
+  references:
+    originalPlan: "DASHBOARD_MASTER_PLAN.md"
+    completedFeatures: "All 6 dashboards, role switcher functional"
+    location: "src/components/dashboards/"
+    hooks: "src/hooks/useDashboardData.ts"
+    queries: "src/lib/dashboard-queries.ts"
+    tests: "tests/e2e/dashboard-verification.spec.ts"
+    
+  # ===== AGENT INSTRUCTIONS =====
+  agentInstructions:
+    approach: |
+      This contract enhances the completed Dashboard Master Plan.
+      Foundation is solid - focus on optimization and advanced features:
+      1. Real-time capabilities
+      2. Performance improvements
+      3. Advanced user features
+      4. Mobile optimization
+      
+    keyFiles:
+      - "DASHBOARD_MASTER_PLAN.md (reference only)"
+      - "src/components/dashboards/"
+      - "src/hooks/useDashboardData.ts"
+      - "src/lib/dashboard-queries.ts"
+      
+    criticalRules:
+      - "Maintain existing role-based routing"
+      - "Preserve role switcher functionality"
+      - "Don't break mock data system"
+      - "Ensure backward compatibility"
+      
+  # ===== COMPLETION WORKFLOW =====
+  workflow:
+    phase1: "Performance analysis and optimization"
+    phase2: "WebSocket implementation"
+    phase3: "Export functionality development"
+    phase4: "Custom widget system"
+    phase5: "Enhanced mobile optimization"

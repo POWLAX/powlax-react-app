@@ -29,6 +29,7 @@ import {
 } from 'lucide-react'
 import { useClubsManagement } from '@/hooks/useClubsManagement'
 import { TierEnforcementEngine } from '@/lib/platform/tier-enforcement'
+import { DocumentationHelper, InlineDocumentation } from '../management/DocumentationHelper'
 
 export default function ClubsManagementTab() {
   const {
@@ -167,6 +168,11 @@ export default function ClubsManagementTab() {
 
   return (
     <div className="space-y-6">
+      {/* Documentation Helper */}
+      <div className="flex justify-end mb-4">
+        <DocumentationHelper feature="clubs" />
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -185,6 +191,10 @@ export default function ClubsManagementTab() {
           <CardTitle className="flex items-center gap-2 text-gray-900">
             <Building className="h-5 w-5" />
             Select Club
+            <InlineDocumentation 
+              tableName="clubs" 
+              action="Select organization to manage"
+            />
           </CardTitle>
           <CardDescription>
             Choose a club to manage settings and teams
@@ -208,7 +218,7 @@ export default function ClubsManagementTab() {
                     )}
                   </div>
                   <div className="text-sm text-gray-600 space-y-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2" title="Count from teams table where club_id matches">
                       <Users className="h-3 w-3" />
                       {club.team_count || 0} teams
                     </div>
@@ -414,7 +424,14 @@ export default function ClubsManagementTab() {
           <TabsContent value="teams" className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold">Team Management</h3>
+                <h3 className="text-lg font-semibold">
+                  Team Management
+                  <InlineDocumentation 
+                    tableName="teams" 
+                    action="Manage teams linked to club"
+                    fields={['club_id', 'name', 'age_group']}
+                  />
+                </h3>
                 <p className="text-gray-600">Manage teams within {selectedClub.name}</p>
               </div>
               <Button disabled={!hasFeatureAccess('team_management')} className="bg-blue-600 hover:bg-blue-700 text-white">

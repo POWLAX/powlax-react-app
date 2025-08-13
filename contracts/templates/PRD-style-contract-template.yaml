@@ -43,6 +43,18 @@ contractTemplate:
         description: "Video URLs from drill records"
         testable: "drill.video_url populates modal"
         status: NOT_CONNECTED | PARTIAL | CONNECTED
+        
+      # NO MOCK DATA POLICY - CRITICAL FOR MVP
+      - name: "No Hardcoded Mock Data"
+        description: "ZERO hardcoded fake data in codebase"
+        testable: "All data from real database or marked (MOCK)"
+        status: COMPLIANT | VIOLATION
+        policy:
+          - NO hardcoded users, teams, or clubs
+          - NO fake WordPress associations
+          - NO mock data from hooks/components
+          - IF needed: Add "(MOCK)" prefix to database entries
+          - Real flow: WordPress → Supabase → Frontend
     
     # UI Requirements - "Does it look/work right?"
     ui:

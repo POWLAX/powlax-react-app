@@ -20,6 +20,48 @@ This is the complete, production-ready workflow system for developing the entire
 
 ---
 
+## 🚨 **CRITICAL: NO MOCK DATA POLICY**
+
+### **MANDATORY DATA INTEGRITY REQUIREMENTS**
+**ABSOLUTELY NO HARDCODED MOCK DATA IN ANY DEVELOPMENT!**
+
+#### **Policy Requirements:**
+- ❌ **NO** hardcoded mock users, teams, or clubs in codebase
+- ❌ **NO** fake WordPress associations or connections  
+- ❌ **NO** returning mock data from hooks or components
+- ✅ **ONLY** real data from actual database tables
+- ✅ **IF TESTING NEEDED:** Use "(MOCK)" prefix in actual Supabase tables
+- ✅ **REAL FLOW:** WordPress → Supabase → Frontend
+
+#### **Why This Matters:**
+- Mock data creates false positives that destroy production readiness
+- MVP requires real data flow to trust what's working
+- Debugging becomes impossible with mixed real/fake data
+- User cannot distinguish between working features and fake demos
+
+#### **Implementation:**
+```typescript
+// ❌ NEVER DO THIS - Creates false positives
+const mockTeams = [
+  { id: 1, name: "Team Alpha", club: "Club OS" }
+];
+
+// ✅ CORRECT - Query real data or clearly marked test data
+const { data: teams } = await supabase
+  .from('teams')
+  .select('*'); // Returns real teams or "(MOCK) Team Name" entries
+```
+
+#### **Agent Requirements:**
+All sub-agents MUST:
+1. Check for and remove any hardcoded mock data
+2. Query real database tables only
+3. If test data needed, insert with "(MOCK)" prefix
+4. Never return fake data from components
+5. Validate all data comes from actual sources
+
+---
+
 ## 📋 **MASTER CONTROLLER OPERATIONAL WORKFLOW**
 
 ### **Step 1: Task Reception & Contract Creation**

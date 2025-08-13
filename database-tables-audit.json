@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-12T15:59:41.182Z",
+  "timestamp": "2025-08-13T04:34:44.120Z",
   "existingTables": [
     {
       "name": "skills_academy_drills",
@@ -291,7 +291,7 @@
     },
     {
       "name": "clubs",
-      "recordCount": 3,
+      "recordCount": 7,
       "columns": [
         "id",
         "name",
@@ -301,7 +301,7 @@
     },
     {
       "name": "teams",
-      "recordCount": 14,
+      "recordCount": 17,
       "columns": [
         "id",
         "club_id",
@@ -641,7 +641,7 @@
     },
     {
       "name": "webhook_queue",
-      "recordCount": 138,
+      "recordCount": 156,
       "columns": [
         "id",
         "webhook_id",

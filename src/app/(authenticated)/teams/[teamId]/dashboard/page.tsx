@@ -13,6 +13,7 @@ import { ProgressOverview } from '@/components/teams/dashboard/ProgressOverview'
 import { RecentActivity } from '@/components/teams/dashboard/RecentActivity'
 import { ParentView } from '@/components/teams/dashboard/ParentView'
 import { PlayerView } from '@/components/teams/dashboard/PlayerView'
+import TeamPlaybookSection from '@/components/teams/dashboard/TeamPlaybookSection'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
@@ -166,6 +167,13 @@ export default function TeamDashboardPage() {
 
           {/* Right column - Progress and activity */}
           <div className="space-y-6">
+            {/* Team Playbook Section */}
+            <TeamPlaybookSection 
+              teamId={teamId}
+              teamName={team.name}
+              isCoach={!!isCoach}
+            />
+
             {/* Team development progress */}
             <ProgressOverview 
               team={team}

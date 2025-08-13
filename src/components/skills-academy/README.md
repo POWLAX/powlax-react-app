@@ -1,5 +1,13 @@
 # 🎓 **POWLAX Skills Academy Components**
 
+## 🚨 CRITICAL: NO MOCK DATA POLICY
+
+**ABSOLUTELY NO HARDCODED MOCK DATA!**
+- ❌ **NO** hardcoded workouts, drills, or user progress
+- ❌ **NO** fake point values or completion states
+- ✅ **ONLY** real data from `skills_academy_*` tables
+- ✅ **IF NEEDED**: Add test data with "(MOCK)" prefix to actual database
+
 *Component Directory: `src/components/skills-academy/`*  
 *Pages Location: `src/app/(authenticated)/skills-academy/`*
 

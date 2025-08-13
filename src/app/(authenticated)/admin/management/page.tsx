@@ -41,6 +41,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import ManagementTabs from '@/components/admin/management/ManagementTabs'
+import { DocumentationHelper, InlineDocumentation } from '@/components/admin/management/DocumentationHelper'
 
 interface User {
   id: string
@@ -231,6 +232,11 @@ export default function ManagementPage() {
   // Prepare the role management content to pass to tabs
   const roleManagementContent = (
     <div className="space-y-6">
+      {/* Documentation Helper */}
+      <div className="flex justify-end mb-4">
+        <DocumentationHelper feature="roles" />
+      </div>
+
       {/* Role Statistics */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <Card className="bg-white rounded-lg border border-gray-200 shadow-sm">
@@ -297,6 +303,11 @@ export default function ManagementPage() {
           <CardTitle className="text-lg flex items-center gap-2 text-gray-900">
             <Shield className="h-4 w-4" />
             Your Permissions
+            <InlineDocumentation 
+              tableName="users" 
+              fields={['roles[]']}
+              action="Role-based access control"
+            />
           </CardTitle>
         </CardHeader>
         <CardContent>
