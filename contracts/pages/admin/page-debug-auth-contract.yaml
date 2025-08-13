@@ -1,0 +1,155 @@
+# Page Contract: Debug Auth Page
+# Route: /debug-auth
+
+contractId: "page-debug-auth-20250113"
+pageInfo:
+  route: "/debug-auth"
+  filePath: "src/app/(authenticated)/debug-auth/page.tsx"
+  pageType: "client"
+  category: "debug"
+  dynamicSegments: []
+
+renderingStrategy:
+  componentType: "Client Component"
+  dataFetching: "client-side"
+  streamingEnabled: false
+  suspenseBoundaries: []
+  errorBoundaries: []
+
+dataOrchestration:
+  serverDataFetching: []
+  clientDataFetching:
+    - hook: "useAuth"
+      trigger: "On mount"
+      tables: []
+      realtime: false
+    - hook: "useRequireAuth"
+      trigger: "On mount"
+      tables: []
+      realtime: false
+    - hook: "useEffect + localStorage"
+      trigger: "On mount"
+      tables: []
+      realtime: false
+  propsFlow:
+    fromServer: {}
+    toClient: {}
+
+componentComposition:
+  componentsUsed:
+    - name: "Button"
+      source: "@/components/ui/button"
+      props: "Various action buttons"
+      conditionalRendering: "Always after mount"
+  layoutUsed: "(authenticated)/layout.tsx"
+  providerDependencies: ["SupabaseAuthContext"]
+
+routingLogic:
+  guards: []
+  navigation:
+    - triggers: ["Debug buttons"]
+      destinations: ["Various app routes"]
+      method: "window.location.href"
+  dynamicRouting: []
+
+pageSpecificLogic:
+  businessLogic: "Authentication debugging and testing interface"
+  stateManagement: "State for localStorage data and mount status"
+  sideEffects: ["localStorage manipulation", "Page reloads", "Direct navigation"]
+  formHandling: "None"
+
+serverClientBoundary:
+  serverComponents: []
+  clientComponents: 
+    - "DebugAuthPage (root component)"
+    - "All UI and action components"
+  boundaryLocation: "Entire page is client-side"
+  dataSerializationPoints: []
+
+performancePatterns:
+  prefetching: []
+  lazyLoading: []
+  codeSpliitting: []
+  optimizations: 
+    - "Mounted state to prevent hydration issues"
+
+securityPatterns:
+  authentication: "Debug access to auth hooks"
+  authorization: "None (debug page)"
+  dataValidation: "None"
+  csrfProtection: false
+
+integrationPoints:
+  supabaseUsage:
+    directQueries: false
+    throughHooks: true
+    serverSideOnly: false
+  externalAPIs: []
+  webhooks: []
+  realtimeSubscriptions: []
+
+debugSpecificFeatures:
+  authHookTesting:
+    useAuth: "Tests auth context state and user presence"
+    useRequireAuth: "Tests auth requirement hook behavior"
+    hookComparison: "Side-by-side comparison of hook states"
+    
+  localStorageInspection:
+    keys: ["supabase_auth_user", "supabase_auth_session"]
+    visualization: "JSON data display"
+    manipulation: "Clear and set operations"
+    
+  mockAuthentication:
+    testUser:
+      id: "523f2768-6404-439c-a429-f9eb6736aa17"
+      email: "patrick@powlax.com"
+      role: "admin"
+      permissions: "Full admin access"
+    method: "localStorage manipulation"
+    
+  navigationTesting:
+    routes: ["/dashboard", "/skills-academy", "/skills-academy/workouts", "/teams/1/practice-plans", "/admin/role-management"]
+    method: "Direct window.location.href navigation"
+    purpose: "Test auth-protected routes"
+    
+  diagnosticCapabilities:
+    authState: "Real-time auth context analysis"
+    storageState: "localStorage inspection"
+    hookComparison: "useAuth vs useRequireAuth differences"
+    troubleshooting: "Common auth issue identification"
+
+actionFeatures:
+  clearAuth: "Removes all auth data and reloads page"
+  setDirectLogin: "Injects mock admin user data"
+  pageReload: "Force page refresh"
+  routeTesting: "Navigate to various auth-protected routes"
+
+uiPatterns:
+  layout: "Sectioned cards for different debug aspects"
+  statusIndicators: "Color-coded status displays (green/red/yellow)"
+  actionButtons: "Prominent buttons for auth manipulation"
+  dataDisplay: "Structured display of auth and storage data"
+
+loadingStates:
+  mounting: "Prevents rendering until client-side mounted"
+  authHooks: "Shows loading states of auth hooks"
+
+diagnosticAnalysis:
+  scenarios:
+    authLoading: "Identifies when auth is still loading"
+    contextMismatch: "Detects localStorage vs context discrepancies"
+    noAuth: "Identifies complete absence of auth data"
+    authWorking: "Confirms successful auth state"
+
+securityConsiderations:
+  debugAccess: "No access restrictions (should be removed in production)"
+  mockData: "Hardcoded admin credentials for testing"
+  dataExposure: "Displays sensitive auth data"
+
+notes:
+  - "Essential debugging tool for authentication issues"
+  - "Provides comprehensive auth state inspection"
+  - "Allows mock authentication for development"
+  - "Should be restricted or removed in production"
+  - "Excellent for troubleshooting auth flow problems"
+  - "Helps identify context vs localStorage sync issues"

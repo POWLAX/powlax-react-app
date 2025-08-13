@@ -1,0 +1,127 @@
+# Component Contract: Tooltip UI Component
+
+contractId: "component-tooltip-20250113"
+componentInfo:
+  name: "Tooltip"
+  filePath: "src/components/ui/tooltip.tsx"
+  category: "ui-foundation"
+  parentPage: "multiple"
+  complexity: "simple"
+  
+functionalAnalysis:
+  purpose: "Contextual help and information display that appears on hover or focus"
+  primaryFunction: "Provides additional information without cluttering the interface"
+  userInteractions: ["hover to show", "focus for keyboard users", "auto-dismiss on leave"]
+  businessLogic: "Contextual help system with positioning and timing management"
+  stateManagement: "Radix primitive handles show/hide state and positioning"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements: ["tooltip styling", "positioning offset", "animations", "z-index layering"]
+  mockDataUsage: []
+  realDataPercentage: 0
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: ["cn (className utility)"]
+  externalLibraries: ["@radix-ui/react-tooltip"]
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: []
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: ["Add size variants", "Add color variants for different types", "Add delay customization"]
+  priority: "low"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation: ["accessibility features", "positioning behavior", "usage guidelines"]
+  
+componentInteractions:
+  callsComponents: []
+  calledByComponents: ["Icon buttons", "Help indicators", "Complex UI elements", "Form fields", "Status indicators"]
+  sharedState: []
+  eventCommunication: []
+  propsPassedTo: []
+  propsReceivedFrom: ["tooltip content and positioning from parent"]
+  
+userJourneyContext:
+  userFlows: ["Help Context->Understanding Features", "Complex UI->Clarification", "Icon Buttons->Action Explanation"]
+  criticalForMVP: false
+  usageFrequency: "medium"
+  primaryUserTypes: ["new users", "coach", "admin"]
+  featureArea: "ui-foundation"
+  journeyStage: "onboarding"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "Tooltip"
+  reasonForDuplication: "n/a"
+  consolidationStrategy: "n/a"
+  supabaseIntegrationWinner: "n/a"
+
+# Usage Analysis
+usagePatterns:
+  helpText: "Explaining complex features or unfamiliar terminology"
+  iconButtons: "Providing context for icon-only buttons"
+  formFields: "Additional guidance for form inputs"
+  statusIndicators: "Explaining status meanings or system states"
+  mobileFriendly: true
+  
+components:
+  TooltipProvider: "Context provider for tooltip functionality"
+  Tooltip: "Root tooltip component"
+  TooltipTrigger: "Element that triggers tooltip display"
+  TooltipContent: "Tooltip content with positioning"
+  
+accessibility:
+  - "Keyboard navigation support"
+  - "Screen reader compatible"
+  - "Focus management"
+  - "ARIA roles and states"
+  - "Proper dismissal behavior"
+  
+positioning:
+  - "Auto-positioning to stay in viewport"
+  - "Multiple side options (top, bottom, left, right)"
+  - "Offset customization for proper spacing"
+  - "Collision detection and avoidance"
+  
+useCases:
+  helpSystem: "Contextual help without cluttering interface"
+  featureExplanation: "Explaining new or complex features"
+  iconClarification: "Describing icon button purposes"
+  statusMeaning: "Explaining status indicators and system states"
+  
+mobileConsiderations:
+  - "Touch-friendly trigger areas"
+  - "Appropriate timing for touch interactions"
+  - "Readable text size"
+  - "Non-intrusive positioning"
+  
+bestPractices:
+  - "Keep tooltip content concise"
+  - "Use for supplementary information only"
+  - "Don't rely on tooltips for critical information"
+  - "Test with keyboard and screen readers"
+  
+integrationOpportunity: "Could display dynamic help content or user preferences"

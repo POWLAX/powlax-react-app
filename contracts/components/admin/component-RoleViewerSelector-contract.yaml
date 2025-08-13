@@ -1,0 +1,101 @@
+# Component Contract: RoleViewerSelector
+contractId: "component-RoleViewerSelector-20250113"
+componentInfo:
+  name: "RoleViewerSelector"
+  filePath: "/src/components/admin/RoleViewerSelector.tsx"
+  category: "admin"
+  parentPage: "authenticated layout"
+  complexity: "moderate"
+  
+functionalAnalysis:
+  purpose: "Provides role-based viewing mode switcher for administrators"
+  primaryFunction: "Allows administrators to view application as different user roles (player, coach, parent, director)"
+  userInteractions: 
+    - "Click role buttons to switch viewing perspective"
+    - "Exit viewing mode with dedicated button"
+    - "Keyboard shortcut (Ctrl+Shift+R) to exit"
+  businessLogic: "Security-enforced role switching for testing and support"
+  stateManagement: "React context (RoleViewerContext) with local state for UI"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "context"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements: 
+    - "Role icon mappings"
+    - "Role color schemes"
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks:
+    - "useAuth (authentication context)"
+    - "useRoleViewer (role viewing context)"
+    - "useEffect, useState (React hooks)"
+  contexts:
+    - "SupabaseAuthContext"
+    - "RoleViewerContext"
+  utilities: []
+  externalLibraries:
+    - "lucide-react (icons)"
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations:
+    - "Maps role values to display labels and icons"
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Could add role permission validation"
+    - "Consider audit logging for role switches"
+  priority: "high"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation:
+    - "Security implications of role switching"
+    - "Available roles and their permissions"
+  
+componentInteractions:
+  callsComponents: 
+    - "Button (UI component)"
+    - "Badge (UI component)"
+  calledByComponents:
+    - "AuthenticatedLayout"
+  sharedState:
+    - "RoleViewerContext (viewing role state)"
+    - "SupabaseAuthContext (user authentication)"
+  eventCommunication: []
+  propsPassedTo: []
+  propsReceivedFrom: []
+  
+userJourneyContext:
+  userFlows:
+    - "Admin -> Role Switch -> View As Other Role -> Exit"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["admin"]
+  featureArea: "admin"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "RoleViewerSelector"
+  reasonForDuplication: ""
+  consolidationStrategy: ""
+  supabaseIntegrationWinner: "N/A"

@@ -1,0 +1,184 @@
+# Parent View Component Contract
+contractId: "component-parent-view-20250113"
+componentInfo:
+  name: "ParentView"
+  filePath: "src/components/teams/dashboard/ParentView.tsx"
+  category: "Team Management"
+  parentPage: "Team Dashboard (Parent Role)"
+  complexity: "complex"
+
+functionalAnalysis:
+  purpose: "Comprehensive parent portal showing child's progress, team information, and parent-specific features"
+  primaryFunction: "Parent-focused dashboard with child progress tracking, volunteer opportunities, and team communication"
+  userInteractions:
+    - "View child's lacrosse progress and statistics"
+    - "Check upcoming events with parent checklist"
+    - "Sign up for volunteer opportunities"
+    - "Contact coach directly via phone/email"
+    - "View team announcements and alerts"
+    - "Browse team photos and calendar"
+    - "Read messages from coaching staff"
+  businessLogic: "Parent-child relationship filtering, announcement priority display, volunteer opportunity management"
+  stateManagement: "Props-based team and event data, extensive mock data for parent-specific features"
+
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "direct"
+  supabaseTables:
+    - "teams"
+    - "team_members"
+  tableUsage:
+    - tableName: "teams"
+      operations: ["select"]
+      purpose: "Display team context and information"
+      dataFlow: "Team prop provides team metadata for parent context"
+    - tableName: "team_members"
+      operations: ["select"]
+      purpose: "Identify parent's children on team"
+      dataFlow: "playerMembers prop contains parent's children team memberships"
+
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements:
+    - "Extensive mock parentData object with child progress, volunteer opportunities, announcements"
+    - "Child progress statistics (attendance_rate: 95, recent_progress array)"
+    - "Volunteer opportunities with spots and dates"
+    - "Coach contact information"
+    - "Season calendar events"
+    - "Important announcements with priority levels"
+  mockDataUsage:
+    - "Child progress data (skills, badges, goals)"
+    - "Volunteer opportunity listings"
+    - "Coach contact details and availability"
+    - "Team announcements and alerts"
+    - "Calendar events and photo placeholders"
+  realDataPercentage: 30
+
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: []
+  externalLibraries:
+    - "lucide-react - extensive icon usage"
+
+supabaseTableDetails:
+  tablesUsed:
+    - "teams"
+    - "team_members"
+  tableRelationships:
+    - "team_members.team_id -> teams.id"
+    - "team_members.user_id -> users.id (parent-child relationships)"
+  queryPatterns:
+    - "Parent-child relationship identification"
+    - "Team context for parent view"
+  dataTransformations:
+    - "Event time calculations (getTimeUntilEvent)"
+    - "Date formatting for display"
+    - "Parent checklist generation"
+
+mvpReadiness:
+  isProductionReady: false
+  blockers:
+    - "Extensive mock data not connected to database"
+    - "Parent-child relationships not properly implemented"
+    - "Volunteer system not connected to database"
+    - "Coach contact system placeholder"
+  improvements:
+    - "Connect child progress to gamification system"
+    - "Implement volunteer opportunity database and signup system"
+    - "Integrate coach contact information from team_members"
+    - "Connect announcements to real team communication system"
+    - "Add photo upload and gallery system"
+    - "Implement messaging system with coaches"
+  priority: "medium"
+
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation:
+    - "Parent-child relationship system"
+    - "Volunteer opportunity management"
+    - "Team communication integration"
+
+componentInteractions:
+  callsComponents:
+    - "Card, CardContent, CardHeader, CardTitle (UI)"
+    - "Badge (UI)"
+    - "Button (UI)"
+    - "Avatar, AvatarFallback (UI)"
+    - "Progress (UI)"
+    - "Alert, AlertDescription (UI)"
+    - "Tabs, TabsContent, TabsList, TabsTrigger (UI)"
+  calledByComponents:
+    - "Team Dashboard page (when user role is parent)"
+  sharedState: []
+  eventCommunication: []
+  propsPassedTo: []
+  propsReceivedFrom:
+    - "team: Team - team context"
+    - "playerMembers: UserTeamRole[] - parent's children on team"
+    - "upcomingEvents: TeamEvent[] - team schedule"
+    - "recentActivity: ActivityItem[] - team activity feed"
+
+userJourneyContext:
+  userFlows:
+    - "Parent->Team Dashboard->Check Child Progress"
+    - "Parent->Team Dashboard->Sign Up for Volunteer"
+    - "Parent->Team Dashboard->Contact Coach"
+    - "Parent->Team Dashboard->View Team Announcements"
+  criticalForMVP: false
+  usageFrequency: "medium"
+  primaryUserTypes: ["parent"]
+  featureArea: "teams"
+  journeyStage: "core-loop"
+
+duplicateFunctionality:
+  hasDuplicates: true
+  duplicateComponents:
+    - "PlayerStatsCard - child progress overlap"
+    - "UpcomingSchedule - event display overlap"
+  primaryComponent: "ParentView"
+  reasonForDuplication: "Parent-specific context and features not available in other components"
+  consolidationStrategy: "Keep separate - unique parent perspective and features"
+  supabaseIntegrationWinner: "PlayerStatsCard (for child progress), UpcomingSchedule (for events)"
+
+# Team Management Specific Analysis
+teamManagementContext:
+  roleBasedDisplay: true
+  supportedRoles: ["parent"]
+  teamDataIntegration: "Minimal - mostly mock data for parent-specific features"
+  parentChildRelationship: "playerMembers prop identifies parent's children"
+  parentSpecificFeatures:
+    - "Child progress tracking with tabs (overview, skills, achievements)"
+    - "Volunteer opportunity signup system"
+    - "Coach contact with availability hours"
+    - "Parent checklist for events"
+    - "Team photo gallery access"
+    - "Priority announcements and alerts"
+  
+criticalParentFeatures:
+  childProgressTracking: "Attendance rate, recent improvements, badge achievements"
+  volunteerManagement: "Opportunity listings with spot availability"
+  coachCommunication: "Direct contact with availability scheduling"
+  eventPreparation: "Parent checklist for upcoming events"
+  teamEngagement: "Photo sharing and team calendar integration"
+  
+dataGaps:
+  childProgressIntegration: "Not connected to actual gamification system"
+  volunteerSystem: "No database backing for volunteer opportunities"
+  parentChildMapping: "Parent-child relationships not properly implemented"
+  coachContactSystem: "Coach availability not stored in database"
+  announcementSystem: "Priority announcements are mock data"
+  photoManagement: "Team photos are placeholder content"
+  
+parentExperienceDesign:
+  welcomeHeader: "Branded parent portal with child identification"
+  priorityAlerts: "High/medium priority announcement system"
+  tabNavigator: "Organized child progress in overview/skills/achievements tabs"
+  sidebarLayout: "Coach contact and quick calendar in sidebar"
+  engagementFeatures: "Volunteer opportunities and team participation"

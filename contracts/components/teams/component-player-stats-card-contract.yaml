@@ -1,0 +1,175 @@
+# Player Stats Card Component Contract
+contractId: "component-player-stats-card-20250113"
+componentInfo:
+  name: "PlayerStatsCard"
+  filePath: "src/components/teams/PlayerStatsCard.tsx"
+  category: "Team Management"
+  parentPage: "Team Dashboard, Team Roster Views"
+  complexity: "complex"
+
+functionalAnalysis:
+  purpose: "Displays comprehensive gamification statistics for a team player including points, rank, badges, and skills progress"
+  primaryFunction: "Real-time player stats dashboard with WordPress profile integration"
+  userInteractions:
+    - "View player points and rank progression"
+    - "Browse recent badges earned"
+    - "Track skills completion progress"
+    - "Edit profile via WordPress integration"
+    - "Refresh stats manually on error"
+  businessLogic: "Aggregates gamification data from multiple tables to show unified player progress view"
+  stateManagement: "Hook-based state management with real-time subscriptions via usePlayerStats"
+
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "hook"
+  supabaseTables:
+    - "user_points_wallets"
+    - "users" 
+    - "user_badges"
+    - "skills_academy_user_progress"
+    - "powlax_player_ranks"
+  tableUsage:
+    - tableName: "user_points_wallets"
+      operations: ["select"]
+      purpose: "Fetch user point balances by currency type"
+      dataFlow: "Real-time subscription for point updates -> calculate total points"
+    - tableName: "users"
+      operations: ["select"]
+      purpose: "Get user profile data including WordPress username"
+      dataFlow: "One-time fetch for profile information"
+    - tableName: "user_badges"
+      operations: ["select"]
+      purpose: "Retrieve earned badges for display"
+      dataFlow: "Real-time subscription for new badges -> display recent badges"
+    - tableName: "skills_academy_user_progress"
+      operations: ["select"]
+      purpose: "Calculate skills completion statistics"
+      dataFlow: "Real-time subscription for progress updates -> aggregate completion data"
+    - tableName: "powlax_player_ranks"
+      operations: ["select"]
+      purpose: "Calculate current rank and progression"
+      dataFlow: "Static rank definitions -> calculate user's current rank and progress"
+
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements:
+    - "Badge emoji mapping (getBadgeEmoji function)"
+    - "WordPress profile URL structure"
+  mockDataUsage: []
+  realDataPercentage: 95
+
+dependencies:
+  hooks:
+    - "usePlayerStats - comprehensive gamification data fetching"
+  contexts: []
+  utilities: []
+  externalLibraries:
+    - "lucide-react - icons"
+
+supabaseTableDetails:
+  tablesUsed:
+    - "user_points_wallets"
+    - "users"
+    - "user_badges" 
+    - "skills_academy_user_progress"
+    - "powlax_player_ranks"
+  tableRelationships:
+    - "user_points_wallets.user_id -> users.id"
+    - "user_badges.user_id -> users.id"
+    - "skills_academy_user_progress.user_id -> users.id"
+  queryPatterns:
+    - "Parallel data fetching for performance"
+    - "Real-time subscriptions for live updates"
+    - "Point aggregation across currency types"
+    - "Rank calculation from requirements matrix"
+  dataTransformations:
+    - "Points aggregation by currency type"
+    - "Badge emoji assignment for display" 
+    - "Rank progression percentage calculation"
+    - "Skills completion statistics"
+
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Add badge detail tooltips on hover"
+    - "Add skills breakdown by category"
+    - "Add attendance rate integration when attendance table exists"
+  priority: "high"
+
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation:
+    - "usePlayerStats hook integration"
+    - "Real-time subscription patterns"
+    - "WordPress profile integration setup"
+
+componentInteractions:
+  callsComponents:
+    - "Card, CardContent, CardHeader, CardTitle (UI)"
+    - "Button (UI)"
+    - "Progress (UI)"
+    - "Badge (UI)"
+    - "Skeleton (UI)"
+  calledByComponents:
+    - "TeamRoster (parent component)"
+    - "PlayerView (parent component)"
+    - "Team Dashboard views"
+  sharedState:
+    - "usePlayerStats hook state"
+  eventCommunication: []
+  propsPassedTo: []
+  propsReceivedFrom:
+    - "userId: string - player identifier"
+    - "teamId: string - team context"
+    - "showEditProfile: boolean - show edit button"
+    - "playerName: string - display name"
+    - "teamName: string - team context name"
+
+userJourneyContext:
+  userFlows:
+    - "Coach->Team Dashboard->View Player Stats"
+    - "Parent->Team View->Check Child Progress"
+    - "Player->Personal Stats->Track Progress"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["coach", "parent", "player"]
+  featureArea: "teams"
+  journeyStage: "core-loop"
+
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "PlayerStatsCard"
+  reasonForDuplication: "N/A"
+  consolidationStrategy: "N/A"
+  supabaseIntegrationWinner: "PlayerStatsCard"
+
+# Team Management Specific Analysis
+teamManagementContext:
+  roleBasedDisplay: true
+  supportedRoles: ["coach", "parent", "player"]
+  teamDataIntegration: "Indirect via userId and teamId props"
+  realTimeFeatures:
+    - "Live points updates"
+    - "Real-time badge notifications"
+    - "Skills progress updates"
+  wordpressIntegration: "Profile editing via wordpress_username field"
+  
+gamificationIntegration:
+  pointSystemIntegration: "Full - all currency types supported"
+  badgeSystem: "Full - real-time badge display"
+  rankingSystem: "Full - live rank calculation and progression"
+  skillsTracking: "Full - Skills Academy progress integration"
+  
+criticalTeamFeatures:
+  playerIdentification: "Avatar with initials, jersey number context"
+  progressVisibility: "Parent/coach can view player progress"
+  wordpressProfileSync: "Edit profile links to WordPress"
+  realTimeUpdates: "Live gamification data updates"

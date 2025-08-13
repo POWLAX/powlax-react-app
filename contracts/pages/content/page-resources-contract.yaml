@@ -1,0 +1,374 @@
+# Resources Page Orchestration Contract
+# Analysis of content loading, filter state management, and resource discovery patterns
+
+contractId: "page-resources-content-001"
+type: PAGE_ORCHESTRATION_ANALYSIS
+version: 1.0.0
+created: 2025-01-15
+priority: MEDIUM
+category: content
+
+# ===== PAGE INFORMATION =====
+pageInfo:
+  route: "/resources"
+  filePath: "src/app/(authenticated)/resources/page.tsx"
+  pageType: client
+  category: content
+  dynamicSegments: []
+
+# ===== RENDERING STRATEGY =====
+renderingStrategy:
+  componentType: "Client Component"
+  dataFetching: "client-side"
+  streamingEnabled: false
+  suspenseBoundaries: []
+  errorBoundaries: []
+  clientDirective: "'use client'"
+
+# ===== DATA ORCHESTRATION =====
+dataOrchestration:
+  serverDataFetching: []
+  
+  clientDataFetching:
+    - hook: "useViewAsAuth"
+      trigger: "On mount"
+      tables: ["users"]
+      realtime: false
+      purpose: "Authentication state and role determination"
+    
+    - hook: "useResourceFavorites"
+      trigger: "On mount"
+      tables: ["user_favorites", "user_collections"]
+      realtime: false
+      purpose: "User's favorited resources and collections"
+    
+    - hook: "resourceDataProvider.getResourcesForRole"
+      trigger: "After auth resolution"
+      tables: ["resources", "powlax_resources"]
+      realtime: false
+      purpose: "Role-based resource filtering"
+    
+    - hook: "resourceDataProvider.getCategories"
+      trigger: "After auth resolution"
+      tables: ["resources"]
+      realtime: false
+      purpose: "Available resource categories"
+    
+    - hook: "resourceDataProvider.getUserFavorites"
+      trigger: "When user logged in"
+      tables: ["user_favorites"]
+      realtime: false
+      purpose: "User's favorite resources"
+    
+    - hook: "resourceDataProvider.getRecentlyViewed"
+      trigger: "When user logged in"
+      tables: ["user_resource_views"]
+      realtime: false
+      purpose: "Recently accessed resources"
+
+  propsFlow:
+    fromServer: {}
+    toClient:
+      - ResourceFilter: "filters, categories, userRole"
+      - ResourceCard: "resource, onClick, isFavorite"
+      - ResourceDetailModal: "isOpen, resource, relatedResources"
+
+# ===== CONTENT LOADING STRATEGY =====
+contentLoadingStrategy:
+  loadingMethod: "Progressive Enhancement"
+  fallbackStrategy: "No Mock Data Policy"
+  
+  loadingFlow:
+    - step: 1
+      action: "Check authentication state"
+      timeout: 1500
+      fallback: "Proceed with timeout flag"
+    
+    - step: 2
+      action: "Determine user role"
+      default: "player"
+      roleMapping: 
+        - "team_coach -> Coach"
+        - "player -> Player" 
+        - "parent -> Parent"
+        - "club_director -> Club Director"
+        - "administrator -> Administrator"
+    
+    - step: 3
+      action: "Load role-specific resources"
+      source: "resourceDataProvider.getResourcesForRole"
+      emptyHandling: "Show empty state with seed script suggestion"
+    
+    - step: 4
+      action: "Load categories from actual data"
+      source: "resourceDataProvider.getCategories"
+      derivedFrom: "existing resources"
+    
+    - step: 5
+      action: "Load user interactions (favorites, recent)"
+      condition: "user authenticated"
+      gracefulDegradation: "Show first few resources for anonymous"
+
+  noMockDataPolicy:
+    enforcement: "STRICT"
+    violations: "None - all hardcoded mock data removed"
+    realDataOnly: true
+    testDataLabeling: "Use (MOCK) prefix for test data in database"
+
+# ===== FILTER STATE MANAGEMENT =====
+filterStateManagement:
+  architecture: "Centralized Filter State"
+  stateLocation: "Page level useState"
+  
+  filterState:
+    searchQuery: "string"
+    category: "string | null"
+    resourceType: "string | null"
+    ageGroups: "string[]"
+    roles: "string[]"
+    tags: "string[]"
+    sortBy: "newest | popular | rating | alphabetical"
+    onlyFavorites: "boolean"
+    onlyDownloaded: "boolean"
+  
+  filterProcessing:
+    applyFilters: "Client-side filtering function"
+    sortResources: "Client-side sorting function"
+    processedResources: "Filtered + sorted result"
+  
+  legacySupport:
+    searchQuery: "Maintained for backward compatibility"
+    selectedCategory: "Maintained for backward compatibility"
+    filteredResources: "Legacy filtered result"
+
+  filterOrchestration:
+    - component: "ResourceFilter"
+      responsibility: "UI controls and filter state changes"
+      props: "onFilterChange, activeFilters, userRole, categories"
+    
+    - component: "ResourcesPage"
+      responsibility: "Filter state management and application"
+      methods: "applyFilters, sortResources"
+    
+    - component: "ResourceCard"
+      responsibility: "Individual resource display"
+      filtering: "Receives pre-filtered resources"
+
+# ===== COMPONENT COMPOSITION =====
+componentComposition:
+  componentsUsed:
+    - name: "ResourceFilter"
+      source: "@/components/resources"
+      props:
+        onFilterChange: "setFilters function"
+        activeFilters: "current filter state"
+        userRole: "getUserRole() result"
+        categories: "database categories"
+        resultCount: "filtered results count"
+      conditionalRendering: "Always shown"
+    
+    - name: "ResourceCard" 
+      source: "@/components/resources"
+      props:
+        resource: "individual resource object"
+        onClick: "modal trigger function"
+        isFavorite: "favorite status check"
+      conditionalRendering: "Per resource in filtered results"
+    
+    - name: "ResourceDetailModal"
+      source: "@/components/resources"
+      props:
+        isOpen: "modal visibility state"
+        onClose: "modal close handler"
+        resource: "selected resource"
+        relatedResources: "same category resources"
+      conditionalRendering: "When resource selected"
+
+  layoutUsed: "Authenticated layout"
+  providerDependencies: 
+    - "SupabaseAuthContext"
+    - "Resource favorites provider"
+
+# ===== SEARCH IMPLEMENTATION =====
+searchImplementation:
+  searchScope: "Title and description fields"
+  searchMethod: "Client-side text matching"
+  
+  searchLogic:
+    field1: "resource.title.toLowerCase().includes(query)"
+    field2: "resource.description.toLowerCase().includes(query)"
+    operator: "OR"
+  
+  searchIntegration:
+    legacySearch: "searchQuery state (backward compatible)"
+    newSearch: "filters.searchQuery (preferred)"
+    bothSupported: true
+
+# ===== MODAL COORDINATION =====
+modalCoordination:
+  modalState: "selectedResource (Resource | null)"
+  
+  modalTriggers:
+    open: "Click ResourceCard -> setSelectedResource(resource)"
+    close: "Modal onClose -> setSelectedResource(null)"
+  
+  modalData:
+    primaryResource: "selectedResource"
+    relatedResources: "Same category, excluding current, limited to 3"
+    derivedData: "Calculated from main resources array"
+
+# ===== LOADING AND ERROR HANDLING =====
+loadingErrorHandling:
+  loadingStates:
+    authLoading: "useViewAsAuth loading"
+    dataLoading: "resources fetch loading"
+    authTimeout: "1.5 second timeout for stuck auth"
+  
+  loadingUI:
+    disabled: "Loading spinner commented out to prevent infinite loading"
+    rationale: "Auth can get stuck, prevented page access"
+  
+  errorHandling:
+    resourceLoadError: "Console log, fallback to empty array"
+    networkError: "Graceful degradation to empty state"
+    authError: "Timeout mechanism bypasses stuck auth"
+
+# ===== DATA CACHING APPROACHES =====
+dataCachingApproaches:
+  clientSideState:
+    resources: "useState array, loaded once per session"
+    categories: "useState array, derived from resources"
+    recentResources: "useState array, user-specific"
+  
+  favoritePersistence:
+    mechanism: "useResourceFavorites hook"
+    storage: "Database with array columns"
+    arraySupport: "team_ids[], user_ids[], custom_tags[]"
+  
+  noCaching:
+    reasoning: "Real-time data preferred over stale cache"
+    freshData: "Fetch on every page load"
+    userSpecific: "Favorites and recent views are user-dependent"
+
+# ===== PERMANENCE PATTERN TESTING =====
+permanencePatternTesting:
+  testingSection: "Permanence Pattern Test Card"
+  visibility: "Collapsible test section"
+  
+  testFeatures:
+    favoriteToggle: "Test favorite with array sharing options"
+    teamSharing: "shareWithTeams checkbox + teamIds array"
+    userSharing: "shareWithUsers checkbox + userIds array"
+    persistenceVerification: "Refresh page to verify database persistence"
+  
+  testData:
+    mockTeamIds: "[1, 2, 3]"
+    mockUserIds: "['user-1', 'user-2']"
+    customTags: "['test', 'resource']"
+    notes: "'Testing permanence pattern'"
+
+# ===== INTEGRATION POINTS =====
+integrationPoints:
+  supabaseUsage:
+    directQueries: false
+    throughHooks: true
+    serverSideOnly: false
+    
+  externalAPIs: []
+  webhooks: []
+  realtimeSubscriptions: []
+  
+  resourceDataProvider:
+    purpose: "Abstraction layer for resource operations"
+    methods:
+      - "getResourcesForRole(role)"
+      - "getCategories()" 
+      - "getUserFavorites(userId)"
+      - "getRecentlyViewed(userId)"
+
+# ===== PERFORMANCE PATTERNS =====
+performancePatterns:
+  prefetching: []
+  lazyLoading: []
+  codeSpliitting: []
+  optimizations: 
+    - "Client-side filtering (avoid server roundtrips)"
+    - "Category derivation from existing data"
+    - "Related resources calculated locally"
+
+# ===== SECURITY PATTERNS =====
+securityPatterns:
+  authentication: "useViewAsAuth hook verification"
+  authorization: "Role-based resource filtering"
+  dataValidation: "TypeScript interfaces"
+  csrfProtection: false
+
+# ===== CONTENT DISCOVERY PATTERNS =====
+contentDiscoveryPatterns:
+  categoryBrowsing:
+    trigger: "When no resources match filters"
+    display: "Grid of category cards with resource counts"
+    interaction: "Click category -> set filter"
+  
+  roleBasedContent:
+    filtering: "Resources filtered by user role on load"
+    display: "Role name in header ('Coach Resources', 'Player Resources')"
+    customization: "Description adapts to role"
+  
+  emptyStates:
+    noResources: "Database truly empty - show seed script command"
+    noResults: "Filters applied but no matches - show clear filters button"
+    noFavorites: "No favorited resources yet"
+
+# ===== MOCK DATA ELIMINATION =====
+mockDataElimination:
+  status: "COMPLETE"
+  
+  removed:
+    - "Hard-coded resource arrays"
+    - "Fake user data"
+    - "Mock categories"
+    - "Placeholder resources"
+  
+  retained:
+    - "Quick Access cards marked as MOCK with disabled buttons"
+    - "Permanence test section for development testing"
+  
+  verification:
+    realDataFlow: "WordPress -> Supabase -> Frontend"
+    noFallbacks: "No mock data fallbacks in production"
+    testDataLabeling: "Any test data clearly marked with (MOCK)"
+
+# ===== STAGE INFORMATION =====
+stageInformation:
+  currentStage: "Stage 5: Real Data Only"
+  status: "✅ NO MOCK DATA"
+  verification: "All resources from database, empty state if no data"
+  nextSteps: "Populate database with real resources or clearly marked test data"
+
+# ===== CRITICAL FINDINGS =====
+criticalFindings:
+  positive:
+    - "Complete elimination of mock data hardcoding"
+    - "Sophisticated filter orchestration system"
+    - "Role-based content delivery"
+    - "Comprehensive permanence testing"
+    - "Graceful authentication timeout handling"
+  
+  improvements:
+    - "Loading UI disabled - consider better loading state management"
+    - "Error handling could be more user-friendly"
+    - "Category icons are hardcoded - could be database-driven"
+  
+  antiPatterns:
+    - "Auth loading can get stuck (mitigated with timeout)"
+    - "Dual filter systems (legacy + new) create complexity"
+
+# ===== ORCHESTRATION SUMMARY =====
+orchestrationSummary:
+  primaryPattern: "Progressive Enhancement with Timeout Fallback"
+  dataFlow: "Auth Resolution -> Role Determination -> Resource Loading -> Filter Application"
+  userExperience: "Role-based resource discovery with powerful filtering"
+  contentStrategy: "Real database resources only, no mock data fallbacks"
+  filteringStrategy: "Client-side processing for responsive filtering"
+  modalPattern: "Click-to-detail with related resource suggestions"

@@ -1,0 +1,108 @@
+# Practice Planner Component Contract: PrintablePracticePlan
+contractId: "component-printable-practice-plan-20250113"
+componentInfo:
+  name: "PrintablePracticePlan"
+  filePath: "src/components/practice-planner/PrintablePracticePlan.tsx"
+  category: "practice-planner"
+  parentPage: "Practice Planner (/teams/[teamId]/practiceplan)"
+  complexity: "moderate"
+  
+functionalAnalysis:
+  purpose: "Print-optimized practice plan layout with comprehensive information display. Generates printer-friendly practice plans for coaches."
+  primaryFunction: "Practice plan document generation and printing"
+  userInteractions: 
+    - "Print practice plan with proper formatting"
+    - "View complete practice timeline with calculated times"
+    - "See equipment checklist with checkboxes"
+    - "Review strategy organization by game phase"
+    - "Access setup time instructions"
+  businessLogic: "Time calculations for drill scheduling, equipment aggregation from all drills, strategy grouping by phases, print-optimized styling"
+  stateManagement: "No local state - pure presentation component"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements: 
+    - "POWLAX branding and tagline"
+    - "Print styling and layout"
+    - "Default setup time instructions"
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: 
+    - "date-fns (format function)"
+  externalLibraries: 
+    - "date-fns"
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: 
+    - "Calculates drill start times based on cumulative duration"
+    - "Aggregates equipment from all drills into checklist"
+    - "Groups strategies by game phase for organized display"
+    - "Formats dates and times for readability"
+    
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: 
+    - "Could add custom branding options"
+    - "Could implement PDF generation"
+    - "Could add QR codes for digital content"
+    - "Could include weather considerations"
+  priority: "medium"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation: 
+    - "Print styling requirements"
+    - "Time calculation logic"
+    - "Equipment aggregation method"
+    
+componentInteractions:
+  callsComponents: []
+  calledByComponents: 
+    - "Practice Planner Main Page (print functionality)"
+  sharedState: []
+  eventCommunication: []
+  propsPassedTo: []
+  propsReceivedFrom: 
+    - "Practice metadata (date, time, duration, field, coach, team)"
+    - "timeSlots array with drill sequences"
+    - "Setup time and notes"
+    - "Selected strategies array"
+    - "Practice notes"
+    
+userJourneyContext:
+  userFlows: 
+    - "Practice Preparation: Complete practice plan → Print for field use → Reference during practice"
+    - "Sharing: Create practice plan → Print copies → Distribute to assistant coaches"
+  criticalForMVP: false
+  usageFrequency: "low"
+  primaryUserTypes: ["coach"]
+  featureArea: "practice"
+  journeyStage: "advanced"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "PrintablePracticePlan"
+  reasonForDuplication: "N/A"
+  consolidationStrategy: "N/A"
+  supabaseIntegrationWinner: "N/A - presentation component only"

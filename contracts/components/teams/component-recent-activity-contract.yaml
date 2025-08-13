@@ -1,0 +1,77 @@
+# Recent Activity Component Contract
+contractId: "component-recent-activity-20250113"
+componentInfo:
+  name: "RecentActivity"
+  filePath: "src/components/teams/dashboard/RecentActivity.tsx"
+  category: "Team Management"
+  parentPage: "Team Dashboard"
+  complexity: "simple"
+
+functionalAnalysis:
+  purpose: "Team activity feed showing recent events, achievements, and team interactions"
+  primaryFunction: "Display chronological team activity with filtering and activity type categorization"
+  userInteractions:
+    - "View recent team activities and events"
+    - "Filter activities by type (all, practice, badges, announcements, etc.)"
+    - "See activity details with user attribution"
+    - "Navigate to activity details"
+  businessLogic: "Activity type filtering, icon assignment based on activity type"
+  stateManagement: "Local state for activity type filtering"
+
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "direct"
+  supabaseTables:
+    - "teams"
+  tableUsage:
+    - tableName: "teams"
+      operations: ["select"]
+      purpose: "Team context for activity display"
+      dataFlow: "Team prop provides context, activity prop from useTeamDashboard"
+
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements:
+    - "Activity type to icon mapping (getActivityIcon function)"
+  mockDataUsage: []
+  realDataPercentage: 90
+
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Add activity detail modals"
+    - "Add real-time activity updates"
+    - "Add activity interaction (likes, comments)"
+    - "Add activity search functionality"
+  priority: "medium"
+
+componentInteractions:
+  callsComponents:
+    - "Card, CardContent, CardHeader, CardTitle (UI)"
+    - "Badge (UI)"
+    - "Button (UI)"
+    - "Avatar, AvatarFallback (UI)"
+    - "Select components (UI)"
+  calledByComponents:
+    - "Team Dashboard page"
+  propsReceivedFrom:
+    - "activity: ActivityItem[] - team activity feed"
+    - "team: Team - team context"
+    - "canManage: boolean - management permissions"
+
+userJourneyContext:
+  userFlows:
+    - "Any User->Team Dashboard->View Recent Activity"
+    - "Coach->Team Dashboard->Review Team Engagement"
+  criticalForMVP: false
+  usageFrequency: "medium"
+  primaryUserTypes: ["coach", "parent", "player"]
+  featureArea: "teams"
+  journeyStage: "core-loop"
+
+teamManagementContext:
+  roleBasedDisplay: false
+  activityTracking: "Team-wide activity feed from multiple sources"
+  engagementMetrics: "Activity frequency and type distribution"
+  communicationHub: "Central place for team updates and achievements"

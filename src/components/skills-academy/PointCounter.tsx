@@ -165,72 +165,42 @@ export default function PointCounter({
 
   return (
     <>
-      {/* Horizontal bar layout */}
+      {/* 2-Column Layout with Bigger Images (IMAGE-Name-Number format) */}
       <div 
-        className={`relative py-3 px-4 bg-white/95 backdrop-blur-sm border-b border-gray-200 ${className}`}
-        onMouseEnter={() => !touchedPoint && setHoveredPoint('header')}
-        onMouseLeave={() => setHoveredPoint(null)}
+        className={`relative py-4 px-4 bg-white/95 backdrop-blur-sm border-b border-gray-200 ${className}`}
       >
-        {/* Header tooltip on hover */}
-        {hoveredPoint === 'header' && !touchedPoint && (
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full mb-2 px-3 py-1 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap z-50">
-            Points earned during this workout!
-            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
-              <div className="border-4 border-transparent border-t-gray-900"></div>
-            </div>
-          </div>
-        )}
-
-        <div className="flex items-center justify-center gap-4 md:gap-6">
+        {/* Grid Layout - 2 columns on mobile, can expand on desktop */}
+        <div className="grid grid-cols-2 gap-3 max-w-lg mx-auto">
           {displayPoints.map((point) => (
             <div 
               key={point.type}
               data-point-type={point.type}
               data-point-icon
-              className={`relative flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 transition-all duration-300 ${
+              className={`relative flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 transition-all duration-500 ${
                 animatingPoints.has(point.type) 
-                  ? 'scale-110 bg-blue-100 shadow-lg' 
-                  : 'scale-100 hover:bg-gray-100'
+                  ? 'scale-105 from-blue-100 to-blue-50 shadow-xl ring-2 ring-blue-400 ring-opacity-50' 
+                  : 'scale-100 hover:from-gray-100 hover:to-gray-50 hover:shadow-md'
               }`}
-              onMouseEnter={() => !touchedPoint && setHoveredPoint(point.type)}
-              onMouseLeave={() => setHoveredPoint(null)}
               onTouchStart={(e) => handleTouchStart(point.type, e)}
               onTouchEnd={handleTouchEnd}
             >
-              {/* Tooltip for point name */}
-              {(hoveredPoint === point.type || touchedPoint === point.type) && (
-                <div 
-                  className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap z-50"
-                  style={touchPosition ? {
-                    position: 'fixed',
-                    left: touchPosition.x,
-                    top: touchPosition.y - 40,
-                    transform: 'translateX(-50%)'
-                  } : undefined}
-                >
-                  {point.displayName}
-                  <div className="absolute top-full left-1/2 transform -translate-x-1/2">
-                    <div className="border-4 border-transparent border-b-gray-900"></div>
-                  </div>
-                </div>
-              )}
-
-              {/* Point Type Icon */}
+              {/* Bigger Point Type Icon (IMAGE) */}
               {point.icon ? (
-                <div className="relative w-10 h-10 flex-shrink-0">
+                <div className="relative w-14 h-14 flex-shrink-0">
                   <Image
                     src={point.icon}
                     alt={point.displayName}
                     fill
-                    className="object-contain"
-                    sizes="40px"
+                    className="object-contain drop-shadow-md"
+                    sizes="56px"
+                    priority
                     onError={(e) => {
                       // Fallback to initials if image fails
                       const parent = e.currentTarget.parentElement
                       if (parent) {
                         parent.innerHTML = `
-                          <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                            <span class="text-blue-600 font-bold text-xs">
+                          <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-md">
+                            <span class="text-white font-bold text-base">
                               ${point.displayName.split(' ').map(w => w[0]).join('').slice(0, 2)}
                             </span>
                           </div>
@@ -240,24 +210,57 @@ export default function PointCounter({
                   />
                 </div>
               ) : (
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600 font-bold text-xs">
+                <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-md">
+                  <span className="text-white font-bold text-base">
                     {point.displayName.split(' ').map(w => w[0]).join('').slice(0, 2)}
                   </span>
                 </div>
               )}
               
-              {/* Point Value (no name) */}
-              <div className={`text-xl font-bold transition-all duration-300 ${
-                animatingPoints.has(point.type) 
-                  ? 'text-blue-600 transform scale-110' 
-                  : 'text-gray-800'
-              }`}>
-                {point.value.toLocaleString()}
+              {/* Name and Number Column */}
+              <div className="flex-1 min-w-0">
+                {/* Point Name */}
+                <div className="text-xs font-medium text-gray-600 truncate">
+                  {point.displayName}
+                </div>
+                
+                {/* Point Value (NUMBER) - Bigger and Bolder */}
+                <div className={`text-2xl font-black transition-all duration-500 ${
+                  animatingPoints.has(point.type) 
+                    ? 'text-blue-600 transform scale-110' 
+                    : 'text-gray-900'
+                }`}>
+                  {point.value.toLocaleString()}
+                </div>
               </div>
+
+              {/* Animation Burst Effect */}
+              {animatingPoints.has(point.type) && (
+                <div className="absolute inset-0 rounded-xl pointer-events-none">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 opacity-20 animate-pulse rounded-xl" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-400 opacity-10 animate-ping rounded-xl" />
+                </div>
+              )}
             </div>
           ))}
         </div>
+
+        {/* Touch Tooltip */}
+        {touchedPoint && (
+          <div 
+            className="fixed px-3 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-xl z-50"
+            style={touchPosition ? {
+              left: touchPosition.x,
+              top: touchPosition.y - 50,
+              transform: 'translateX(-50%)'
+            } : undefined}
+          >
+            {displayPoints.find(p => p.type === touchedPoint)?.displayName}
+            <div className="absolute top-full left-1/2 transform -translate-x-1/2">
+              <div className="border-4 border-transparent border-t-gray-900"></div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   )

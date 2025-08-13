@@ -1,0 +1,117 @@
+# Practice Planner Component Contract: SavePracticeModal
+contractId: "component-save-practice-modal-20250113"
+componentInfo:
+  name: "SavePracticeModal"
+  filePath: "src/components/practice-planner/modals/SavePracticeModal.tsx"
+  category: "practice-planner-modal"
+  parentPage: "Practice Planner (/teams/[teamId]/practiceplan)"
+  complexity: "simple"
+  
+functionalAnalysis:
+  purpose: "Modal dialog for saving practice plans with title and optional notes. Supports both new saves and updates."
+  primaryFunction: "Practice plan persistence to database"
+  userInteractions: 
+    - "Enter practice plan title (required)"
+    - "Add optional practice notes"
+    - "Save practice plan to database"
+    - "Cancel without saving"
+    - "Handle validation errors"
+  businessLogic: "Form validation, async save operation, error handling, supports update mode for existing plans"
+  stateManagement: "Local state for form fields (title, notes), saving status, validation errors"
+  
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "hook"
+  supabaseTables: 
+    - "practices"
+  tableUsage:
+    - tableName: "practices"
+      operations: ["insert", "update"]
+      purpose: "Save practice plan data with drill sequence"
+      dataFlow: "Modal form → onSave callback → usePracticePlans hook → practices table"
+    
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements: []
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: []
+  externalLibraries: 
+    - "@/components/ui/dialog"
+    - "@/components/ui/button"
+    - "@/components/ui/input"
+    - "@/components/ui/textarea"
+    - "@/components/ui/label"
+    - "lucide-react (Save, Loader2 icons)"
+  
+supabaseTableDetails:
+  tablesUsed: 
+    - "practices"
+  tableRelationships: 
+    - "practices.coach_id → users.id"
+    - "practices.team_id → teams.id"
+  queryPatterns: 
+    - "INSERT INTO practices (name, coach_id, team_id, raw_wp_data, ...) VALUES (...)"
+    - "UPDATE practices SET name = ?, notes = ?, raw_wp_data = ? WHERE id = ?"
+  dataTransformations: 
+    - "Converts form data to database schema"
+    - "Maps drill_sequence to raw_wp_data JSON field"
+    
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: 
+    - "Could add practice plan templates"
+    - "Could add scheduling integration"
+    - "Could add sharing options"
+  priority: "critical"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation: 
+    - "Save operation flow"
+    - "Error handling patterns"
+    - "Data structure requirements"
+    
+componentInteractions:
+  callsComponents: []
+  calledByComponents: 
+    - "Practice Planner Main Page"
+  sharedState: []
+  eventCommunication: 
+    - "onSave callback with practice data"
+    - "onClose callback for modal dismissal"
+  propsPassedTo: []
+  propsReceivedFrom: 
+    - "isOpen modal visibility flag"
+    - "onSave async callback function"
+    - "defaultTitle and defaultNotes for editing"
+    - "isUpdate flag for update vs create mode"
+    
+userJourneyContext:
+  userFlows: 
+    - "Practice Completion: Build practice → Save with title → Store for future use"
+    - "Practice Update: Load existing practice → Modify → Update with same/new title"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["coach"]
+  featureArea: "practice"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "SavePracticeModal"
+  reasonForDuplication: "N/A"
+  consolidationStrategy: "N/A"
+  supabaseIntegrationWinner: "SavePracticeModal (only implementation)"

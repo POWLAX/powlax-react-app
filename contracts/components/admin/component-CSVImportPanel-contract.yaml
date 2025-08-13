@@ -1,0 +1,133 @@
+# Component Contract: CSVImportPanel
+contractId: "component-CSVImportPanel-20250113"
+componentInfo:
+  name: "CSVImportPanel"
+  filePath: "/src/components/admin/CSVImportPanel.tsx"
+  category: "admin"
+  parentPage: "admin management - users tab"
+  complexity: "complex"
+  
+functionalAnalysis:
+  purpose: "Import user data from CSV files with validation and processing"
+  primaryFunction: "Parse CSV files, validate data, and import users into the system"
+  userInteractions:
+    - "Upload CSV files"
+    - "Preview import data"
+    - "Configure import options"
+    - "Execute import with validation"
+    - "View import results and errors"
+  businessLogic: "CSV parsing, data validation, and batch user import with error handling"
+  stateManagement: "Import process state with file handling, validation, and progress tracking"
+  
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "hook"
+  supabaseTables:
+    - "users"
+    - "team_members"
+    - "teams"
+    - "clubs"
+    - "membership_entitlements"
+  tableUsage:
+    - tableName: "users"
+      operations: ["insert", "update"]
+      purpose: "Import target for user data"
+      dataFlow: "Creates or updates user records from CSV"
+    - tableName: "team_members"
+      operations: ["insert"]
+      purpose: "Team association creation"
+      dataFlow: "Links imported users to teams"
+  
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements:
+    - "CSV field mapping configuration"
+    - "Validation rules"
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks:
+    - "useState, useEffect (React hooks)"
+    - "useFileUpload (file handling)"
+  contexts: []
+  utilities:
+    - "CSV parsing library"
+    - "Data validation utilities"
+  externalLibraries:
+    - "sonner (toast notifications)"
+    - "lucide-react (icons)"
+  
+supabaseTableDetails:
+  tablesUsed:
+    - "users (import target)"
+    - "team_members (team associations)"
+    - "membership_entitlements (user access)"
+  tableRelationships:
+    - "users -> team_members (one-to-many)"
+    - "users -> membership_entitlements (one-to-many)"
+  queryPatterns:
+    - "Batch insert operations with conflict resolution"
+    - "Validation queries for existing data"
+    - "Transaction-based imports"
+  dataTransformations:
+    - "CSV data to database schema mapping"
+    - "Data type conversion and validation"
+    - "Duplicate detection and merging"
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Add CSV template generation"
+    - "Implement incremental imports"
+    - "Add data preview with editing"
+  priority: "medium"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation:
+    - "CSV format specifications"
+    - "Import validation rules"
+    - "Error handling procedures"
+  
+componentInteractions:
+  callsComponents:
+    - "Dialog (UI component)"
+    - "Card (UI component)"
+    - "Button (UI component)"
+    - "Progress (UI component)"
+    - "Table (UI component)"
+  calledByComponents:
+    - "UsersTabContent"
+    - "BulkOperationsPanel"
+  sharedState: []
+  eventCommunication:
+    - "onClose callback to parent"
+    - "onImportComplete callback"
+  propsPassedTo: []
+  propsReceivedFrom:
+    - "isOpen, onClose from parent"
+  
+userJourneyContext:
+  userFlows:
+    - "Admin -> Users -> Import -> Upload CSV -> Validate -> Import -> Review Results"
+  criticalForMVP: false
+  usageFrequency: "low"
+  primaryUserTypes: ["admin"]
+  featureArea: "admin"
+  journeyStage: "advanced"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "CSVImportPanel"
+  reasonForDuplication: ""
+  consolidationStrategy: ""
+  supabaseIntegrationWinner: "CSVImportPanel"

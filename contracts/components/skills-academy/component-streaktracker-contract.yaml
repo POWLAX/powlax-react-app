@@ -1,0 +1,180 @@
+# StreakTracker Component Contract
+# Gamification component for tracking workout streaks and consistency
+
+contractId: "component-streaktracker-20250113"
+componentInfo:
+  name: "StreakTracker"
+  filePath: "src/components/skills-academy/StreakTracker.tsx"
+  category: "Skills Academy"
+  parentPage: "Skills Academy Dashboard"
+  complexity: "moderate"
+  
+functionalAnalysis:
+  purpose: "Tracks and displays user workout streaks with visual calendar and gamification elements"
+  primaryFunction: "Shows current streak, best streak, weekly/monthly stats with motivational messaging and visual progress"
+  userInteractions: 
+    - "View current streak with flame animation"
+    - "See weekly and total workout statistics"
+    - "Visual calendar showing streak days"
+    - "Streak multiplier badge for bonus rewards"
+  businessLogic: "Calculates streak based on consecutive workout days, manages localStorage persistence, determines streak multipliers and rewards"
+  stateManagement: "Complex state for streak data, localStorage sync, and streak calculations"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements: 
+    - "Demo streak data initialization"
+    - "Streak multiplier calculation logic"
+    - "Motivational messages based on streak length"
+    - "localStorage persistence instead of database"
+  mockDataUsage: 
+    - "Initial demo data: 3-day current streak, 7-day best streak, 42 total workouts"
+  realDataPercentage: 20
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: []
+  externalLibraries: 
+    - "lucide-react (Flame, Calendar, Trophy, TrendingUp icons)"
+    - "@/components/ui/card"
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: 
+    - "Date calculations for streak logic"
+    - "localStorage JSON serialization"
+    - "Streak multiplier calculations"
+  
+mvpReadiness:
+  isProductionReady: false
+  blockers: 
+    - "Uses localStorage instead of database persistence"
+    - "No integration with actual workout completion data"
+    - "Hardcoded demo data for initialization"
+  improvements: 
+    - "Integrate with skills_academy_user_progress table"
+    - "Real-time streak updates from workout completions"
+    - "Database persistence for cross-device sync"
+    - "Integration with point multipliers"
+  priority: "medium"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: true
+  documentationQuality: "good"
+  needsDocumentation: 
+    - "Database integration requirements"
+    - "Streak calculation methodology"
+    - "Cross-device sync strategy"
+  
+componentInteractions:
+  callsComponents: []
+  calledByComponents: 
+    - "Skills Academy dashboard components"
+    - "Workout completion flows"
+  sharedState: []
+  eventCommunication: 
+    - "onStreakUpdate callback to parent"
+  propsPassedTo: []
+  propsReceivedFrom: 
+    - "userId?: string (user identification)"
+    - "onStreakUpdate?: (streak: number) => void (callback)"
+  
+userJourneyContext:
+  userFlows: 
+    - "Daily workout completion → Streak increment → StreakTracker update"
+    - "Dashboard view → StreakTracker display → Motivation to continue"
+  criticalForMVP: false
+  usageFrequency: "high"
+  primaryUserTypes: ["player"]
+  featureArea: "gamification"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: true
+  duplicateComponents: 
+    - "StreakBadge (mini streak display)"
+    - "Gamification dashboard streak displays"
+    - "Progress tracking components"
+  primaryComponent: "StreakTracker"
+  reasonForDuplication: "Different contexts - full tracker vs. mini badge display"
+  consolidationStrategy: "Keep StreakTracker as main component, StreakBadge for compact display"
+  supabaseIntegrationWinner: "StreakTracker (needs full database integration)"
+
+# Gamification Integration Analysis
+gamificationIntegration:
+  currentImplementation:
+    - "localStorage-based streak persistence"
+    - "Streak multiplier calculation (3x, 4x, 5x bonuses)"
+    - "Motivational messaging system"
+    - "Visual progress calendar"
+    
+  databaseIntegrationRequirements:
+    tables:
+      - table: "skills_academy_user_progress"
+        purpose: "Track workout completion dates for streak calculation"
+        columns: ["user_id", "workout_id", "completed_at", "streak_day"]
+        
+      - table: "user_streak_data"
+        purpose: "Store streak statistics and history" 
+        columns: ["user_id", "current_streak", "best_streak", "last_workout_date"]
+        
+      - table: "points_transactions_powlax"
+        purpose: "Apply streak multipliers to point awards"
+        columns: ["user_id", "base_points", "streak_multiplier", "bonus_points"]
+  
+  enhancementOpportunities:
+    - "Real-time streak updates from workout API"
+    - "Streak-based point multipliers integration"
+    - "Social streak sharing and comparison"
+    - "Streak milestone badges and achievements"
+
+# Business Logic Analysis  
+businessLogic:
+  streakCalculation:
+    - "Consecutive days with completed workouts"
+    - "Broken by missing workout day (resets to 1)"
+    - "Same-day multiple workouts don't increase streak"
+    
+  multiplierSystem:
+    - "3+ day streak: 2x bonus"
+    - "6+ day streak: 3x bonus" 
+    - "9+ day streak: 4x bonus"
+    - "12+ day streak: 5x bonus (max)"
+    
+  motivationalSystem:
+    - "0-2 days: 'Keep Going! 👍'"
+    - "3-6 days: 'Building Momentum! 💪'"
+    - "7-13 days: 'Great Work! ⭐'"
+    - "14-29 days: 'On Fire! 🔥'"
+    - "30+ days: 'Legendary! 🏆'"
+
+# Critical MVP Issues
+mvpCriticalIssues:
+  dataIntegrity:
+    - "localStorage data not reliable across devices"
+    - "No connection to actual workout completion events"
+    - "Demo data creates false user expectations"
+    
+  functionalGaps:
+    - "No automatic streak updates from workouts"
+    - "No streak multiplier integration with point system"
+    - "No streak recovery or forgiveness for missed days"
+    
+  recommendedSolution:
+    priority: "medium"
+    approach: "Database integration with skills_academy_user_progress"
+    timeline: "After core workout functionality is stable"

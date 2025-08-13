@@ -1,0 +1,152 @@
+# Component Contract: CompleteUserEditor
+contractId: "component-CompleteUserEditor-20250113"
+componentInfo:
+  name: "CompleteUserEditor"
+  filePath: "/src/components/admin/CompleteUserEditor.tsx"
+  category: "admin"
+  parentPage: "admin management"
+  complexity: "complex"
+  
+functionalAnalysis:
+  purpose: "Comprehensive user data editor with tabbed interface"
+  primaryFunction: "Edit all aspects of user data across multiple database tables"
+  userInteractions:
+    - "Navigate between tabs (Profile, Auth, Membership, Team, Family, Activity)"
+    - "Edit user data fields in each tab"
+    - "Save changes with validation"
+    - "Track unsaved changes"
+  businessLogic: "Multi-table user data management with change tracking and audit logging"
+  stateManagement: "Complex state with change tracking and tab management"
+  
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "direct"
+  supabaseTables:
+    - "users"
+    - "user_sessions"
+    - "magic_links"
+    - "membership_entitlements"
+    - "membership_products"
+    - "team_members"
+    - "teams"
+    - "clubs"
+    - "parent_child_relationships"
+    - "family_accounts"
+    - "family_members"
+    - "user_points_wallets"
+    - "powlax_points_currencies"
+    - "user_badges"
+    - "skills_academy_user_progress"
+    - "user_activity_log"
+  tableUsage:
+    - tableName: "users"
+      operations: ["select", "update"]
+      purpose: "Main user profile data"
+      dataFlow: "Loads and updates core user information"
+    - tableName: "team_members"
+      operations: ["select", "insert", "update", "delete"]
+      purpose: "User team associations"
+      dataFlow: "Manages team membership relationships"
+    - tableName: "membership_entitlements"
+      operations: ["select", "update"]
+      purpose: "User product access rights"
+      dataFlow: "Updates user capabilities and access"
+    - tableName: "user_activity_log"
+      operations: ["insert"]
+      purpose: "Audit trail for changes"
+      dataFlow: "Records all user data modifications"
+  
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements: []
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks:
+    - "useState, useEffect (React hooks)"
+  contexts: []
+  utilities:
+    - "supabase client"
+  externalLibraries:
+    - "sonner (toast notifications)"
+    - "lucide-react (icons)"
+  
+supabaseTableDetails:
+  tablesUsed:
+    - "users (main user data)"
+    - "team_members (team associations)"
+    - "membership_entitlements (product access)"
+    - "family_accounts (family groupings)"
+    - "user_points_wallets (gamification)"
+    - "user_badges (achievements)"
+    - "skills_academy_user_progress (learning progress)"
+  tableRelationships:
+    - "users -> team_members (one-to-many)"
+    - "users -> membership_entitlements (one-to-many)"
+    - "users -> family_accounts (one-to-many)"
+    - "users -> user_points_wallets (one-to-many)"
+  queryPatterns:
+    - "Parallel data loading for all tabs"
+    - "Complex joins with relationships"
+    - "Change tracking and batch updates"
+  dataTransformations:
+    - "Aggregates data from multiple tables into tab structure"
+    - "Tracks field changes with timestamps"
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Add field validation"
+    - "Implement optimistic updates"
+    - "Add data export functionality"
+  priority: "high"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation:
+    - "Tab-specific editing workflows"
+    - "Data validation rules"
+    - "Change tracking system"
+  
+componentInteractions:
+  callsComponents:
+    - "Dialog (UI component)"
+    - "Tabs (UI component)"
+    - "Button (UI component)"
+    - "ProfileTab, AuthenticationTab, MembershipTab, TeamTab, FamilyTab, ActivityTab"
+  calledByComponents:
+    - "UsersTabContent"
+    - "Admin management interfaces"
+  sharedState: []
+  eventCommunication:
+    - "onUserUpdated callback for parent refresh"
+  propsPassedTo:
+    - "userData to tab components"
+    - "onFieldChange callback"
+  propsReceivedFrom:
+    - "userId, isOpen, onClose from parent"
+  
+userJourneyContext:
+  userFlows:
+    - "Admin -> User Management -> Edit User -> Update Multiple Tabs -> Save"
+  criticalForMVP: true
+  usageFrequency: "medium"
+  primaryUserTypes: ["admin"]
+  featureArea: "admin"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "CompleteUserEditor"
+  reasonForDuplication: ""
+  consolidationStrategy: ""
+  supabaseIntegrationWinner: "CompleteUserEditor"

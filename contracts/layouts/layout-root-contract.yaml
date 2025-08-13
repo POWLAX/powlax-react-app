@@ -1,0 +1,262 @@
+# Root Layout Contract - POWLAX Next.js Application
+# Analysis of src/app/layout.tsx and global application orchestration
+
+contractId: "layout-root-analysis-001"
+type: LAYOUT_ANALYSIS
+version: 1.0.0
+created: 2025-01-15
+priority: CRITICAL
+parentContract: "page-orchestration-analysis-001"
+
+# ===== CONTRACT OVERVIEW =====
+intent:
+  goal: "Document root layout configuration, provider hierarchy, and global application setup"
+  scope:
+    - Root layout component analysis
+    - HTML document structure
+    - Global CSS and font loading
+    - Provider wrapper initialization
+    - PWA configuration
+    - Viewport and metadata setup
+  
+  criticalFindings:
+    - Server Component-based root layout
+    - Minimal root layout with provider delegation
+    - Progressive Web App configuration
+    - Client-side provider hierarchy management
+    - Clean separation of server/client boundaries
+
+# ===== LAYOUT STRUCTURE ANALYSIS =====
+layoutStructure:
+  componentType: "Server Component"
+  filePath: "src/app/layout.tsx"
+  renderingStrategy: "Server-side rendered HTML shell"
+  
+  htmlDocument:
+    language: "en"
+    fontLoading:
+      - font: "Inter"
+        subsets: ["latin"]
+        strategy: "Next.js font optimization"
+        classname: "Applied via inter.className"
+    
+    bodyConfiguration:
+      className: "${inter.className}"
+      children: "ClientProviders wrapper"
+      
+  metadataConfiguration:
+    title: "POWLAX - Practice Optimization for Winning Lacrosse"
+    description: "Transform youth lacrosse with structured practice planning and skills development"
+    pwa:
+      manifest: "/manifest.json"
+      appleWebApp:
+        capable: true
+        statusBarStyle: "default"
+        title: "POWLAX"
+    
+    viewport:
+      width: "device-width"
+      initialScale: 1
+      maximumScale: 1
+      userScalable: false
+      themeColor: "#003366"
+
+# ===== PROVIDER HIERARCHY =====
+providerHierarchy:
+  strategy: "Delegated to ClientProviders"
+  boundaryLocation: "Root layout delegates to ClientProviders.tsx"
+  serverClientSeparation:
+    serverComponents:
+      - "Root layout (metadata, HTML structure)"
+      - "Font loading optimization"
+    clientComponents:
+      - "All context providers via ClientProviders"
+      - "Application state management"
+      - "Authentication system"
+
+  providerChain:
+    rootWrapper: "ClientProviders"
+    nestedProviders:
+      - order: 1
+        provider: "ThemeProvider"
+        purpose: "Dark/light theme management"
+        scope: "Global theming"
+        
+      - order: 2
+        provider: "OnboardingProvider"
+        purpose: "User onboarding flow state"
+        scope: "First-time user experience"
+        
+      - order: 3
+        provider: "SidebarProvider"
+        purpose: "Sidebar collapse/expand state"
+        scope: "Navigation UI state"
+        
+      - order: 4
+        provider: "QueryProvider"
+        purpose: "React Query client configuration"
+        scope: "Data fetching and caching"
+        
+      - order: 5
+        provider: "SupabaseAuthProvider"
+        purpose: "Authentication and user management"
+        scope: "User session and auth state"
+        
+      - order: 6
+        provider: "RoleViewerProvider"
+        purpose: "Admin role switching functionality"
+        scope: "Admin tools and role simulation"
+        
+      - order: 7
+        component: "ToasterProvider"
+        purpose: "Toast notifications"
+        scope: "Global notifications"
+
+# ===== GLOBAL CONFIGURATION =====
+globalConfiguration:
+  stylingSystem:
+    framework: "Tailwind CSS"
+    globalStylesheet: "src/app/globals.css"
+    fontOptimization: "Next.js font optimization with Inter"
+    
+  pwaConfiguration:
+    manifestFile: "/manifest.json"
+    serviceWorker: "/sw.js"
+    appleTouchIcon: "Configured via appleWebApp settings"
+    themeColor: "#003366 (POWLAX brand blue)"
+    
+  performanceOptimizations:
+    fontDisplay: "Optimized via Next.js font loading"
+    staticGeneration: "Layout enables static generation for nested pages"
+    streaming: "Supports React 18 streaming"
+
+# ===== SECURITY PATTERNS =====
+securityPatterns:
+  contentSecurityPolicy: "Not explicitly configured in layout"
+  crossOriginPolicy: "Default Next.js security"
+  authenticationBoundary: "Delegated to SupabaseAuthProvider"
+  
+  dataFlow:
+    serverToClient: "Minimal - only HTML structure and metadata"
+    clientStateManagement: "All managed in ClientProviders hierarchy"
+
+# ===== INTEGRATION POINTS =====
+integrationPoints:
+  nextjsFeatures:
+    - metadata: "Next.js 14 Metadata API"
+    - viewport: "Next.js 14 Viewport API"
+    - fonts: "Next.js font optimization"
+    - appRouter: "App Router layout system"
+    
+  externalServices:
+    - none: "Root layout is service-agnostic"
+    
+  childLayouts:
+    authenticatedLayout: "src/app/(authenticated)/layout.tsx"
+    pageSpecificLayouts: "Pages can define additional layouts"
+
+# ===== PERFORMANCE ANALYSIS =====
+performanceCharacteristics:
+  renderingStrategy: "Server-side HTML generation"
+  hydrationBoundary: "ClientProviders component"
+  cacheability: "Layout is cacheable as static content"
+  
+  optimizations:
+    - fontLoading: "Inter font preloaded and optimized"
+    - staticGeneration: "Layout enables static page generation"
+    - streaming: "Compatible with React 18 streaming"
+    
+  potentialIssues:
+    - providerNesting: "Deep provider nesting may impact performance"
+    - clientBoundary: "Large ClientProviders bundle may delay interactivity"
+
+# ===== TECHNICAL DEBT & OPPORTUNITIES =====
+technicalDebt:
+  current:
+    - metadata: "Hardcoded metadata - could be dynamic"
+    - theming: "Theme color hardcoded in viewport"
+    
+  opportunities:
+    - csp: "Add Content Security Policy headers"
+    - analytics: "Add analytics initialization"
+    - errorBoundary: "Add global error boundary"
+    - loadingUI: "Add global loading states"
+
+# ===== TESTING STRATEGY =====
+testingConsiderations:
+  unitTests:
+    - metadataGeneration: "Test metadata configuration"
+    - fontLoading: "Test font optimization"
+    
+  integrationTests:
+    - providerHierarchy: "Test provider initialization order"
+    - pwaConfiguration: "Test manifest and service worker"
+    
+  e2eTests:
+    - pageLoading: "Test initial page load performance"
+    - themeApplication: "Test theme system initialization"
+
+# ===== DOCUMENTATION GAPS =====
+documentationNeeds:
+  - providerOrdering: "Document why providers are ordered this way"
+  - pwaFeatures: "Document PWA capabilities and offline support"
+  - performanceMetrics: "Document loading performance targets"
+  - securityHeaders: "Document security header configuration"
+
+# ===== INTEGRATION WITH OTHER CONTRACTS =====
+contractRelationships:
+  dependsOn:
+    - "ClientProviders component analysis"
+    - "Authentication system documentation"
+    
+  influences:
+    - "All page components inherit this layout"
+    - "Authenticated layout extends this structure"
+    - "Provider availability across application"
+
+# ===== CRITICAL SUCCESS FACTORS =====
+successCriteria:
+  functional:
+    - providers: "All providers initialize correctly"
+    - metadata: "PWA metadata applied correctly"
+    - fonts: "Inter font loads and applies"
+    
+  performance:
+    - firstContentfulPaint: "< 1.5s"
+    - layoutShift: "Minimal cumulative layout shift"
+    - hydration: "Fast client-side hydration"
+    
+  security:
+    - csp: "No unsafe inline styles or scripts"
+    - headers: "Appropriate security headers"
+
+# ===== MONITORING & OBSERVABILITY =====
+monitoringPoints:
+  performance:
+    - fontLoadTime: "Inter font loading performance"
+    - providerInitTime: "ClientProviders initialization time"
+    - hydrationTime: "Time to interactive"
+    
+  errors:
+    - providerErrors: "Provider initialization failures"
+    - metadataErrors: "PWA configuration issues"
+    - fontErrors: "Font loading failures"
+
+# ===== CONCLUSION =====
+summary:
+  strengths:
+    - "Clean separation of server/client concerns"
+    - "Proper Next.js 14 patterns usage"
+    - "PWA configuration included"
+    - "Font optimization implemented"
+    
+  weaknesses:
+    - "No global error boundary"
+    - "Hardcoded metadata values"
+    - "No Content Security Policy"
+    
+  recommendations:
+    - "Add global error boundary"
+    - "Implement dynamic metadata"
+    - "Add security headers"
+    - "Consider provider performance optimization"

@@ -354,6 +354,19 @@ const DrillCard = memo(function DrillCard({
       </div>
     </div>
   )
+}, (prevProps, nextProps) => {
+  // Custom comparison function for memo
+  // Re-render if any of these change:
+  return (
+    prevProps.drill.id === nextProps.drill.id &&
+    prevProps.drill.duration_minutes === nextProps.drill.duration_minutes &&
+    prevProps.drill.notes === nextProps.drill.notes &&
+    prevProps.startTime === nextProps.startTime &&
+    prevProps.index === nextProps.index &&
+    prevProps.canMoveUp === nextProps.canMoveUp &&
+    prevProps.canMoveDown === nextProps.canMoveDown &&
+    prevProps.isParallel === nextProps.isParallel
+  )
 })
 
 export default DrillCard

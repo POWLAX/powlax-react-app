@@ -1,0 +1,152 @@
+# SkillsAcademyHubEnhanced Component Contract
+# Main landing page component for Skills Academy section
+
+contractId: "component-skillsacademyhubenhanced-20250113"
+componentInfo:
+  name: "SkillsAcademyHubEnhanced"
+  filePath: "src/components/skills-academy/SkillsAcademyHubEnhanced.tsx"
+  category: "Skills Academy"
+  parentPage: "Skills Academy Landing"
+  complexity: "moderate"
+  
+functionalAnalysis:
+  purpose: "Main hub component that displays Skills Academy overview, stats, and provides navigation to training tracks"
+  primaryFunction: "Landing page for Skills Academy with stats display and track navigation"
+  userInteractions: 
+    - "Click 'Start Training' to begin first workout"
+    - "Select training tracks (Attack, Defense, Midfield, etc.)"
+    - "Navigate to favorites and progress sections"
+    - "View academy statistics"
+  businessLogic: "Displays hardcoded statistics and provides navigation to different training tracks based on user position"
+  stateManagement: "Minimal state - loading state and user interaction handlers"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements: 
+    - "Statistics (167 drills, 118 workouts, 4 tracks)"
+    - "Training track information (handled by TrackCards)"
+    - "Hero section content and messaging"
+  mockDataUsage: 
+    - "stats object with drillCount, workoutCount, trackCount"
+  realDataPercentage: 0
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: []
+  externalLibraries: 
+    - "next/navigation (useRouter)"
+    - "lucide-react (icons)"
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: []
+  
+mvpReadiness:
+  isProductionReady: false
+  blockers: 
+    - "Uses hardcoded statistics instead of real data"
+    - "No integration with actual drill/workout counts"
+    - "Missing user progress integration"
+  improvements: 
+    - "Integrate with skills_academy_drills count"
+    - "Integrate with skills_academy_workouts count"
+    - "Add user-specific progress display"
+    - "Add recent workout history"
+  priority: "high"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation: 
+    - "Component purpose and navigation flow"
+    - "Integration points with Skills Academy data"
+    - "Track selection behavior"
+  
+componentInteractions:
+  callsComponents: 
+    - "TrackCards"
+  calledByComponents: 
+    - "Skills Academy landing page (/skills-academy/page.tsx)"
+  sharedState: []
+  eventCommunication: []
+  propsPassedTo: 
+    - "onTrackClick handler to TrackCards"
+  propsReceivedFrom: 
+    - "userId?: string (optional user ID)"
+  
+userJourneyContext:
+  userFlows: 
+    - "Dashboard → Skills Academy → Hub (first entry point)"
+    - "Hub → Track Selection → Workout Browser"
+    - "Hub → Start Training → First workout"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["player", "coach"]
+  featureArea: "skills"
+  journeyStage: "onboarding"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "SkillsAcademyHubEnhanced"
+  reasonForDuplication: "N/A"
+  consolidationStrategy: "N/A"
+  supabaseIntegrationWinner: "N/A"
+
+# Database Integration Opportunities
+databaseIntegrationOpportunities:
+  immediateIntegration:
+    - table: "skills_academy_drills"
+      purpose: "Get real drill count instead of hardcoded 167"
+      query: "SELECT COUNT(*) FROM skills_academy_drills"
+      
+    - table: "skills_academy_workouts"
+      purpose: "Get real workout count instead of hardcoded 118"
+      query: "SELECT COUNT(*) FROM skills_academy_workouts"
+      
+    - table: "skills_academy_series"
+      purpose: "Get actual series/track count instead of hardcoded 4"
+      query: "SELECT COUNT(DISTINCT series_type) FROM skills_academy_series"
+  
+  userProgressIntegration:
+    - table: "skills_academy_user_progress"
+      purpose: "Show user-specific progress and recently completed workouts"
+      query: "SELECT * FROM skills_academy_user_progress WHERE user_id = $1"
+      
+    - table: "user_points_wallets"
+      purpose: "Display user's total academy points in hero section"
+      query: "SELECT academy_points FROM user_points_wallets WHERE user_id = $1"
+
+# Critical MVP Issues
+mvpCriticalIssues:
+  dataIntegrity:
+    - "Hardcoded statistics create false impression of content availability"
+    - "No connection to actual Skills Academy database content"
+    - "Users may expect functionality that doesn't exist"
+    
+  navigationFlow:
+    - "Track selection leads to placeholder routes"
+    - "Start Training button hardcoded to workout ID 1"
+    - "Favorites and progress sections not implemented"
+    
+  recommendedFixes:
+    priority: "immediate"
+    changes:
+      - "Replace hardcoded stats with database queries"
+      - "Implement proper track selection navigation"
+      - "Add user progress integration"
+      - "Connect to actual Skills Academy data"

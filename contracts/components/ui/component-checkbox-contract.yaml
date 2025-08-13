@@ -1,0 +1,103 @@
+# Component Contract: Checkbox UI Component
+
+contractId: "component-checkbox-20250113"
+componentInfo:
+  name: "Checkbox"
+  filePath: "src/components/ui/checkbox.tsx"
+  category: "ui-foundation"
+  parentPage: "multiple"
+  complexity: "simple"
+  
+functionalAnalysis:
+  purpose: "Enable multiple selections in forms, filters, and preference settings"
+  primaryFunction: "Provides binary selection input with visual feedback and accessibility"
+  userInteractions: ["click to toggle", "keyboard space/enter", "touch on mobile"]
+  businessLogic: "Boolean state management with controlled/uncontrolled patterns"
+  stateManagement: "Radix primitive handles internal state, can be controlled via props"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements: ["16px size", "check icon", "border styling", "focus ring"]
+  mockDataUsage: []
+  realDataPercentage: 0
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: ["cn (className utility)"]
+  externalLibraries: ["@radix-ui/react-checkbox", "@radix-ui/react-icons"]
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: []
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: ["Add indeterminate state", "Add size variants", "Add custom check icons"]
+  priority: "medium"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation: ["controlled vs uncontrolled usage", "form integration patterns", "accessibility features"]
+  
+componentInteractions:
+  callsComponents: []
+  calledByComponents: ["Resource filters", "Admin forms", "Preference settings", "Multi-select lists"]
+  sharedState: ["Form state management"]
+  eventCommunication: ["onCheckedChange events"]
+  propsPassedTo: []
+  propsReceivedFrom: ["checked, onCheckedChange from form components"]
+  
+userJourneyContext:
+  userFlows: ["Resource Filtering", "Admin->User Management", "Settings->Preferences", "Team->Member Selection"]
+  criticalForMVP: true
+  usageFrequency: "medium"
+  primaryUserTypes: ["coach", "admin", "director"]
+  featureArea: "admin"
+  journeyStage: "advanced"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "Checkbox"
+  reasonForDuplication: "n/a"
+  consolidationStrategy: "n/a"
+  supabaseIntegrationWinner: "n/a"
+
+# Usage Analysis
+usagePatterns:
+  filteringUse: "Resource filters, drill category selection, team member filters"
+  adminUse: "Bulk operations, permission settings, feature toggles"
+  preferencesUse: "User settings, notification preferences, privacy settings"
+  multiSelectUse: "Selecting multiple drills, strategies, or team members"
+  mobileFriendly: true
+  touchTargets: "16px base + padding provides adequate touch area"
+  accessibility:
+    - "Proper ARIA states"
+    - "Keyboard navigation support"
+    - "Screen reader compatible"
+    - "Focus management"
+  
+integrationOpportunity: "Could integrate with user preferences, settings tables"
+potentialConnections:
+  - "User preference settings (notification settings, privacy)"
+  - "Multi-select operations (team member selection, resource favoriting)"
+  - "Filter states (practice type filters, skill level filters)"
+  - "Admin bulk operations (user management, content moderation)"
+  
+formIntegration: "Works with React Hook Form and form validation libraries"

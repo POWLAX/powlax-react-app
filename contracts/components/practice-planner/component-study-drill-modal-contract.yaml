@@ -1,0 +1,132 @@
+# Practice Planner Component Contract: StudyDrillModal
+contractId: "component-study-drill-modal-20250113"
+componentInfo:
+  name: "StudyDrillModal"
+  filePath: "src/components/practice-planner/modals/StudyDrillModal.tsx"
+  category: "practice-planner-modal"
+  parentPage: "Practice Planner (/teams/[teamId]/practiceplan)"
+  complexity: "complex"
+  
+functionalAnalysis:
+  purpose: "Comprehensive drill study interface with video, diagrams, and coaching notes. Primary modal for consuming drill content and learning."
+  primaryFunction: "Multi-media drill content consumption and note-taking"
+  userInteractions: 
+    - "View drill overview with metadata (category, complexity, age group)"
+    - "Switch between Overview, Diagram, and Video tabs"
+    - "Watch embedded video content (YouTube/Vimeo)"
+    - "Navigate through multiple diagram pages with controls"
+    - "Edit and save coaching notes with localStorage persistence"
+    - "Add/remove drill from favorites"
+    - "Download printable playbook (if available)"
+    - "Fullscreen diagram viewing on mobile"
+  businessLogic: "Tab-based content organization, video URL conversion for embeds, multi-diagram navigation, note persistence, responsive layout adaptation"
+  stateManagement: "Complex local state for tab management, video playback, diagram navigation, note editing, loading states"
+  
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "hook"
+  supabaseTables: 
+    - "user_favorites"
+  tableUsage:
+    - tableName: "user_favorites"
+      operations: ["select", "insert", "delete"]
+      purpose: "Manage drill favorites through useFavorites hook"
+      dataFlow: "Star button → useFavorites hook → database toggle"
+    
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements: 
+    - "Default drill complexity (Level 3/5)"
+    - "Default age group (14U+)"
+    - "Fallback drill description text"
+  mockDataUsage: []
+  realDataPercentage: 95
+  
+dependencies:
+  hooks: 
+    - "useFavorites"
+  contexts: []
+  utilities: 
+    - "localStorage (drill notes persistence)"
+    - "sonner (toast notifications)"
+  externalLibraries: 
+    - "@/components/ui/dialog"
+    - "@/components/ui/tabs"
+    - "@/components/ui/badge"
+    - "lucide-react (multiple icons)"
+  
+supabaseTableDetails:
+  tablesUsed: 
+    - "user_favorites"
+  tableRelationships: 
+    - "user_favorites.user_id → users.id"
+    - "user_favorites.item_id → powlax_drills.id OR user_drills.id"
+  queryPatterns: 
+    - "SELECT * FROM user_favorites WHERE user_id = ? AND item_type = 'drill'"
+    - "INSERT INTO user_favorites (user_id, item_id, item_type) VALUES (?, ?, 'drill')"
+    - "DELETE FROM user_favorites WHERE user_id = ? AND item_id = ?"
+  dataTransformations: 
+    - "Converts video URLs to embeddable format (YouTube/Vimeo)"
+    - "Parses lab_urls JSON arrays for diagram display"
+    - "Processes drill metadata for overview display"
+    
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: 
+    - "Could add video progress tracking"
+    - "Could implement drill completion tracking"
+    - "Could add social sharing features"
+    - "Could implement drill rating system"
+  priority: "high"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation: 
+    - "Video URL conversion logic"
+    - "Diagram navigation system"
+    - "Note persistence mechanism"
+    - "Tab switching behavior"
+    
+componentInteractions:
+  callsComponents: []
+  calledByComponents: 
+    - "DrillLibraryTabbed"
+    - "DrillCard"
+    - "Any component with drill study functionality"
+  sharedState: []
+  eventCommunication: 
+    - "onUpdateDrill callback for drill modifications"
+    - "onClose callback for modal dismissal"
+  propsPassedTo: []
+  propsReceivedFrom: 
+    - "isOpen modal visibility flag"
+    - "drill object with full metadata"
+    - "onUpdateDrill callback for drill changes"
+    
+userJourneyContext:
+  userFlows: 
+    - "Drill Learning: Select drill → Study overview → Watch video → View diagrams → Take notes"
+    - "Content Consumption: Browse drill library → Study detailed content → Add to favorites"
+    - "Coaching Prep: Load practice plan → Study each drill → Add coaching notes → Run practice"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["coach"]
+  featureArea: "practice"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: true
+  duplicateComponents: 
+    - "VideoModal (simpler video-only viewing)"
+    - "LacrosseLabModal (diagram-only viewing)"
+  primaryComponent: "StudyDrillModal"
+  reasonForDuplication: "StudyDrillModal is comprehensive, others are lightweight for specific content types"
+  consolidationStrategy: "Keep StudyDrillModal as primary, consider deprecating others or using for quick previews"
+  supabaseIntegrationWinner: "StudyDrillModal (includes favorites integration)"

@@ -1,0 +1,130 @@
+# Component Contract: Textarea UI Component
+
+contractId: "component-textarea-20250113"
+componentInfo:
+  name: "Textarea"
+  filePath: "src/components/ui/textarea.tsx"
+  category: "ui-foundation"
+  parentPage: "multiple"
+  complexity: "simple"
+  
+functionalAnalysis:
+  purpose: "Multi-line text input for longer content like practice notes, feedback, and descriptions"
+  primaryFunction: "Provides resizable text area with consistent styling and form integration"
+  userInteractions: ["text entry", "resize dragging", "focus/blur", "keyboard navigation"]
+  businessLogic: "Multi-line text data collection with auto-resize and validation support"
+  stateManagement: "Standard React textarea - can be controlled via value/onChange props"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements: ["minimum height (80px)", "padding", "border styling", "focus ring"]
+  mockDataUsage: []
+  realDataPercentage: 0
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: ["cn (className utility)"]
+  externalLibraries: []
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: []
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: ["Add auto-resize functionality", "Add character count", "Add rich text support"]
+  priority: "high"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation: ["form integration patterns", "resize behavior", "accessibility features"]
+  
+componentInteractions:
+  callsComponents: []
+  calledByComponents: ["Practice plan forms", "Profile editors", "Feedback forms", "Custom drill/strategy creators", "Admin forms"]
+  sharedState: ["Form state", "validation state"]
+  eventCommunication: ["onChange events", "onBlur validation", "onSubmit triggers"]
+  propsPassedTo: []
+  propsReceivedFrom: ["value, onChange, placeholder from form components"]
+  
+userJourneyContext:
+  userFlows: ["Practice->Notes Entry", "Profile->Bio/Description", "Feedback->Comments", "Custom Content->Descriptions"]
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["coach", "admin", "director"]
+  featureArea: "practice"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "Textarea"
+  reasonForDuplication: "n/a"
+  consolidationStrategy: "n/a"
+  supabaseIntegrationWinner: "n/a"
+
+# Usage Analysis
+usagePatterns:
+  practiceNotes: "Practice plan objectives, drill modifications, session feedback"
+  profileData: "User bio, team descriptions, coach introductions"
+  customContent: "Custom drill descriptions, strategy explanations"
+  feedback: "Performance feedback, progress notes, comments"
+  adminUse: "System notifications, policy updates, announcement creation"
+  mobileFriendly: true
+  
+formIntegration:
+  - "React Hook Form compatible"
+  - "Supports controlled and uncontrolled patterns"
+  - "Validation state styling via className"
+  - "Error message integration via form libraries"
+  
+accessibility:
+  - "Proper focus management"
+  - "Placeholder text support"
+  - "Label association via htmlFor"
+  - "Screen reader compatible"
+  - "Keyboard navigation"
+  - "Resize functionality accessible"
+  
+visualDesign:
+  - "80px minimum height for adequate content space"
+  - "Consistent padding with other form inputs"
+  - "Proper focus ring for accessibility"
+  - "Resizable handle for user control"
+  - "High contrast for readability"
+  
+mobileConsiderations:
+  - "Touch-friendly resize handle"
+  - "Proper keyboard behavior on mobile"
+  - "Adequate touch targets"
+  - "Responsive text sizing"
+  
+integrationOpportunity: "Essential for all multi-line text data in Supabase"
+potentialConnections:
+  - "practices (practice notes, objectives)"
+  - "user_drills (custom drill descriptions)"
+  - "user_strategies (custom strategy explanations)"  
+  - "users (profile bio, coaching philosophy)"
+  - "teams (team descriptions, season notes)"
+  
+dataTypes:
+  practiceData: "Objectives, notes, modifications, feedback"
+  profileData: "Bio, descriptions, introductions, philosophy"
+  customContent: "User-generated drill/strategy descriptions"
+  systemData: "Admin notifications, announcements, policies"

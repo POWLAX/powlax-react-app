@@ -1,0 +1,135 @@
+contractId: "component-resourcefilter-20250113"
+componentInfo:
+  name: "ResourceFilter"
+  filePath: "src/components/resources/ResourceFilter.tsx"
+  category: "Resource Filtering"
+  parentPage: "/resources"
+  complexity: "moderate"
+  
+functionalAnalysis:
+  purpose: "Comprehensive filtering and search interface for resources with multiple filter types"
+  primaryFunction: "Provide advanced filtering capabilities including search, categories, types, ages, roles, and sorting"
+  userInteractions:
+    - "Text search with debounced input"
+    - "Category selection via checkboxes"
+    - "Resource type quick filters"
+    - "Age group multi-selection"
+    - "Target audience (role) filtering"
+    - "Tag-based filtering"
+    - "Sort by multiple criteria"
+    - "Favorites-only filtering"
+    - "Clear all filters"
+    - "Expandable filter sections"
+  businessLogic: "Manages complex filter state, debounced search, active filter tracking, and result counting"
+  stateManagement: "Complex state with FilterState interface, local filters vs. active filters synchronization"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements:
+    - "Resource type definitions (video, pdf, template, link)"
+    - "Age group options (8-10, 11-14, 15+)"
+    - "Role options (coach, player, parent, director)"
+    - "Sort options (newest, popular, rating, alphabetical)"
+  mockDataUsage:
+    - "Static resource types array"
+    - "Static age groups array"
+    - "Static roles array"
+    - "Static sort options array"
+  realDataPercentage: 20
+  
+dependencies:
+  hooks:
+    - "useState"
+    - "useEffect"
+  contexts: []
+  utilities: []
+  externalLibraries:
+    - "lucide-react"
+    - "@/components/ui/*"
+    
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations:
+    - "Filter state object to query parameters"
+    - "Array filters to inclusion/exclusion logic"
+    - "Boolean filters to active state"
+    
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Connect age groups to database table"
+    - "Connect roles to actual user roles table"
+    - "Dynamic resource type detection from database"
+    - "Saved filter presets"
+    - "Advanced search with operators"
+  priority: "medium"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation:
+    - "FilterState interface documentation"
+    - "Debouncing strategy explanation"
+    - "Filter persistence patterns"
+    
+componentInteractions:
+  callsComponents:
+    - "Card, CardContent (ui)"
+    - "Button (ui)"
+    - "Input (ui)"
+    - "Label (ui)"
+    - "Badge (ui)"
+    - "Select, SelectContent, SelectItem, SelectTrigger, SelectValue (ui)"
+    - "Accordion, AccordionContent, AccordionItem, AccordionTrigger (ui)"
+    - "Checkbox (ui)"
+  calledByComponents:
+    - "Resources page"
+  sharedState:
+    - "FilterState shared with parent via onFilterChange"
+  eventCommunication:
+    - "onFilterChange callback with FilterState"
+    - "Real-time filter updates"
+  propsPassedTo:
+    - "onFilterChange: (filters: FilterState) => void"
+    - "activeFilters: FilterState"
+    - "userRole: string"
+    - "categories: Array<{id: string, name: string}>"
+    - "availableTags?: string[]"
+    - "resultCount?: number"
+  propsReceivedFrom:
+    - "Parent provides filter change handler and current state"
+    
+userJourneyContext:
+  userFlows:
+    - "Resource browsing -> Apply filters -> Refined results"
+    - "Search for specific content -> Text search -> Category refinement"
+    - "Role-based filtering -> Target audience selection -> Relevant resources"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["coach", "player", "parent", "director", "admin"]
+  featureArea: "resources"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: true
+  duplicateComponents:
+    - "GlobalSearch (text search functionality)"
+    - "Practice planner filters (similar filtering patterns)"
+  primaryComponent: "ResourceFilter"
+  reasonForDuplication: "Different contexts require specialized filtering interfaces"
+  consolidationStrategy: "Extract shared filtering logic into reusable hooks"
+  supabaseIntegrationWinner: "None currently - all use hardcoded options"

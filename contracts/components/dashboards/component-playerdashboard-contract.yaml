@@ -1,0 +1,111 @@
+# Component Contract: PlayerDashboard
+contractId: "component-playerdashboard-20250113"
+componentInfo:
+  name: "PlayerDashboard"
+  filePath: "src/components/dashboards/PlayerDashboard.tsx"
+  category: "dashboard"
+  parentPage: "/dashboard (when user role is player)"
+  complexity: "moderate"
+  
+functionalAnalysis:
+  purpose: "Player-focused dashboard showing gamification progress, skill development, and upcoming activities"
+  primaryFunction: "Display player's points, streaks, skill progress, achievements, and schedule in an engaging gamified interface"
+  userInteractions: 
+    - "View current streak and achievements"
+    - "Navigate to Skills Academy for training"
+    - "Check upcoming practices and games"
+    - "View skill development progress"
+    - "Access practice schedules"
+  businessLogic: "Player-centric view with gamification emphasis - shows progress, achievements, and motivational elements"
+  stateManagement: "Static mock data - no dynamic state management"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements:
+    - "All player statistics (points, streaks, progress)"
+    - "Mock team and practice information"
+    - "Skill progress percentages"
+    - "Achievement badges"
+    - "Upcoming events and schedule"
+  mockDataUsage:
+    - "mockData object with comprehensive player stats"
+    - "Static skill progress arrays"
+    - "Hardcoded upcoming events"
+    - "Mock team assignments and badges"
+  realDataPercentage: 0
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: []
+  externalLibraries: ["lucide-react", "next/link"]
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: []
+  
+mvpReadiness:
+  isProductionReady: false
+  blockers:
+    - "All data is hardcoded mock"
+    - "No integration with gamification tables"
+    - "No real team or schedule data"
+    - "No Skills Academy progress connection"
+  improvements:
+    - "Connect to user_points_wallets for real points"
+    - "Integrate with skills_academy_user_progress"
+    - "Connect to team_members for real team data"
+    - "Add practice schedule integration"
+    - "Connect to user_badges for real achievements"
+  priority: "high"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation: ["Gamification features", "Data integration needs", "Player user journey"]
+  
+componentInteractions:
+  callsComponents: ["StatCard", "ActionCard", "ProgressCard", "ScheduleCard"]
+  calledByComponents: ["Main dashboard page when user role is player"]
+  sharedState: ["User object passed as prop"]
+  eventCommunication: []
+  propsPassedTo: ["Mock data to StatCard, ProgressCard, ScheduleCard"]
+  propsReceivedFrom: ["user prop from parent dashboard"]
+  
+userJourneyContext:
+  userFlows: ["Player Login -> Dashboard -> Skills Academy", "Player -> View Progress -> Train", "Player -> Check Schedule -> Join Practice"]
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["player"]
+  featureArea: "skills"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "PlayerDashboard"
+  reasonForDuplication: ""
+  consolidationStrategy: ""
+  supabaseIntegrationWinner: ""
+
+notes:
+  - "Completely mock data implementation"
+  - "Well-designed UI but no database integration"
+  - "Perfect candidate for gamification table integration"
+  - "Should connect to user_points_wallets, user_badges, skills_academy_user_progress"
+  - "Team workout section explicitly marked as mock"
+  - "Good foundation for real gamification implementation"
+  - "High priority for MVP completion"

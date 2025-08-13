@@ -1,0 +1,105 @@
+# Authentication Login Page Orchestration Contract
+contractId: "page-auth-login-20250113"
+
+pageInfo:
+  route: "/auth/login"
+  filePath: "src/app/auth/login/page.tsx"
+  pageType: "client"
+  category: "authentication"
+  dynamicSegments: []
+  
+renderingStrategy:
+  componentType: "Client Component"
+  dataFetching: "client-side"
+  streamingEnabled: false
+  suspenseBoundaries: []
+  errorBoundaries: []
+  
+dataOrchestration:
+  serverDataFetching: []
+  clientDataFetching:
+    - hook: "useAuth"
+      trigger: "On mount"
+      tables: ["users"]
+      realtime: false
+  propsFlow: []
+        
+componentComposition:
+  componentsUsed:
+    - name: "Card, CardContent, CardDescription, CardHeader, CardTitle"
+      source: "@/components/ui/card"
+      props: {}
+      conditionalRendering: "Always"
+    - name: "Button"
+      source: "@/components/ui/button"
+      props: { "type": "submit", "disabled": "isSubmitting" }
+      conditionalRendering: "Always"
+    - name: "Loader2, AlertCircle"
+      source: "lucide-react"
+      props: {}
+      conditionalRendering: "State-based"
+  layoutUsed: "Root Layout only"
+  providerDependencies: ["SupabaseAuthProvider"]
+  
+routingLogic:
+  guards: []
+  navigation:
+    - triggers: ["Successful login", "Continue to Dashboard button"]
+      destinations: ["/dashboard"]
+      method: "router.push"
+    - triggers: ["External links"]
+      destinations: ["https://powlax.com/wp-login.php?action=lostpassword", "https://powlax.com/register"]
+      method: "External links"
+  dynamicRouting: []
+  
+pageSpecificLogic:
+  businessLogic: "WordPress credential validation, dual auth state handling (logged in vs login form), redirect after successful authentication"
+  stateManagement: "useState for form data, loading states, error handling, allowLogin override"
+  sideEffects: ["Console logging for auth state", "Form field clearing on error"]
+  formHandling: "Controlled form with username/password validation"
+  
+serverClientBoundary:
+  serverComponents: []
+  clientComponents: ["LoginPage component", "All UI components"]
+  boundaryLocation: "Page level - entire page is client component"
+  dataSerializationPoints: []
+  
+performancePatterns:
+  prefetching: []
+  lazyLoading: []
+  codeSpliiting: []
+  optimizations: ["Password field clearing on error for security"]
+  
+securityPatterns:
+  authentication: "WordPress credentials via useAuth hook"
+  authorization: "None - pre-auth page"
+  dataValidation: "Required field validation, email format for forgot password"
+  csrfProtection: false
+  
+integrationPoints:
+  supabaseUsage:
+    directQueries: false
+    throughHooks: true
+    serverSideOnly: false
+  externalAPIs: ["WordPress authentication endpoint"]
+  webhooks: []
+  realtimeSubscriptions: []
+
+authFlowAnalysis:
+  entryPoints: ["Direct navigation", "Redirect from protected pages"]
+  userStates:
+    - state: "Not authenticated"
+      display: "Login form"
+      actions: ["Submit credentials", "External links"]
+    - state: "Already authenticated"
+      display: "Logged in message with override option"
+      actions: ["Continue to dashboard", "Logout and re-login"]
+  exitPoints: ["/dashboard", "External WordPress pages"]
+  errorHandling: ["Invalid credentials", "Connection errors", "Form validation"]
+
+analysisNotes:
+  - "Sophisticated dual-state handling for already logged in users"
+  - "Direct integration with WordPress authentication system"
+  - "Good UX with loading states and error messages"
+  - "Security consideration: password clearing on failed attempts"
+  - "External links maintain WordPress ecosystem integration"

@@ -1,0 +1,273 @@
+# Skills Academy Workouts Page Contract
+contractId: "page-skills-academy-workouts-20250113"
+type: PAGE_ORCHESTRATION_ANALYSIS
+version: 1.0.0
+created: 2025-01-13
+priority: CRITICAL
+parentContract: "page-orchestration-analysis-001"
+
+# ===== PAGE INFORMATION =====
+pageInfo:
+  route: "/skills-academy/workouts"
+  filePath: "src/app/(authenticated)/skills-academy/workouts/page.tsx"
+  pageType: "client"
+  category: "skills-academy"
+  dynamicSegments: []
+
+# ===== RENDERING STRATEGY =====
+renderingStrategy:
+  componentType: "Client Component"
+  dataFetching: "client-side"
+  streamingEnabled: false
+  suspenseBoundaries: []
+  errorBoundaries: []
+
+# ===== DATA ORCHESTRATION =====
+dataOrchestration:
+  serverDataFetching: []
+  
+  clientDataFetching:
+    - hook: "useEffect + supabase direct"
+      trigger: "On mount"
+      tables: 
+        - "skills_academy_series"
+        - "skills_academy_workouts"
+      realtime: false
+      implementation: "fetchSeriesAndWorkouts()"
+      
+    - hook: "useAuth"
+      trigger: "On mount"
+      tables: ["auth.users"]
+      realtime: false
+      
+  propsFlow:
+    fromServer: {}
+    toClient: {}
+
+# ===== COMPONENT COMPOSITION =====
+componentComposition:
+  componentsUsed:
+    - name: "Dialog Components"
+      source: "@/components/ui/dialog"
+      props: "Modal control props"
+      conditionalRendering: "When isModalOpen"
+      
+    - name: "Button"
+      source: "@/components/ui/button"
+      props: "Various button configurations"
+      conditionalRendering: "Always"
+      
+    - name: "Card"
+      source: "@/components/ui/card"
+      props: "Track display"
+      conditionalRendering: "Desktop view"
+      
+    - name: "Icons"
+      source: "lucide-react"
+      props: "Icon configurations"
+      conditionalRendering: "Various"
+      
+  layoutUsed: "Authenticated Layout"
+  providerDependencies: 
+    - "SupabaseAuthContext"
+
+# ===== ROUTING LOGIC =====
+routingLogic:
+  guards:
+    - type: "Auth"
+      implementation: "Layout-level + useAuth bypass"
+      redirectTo: "/auth/login"
+      note: "Auth loading check temporarily bypassed"
+      
+  navigation:
+    - triggers: ["Track card click", "Workout button click", "Animations button click"]
+      destinations: 
+        - "/skills-academy/workout/[id]"
+        - "/skills-academy/animations"
+      method: "router.push"
+      
+  dynamicRouting:
+    - parameter: "workout_id"
+      validation: "Workout must exist in workouts array"
+      fallback: "Modal remains open"
+
+# ===== PAGE-SPECIFIC LOGIC =====
+pageSpecificLogic:
+  businessLogic: "Complex workout track and selection system with mobile/desktop responsive design"
+  stateManagement: "Multiple useState hooks for UI state, data state, and modal state"
+  sideEffects: 
+    - "Data fetching on mount"
+    - "Router navigation on workout selection"
+  formHandling: "N/A"
+  
+  responsiveDesign:
+    desktop: "Grid-based track cards with modal"
+    mobile: "Welcome screen + bottom sheet track selector"
+
+# ===== SERVER/CLIENT BOUNDARY =====
+serverClientBoundary:
+  serverComponents: []
+  clientComponents: 
+    - "Main page component"
+    - "All UI components"
+  boundaryLocation: "Entire page is client-side"
+  dataSerializationPoints: []
+
+# ===== PERFORMANCE PATTERNS =====
+performancePatterns:
+  prefetching: []
+  lazyLoading: 
+    - "Mobile track selector (conditional render)"
+  codeSpliiting: []
+  optimizations: 
+    - "Responsive design prevents unnecessary mobile renders"
+    - "Modal-based architecture"
+
+# ===== SECURITY PATTERNS =====
+securityPatterns:
+  authentication: "useAuth hook + layout enforcement"
+  authorization: "Authenticated layout wrapper"
+  dataValidation: "Basic client-side workout validation"
+  csrfProtection: false
+
+# ===== INTEGRATION POINTS =====
+integrationPoints:
+  supabaseUsage:
+    directQueries: true
+    throughHooks: true
+    serverSideOnly: false
+    
+  externalAPIs: []
+  webhooks: []
+  realtimeSubscriptions: []
+
+# ===== SKILLS ACADEMY SPECIFIC ANALYSIS =====
+skillsAcademySpecificAnalysis:
+  workoutDataLoading: 
+    strategy: "Client-side batch loading"
+    tables: 
+      - "skills_academy_series (with is_active filter)"
+      - "skills_academy_workouts (with is_active filter)"
+    timing: "On component mount"
+    
+  gamificationSetup: "None at this page level"
+  pointSystemInitialization: "Not handled here"
+  videoStreamingConfiguration: "Not configured here"
+  
+  workoutFlowOrchestration:
+    trackSystem:
+      - "5 predefined tracks (solid_start, attack, midfield, defense, wall_ball)"
+      - "Track-to-series mapping via series_type"
+      - "Dynamic workout grouping by series"
+      
+    workoutSelection:
+      - "Series-based grouping"
+      - "Size-based workout options (mini, more, complete)"
+      - "Special handling for wall_ball with coaching options"
+      
+    routingStrategy:
+      - "Direct navigation to /skills-academy/workout/[id]"
+      - "Workout ID passed as route parameter"
+      
+  responsiveArchitecture:
+    desktop: 
+      - "Track cards grid layout"
+      - "Modal-based workout selection"
+    mobile:
+      - "Welcome message + bottom sheet"
+      - "Fixed bottom button for track selection"
+      - "Slide-up track selector modal"
+
+# ===== ARCHITECTURAL PATTERNS =====
+architecturalPatterns:
+  pattern: "Client-Side Data Orchestrator with Responsive Modal System"
+  description: "Complex client component managing track/workout selection with different UX patterns for mobile/desktop"
+  
+  benefits:
+    - "Rich interactive experience"
+    - "Responsive design patterns"
+    - "Modal-based workflow"
+    
+  tradeoffs:
+    - "Client-side data loading"
+    - "Complex state management"
+    - "No server-side optimization"
+
+# ===== STATE MANAGEMENT ANALYSIS =====
+stateManagement:
+  localState:
+    - "selectedTrack: Track | null"
+    - "isModalOpen: boolean"
+    - "workouts: Workout[]"
+    - "series: Series[]"
+    - "loading: boolean"
+    - "showTrackSelector: boolean"
+    
+  stateFlow:
+    - "Mount -> fetchSeriesAndWorkouts() -> populate workouts/series"
+    - "Track click -> setSelectedTrack + setIsModalOpen"
+    - "Workout selection -> router.push + modal close"
+
+# ===== DATA TRANSFORMATION =====
+dataTransformation:
+  seriesFiltering: "Filter by series_type to match track"
+  workoutGrouping: "Group workouts by series_id within track"
+  specialHandling: 
+    - "Wall ball workouts: coaching vs no-coaching variants"
+    - "Regular workouts: mini/more/complete sizes"
+  sorting: "Series sorted by numerical suffix (SS1, SS2, etc.)"
+
+# ===== DEPENDENCIES =====
+dependencies:
+  serverDependencies: []
+  clientDependencies:
+    - "@/contexts/SupabaseAuthContext"
+    - "@/lib/supabase"
+    - "next/navigation"
+    - "@/components/ui/*"
+    - "lucide-react"
+  criticalPath:
+    - "Auth context initialization"
+    - "Series and workouts data loading"
+
+# ===== POTENTIAL IMPROVEMENTS =====
+potentialImprovements:
+  - "Add server-side data prefetching"
+  - "Implement proper loading states"
+  - "Add error boundaries"
+  - "Cache workout data"
+  - "Add search/filter functionality"
+  - "Implement workout favoriting"
+
+# ===== INTEGRATION WITH COMPONENT CONTRACTS =====
+linkedComponentContracts:
+  - "component-supabase-auth-context"
+  - "component-ui-dialog"
+  - "component-ui-button"
+  - "component-ui-card"
+
+# ===== WALL BALL SPECIAL HANDLING =====
+wallBallHandling:
+  detection: "series_type === 'wall_ball'"
+  workoutVariants:
+    - "mini / mini_no_coach (5 minutes)"
+    - "more / more_no_coach (10 minutes)"
+    - "complete / complete_no_coach (Complete)"
+  uiPattern: "Three-column grid with coaching options"
+  colorScheme: "Orange theme (bg-orange-600)"
+
+# ===== MOBILE UX PATTERN =====
+mobileUXPattern:
+  initialState: "Welcome screen with Call-to-Action"
+  activationMethod: "Bottom fixed button"
+  selectionUI: "Slide-up modal from top"
+  dismissal: "Top-right close button"
+  trackSelection: "Immediate modal close + workout modal open"
+
+# ===== NOTES =====
+notes:
+  - "Complex responsive design with different UX patterns"
+  - "Auth loading check bypassed - relies on layout protection"
+  - "Direct Supabase queries instead of hooks"
+  - "Special handling for wall ball workouts"
+  - "Mobile-first design with desktop enhancements"

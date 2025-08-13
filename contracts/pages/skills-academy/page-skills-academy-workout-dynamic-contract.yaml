@@ -1,0 +1,381 @@
+# Skills Academy Dynamic Workout Page Contract
+contractId: "page-skills-academy-workout-dynamic-20250113"
+type: PAGE_ORCHESTRATION_ANALYSIS
+version: 1.0.0
+created: 2025-01-13
+priority: CRITICAL
+parentContract: "page-orchestration-analysis-001"
+
+# ===== PAGE INFORMATION =====
+pageInfo:
+  route: "/skills-academy/workout/[id]"
+  filePath: "src/app/(authenticated)/skills-academy/workout/[id]/page.tsx"
+  pageType: "client"
+  category: "skills-academy"
+  dynamicSegments: ["id"]
+
+# ===== RENDERING STRATEGY =====
+renderingStrategy:
+  componentType: "Client Component"
+  dataFetching: "client-side"
+  streamingEnabled: false
+  suspenseBoundaries: []
+  errorBoundaries: ["WorkoutErrorBoundary"]
+
+# ===== DATA ORCHESTRATION =====
+dataOrchestration:
+  serverDataFetching: []
+  
+  clientDataFetching:
+    - hook: "useWorkoutSession"
+      trigger: "On mount with workoutId"
+      tables: 
+        - "skills_academy_workouts"
+        - "skills_academy_drills"
+        - "skills_academy_series"
+      realtime: false
+      
+    - hook: "useAuth"
+      trigger: "On mount"
+      tables: ["auth.users"]
+      realtime: false
+      
+    - hook: "usePointTypes"
+      trigger: "On mount"
+      tables: ["powlax_points_currencies"]
+      realtime: false
+      
+    - hook: "useGamificationTracking"
+      trigger: "For drill completion tracking"
+      tables: ["gamification tables"]
+      realtime: false
+      
+    - hook: "Direct RPC calls"
+      trigger: "On drill completion"
+      tables: ["user_points_wallets", "points_transactions"]
+      realtime: true
+      
+  propsFlow:
+    fromServer: {}
+    toClient: {}
+
+# ===== COMPONENT COMPOSITION =====
+componentComposition:
+  componentsUsed:
+    - name: "WorkoutErrorBoundary"
+      source: "@/components/skills-academy/WorkoutErrorBoundary"
+      props: "Error handling wrapper"
+      conditionalRendering: "Always (wrapper)"
+      
+    - name: "PointExplosion"
+      source: "@/components/skills-academy/PointExplosion"
+      props: "Animation state and point data"
+      conditionalRendering: "When showPointExplosion"
+      
+    - name: "PointCounter"
+      source: "@/components/skills-academy/PointCounter"
+      props: "User points and series type"
+      conditionalRendering: "Always"
+      
+    - name: "WorkoutReviewModal"
+      source: "@/components/skills-academy/WorkoutReviewModal"
+      props: "Completion data"
+      conditionalRendering: "When showReviewModal"
+      
+    - name: "CelebrationAnimation"
+      source: "@/components/skills-academy/CelebrationAnimation"
+      props: "Points and visibility"
+      conditionalRendering: "When showCelebration"
+      
+  layoutUsed: "Authenticated Layout"
+  providerDependencies: 
+    - "SupabaseAuthContext"
+
+# ===== ROUTING LOGIC =====
+routingLogic:
+  guards:
+    - type: "Auth"
+      implementation: "Layout-level + useAuth"
+      redirectTo: "/auth/login"
+      
+  navigation:
+    - triggers: ["Back button", "Workout completion", "Error states"]
+      destinations: 
+        - "/skills-academy/workouts"
+        - "/dashboard"
+      method: "Link component + router.push"
+      
+  dynamicRouting:
+    - parameter: "[id]"
+      validation: "parseInt() + useWorkoutSession validation"
+      fallback: "Error screen with back button"
+
+# ===== PAGE-SPECIFIC LOGIC =====
+pageSpecificLogic:
+  businessLogic: "Complex workout execution with real-time point tracking, timer enforcement, and gamification integration"
+  stateManagement: "Extensive local state for workout progress, timers, points, and UI state"
+  sideEffects:
+    - "Real-time point updates to database"
+    - "Timer enforcement for drill completion"
+    - "Gamification tracking (badges, ranks)"
+    - "Point explosion animations"
+    - "Workout progress persistence"
+  formHandling: "N/A"
+
+# ===== SERVER/CLIENT BOUNDARY =====
+serverClientBoundary:
+  serverComponents: []
+  clientComponents: 
+    - "Main workout page component"
+    - "All nested UI components"
+  boundaryLocation: "Entire page is client-side"
+  dataSerializationPoints: []
+
+# ===== PERFORMANCE PATTERNS =====
+performancePatterns:
+  prefetching: []
+  lazyLoading: []
+  codeSpliiting: []
+  optimizations:
+    - "Real-time UI updates for points"
+    - "Efficient video iframe loading"
+    - "Timer optimization with cleanup"
+
+# ===== SECURITY PATTERNS =====
+securityPatterns:
+  authentication: "useAuth hook + layout enforcement"
+  authorization: "User ID validation for point updates"
+  dataValidation: "Workout ID validation, drill completion validation"
+  csrfProtection: false
+
+# ===== INTEGRATION POINTS =====
+integrationPoints:
+  supabaseUsage:
+    directQueries: true
+    throughHooks: true
+    serverSideOnly: false
+    
+  externalAPIs: ["Vimeo video player"]
+  webhooks: []
+  realtimeSubscriptions: ["Point updates"]
+
+# ===== SKILLS ACADEMY SPECIFIC ANALYSIS =====
+skillsAcademySpecificAnalysis:
+  workoutDataLoading:
+    strategy: "Hook-based with workout session management"
+    hook: "useWorkoutSession(workoutId)"
+    dataStructure: "session.workout + session.drills"
+    
+  gamificationSetup:
+    pointTracking: "Real-time point updates with immediate UI feedback"
+    badgeTracking: "trackDrillCompletion() for badge progress"
+    rankTracking: "Automatic rank up detection"
+    
+  pointSystemInitialization:
+    userPoints: "Fetched via get_user_points RPC"
+    pointTypes: "usePointTypes hook"
+    realTimeUpdates: "Immediate setState + background database sync"
+    
+  videoStreamingConfiguration:
+    regularDrills: "Vimeo iframe with extractVimeoId() helper"
+    wallBallWorkouts: "Special handling with workout-level video"
+    fallbackUI: "PlayCircle placeholder for missing videos"
+    
+  workoutFlowOrchestration:
+    architecture: "5-Zone Container System"
+    zones:
+      1: "Header with back button and title"
+      2: "Point counter with real-time updates"
+      3: "Drill timeline (horizontal scroll)"
+      4: "Video player (flex-1 with aspect ratio)"
+      5: "Sticky footer with drill info and completion button"
+      
+  timerEnforcement:
+    implementation: "Drill-level timer with minimum completion time"
+    calculation: "Math.max((durationMinutes - 1), 1) * 60"
+    uiIndication: "Button disabled until time requirement met"
+    wallBallException: "Uses workout estimated duration"
+
+# ===== ARCHITECTURAL PATTERNS =====
+architecturalPatterns:
+  pattern: "Real-Time Workout Execution Engine"
+  description: "Complex client component managing workout progression with real-time data updates, animation coordination, and gamification integration"
+  
+  benefits:
+    - "Real-time point feedback"
+    - "Comprehensive progress tracking"
+    - "Mobile-optimized 5-zone layout"
+    - "Integrated gamification"
+    
+  tradeoffs:
+    - "Complex state management"
+    - "Heavy client-side processing"
+    - "Multiple simultaneous effects"
+
+# ===== STATE MANAGEMENT ANALYSIS =====
+stateManagement:
+  coreWorkoutState:
+    - "localCurrentDrillIndex: number"
+    - "completedDrills: Set<number>"
+    - "isCompleted: boolean"
+    - "drillTimer: number"
+    - "drillTimes: Record<number, any>"
+    
+  pointsState:
+    - "userPoints: object (real-time updated)"
+    - "localTotalPoints: number"
+    - "showPointExplosion: boolean"
+    - "explosionOrigin: HTMLElement"
+    - "explosionPoints: Record<string, number>"
+    
+  timerState:
+    - "drillStartTime: number | null"
+    - "drillTimeElapsed: number"
+    
+  modalState:
+    - "showCelebration: boolean"
+    - "showReviewModal: boolean"
+    
+  wallBallState:
+    - "isWallBallWorkout: boolean"
+    - "wallBallVimeoId: string | null"
+    
+  seriesState:
+    - "seriesInfo: any"
+
+# ===== REAL-TIME SYSTEMS =====
+realTimeSystems:
+  pointUpdates:
+    strategy: "Immediate UI update + background database sync"
+    implementation: "setUserPoints immediate + supabase.rpc background"
+    animation: "PointExplosion from button to header"
+    
+  timerEnforcement:
+    strategy: "Client-side timer with server validation"
+    intervals: "1-second updates with cleanup"
+    enforcement: "Button disabled until minimum time met"
+    
+  progressTracking:
+    strategy: "Local state with database persistence"
+    implementation: "Set<number> for completed drills"
+
+# ===== ANIMATION ORCHESTRATION =====
+animationOrchestration:
+  pointExplosion:
+    trigger: "handleMarkComplete()"
+    origin: "Did It button ([data-did-it-button])"
+    destination: "Header points display ([data-header-points])"
+    duration: "2500ms"
+    
+  celebration:
+    trigger: "Workout completion"
+    implementation: "CelebrationAnimation component"
+    timing: "500ms delay after completion"
+    
+  headerPulse:
+    trigger: "Point animation completion"
+    implementation: "CSS animate-pulse class"
+    duration: "1000ms"
+
+# ===== VIMEO INTEGRATION =====
+vimeoIntegration:
+  videoExtraction:
+    helper: "extractVimeoId(drill)"
+    patterns: ["vimeo.com/(\\d+)", "player.vimeo.com/video/(\\d+)", "^(\\d+)$"]
+    fallback: "drill.vimeo_id"
+    
+  wallBallHandling:
+    strategy: "Workout-level video ID"
+    helper: "getWallBallVideoId(workout)"
+    source: "original_json_name with 'vimeo:' prefix"
+    fallback: "wall_ball_drill_library table query"
+    
+  playerConfiguration:
+    params: "?badge=0&autopause=0&player_id=0&app_id=58479"
+    features: "autoplay; fullscreen; picture-in-picture"
+
+# ===== GAMIFICATION INTEGRATION =====
+gamificationIntegration:
+  drillCompletion:
+    hook: "useGamificationTracking"
+    method: "trackDrillCompletion(drillId, seriesId)"
+    returns: "badgeEarned, rankUp notifications"
+    
+  pointAwarding:
+    rpc: "award_drill_points"
+    parameters: "p_user_id, p_drill_id, p_points"
+    pointMapping: "lax_credit -> academy_points (minimum 10)"
+    
+  badgeTracking:
+    integration: "Background tracking with console logging"
+    future: "Badge earned modal/notification TODO"
+    
+  rankProgression:
+    integration: "Automatic rank up detection"
+    future: "Rank up modal/notification TODO"
+
+# ===== RESPONSIVE DESIGN =====
+responsiveDesign:
+  layout: "Mobile-first 5-zone flex column"
+  safeArea: "pb-[calc(env(safe-area-inset-bottom)+80px)]"
+  zones:
+    header: "flex-shrink-0 with sticky behavior"
+    pointCounter: "flex-shrink-0 with backdrop blur"
+    timeline: "flex-shrink-0 with horizontal scroll"
+    video: "flex-1 with aspect ratio containment"
+    footer: "flex-shrink-0 with safe area padding"
+
+# ===== DEPENDENCIES =====
+dependencies:
+  serverDependencies: []
+  clientDependencies:
+    - "@/hooks/useWorkoutSession"
+    - "@/hooks/useGamificationTracking"
+    - "@/hooks/usePointTypes"
+    - "@/contexts/SupabaseAuthContext"
+    - "next/navigation (useParams)"
+    - "Multiple Skills Academy components"
+  criticalPath:
+    - "Workout session initialization"
+    - "User authentication"
+    - "Point types loading"
+
+# ===== ERROR HANDLING =====
+errorHandling:
+  boundary: "WorkoutErrorBoundary wrapper"
+  loadingStates: "Comprehensive loading screens"
+  errorStates:
+    - "Workout not found"
+    - "No drills available"
+    - "Auth loading"
+  fallbackUI: "Error screens with back navigation"
+
+# ===== POTENTIAL IMPROVEMENTS =====
+potentialImprovements:
+  - "Add server-side workout data prefetching"
+  - "Implement workout resume functionality"
+  - "Add offline support for completed workouts"
+  - "Enhance error boundary with retry logic"
+  - "Implement workout bookmarking"
+  - "Add social sharing for completed workouts"
+  - "Implement workout difficulty rating"
+
+# ===== INTEGRATION WITH COMPONENT CONTRACTS =====
+linkedComponentContracts:
+  - "component-skills-academy-point-explosion"
+  - "component-skills-academy-point-counter"
+  - "component-skills-academy-celebration-animation"
+  - "component-skills-academy-workout-review-modal"
+  - "hook-workout-session"
+  - "hook-gamification-tracking"
+
+# ===== NOTES =====
+notes:
+  - "Most complex page in Skills Academy system"
+  - "Real-time point updates with immediate UI feedback"
+  - "Comprehensive timer enforcement system"
+  - "Integrated gamification with badge/rank tracking"
+  - "Mobile-optimized 5-zone layout architecture"
+  - "Special handling for wall ball workouts"
+  - "Complex animation orchestration"
+  - "Heavy use of useEffect hooks for real-time features"

@@ -1,0 +1,120 @@
+# Practice Planner Component Contract: LoadPracticeModal
+contractId: "component-load-practice-modal-20250113"
+componentInfo:
+  name: "LoadPracticeModal"
+  filePath: "src/components/practice-planner/modals/LoadPracticeModal.tsx"
+  category: "practice-planner-modal"
+  parentPage: "Practice Planner (/teams/[teamId]/practiceplan)"
+  complexity: "moderate"
+  
+functionalAnalysis:
+  purpose: "Modal dialog for browsing and loading existing practice plans. Provides search and selection interface for saved practices."
+  primaryFunction: "Practice plan discovery and loading from database"
+  userInteractions: 
+    - "Browse list of saved practice plans"
+    - "Search practice plans by title or notes"
+    - "Select practice plan from list"
+    - "View practice plan metadata (date, duration, drill count)"
+    - "Load selected practice plan"
+    - "Cancel without loading"
+  businessLogic: "Practice plan search/filter, selection management, metadata display with relative timestamps"
+  stateManagement: "Local state for search term, selected practice plan"
+  
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "hook"
+  supabaseTables: 
+    - "practices"
+  tableUsage:
+    - tableName: "practices"
+      operations: ["select"]
+      purpose: "Load existing practice plans for selection"
+      dataFlow: "usePracticePlans hook → LoadPracticeModal → practice selection → onLoad callback"
+    
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements: []
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: 
+    - "date-fns (formatDistanceToNow)"
+  externalLibraries: 
+    - "@/components/ui/dialog"
+    - "@/components/ui/button"
+    - "@/components/ui/scroll-area"
+    - "@/components/ui/input"
+    - "lucide-react (FolderOpen, Calendar, Clock, Loader2, Search icons)"
+  
+supabaseTableDetails:
+  tablesUsed: 
+    - "practices"
+  tableRelationships: 
+    - "practices.coach_id → users.id"
+    - "practices.team_id → teams.id"
+  queryPatterns: 
+    - "SELECT * FROM practices ORDER BY created_at DESC"
+    - "SELECT * FROM practices WHERE team_id = ? ORDER BY created_at DESC"
+  dataTransformations: 
+    - "Displays practice metadata in user-friendly format"
+    - "Formats dates with relative timestamps"
+    - "Extracts drill count from raw_wp_data"
+    
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: 
+    - "Could add practice plan previews"
+    - "Could add sorting options (date, name, duration)"
+    - "Could add practice plan deletion"
+    - "Could add practice plan duplication"
+  priority: "high"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation: 
+    - "Search functionality"
+    - "Practice plan data structure"
+    - "Loading workflow"
+    
+componentInteractions:
+  callsComponents: []
+  calledByComponents: 
+    - "Practice Planner Main Page"
+  sharedState: []
+  eventCommunication: 
+    - "onLoad callback with selected practice plan"
+    - "onClose callback for modal dismissal"
+  propsPassedTo: []
+  propsReceivedFrom: 
+    - "isOpen modal visibility flag"
+    - "onLoad callback function"
+    - "plans array from usePracticePlans"
+    - "loading state from usePracticePlans"
+    
+userJourneyContext:
+  userFlows: 
+    - "Practice Reuse: Start new practice → Load existing → Modify as needed"
+    - "Practice Review: Browse saved practices → Load for reference → Study structure"
+  criticalForMVP: true
+  usageFrequency: "medium"
+  primaryUserTypes: ["coach"]
+  featureArea: "practice"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "LoadPracticeModal"
+  reasonForDuplication: "N/A"
+  consolidationStrategy: "N/A"
+  supabaseIntegrationWinner: "LoadPracticeModal (only implementation)"

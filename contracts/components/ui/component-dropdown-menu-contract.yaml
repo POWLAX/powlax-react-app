@@ -1,0 +1,119 @@
+# Component Contract: DropdownMenu UI Component
+
+contractId: "component-dropdown-menu-20250113"
+componentInfo:
+  name: "DropdownMenu"
+  filePath: "src/components/ui/dropdown-menu.tsx"
+  category: "ui-foundation"
+  parentPage: "multiple"
+  complexity: "complex"
+  
+functionalAnalysis:
+  purpose: "Contextual menus and action lists that appear on trigger activation"
+  primaryFunction: "Displays floating menus with actions, navigation, and nested submenus"
+  userInteractions: ["trigger click", "menu item selection", "keyboard navigation", "submenu expansion", "outside click to close"]
+  businessLogic: "Complex menu positioning, nested submenus, checkbox/radio items, keyboard navigation"
+  stateManagement: "Radix primitive handles open/close state, positioning, and focus management"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements: ["menu styling", "item padding", "icon sizes", "animations", "positioning logic"]
+  mockDataUsage: []
+  realDataPercentage: 0
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: ["cn (className utility)"]
+  externalLibraries: ["@radix-ui/react-dropdown-menu", "lucide-react"]
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: []
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: ["Add mobile-specific touch handling", "Add custom item types", "Add loading states"]
+  priority: "medium"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation: ["menu composition patterns", "keyboard shortcuts", "accessibility features", "nested menu usage"]
+  
+componentInteractions:
+  callsComponents: []
+  calledByComponents: ["Navigation menus", "Context menus", "User profile menus", "Action menus", "Settings menus"]
+  sharedState: []
+  eventCommunication: ["onSelect events from menu items"]
+  propsPassedTo: []
+  propsReceivedFrom: ["menu items, actions, state from parent components"]
+  
+userJourneyContext:
+  userFlows: ["Navigation->User Menu", "Content->Context Actions", "Settings->Option Selection"]
+  criticalForMVP: true
+  usageFrequency: "medium"
+  primaryUserTypes: ["coach", "admin", "director"]
+  featureArea: "navigation"
+  journeyStage: "advanced"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "DropdownMenu"
+  reasonForDuplication: "n/a"
+  consolidationStrategy: "n/a"
+  supabaseIntegrationWinner: "n/a"
+
+# Usage Analysis
+usagePatterns:
+  navigationUse: "User profile menus, account settings, logout actions"
+  contextMenus: "Right-click actions on content items"
+  bulkActions: "Multi-select operations, batch processing"
+  filterMenus: "Advanced filtering options, sort preferences"
+  mobileFriendly: true
+  touchOptimized: "Adequate touch targets, proper spacing"
+  
+components:
+  DropdownMenu: "Root menu container"
+  DropdownMenuTrigger: "Button/element that opens menu"
+  DropdownMenuContent: "Menu container with positioning"
+  DropdownMenuItem: "Individual menu action item"
+  DropdownMenuCheckboxItem: "Checkbox selection item"
+  DropdownMenuRadioItem: "Radio button selection item"
+  DropdownMenuLabel: "Section label within menu"
+  DropdownMenuSeparator: "Visual divider between sections"
+  DropdownMenuShortcut: "Keyboard shortcut display"
+  DropdownMenuSub: "Nested submenu container"
+  DropdownMenuSubTrigger: "Submenu trigger item"
+  DropdownMenuSubContent: "Submenu content container"
+  DropdownMenuGroup: "Logical grouping of items"
+  DropdownMenuPortal: "Portal for proper layering"
+  DropdownMenuRadioGroup: "Radio button group container"
+  
+accessibility:
+  - "Full keyboard navigation"
+  - "ARIA roles and states"
+  - "Focus management"
+  - "Screen reader support"
+  - "Proper menu hierarchy"
+  
+integrationOpportunity: "Could display dynamic menu items from database"
+potentialConnections:
+  - "User roles and permissions for menu item visibility"
+  - "Recent actions or frequently used items"
+  - "Team-specific actions based on team membership"

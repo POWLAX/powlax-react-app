@@ -1,0 +1,94 @@
+# Component Contract: ProgressCard
+contractId: "component-progresscard-20250113"
+componentInfo:
+  name: "ProgressCard"
+  filePath: "src/components/dashboards/ProgressCard.tsx"
+  category: "dashboard-support"
+  parentPage: "Used by PlayerDashboard, AdminDashboard, DirectorDashboard"
+  complexity: "moderate"
+  
+functionalAnalysis:
+  purpose: "Reusable progress visualization card for displaying multiple progress metrics with progress bars"
+  primaryFunction: "Display collection of progress items with labels, values, progress bars, and optional badges for achievement levels"
+  userInteractions: 
+    - "Visual progress monitoring"
+    - "Achievement level recognition through badges"
+  businessLogic: "Calculates percentages, applies color coding, shows achievement badges based on progress thresholds"
+  stateManagement: "No state - pure presentation component with calculations"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements: 
+    - "Achievement thresholds (80% = Excellent, 60% = Good)"
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: []
+  externalLibraries: ["lucide-react"]
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: []
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Make achievement thresholds configurable"
+    - "Add animation for progress changes"
+    - "Enhance accessibility for progress bars"
+    - "Add custom color support for progress bars"
+  priority: "low"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation: ["ProgressItem interface", "Achievement threshold logic", "Color scheme mapping"]
+  
+componentInteractions:
+  callsComponents: ["Card", "CardContent", "CardDescription", "CardHeader", "CardTitle", "Progress", "Badge"]
+  calledByComponents: ["PlayerDashboard", "AdminDashboard", "DirectorDashboard"]
+  sharedState: []
+  eventCommunication: []
+  propsPassedTo: ["Progress value calculations, Badge conditions"]
+  propsReceivedFrom: ["ProgressCardProps: title, description, items, icon, showBadges"]
+  
+userJourneyContext:
+  userFlows: ["Dashboard -> Progress Monitoring -> Goal Tracking"]
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["player", "parent", "admin", "director"]
+  featureArea: "analytics"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "ProgressCard"
+  reasonForDuplication: ""
+  consolidationStrategy: ""
+  supabaseIntegrationWinner: ""
+
+notes:
+  - "Sophisticated progress visualization component"
+  - "Supports both absolute values and percentages"
+  - "Achievement badging system with thresholds"
+  - "Color-coded progress bars"
+  - "Well-structured for skills tracking and system metrics"
+  - "Could be enhanced with configurable thresholds"

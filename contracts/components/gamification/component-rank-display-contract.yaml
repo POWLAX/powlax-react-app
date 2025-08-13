@@ -1,0 +1,186 @@
+# RankDisplay Component Contract
+
+contractId: "component-rank-display-20250113"
+componentInfo:
+  name: "RankDisplay"
+  filePath: "/src/components/gamification/RankDisplay.tsx"
+  category: "gamification"
+  parentPage: "/gamification, /dashboard"
+  complexity: "complex"
+
+functionalAnalysis:
+  purpose: "Visual rank progression system showing player advancement through lacrosse skill tiers with Academy Points"
+  primaryFunction: "Display current rank, progress to next rank, and Academy Points total in both compact and full modes"
+  userInteractions:
+    - "View current rank with icon and description"
+    - "Monitor progress bar to next rank level"
+    - "See Academy Points total and points needed"
+    - "Preview next rank achievement goals"
+  businessLogic: "Calculates rank progression based on Academy Points with 10-tier system from Lacrosse Bot to Lax God"
+  stateManagement: "React hooks for rank data, loading states, progress animations"
+
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "direct"
+  supabaseTables:
+    - "user_rank_progress"
+    - "powlax_player_ranks"
+  tableUsage:
+    - tableName: "user_rank_progress"
+      operations: ["select", "insert", "update"]
+      purpose: "Track user's current rank, Academy Points total, and progress metrics"
+      dataFlow: "User progress -> rank calculations -> progress display"
+    - tableName: "powlax_player_ranks"
+      operations: ["select"]
+      purpose: "Fetch rank metadata (title, description, icon_url) for display"
+      dataFlow: "Rank definitions -> current/next rank display"
+
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements:
+    - "RANK_DATA array with 10 rank tiers and point requirements"
+    - "Rank progression logic and point thresholds"
+    - "Default rank initialization (Lacrosse Bot at 0 points)"
+  mockDataUsage: []
+  realDataPercentage: 70
+
+dependencies:
+  hooks:
+    - "useAuth (SupabaseAuthContext)"
+    - "useState, useEffect (React)"
+  contexts:
+    - "SupabaseAuthContext"
+  utilities:
+    - "supabase client"
+    - "Next.js Image component"
+  externalLibraries:
+    - "next/image"
+
+supabaseTableDetails:
+  tablesUsed:
+    - "user_rank_progress"
+    - "powlax_player_ranks"
+  tableRelationships:
+    - "user_rank_progress.current_rank_id -> powlax_player_ranks.id"
+    - "user_rank_progress.user_id -> users.id"
+  queryPatterns:
+    - "SELECT * FROM user_rank_progress WHERE user_id = ? SINGLE"
+    - "SELECT * FROM powlax_player_ranks WHERE id = ? SINGLE"
+    - "INSERT INTO user_rank_progress (initial rank setup)"
+  dataTransformations:
+    - "Academy Points -> rank tier calculation"
+    - "Progress percentage calculation between ranks"
+    - "Points needed for next rank computation"
+
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Sync hardcoded RANK_DATA with database powlax_player_ranks table"
+    - "Add rank history and achievement timestamps"
+    - "Implement rank badge unlocks and celebrations"
+    - "Add seasonal rank resets or prestige system"
+  priority: "high"
+
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation:
+    - "Rank tier system explanation"
+    - "Academy Points earning methodology"
+    - "Rank progression algorithm"
+
+componentInteractions:
+  callsComponents: []
+  calledByComponents:
+    - "PlayerDashboard"
+    - "GamificationDashboard" 
+    - "Skills Academy components"
+  sharedState:
+    - "SupabaseAuthContext (user authentication)"
+  eventCommunication: []
+  propsPassedTo: []
+  propsReceivedFrom:
+    - "compact: boolean (display mode)"
+
+userJourneyContext:
+  userFlows:
+    - "Dashboard -> Rank Display -> Motivational progress tracking"
+    - "Skills Academy -> Rank Progress -> Achievement recognition"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["player"]
+  featureArea: "gamification"
+  journeyStage: "core-loop"
+
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "RankDisplay"
+  reasonForDuplication: "N/A"
+  consolidationStrategy: "N/A"
+  supabaseIntegrationWinner: "RankDisplay"
+
+gamificationSystemDetails:
+  rankTiers:
+    1: "Lacrosse Bot (0 pts)"
+    2: "2nd Bar Syndrome (250 pts)" 
+    3: "Left Bench Hero (600 pts)"
+    4: "Celly King (1,000 pts)"
+    5: "D-Mid Rising (1,400 pts)"
+    6: "Lacrosse Utility (2,000 pts)"
+    7: "Flow Bro (3,000 pts)"
+    8: "Lax Beast (4,500 pts)"
+    9: "Lax Ninja (6,000 pts)"
+    10: "Lax God (10,000 pts)"
+  progressCalculation:
+    - "Academy Points earned through drill completions (10 pts base)"
+    - "Linear progression between rank thresholds"
+    - "Progress percentage: (current - rank_min) / (next_rank - rank_min)"
+  achievementTriggers:
+    - "Drill completion -> Academy Points increase -> rank progress"
+    - "Rank threshold reached -> rank up celebration -> rank display update"
+
+animationIntegration:
+  celebrationEffects:
+    - "Pulse animation on rank progress changes"
+    - "Shine effect on progress bar fill"
+    - "Scale animation on rank icon updates"
+  visualFeedback:
+    - "Loading skeleton for rank data fetch"
+    - "Gradient progress bars with smooth transitions"
+    - "Animated rank progress percentage updates"
+  performanceOptimizations:
+    - "Compact mode for embedded display efficiency"
+    - "CSS transforms for GPU acceleration"
+    - "Conditional animation triggering"
+
+displayModes:
+  compact:
+    purpose: "Embedded display in headers or cards"
+    features:
+      - "Rank icon with progress bar"
+      - "Academy Points total"
+      - "Minimal space requirement"
+  full:
+    purpose: "Dedicated gamification page display"
+    features:
+      - "Detailed rank information with description"
+      - "Progress section with next rank preview"
+      - "Points breakdown (current/needed)"
+      - "Visual rank progression indicators"
+
+dataConsistencyIssues:
+  criticalIssues:
+    - "RANK_DATA hardcoded array not synced with powlax_player_ranks table"
+    - "Rank calculations use hardcoded values instead of database"
+    - "Potential data mismatch between code and database rank definitions"
+  recommendedFixes:
+    - "Fetch rank definitions from powlax_player_ranks table"
+    - "Remove hardcoded RANK_DATA array"
+    - "Use database-driven rank progression logic"

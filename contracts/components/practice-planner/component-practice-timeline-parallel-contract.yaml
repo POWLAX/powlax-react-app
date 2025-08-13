@@ -1,0 +1,119 @@
+# Practice Planner Component Contract: PracticeTimelineWithParallel
+contractId: "component-practice-timeline-parallel-20250113"
+componentInfo:
+  name: "PracticeTimelineWithParallel"
+  filePath: "src/components/practice-planner/PracticeTimelineWithParallel.tsx"
+  category: "practice-planner"
+  parentPage: "Practice Planner (/teams/[teamId]/practiceplan)"
+  complexity: "complex"
+  
+functionalAnalysis:
+  purpose: "Visual timeline interface for organizing practice drills with support for parallel activities and time management. Core component for practice plan structure."
+  primaryFunction: "Practice timeline management with drag-and-drop drill organization"
+  userInteractions: 
+    - "View practice timeline with calculated start times"
+    - "Move drills up/down in timeline with arrow buttons"
+    - "Edit drill duration inline by clicking duration badge"
+    - "Remove individual drills from timeline"
+    - "Add parallel activities to time slots"
+    - "Edit parallel activity duration (affects all parallel drills)"
+    - "View and edit setup time with notes"
+    - "Visual duration progress bar integration"
+  businessLogic: "Manages time slots containing single or multiple parallel drills, calculates cumulative start times, handles parallel drill duration synchronization, supports setup time calculations"
+  stateManagement: "Local state for parallel drill picker, setup modal, duration editing, time calculations based on props from parent"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements: []
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: []
+  externalLibraries: 
+    - "lucide-react (icons)"
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: 
+    - "Converts TimeSlot data structure to visual timeline"
+    - "Calculates start times based on cumulative durations"
+    - "Manages parallel drill synchronization"
+    
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: 
+    - "Could add drag-and-drop reordering"
+    - "Could add time conflict detection"
+    - "Could add equipment overlap warnings"
+    - "Could add real-time collaborative editing"
+  priority: "critical"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation: 
+    - "Time calculation logic"
+    - "Parallel drill management"
+    - "Data structure requirements"
+    
+componentInteractions:
+  callsComponents: 
+    - "DrillCard"
+    - "ParallelDrillPicker"
+    - "SetupTimeModal"
+    - "PracticeDurationBar"
+  calledByComponents: 
+    - "Practice Planner Main Page"
+  sharedState: 
+    - "timeSlots array managed by parent"
+    - "Practice timing information (startTime, setupTime)"
+  eventCommunication: 
+    - "setDrills callback for timeline changes"
+    - "onSetupNotesChange for setup modifications"
+    - "onStudyDrill for drill study modal"
+  propsPassedTo: 
+    - "Individual drill data to DrillCard"
+    - "Time calculations to DrillCard"
+    - "Navigation callbacks to DrillCard"
+  propsReceivedFrom: 
+    - "drills (timeSlots) array from parent"
+    - "startTime, setupTime, totalDuration from parent"
+    - "Event callbacks for state updates"
+    
+userJourneyContext:
+  userFlows: 
+    - "Practice Building: Add drills → Organize timeline → Adjust durations → Review timing"
+    - "Parallel Activities: Add drill → Add parallel activity → Sync durations"
+    - "Time Management: Set practice duration → Monitor progress bar → Adjust as needed"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["coach"]
+  featureArea: "practice"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: true
+  duplicateComponents: 
+    - "PracticeTimeline (without parallel support)"
+    - "LazyPracticeTimeline (lazy-loaded version)"
+  primaryComponent: "PracticeTimelineWithParallel"
+  reasonForDuplication: "Enhanced version with parallel drill support"
+  consolidationStrategy: "PracticeTimelineWithParallel should be primary - others are legacy"
+  supabaseIntegrationWinner: "N/A - no direct database integration"

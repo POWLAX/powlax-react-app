@@ -284,7 +284,7 @@ export function useUserTeams() {
         .from('team_members')
         .select(`
           team_id,
-          team_teams!inner (
+          teams:team_id (
             id,
             name
           )
@@ -297,8 +297,8 @@ export function useUserTeams() {
       }
 
       const userTeams = (data || []).map((item: any) => ({
-        id: item.team_teams.id,
-        name: item.team_teams.name
+        id: item.teams?.id || item.team_id,
+        name: item.teams?.name || 'Unknown Team'
       }))
 
       setTeams(userTeams)

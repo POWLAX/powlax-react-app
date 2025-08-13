@@ -1,0 +1,194 @@
+# PointExplosion Component Contract
+
+contractId: "component-point-explosion-20250113"
+componentInfo:
+  name: "PointExplosion"
+  filePath: "/src/components/skills-academy/PointExplosion.tsx"
+  category: "animations"
+  parentPage: "Skills Academy Workout Player"
+  complexity: "complex"
+
+functionalAnalysis:
+  purpose: "Dramatic point reward animation system creating engaging particle explosions when players complete drills"
+  primaryFunction: "Animate point particles from drill completion source to point counter with vibrant visual effects"
+  userInteractions:
+    - "Visual feedback triggered by drill completion events"
+    - "Particle animation from origin element to point counter area"
+    - "Multiple point types with distinct icons and values"
+  businessLogic: "Creates particle system based on earned points, with trajectory calculations and visual enhancement effects"
+  stateManagement: "React hooks for particles state, origin positioning, animation lifecycle management"
+
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "hook"
+  supabaseTables: []
+  tableUsage: []
+  note: "Receives point data from useGamificationTracking hook and point types from parent component"
+
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements:
+    - "Animation duration and timing parameters"
+    - "Particle count calculation (1-3 per point type)"
+    - "Visual styling and color schemes"
+  mockDataUsage: []
+  realDataPercentage: 100
+
+dependencies:
+  hooks:
+    - "useState, useEffect (React)"
+  contexts: []
+  utilities:
+    - "getBoundingClientRect for origin positioning"
+  externalLibraries:
+    - "framer-motion (AnimatePresence, motion)"
+    - "next/image (Image component)"
+
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations:
+    - "Points object -> individual particle creation"
+    - "Origin element -> screen coordinates for animation start"
+    - "Point types -> icon and display name mapping"
+
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Add performance settings for lower-end devices"
+    - "Implement particle pooling for memory efficiency"
+    - "Add sound effects synchronization"
+    - "Create point type-specific animation themes"
+  priority: "medium"
+
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation:
+    - "Animation performance characteristics"
+    - "Point type integration requirements"
+    - "Mobile optimization strategies"
+
+componentInteractions:
+  callsComponents: []
+  calledByComponents:
+    - "Skills Academy Workout Player"
+    - "Drill completion handlers"
+  sharedState: []
+  eventCommunication:
+    - "onAnimationComplete callback to parent"
+  propsPassedTo: []
+  propsReceivedFrom:
+    - "isVisible: boolean (animation trigger)"
+    - "originElement: HTMLElement (animation start point)"
+    - "points: Record<string, number> (point values by type)"
+    - "pointTypes: Array (point type definitions with icons)"
+    - "onAnimationComplete?: callback"
+    - "duration?: number (animation duration)"
+
+userJourneyContext:
+  userFlows:
+    - "Drill completion -> Point explosion -> Visual satisfaction -> Motivation boost"
+    - "Point earning -> Particle animation -> Point counter update -> Progress recognition"
+  criticalForMVP: false
+  usageFrequency: "high"
+  primaryUserTypes: ["player"]
+  featureArea: "gamification"
+  journeyStage: "core-loop"
+
+duplicateFunctionality:
+  hasDuplicates: true
+  duplicateComponents:
+    - "CelebrationAnimation (different scope - workout level vs drill level)"
+    - "Animation components in animations/ directory (PointExplosionCanvas)"
+  primaryComponent: "PointExplosion"
+  reasonForDuplication: "Different animation techniques and contexts"
+  consolidationStrategy: "Keep PointExplosion as primary, PointExplosionCanvas as technical demo"
+  supabaseIntegrationWinner: "PointExplosion (integrated with Skills Academy)"
+
+animationSystemDetails:
+  particleGeneration:
+    algorithm: "1-3 particles per point type based on value (value/15 ratio)"
+    distribution: "Random spread around origin with 60px variance"
+    lifecycle: "Create -> Animate -> Cleanup with timeout"
+  
+  trajectoryCalculation:
+    startPosition: "Origin element bounding rect center"
+    midPosition: "Random arc 120-200px above start for dramatic effect"
+    endPosition: "Window center for point counter convergence"
+    easing: "Custom cubic bezier [0.175, 0.885, 0.32, 1.4] for bouncy effect"
+  
+  visualEffects:
+    particleDesign: "Gradient golden orbs with border and shadow"
+    scaleAnimation: "0 -> 1.5 -> 1.0 -> 0.7 for impact effect"
+    rotationAnimation: "0 -> 720 degrees for spinning motion"
+    sparkleEffects: "Additional animated sparkle particles"
+  
+  performanceFeatures:
+    staggerDelay: "0.08s between particles for visual impact"
+    frameOptimization: "GPU-accelerated transforms and opacity"
+    memoryManagement: "Automatic cleanup after animation completion"
+
+technicalImplementation:
+  animationLibrary: "Framer Motion"
+  advantages:
+    - "Smooth 60fps animations with GPU acceleration"
+    - "Complex keyframe sequences with easing control"
+    - "Automatic cleanup and unmounting"
+    - "Mobile-optimized performance"
+  
+  coordinateSystem:
+    - "Screen-fixed positioning for overlay effects"
+    - "Dynamic origin calculation from trigger element"
+    - "Responsive endpoint targeting for different screen sizes"
+  
+  errorHandling:
+    - "Graceful fallback for missing origin element"
+    - "Image loading error handling for point type icons"
+    - "Animation completion guarantee with timeout"
+
+pointTypeIntegration:
+  supportedPointTypes:
+    - "Academy Points (primary currency)"
+    - "Skill-specific point categories with icons"
+    - "Bonus multiplier points for streaks/achievements"
+  
+  iconSystem:
+    - "Dynamic icon loading from point type definitions"
+    - "Fallback handling for missing icons"
+    - "Optimized image sizing (10x10 icons for visibility)"
+  
+  valueDisplay:
+    - "Large, bold text with drop shadows"
+    - "Value splitting across multiple particles for large amounts"
+    - "Dynamic font sizing based on point magnitude"
+
+mobileOptimizations:
+  performanceAdjustments:
+    - "Reduced particle count on mobile devices"
+    - "Simplified animation easing for lower-end hardware"
+    - "Touch-friendly trigger areas"
+  
+  visualAdaptations:
+    - "Larger particles for touch screen visibility"
+    - "Increased contrast for outdoor viewing"
+    - "Battery-conscious animation duration"
+
+integrationRequirements:
+  parentComponentNeeds:
+    - "Point earning detection and value calculation"
+    - "Origin element reference management"
+    - "Point type metadata with icons and display names"
+    - "Animation lifecycle coordination"
+  
+  gamificationSystemTies:
+    - "useGamificationTracking hook for point data"
+    - "Real-time point counter updates"
+    - "Achievement system integration for bonus effects"

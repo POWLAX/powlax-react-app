@@ -1,0 +1,329 @@
+# Strategies Page Orchestration Contract
+# Analysis of strategy data loading, categorization logic, and interactive strategy exploration
+
+contractId: "page-strategies-content-002"
+type: PAGE_ORCHESTRATION_ANALYSIS
+version: 1.0.0
+created: 2025-01-15
+priority: MEDIUM
+category: content
+
+# ===== PAGE INFORMATION =====
+pageInfo:
+  route: "/strategies"
+  filePath: "src/app/(authenticated)/strategies/page.tsx"
+  pageType: client
+  category: content
+  dynamicSegments: []
+
+# ===== RENDERING STRATEGY =====
+renderingStrategy:
+  componentType: "Client Component"
+  dataFetching: "mixed"
+  streamingEnabled: false
+  suspenseBoundaries: []
+  errorBoundaries: []
+  clientDirective: "'use client'"
+
+# ===== DATA ORCHESTRATION =====
+dataOrchestration:
+  serverDataFetching: []
+  
+  clientDataFetching:
+    - hook: "useAuth"
+      trigger: "On mount"
+      tables: ["users"]
+      realtime: false
+      purpose: "Authentication state management"
+    
+    - hook: "useUserStrategies"
+      trigger: "On mount"
+      tables: ["user_strategies"]
+      realtime: false
+      purpose: "User-created custom strategies"
+    
+    - hook: "supabase.from('powlax_strategies')"
+      trigger: "On mount via fetchStrategies"
+      tables: ["powlax_strategies"]
+      realtime: false
+      purpose: "Official POWLAX strategy library"
+    
+  propsFlow:
+    fromServer: {}
+    toClient:
+      - VideoModal: "isOpen, onClose, drill object"
+      - LacrosseLabModal: "isOpen, onClose, drill object"
+      - CreateStrategyModal: "isOpen, onClose, onCreate function"
+
+# ===== STRATEGY DATA INTEGRATION =====
+strategyDataIntegration:
+  dataSourceMerging:
+    powlaxStrategies: "Official strategies from powlax_strategies table"
+    userStrategies: "Custom user strategies from user_strategies table"
+    mergedArray: "Combined into allStrategies with isUserStrategy flag"
+  
+  dataTransformation:
+    powlaxStrategies:
+      source: "powlax_strategies table"
+      mapping:
+        id: "strategy.id.toString()"
+        name: "strategy.strategy_name"
+        category: "strategy.strategy_categories.toLowerCase().replace(/s+/g, '_')"
+        description: "strategy.description"
+        complexity: "getComplexityFromAge() function"
+        age_level: "see_it_ages || coach_it_ages || own_it_ages"
+        video_url: "strategy.vimeo_link"
+        lacrosse_lab_url: "strategy.lacrosse_lab_links[0]"
+        tags: "[strategy.strategy_categories]"
+    
+    userStrategies:
+      source: "user_strategies table via useUserStrategies hook"
+      mapping:
+        id: "'user-' + us.id"
+        name: "us.strategy_name"
+        category: "us.strategy_categories.toLowerCase().replace(/s+/g, '_')"
+        description: "us.description"
+        complexity: "'custom'"
+        age_level: "us.target_audience"
+        video_url: "us.vimeo_link"
+        isUserStrategy: "true"
+
+# ===== CATEGORIZATION LOGIC =====
+categorizationLogic:
+  categorySystem:
+    categories: "['all', 'offense', 'defense', 'transition', 'special teams']"
+    categoryMapping: "Database strategy_categories -> normalized lowercase"
+    
+  categoryIcons:
+    offense: "Target icon (red)"
+    defense: "Shield icon (blue)" 
+    transition: "Zap icon (green)"
+    default: "Users icon (gray)"
+  
+  complexityCalculation:
+    algorithm: "getComplexityFromAge function"
+    inputs: "seeIt, coachIt, ownIt age strings"
+    logic:
+      - "Extract numeric ages with regex"
+      - "Find maximum age"
+      - "14+ -> advanced, 12+ -> building, default -> foundation"
+    userStrategies: "Always marked as 'custom' complexity"
+
+# ===== FILTER AND SEARCH ORCHESTRATION =====
+filterSearchOrchestration:
+  searchImplementation:
+    searchQuery: "searchTerm state"
+    scope: "strategy name and description"
+    method: "Client-side includes() matching"
+    caseSensitive: false
+  
+  categoryFiltering:
+    mechanism: "selectedCategory state"
+    options: "Tab-based category selection"
+    allOption: "Shows all categories"
+  
+  combinedFiltering:
+    function: "filteredStrategies computed property"
+    logic: "matchesCategory AND matchesSearch"
+    realtime: "Updates as user types/selects"
+
+# ===== INTERACTIVE STRATEGY EXPLORATION =====
+interactiveExploration:
+  listGridLayout:
+    leftPanel: "2/3 width - strategy cards in grid"
+    rightPanel: "1/3 width - strategy detail panel"
+    scrollable: "Left panel has ScrollArea for large strategy lists"
+  
+  strategySelection:
+    trigger: "Click on strategy card"
+    action: "handleViewStrategy -> setSelectedStrategy"
+    ui: "Detail panel updates with strategy information"
+  
+  detailPanel:
+    conditionalContent:
+      selected: "Strategy details with actions"
+      unselected: "Empty state with 'Select a strategy' message"
+    
+    contentSections:
+      header: "Category icon + strategy name"
+      description: "Full strategy description"
+      details: "Category, complexity, age level with badges"
+      actions: "Video play and Lab view buttons"
+      relatedDrills: "Related drills (when available)"
+
+# ===== MODAL COORDINATION =====
+modalCoordination:
+  videoModal:
+    trigger: "handlePlayVideo function"
+    state: "showVideoModal, currentVideoUrl, currentStrategyName"
+    component: "VideoModal from practice-planner"
+    props: "drill object with name and videoUrl"
+  
+  lacrosseLabModal:
+    trigger: "handleViewLab function" 
+    state: "showLabModal, currentLabUrl, currentStrategyName"
+    component: "LacrosseLabModal from practice-planner"
+    props: "drill object with name and lab_urls array"
+  
+  createStrategyModal:
+    trigger: "Create Strategy button click"
+    state: "showCreateModal"
+    integration: "useUserStrategies.createUserStrategy"
+    formFields: "name, category, description, target_audience, video_link"
+
+# ===== COMPONENT COMPOSITION =====
+componentComposition:
+  componentsUsed:
+    - name: "Tabs, TabsContent, TabsList, TabsTrigger"
+      source: "@/components/ui/tabs"
+      purpose: "Category navigation"
+      
+    - name: "ScrollArea"
+      source: "@/components/ui/scroll-area"
+      purpose: "Strategy list scrolling"
+      
+    - name: "VideoModal"
+      source: "@/components/practice-planner/modals/VideoModal"
+      purpose: "Video playback"
+      
+    - name: "LacrosseLabModal"
+      source: "@/components/practice-planner/modals/LacrosseLabModal"
+      purpose: "Lacrosse Lab integration"
+      
+    - name: "CreateStrategyModal"
+      source: "Inline component definition"
+      purpose: "Custom strategy creation"
+
+  layoutUsed: "Authenticated layout"
+  providerDependencies:
+    - "SupabaseAuthContext"
+    - "UserStrategies provider"
+
+# ===== DATA LOADING STRATEGY =====
+dataLoadingStrategy:
+  loadingFlow:
+    - step: 1
+      action: "Authentication check"
+      component: "useAuth hook"
+      fallback: "Loading spinner"
+    
+    - step: 2
+      action: "Fetch POWLAX strategies"
+      source: "supabase.from('powlax_strategies')"
+      errorHandling: "Fall back to getMockStrategies()"
+      ordering: "order by strategy_name"
+    
+    - step: 3
+      action: "Load user strategies"
+      source: "useUserStrategies hook"
+      parallel: "Loads simultaneously with POWLAX strategies"
+    
+    - step: 4
+      action: "Merge strategy datasets"
+      method: "Spread operator combining arrays"
+      transformation: "Add isUserStrategy flag to user strategies"
+
+  errorHandling:
+    databaseError: "Falls back to mock strategies for POWLAX data"
+    authError: "Shows loading spinner until resolved"
+    userStrategiesError: "Handled by useUserStrategies hook"
+
+# ===== MOCK DATA FALLBACK =====
+mockDataFallback:
+  mockStrategies:
+    purpose: "Fallback when database fetch fails"
+    count: 3
+    examples:
+      - "2-3-1 Motion Offense (offense, building complexity)"
+      - "Slide Package Defense (defense, advanced complexity)"
+      - "Clear vs Ride (transition, foundation complexity)"
+  
+  activationCondition: "supabase query error in fetchStrategies"
+  dataStructure: "Matches Strategy interface exactly"
+
+# ===== STRATEGY CREATION WORKFLOW =====
+strategyCreationWorkflow:
+  createButton: "Header button with Target icon"
+  modal: "CreateStrategyModal (inline component)"
+  
+  formFields:
+    strategyName: "Required text input"
+    category: "Select dropdown (offense/defense/transition/special teams)"
+    description: "Optional textarea"
+    targetAudience: "Select dropdown with age groups"
+    videoLink: "Optional URL input (Vimeo)"
+  
+  submission:
+    validation: "Name required, other fields optional"
+    api: "useUserStrategies.createUserStrategy"
+    payload: "Maps form fields to user_strategies table structure"
+    success: "Reset form, close modal, refresh strategy list"
+
+# ===== PERFORMANCE PATTERNS =====
+performancePatterns:
+  prefetching: []
+  lazyLoading: []
+  codeSpliitting: []
+  optimizations:
+    - "Client-side filtering avoids server requests"
+    - "Computed filteredStrategies updates reactively"
+    - "Strategy detail panel updates without re-render of list"
+
+# ===== INTEGRATION POINTS =====
+integrationPoints:
+  supabaseUsage:
+    directQueries: true
+    throughHooks: true
+    serverSideOnly: false
+    tables: ["powlax_strategies", "user_strategies"]
+  
+  externalAPIs: 
+    - "Vimeo video embedding"
+    - "Lacrosse Lab integration"
+  
+  webhooks: []
+  realtimeSubscriptions: []
+
+# ===== LOADING AND ERROR STATES =====
+loadingErrorStates:
+  authLoading:
+    condition: "useAuth().loading === true"
+    ui: "Full screen loader with spinner"
+    message: "Loading..."
+  
+  dataLoading:
+    condition: "loading state true"
+    ui: "Spinner with primary border"
+    placement: "Center screen"
+  
+  errorStates:
+    noStrategies: "Empty strategy list (rare due to fallback)"
+    noSelection: "Empty detail panel with helper message"
+    modalErrors: "Handled within individual modals"
+
+# ===== SECURITY PATTERNS =====
+securityPatterns:
+  authentication: "useAuth hook verification"
+  authorization: "User strategies scoped to authenticated user"
+  dataValidation: "TypeScript Strategy interface"
+  csrfProtection: false
+
+# ===== STRATEGY ORCHESTRATION SUMMARY =====
+strategyOrchestrationSummary:
+  dataIntegration: "Seamless merge of official and user-created strategies"
+  interactivePattern: "List-detail view with modal overlays"
+  contentDiscovery: "Category-based browsing with search refinement"
+  creationWorkflow: "Inline strategy creation with immediate integration"
+  videoIntegration: "Multi-modal video and lab content access"
+  
+  strengths:
+    - "Unified interface for official and custom content"
+    - "Rich interactive exploration with detail panel"
+    - "Integrated creation workflow"
+    - "Multiple media format support"
+  
+  complexities:
+    - "Dual data source management"
+    - "Complex age-to-complexity mapping"
+    - "Multiple modal coordination"
+    - "Mixed UI component sourcing"

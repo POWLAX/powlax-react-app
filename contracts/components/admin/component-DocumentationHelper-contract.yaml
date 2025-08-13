@@ -1,0 +1,105 @@
+# Component Contract: DocumentationHelper
+contractId: "component-DocumentationHelper-20250113"
+componentInfo:
+  name: "DocumentationHelper"
+  filePath: "/src/components/admin/management/DocumentationHelper.tsx"
+  category: "admin"
+  parentPage: "admin management tabs"
+  complexity: "complex"
+  
+functionalAnalysis:
+  purpose: "Contextual database documentation for admin features"
+  primaryFunction: "Display database schema, relationships, workflows, and permissions for admin features"
+  userInteractions:
+    - "Click database info button to open documentation modal"
+    - "Navigate between Tables, Relationships, Workflow, Permissions tabs"
+    - "Hover tooltips for compact documentation"
+  businessLogic: "Context-aware documentation system with feature-specific database information"
+  stateManagement: "Modal state and tab navigation state"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements:
+    - "Complete database documentation structure"
+    - "Table schemas and relationships"
+    - "Workflow descriptions"
+    - "Permission mappings"
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks:
+    - "useState (React state)"
+  contexts: []
+  utilities: []
+  externalLibraries:
+    - "lucide-react (icons)"
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations:
+    - "Structures database documentation by feature"
+    - "Maps table relationships for visualization"
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Sync with actual database schema"
+    - "Add interactive relationship diagrams"
+    - "Include query examples"
+  priority: "medium"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: true
+  documentationQuality: "excellent"
+  needsDocumentation:
+    - "Integration with live schema"
+  
+componentInteractions:
+  callsComponents:
+    - "Dialog (UI component)"
+    - "Tabs (UI component)"
+    - "Card (UI component)"
+    - "Badge (UI component)"
+    - "Tooltip (UI component)"
+  calledByComponents:
+    - "ManagementTabs"
+    - "Admin feature pages"
+  sharedState: []
+  eventCommunication: []
+  propsPassedTo: []
+  propsReceivedFrom:
+    - "feature (string for feature-specific docs)"
+    - "compact (boolean for tooltip mode)"
+    - "showRelationships (boolean for relationships display)"
+  
+userJourneyContext:
+  userFlows:
+    - "Admin -> Management Feature -> Help Button -> View Documentation"
+  criticalForMVP: false
+  usageFrequency: "low"
+  primaryUserTypes: ["admin", "developer"]
+  featureArea: "admin"
+  journeyStage: "advanced"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "DocumentationHelper"
+  reasonForDuplication: ""
+  consolidationStrategy: ""
+  supabaseIntegrationWinner: "DocumentationHelper"

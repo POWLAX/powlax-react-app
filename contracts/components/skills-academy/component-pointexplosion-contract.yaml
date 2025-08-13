@@ -1,0 +1,152 @@
+# PointExplosion Component Contract
+# Animation component for celebrating point awards in workouts
+
+contractId: "component-pointexplosion-20250113"
+componentInfo:
+  name: "PointExplosion"
+  filePath: "src/components/skills-academy/PointExplosion.tsx"
+  category: "Skills Academy"
+  parentPage: "Skills Academy Workout"
+  complexity: "complex"
+  
+functionalAnalysis:
+  purpose: "Animated celebration component that creates visual point particle explosions when points are awarded"
+  primaryFunction: "Creates animated floating particles for point awards with physics-based movement and visual celebration"
+  userInteractions: 
+    - "Visual feedback only - no user interaction"
+    - "Particles animate from origin element to edges of screen"
+    - "Point values display on particles during animation"
+  businessLogic: "Generates particle animations based on point values, creating more particles for higher point awards"
+  stateManagement: "Complex animation state with particle tracking, origin positioning, and timing management"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements: 
+    - "Animation duration and timing constants"
+    - "Particle count calculation logic"
+    - "Physics and movement parameters"
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: []
+  externalLibraries: 
+    - "framer-motion (complex animations)"
+    - "next/image (point type icons)"
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: 
+    - "Converts point awards to particle animations"
+    - "Maps point types to visual particle properties"
+    - "Calculates particle count based on point values"
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: 
+    - "Could add sound effects for particle explosions"
+    - "Could optimize performance for lower-end devices"
+    - "Could add customizable particle themes"
+  priority: "medium"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: true
+  documentationQuality: "good"
+  needsDocumentation: 
+    - "Performance considerations and optimization"
+    - "Animation timing and physics parameters"
+  
+componentInteractions:
+  callsComponents: []
+  calledByComponents: 
+    - "WorkoutPlayer (during drill completions)"
+    - "CelebrationAnimation (for major achievements)"
+  sharedState: 
+    - "Receives points object from parent"
+    - "Receives pointTypes array for icon display"
+  eventCommunication: 
+    - "onAnimationComplete callback to parent"
+  propsPassedTo: []
+  propsReceivedFrom: 
+    - "isVisible: boolean to trigger animation"
+    - "originElement: HTMLElement for animation origin"
+    - "points: Record<string, number> for particle generation"
+    - "pointTypes: Array with point type definitions"
+  
+userJourneyContext:
+  userFlows: 
+    - "Drill completion → Point award → PointExplosion animation"
+    - "Workout milestone → Celebration → PointExplosion"
+  criticalForMVP: false
+  usageFrequency: "medium"
+  primaryUserTypes: ["player"]
+  featureArea: "skills"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: true
+  duplicateComponents: 
+    - "PointCounter (real-time point display)"
+    - "CelebrationAnimation (celebration effects)"
+    - "PointsAnimation (similar animation approach)"
+  primaryComponent: "PointExplosion"
+  reasonForDuplication: "Specialized for particle explosion effects vs. real-time display"
+  consolidationStrategy: "Keep as specialized celebration component"
+  supabaseIntegrationWinner: "PointCounter (for data integration)"
+
+# Animation Performance Analysis
+animationPerformance:
+  performanceConsiderations:
+    - "Framer Motion creates complex DOM animations"
+    - "Multiple particles can impact mobile performance"
+    - "Image loading for point type icons during animation"
+    
+  optimizationOpportunities:
+    - "Particle count limits based on device capabilities"
+    - "Canvas-based rendering instead of DOM elements"
+    - "Preloaded point type icons"
+    - "Animation frame limiting for performance"
+    
+  technicalDebt:
+    - "Heavy dependency on framer-motion"
+    - "No fallback for devices with poor performance"
+    - "Complex state management for particle tracking"
+
+# Gamification Context
+gamificationRole:
+  purpose: "Provides visual feedback and celebration for achievement moments"
+  psychologicalImpact: "Creates dopamine response through visual rewards"
+  engagementValue: "High - visual celebration increases user satisfaction"
+  
+  integrationPoints:
+    - "Triggered by point awards from workout completion"
+    - "Uses point type data for visual theming"
+    - "Coordinates with other celebration components"
+    
+  dataRequirements:
+    - "Point values and types from parent component"
+    - "Point type icons and display information"
+    - "Origin element for animation positioning"
+
+# MVP Assessment
+mvpAssessment:
+  essentialForMVP: false
+  reasoning: "While engaging, point explosion animations are enhancement features"
+  alternativeApproach: "Simple point display without complex animations"
+  implementationOrder: "After core workout functionality is stable"

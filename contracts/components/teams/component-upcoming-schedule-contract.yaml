@@ -1,0 +1,81 @@
+# Upcoming Schedule Component Contract
+contractId: "component-upcoming-schedule-20250113"
+componentInfo:
+  name: "UpcomingSchedule"
+  filePath: "src/components/teams/dashboard/UpcomingSchedule.tsx"
+  category: "Team Management"
+  parentPage: "Team Dashboard"
+  complexity: "moderate"
+
+functionalAnalysis:
+  purpose: "Team event calendar management with weather integration and event creation"
+  primaryFunction: "Display upcoming team events with weather conditions and allow event creation for managers"
+  userInteractions:
+    - "View upcoming team events with dates, times, locations"
+    - "Check weather conditions for events"
+    - "Create new events (coaches only)"
+    - "Edit existing events"
+    - "View event details and requirements"
+  businessLogic: "Event filtering by team, weather API integration, role-based event management"
+  stateManagement: "Local state for event creation modal and form data"
+
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "hook"
+  supabaseTables:
+    - "practices"
+  tableUsage:
+    - tableName: "practices"
+      operations: ["select", "insert"]
+      purpose: "Display and create team events/practices"
+      dataFlow: "Events prop from useTeamDashboard -> display schedule, createEvent function for new events"
+
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements:
+    - "Weather conditions and icons (getWeatherIcon function)"
+    - "Mock weather data for event display"
+  mockDataUsage:
+    - "Weather information for events"
+  realDataPercentage: 85
+
+mvpReadiness:
+  isProductionReady: false
+  blockers:
+    - "Weather API integration is mock data"
+    - "Event creation may not persist properly"
+  improvements:
+    - "Integrate real weather API"
+    - "Add event editing functionality"
+    - "Add recurring event creation"
+    - "Add event notifications"
+  priority: "high"
+
+componentInteractions:
+  callsComponents:
+    - "Card, CardContent, CardHeader, CardTitle (UI)"
+    - "Badge (UI)"
+    - "Button (UI)"
+    - "Dialog components (UI)"
+  calledByComponents:
+    - "Team Dashboard page"
+  propsReceivedFrom:
+    - "events: TeamEvent[] - team schedule"
+    - "team: Team - team context"
+    - "canManage: boolean - event management permissions"
+
+userJourneyContext:
+  userFlows:
+    - "Coach->Team Dashboard->Create Event"
+    - "Any User->Team Dashboard->Check Schedule"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["coach", "parent", "player"]
+  featureArea: "teams"
+  journeyStage: "core-loop"
+
+teamManagementContext:
+  roleBasedDisplay: true
+  supportedRoles: ["coach", "parent", "player"]
+  eventManagement: "Create/edit events for coaches, view-only for others"
+  weatherIntegration: "Field condition display for event planning"

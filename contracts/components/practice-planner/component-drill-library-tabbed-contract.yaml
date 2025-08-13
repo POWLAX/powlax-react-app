@@ -1,0 +1,152 @@
+# Practice Planner Component Contract: DrillLibraryTabbed
+contractId: "component-drill-library-tabbed-20250113"
+componentInfo:
+  name: "DrillLibraryTabbed"
+  filePath: "src/components/practice-planner/DrillLibraryTabbed.tsx"
+  category: "practice-planner"
+  parentPage: "Practice Planner (/teams/[teamId]/practiceplan)"
+  complexity: "complex"
+  
+functionalAnalysis:
+  purpose: "Primary drill and strategy browser with tabbed interface for practice planning. Serves as the main library interface for selecting drills and strategies to add to practice plans."
+  primaryFunction: "Drill and strategy discovery, filtering, and selection"
+  userInteractions: 
+    - "Browse drills by category (Favorites, User Drills, Concept Drills, Skill Development, Admin, Live Play)"
+    - "Switch between Drills and Strategies tabs"
+    - "Search drills by title using text input"
+    - "Filter drills using FilterDrillsModal"
+    - "Add drills to practice timeline via + button"
+    - "Mark/unmark drills as favorites with star icon"
+    - "Create custom drills via AddCustomDrillModal"
+    - "Study drills via StudyDrillModal with video/lab content"
+    - "Edit custom drills (if user owns drill or is admin)"
+    - "Mobile: Select multiple drills with checkboxes before adding"
+  businessLogic: "Organizes drills into expandable categories, separates POWLAX drills from user-created drills, implements favorites system, supports both desktop (individual add) and mobile (batch add) workflows"
+  stateManagement: "Local state for search, filters, expanded categories, modal visibility, selected drill for modals, mobile drill selection"
+  
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "hook"
+  supabaseTables: 
+    - "powlax_drills"
+    - "user_drills"
+    - "user_favorites"
+  tableUsage:
+    - tableName: "powlax_drills"
+      operations: ["select"]
+      purpose: "Load main POWLAX drill library"
+      dataFlow: "useDrills hook → DrillLibraryTabbed → organized by category"
+    - tableName: "user_drills"
+      operations: ["select", "insert", "update"]
+      purpose: "Load and manage user-created custom drills"
+      dataFlow: "useDrills hook → AddCustomDrillModal → database → refresh"
+    - tableName: "user_favorites"
+      operations: ["select", "insert", "delete"]
+      purpose: "Manage drill favorites for quick access"
+      dataFlow: "useFavorites hook → star button toggle → database update"
+    
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements: []
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks: 
+    - "useDrills"
+    - "useFavorites"
+  contexts: []
+  utilities: []
+  externalLibraries: 
+    - "lucide-react (icons)"
+    - "@/components/ui/tabs"
+  
+supabaseTableDetails:
+  tablesUsed: 
+    - "powlax_drills"
+    - "user_drills" 
+    - "user_favorites"
+  tableRelationships: 
+    - "user_drills.user_id → users.id"
+    - "user_favorites.user_id → users.id"
+    - "user_favorites.item_id → powlax_drills.id OR user_drills.id"
+  queryPatterns: 
+    - "SELECT * FROM powlax_drills ORDER BY title LIMIT 500"
+    - "SELECT * FROM user_drills ORDER BY created_at DESC"
+    - "SELECT * FROM user_favorites WHERE user_id = ? AND item_type = 'drill'"
+  dataTransformations: 
+    - "Maps database columns (title, duration_minutes) to component interface"
+    - "Combines POWLAX and user drills into unified Drill interface"
+    - "Extracts strategies/concepts/skills from drill metadata"
+    - "Organizes drills by category for accordion display"
+    
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: 
+    - "Could add real-time drill sharing between coaches"
+    - "Could implement drill usage analytics"
+    - "Could add drill rating/review system"
+  priority: "critical"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation: 
+    - "Component API documentation"
+    - "Drill organization logic"
+    - "Mobile vs desktop workflow differences"
+    
+componentInteractions:
+  callsComponents: 
+    - "StrategiesTab"
+    - "AddCustomDrillModal"
+    - "FilterDrillsModal"
+    - "VideoModal"
+    - "LinksModal"
+    - "StrategiesModal"
+    - "LacrosseLabModal"
+    - "StudyDrillModal"
+  calledByComponents: 
+    - "Practice Planner Main Page"
+  sharedState: 
+    - "Selected drills passed to parent via onAddDrill"
+    - "Selected strategies passed to parent via onSelectStrategy"
+  eventCommunication: 
+    - "onAddDrill callback when drill selected"
+    - "onSelectStrategy callback when strategy selected"
+  propsPassedTo: 
+    - "Drill objects to modal components"
+    - "Strategy selection to StrategiesTab"
+  propsReceivedFrom: 
+    - "onAddDrill callback from parent"
+    - "onSelectStrategy callback from parent"
+    - "selectedStrategies array from parent"
+    - "isMobile flag from parent"
+    - "user object for permissions"
+    
+userJourneyContext:
+  userFlows: 
+    - "Practice Planning: Browse drills → Filter/search → Add to timeline"
+    - "Drill Discovery: Study drill → View video/lab content → Add to favorites"
+    - "Custom Content: Create custom drill → Share with team/club → Use in practice"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["coach"]
+  featureArea: "practice"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: true
+  duplicateComponents: 
+    - "DrillLibrary (non-tabbed version)"
+    - "DrillCard (different context - timeline vs library)"
+  primaryComponent: "DrillLibraryTabbed"
+  reasonForDuplication: "Enhanced version with strategy tab and better organization"
+  consolidationStrategy: "DrillLibraryTabbed should be the primary - deprecate DrillLibrary"
+  supabaseIntegrationWinner: "DrillLibraryTabbed (full integration with useDrills and useFavorites hooks)"

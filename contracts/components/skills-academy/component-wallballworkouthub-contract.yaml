@@ -1,0 +1,172 @@
+# WallBallWorkoutHub Component Contract
+# Main hub component for Wall Ball workout system
+
+contractId: "component-wallballworkouthub-20250113"
+componentInfo:
+  name: "WallBallWorkoutHub"
+  filePath: "src/components/skills-academy/WallBallWorkoutHub.tsx"
+  category: "Skills Academy - Wall Ball"
+  parentPage: "Wall Ball Training Section"
+  complexity: "complex"
+  
+functionalAnalysis:
+  purpose: "Central hub for Wall Ball workout system with series selection, variant browsing, and video player integration"
+  primaryFunction: "Manages Wall Ball workout flow from series selection to variant selection to video player"
+  userInteractions: 
+    - "Browse available Wall Ball series"
+    - "Select workout series to view variants"
+    - "Choose specific workout variant"
+    - "Launch video player for selected workout"
+    - "Navigate back through hub hierarchy"
+  businessLogic: "Orchestrates multi-level workout selection with state management for series, variants, and video player"
+  stateManagement: "Complex state for selected series, selected variant, and navigation flow management"
+  
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "hook"
+  supabaseTables: 
+    - "wall_ball_drill_library"
+  tableUsage:
+    - tableName: "wall_ball_drill_library"
+      operations: ["select"]
+      purpose: "Fetch Wall Ball series and variants data"
+      dataFlow: "useWallBallSeries & useWallBallVariants hooks → component state → UI display"
+  
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements: []
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks: 
+    - "useWallBallSeries"
+    - "useWallBallVariants"
+  contexts: []
+  utilities: []
+  externalLibraries: 
+    - "lucide-react (Loader2)"
+    - "@/components/ui/alert"
+    - "@/types/wall-ball (WallBallSeries, WallBallVariant)"
+  
+supabaseTableDetails:
+  tablesUsed:
+    - "wall_ball_drill_library"
+  tableRelationships: 
+    - "wall_ball_drill_library contains series and variant definitions"
+  queryPatterns:
+    - "SELECT * FROM wall_ball_drill_library for series data"
+    - "SELECT * FROM wall_ball_drill_library WHERE series_id = $1 for variants"
+  dataTransformations:
+    - "Groups variants by series"
+    - "Transforms database records to TypeScript interfaces"
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: 
+    - "Could add user progress tracking integration"
+    - "Could add favorites/bookmarking functionality"
+    - "Could add workout recommendations based on history"
+  priority: "high"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: true
+  documentationQuality: "good"
+  needsDocumentation: 
+    - "Wall Ball series hierarchy and data structure"
+    - "Integration with other Skills Academy components"
+  
+componentInteractions:
+  callsComponents: 
+    - "WallBallSeriesCard"
+    - "WallBallVariantSelector" 
+    - "WallBallVideoPlayer"
+  calledByComponents: 
+    - "Skills Academy sections and navigation"
+  sharedState: 
+    - "Manages series and variant selection state"
+  eventCommunication: 
+    - "Series selection events to variant selector"
+    - "Variant selection events to video player"
+  propsPassedTo: 
+    - "series data to WallBallSeriesCard"
+    - "variants data to WallBallVariantSelector"
+    - "variant data to WallBallVideoPlayer"
+  propsReceivedFrom: 
+    - "userId?: string (optional user identification)"
+  
+userJourneyContext:
+  userFlows: 
+    - "Skills Academy → Wall Ball Hub → Series Selection → Variant Selection → Video Player"
+    - "Wall Ball completion → Return to hub → Select new workout"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["player", "coach"]
+  featureArea: "skills"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "WallBallWorkoutHub"
+  reasonForDuplication: "N/A"
+  consolidationStrategy: "N/A"
+  supabaseIntegrationWinner: "N/A"
+
+# Wall Ball System Architecture
+wallBallSystemArchitecture:
+  dataFlow:
+    - "wall_ball_drill_library → useWallBallSeries hook → WallBallSeriesCard display"
+    - "Series selection → useWallBallVariants hook → WallBallVariantSelector display"
+    - "Variant selection → WallBallVideoPlayer launch"
+    
+  hierarchicalStructure:
+    - "Hub (all series) → Series (filtered variants) → Video Player (specific workout)"
+    - "Navigation supports back/up movement through hierarchy"
+    - "State management preserves selection context"
+    
+  integrationPoints:
+    - "Connects to Skills Academy point system for Wall Ball completions"
+    - "Integrates with workout completion tracking"
+    - "Supports user progress and favorites functionality"
+
+# Database Integration Analysis
+databaseIntegration:
+  currentTables:
+    - table: "wall_ball_drill_library"
+      records: "48 records"
+      purpose: "Wall Ball workout video segments and series definitions"
+      
+  dataStructure:
+    - "Series groupings with difficulty levels"
+    - "Variant types (strong_hand, off_hand, both_hands)"
+    - "Video URLs and Vimeo integration"
+    - "Duration and coaching information"
+    
+  queryOptimization:
+    - "Efficient series loading on hub initialization"
+    - "Lazy loading of variants when series selected"
+    - "Cached data for improved performance"
+
+# Critical MVP Integration
+mvpIntegration:
+  skillsAcademyConnection:
+    - "Wall Ball awards 'rebound_reward' points"
+    - "Integrates with overall Skills Academy progress tracking"
+    - "Part of position-specific training tracks"
+    
+  pointSystemIntegration:
+    - "Wall Ball completions should award academy_points + rebound_reward"
+    - "Integration with PointCounter component"
+    - "Workout completion events trigger point awards"
+    
+  userProgressTracking:
+    - "Should connect to skills_academy_user_progress table"
+    - "Track Wall Ball workout completions and progress"
+    - "Support streak tracking for Wall Ball sessions"

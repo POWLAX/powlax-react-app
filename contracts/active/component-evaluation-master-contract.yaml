@@ -1,0 +1,621 @@
+# Component Evaluation Master Contract
+# Systematic analysis of every POWLAX component and their Supabase table connections
+
+contractId: "component-evaluation-master-001"
+type: COMPONENT_EVALUATION_MASTER
+version: 2.0.0
+created: 2025-01-15
+updated: 2025-01-15
+priority: HIGH
+enhancements:
+  - "Added Component Interaction Matrix for dependency tracking"
+  - "Added User Journey Context for MVP prioritization"
+  - "Added Duplicate Function Analysis for consolidation"
+  - "Added Supabase Integration Optimization guidelines"
+
+# ===== CONTRACT OVERVIEW =====
+intent:
+  goal: "Create comprehensive component contracts for every POWLAX React component, documenting their functionality, data connections, and Supabase table usage"
+  scope:
+    - Analyze every component identified in POWLAX_PAGE_COMPONENT_INDEX.md
+    - Document component functionality and purpose
+    - Map Supabase table connections and data flow
+    - Identify hardcoded vs database-driven components
+    - Create individual Component Contracts for each component
+    - Update master index with contract references
+  outOfScope:
+    - Code modifications or fixes (analysis only)
+    - Database schema changes
+    - Component refactoring or optimization
+  assumptions:
+    - All components are accessible in the codebase
+    - Supabase schema documentation is available
+    - Components follow consistent patterns
+  risks:
+    - Component complexity may overwhelm individual sub-agents
+    - Some components may have nested dependencies
+    - Database connections may be indirect through hooks
+
+# ===== EXECUTION STRATEGY =====
+executionStrategy:
+  type: parallel
+  agentCount: 8
+  
+  # MANDATORY planning phase
+  ultraThinkPlanning:
+    completed: false  # MUST be set to true before execution
+    duration: "10+ minutes"
+    commonErrorsEvaluated: true
+    fileCollisionRisksAssessed: true
+    scopeBalancingCompleted: false
+    
+  # Agent distribution by component category
+  agentDistribution:
+    agent_1:
+      type: ui-components-specialist
+      scope: "UI Foundation Components"
+      componentCount: 22
+      files: ["src/components/ui/**"]
+      focus: "Basic UI components (Button, Card, Input, etc.)"
+      deliverables:
+        - "UI Component Contracts (22 components)"
+        - "UI Component Usage Analysis"
+        - "Supabase Integration Assessment"
+      
+    agent_2:
+      type: dashboard-specialist
+      scope: "Dashboard Components"
+      componentCount: 12
+      files: ["src/components/dashboards/**"]
+      focus: "Role-based dashboards and supporting components"
+      deliverables:
+        - "Dashboard Component Contracts (12 components)"
+        - "Role-Based Data Flow Analysis"
+        - "User/Team Table Integration Mapping"
+      
+    agent_3:
+      type: practice-planner-specialist
+      scope: "Practice Planner Components"
+      componentCount: 25
+      files: ["src/components/practice-planner/**"]
+      focus: "Practice planning, drill library, modals, timeline components"
+      deliverables:
+        - "Practice Planner Component Contracts (25 components)"
+        - "Drill/Strategy Table Integration Analysis"
+        - "Practice Plan Data Flow Documentation"
+      
+    agent_4:
+      type: skills-academy-specialist
+      scope: "Skills Academy Components"
+      componentCount: 15
+      files: ["src/components/skills-academy/**"]
+      focus: "Workout system, gamification, point tracking"
+      deliverables:
+        - "Skills Academy Component Contracts (15 components)"
+        - "Gamification Table Integration Analysis"
+        - "Point System Data Flow Documentation"
+      
+    agent_5:
+      type: team-management-specialist
+      scope: "Team Management Components"
+      componentCount: 11
+      files: ["src/components/teams/**"]
+      focus: "Team dashboard, roster, scheduling components"
+      deliverables:
+        - "Team Component Contracts (11 components)"
+        - "Team/Member Table Integration Analysis"
+        - "Team Data Flow Documentation"
+      
+    agent_6:
+      type: admin-specialist
+      scope: "Admin & Navigation Components"
+      componentCount: 15
+      files: ["src/components/admin/**", "src/components/navigation/**"]
+      focus: "Admin tools, role management, navigation"
+      deliverables:
+        - "Admin Component Contracts (15 components)"
+        - "User Management Table Integration Analysis"
+        - "Navigation Data Flow Documentation"
+      
+    agent_7:
+      type: gamification-specialist
+      scope: "Gamification & Animation Components"
+      componentCount: 10
+      files: ["src/components/gamification/**", "src/components/animations/**"]
+      focus: "Badge system, ranks, animations, point explosions"
+      deliverables:
+        - "Gamification Component Contracts (10 components)"
+        - "Badge/Rank Table Integration Analysis"
+        - "Achievement System Data Flow Documentation"
+      
+    agent_8:
+      type: miscellaneous-specialist
+      scope: "Miscellaneous & Integration Components"
+      componentCount: 12
+      files: ["src/components/resources/**", "src/components/auth/**", "src/components/search/**", "src/components/theme/**"]
+      focus: "Resources, authentication, search, themes"
+      deliverables:
+        - "Miscellaneous Component Contracts (12 components)"
+        - "Resource/Auth Table Integration Analysis"
+        - "Search/Theme Data Flow Documentation"
+
+# ===== COMPONENT CONTRACT TEMPLATE =====
+componentContractTemplate:
+  contractId: "component-[component-name]-[timestamp]"
+  componentInfo:
+    name: ""
+    filePath: ""
+    category: ""
+    parentPage: ""
+    complexity: "" # simple | moderate | complex
+    
+  functionalAnalysis:
+    purpose: ""
+    primaryFunction: ""
+    userInteractions: []
+    businessLogic: ""
+    stateManagement: ""
+    
+  dataIntegration:
+    hasSupabaseConnection: false
+    connectionType: "" # direct | hook | context | none
+    supabaseTables: []
+    tableUsage:
+      - tableName: ""
+        operations: [] # select | insert | update | delete
+        purpose: ""
+        dataFlow: ""
+    
+  codeAnalysis:
+    isHardcoded: false
+    hardcodedElements: []
+    mockDataUsage: []
+    realDataPercentage: 0 # 0-100%
+    
+  dependencies:
+    hooks: []
+    contexts: []
+    utilities: []
+    externalLibraries: []
+    
+  supabaseTableDetails:
+    tablesUsed: []
+    tableRelationships: []
+    queryPatterns: []
+    dataTransformations: []
+    
+  mvpReadiness:
+    isProductionReady: false
+    blockers: []
+    improvements: []
+    priority: "" # critical | high | medium | low
+    
+  testingStatus:
+    hasTests: false
+    testCoverage: 0
+    testTypes: []
+    
+  documentation:
+    hasDocumentation: false
+    documentationQuality: "" # excellent | good | poor | none
+    needsDocumentation: []
+    
+  # Component Interaction Matrix
+  componentInteractions:
+    callsComponents: []         # Components this one imports/uses
+    calledByComponents: []      # Components that import/use this one
+    sharedState: []            # Shared contexts/stores accessed
+    eventCommunication: []     # Events emitted/listened to
+    propsPassedTo: []          # Data passed to child components
+    propsReceivedFrom: []      # Data received from parent components
+    
+  # User Journey Context  
+  userJourneyContext:
+    userFlows: []              # e.g., ["Login->Dashboard->Practice", "Team->Roster->Player"]
+    criticalForMVP: false      # Essential for basic functionality
+    usageFrequency: ""         # high | medium | low | rare
+    primaryUserTypes: []       # player | coach | parent | admin | director
+    featureArea: ""            # practice | skills | teams | gamification | admin
+    journeyStage: ""           # onboarding | core-loop | advanced | admin
+    
+  # Duplicate Function Analysis
+  duplicateFunctionality:
+    hasDuplicates: false
+    duplicateComponents: []     # List of components with similar functionality
+    primaryComponent: ""        # Which component should be the primary
+    reasonForDuplication: ""    # Why duplicates exist (legacy, different contexts, etc.)
+    consolidationStrategy: ""   # How to consolidate into single component
+    supabaseIntegrationWinner: "" # Which has better Supabase integration
+
+# ===== SUPABASE TABLE REFERENCE =====
+supabaseTableReference:
+  userManagement:
+    - users
+    - user_profiles
+    - user_roles
+    - user_sessions
+    
+  teamManagement:
+    - teams
+    - team_members
+    - clubs
+    - organizations
+    
+  practiceSystem:
+    - practice_plans
+    - drills
+    - drill_library
+    - strategies
+    - powlax_strategies
+    - user_strategies
+    
+  skillsAcademy:
+    - skills_academy_workouts
+    - skills_academy_series
+    - workout_completions
+    - drill_completions
+    - wall_ball_drill_library
+    
+  gamification:
+    - user_points
+    - point_currencies
+    - badges
+    - user_badges
+    - ranks
+    - user_ranks
+    - achievements
+    
+  resources:
+    - powlax_resources
+    - resource_favorites
+    - resource_views
+    
+  wordpress:
+    - wp_users
+    - wp_posts
+    - wp_usermeta
+    - memberpress_members
+
+# ===== ANALYSIS GUIDELINES =====
+analysisGuidelines:
+  componentComplexity:
+    simple:
+      criteria: "< 50 lines, basic UI, no complex logic"
+      timeAllocation: "5-10 minutes per component"
+      
+    moderate:
+      criteria: "50-200 lines, some business logic, hooks usage"
+      timeAllocation: "10-20 minutes per component"
+      
+    complex:
+      criteria: "> 200 lines, complex logic, multiple integrations"
+      timeAllocation: "20-40 minutes per component"
+      
+  dataConnectionAnalysis:
+    direct:
+      description: "Component directly calls supabase client"
+      indicators: ["supabase.from()", "supabase.rpc()"]
+      
+    hook:
+      description: "Component uses custom hooks that connect to Supabase"
+      indicators: ["useTeams()", "useDrills()", "useAuth()"]
+      
+    context:
+      description: "Component gets data through React context"
+      indicators: ["useContext()", "Provider components"]
+      
+    none:
+      description: "Component has no database connection"
+      indicators: ["Static content", "UI-only components"]
+
+# ===== DUPLICATE FUNCTION ANALYSIS =====
+duplicateFunctionAnalysis:
+  knownDuplicatePatterns:
+    drillDisplay:
+      components: ["DrillCard", "DrillLibraryItem", "PracticeDrill", "StudyDrillModal"]
+      purpose: "Display drill information"
+      recommendedPrimary: "DrillCard"
+      supabaseOptimal: "Component with best powlax_drills integration"
+      
+    userDisplay:
+      components: ["UserCard", "TeamMemberCard", "PlayerCard", "UserProfile"]
+      purpose: "Display user/player information"
+      recommendedPrimary: "UserCard"
+      supabaseOptimal: "Component with best users table integration"
+      
+    strategyDisplay:
+      components: ["StrategyCard", "ActiveStrategyCard", "StudyStrategyModal"]
+      purpose: "Display strategy information"
+      recommendedPrimary: "StrategyCard"
+      supabaseOptimal: "Component with best powlax_strategies integration"
+      
+    progressTracking:
+      components: ["ProgressCard", "ProgressOverview", "PlayerProgress", "SkillProgress"]
+      purpose: "Show user/player progress"
+      recommendedPrimary: "ProgressCard"
+      supabaseOptimal: "Component with gamification tables integration"
+      
+    pointDisplay:
+      components: ["PointCounter", "PointsDisplay", "PointExplosion", "PointsSummary"]
+      purpose: "Display points and rewards"
+      recommendedPrimary: "PointCounter"
+      supabaseOptimal: "Component with points_transactions_powlax integration"
+      
+  consolidationPriorities:
+    high:
+      - "Components with 3+ duplicates serving same function"
+      - "Components causing confusion in development"
+      - "Components with conflicting Supabase queries"
+    medium:
+      - "Components with 2 duplicates"
+      - "Legacy components still in use"
+      - "Components with partial overlap"
+    low:
+      - "Components with context-specific variations"
+      - "Components awaiting deprecation"
+
+# ===== COMPONENT INTERACTION PATTERNS =====
+componentInteractionPatterns:
+  commonPatterns:
+    parentChildData:
+      description: "Parent fetches data, passes to children via props"
+      examples: ["Dashboard->Cards", "PracticePlanner->DrillLibrary"]
+      
+    sharedContext:
+      description: "Multiple components share data via React Context"
+      examples: ["AuthContext", "TeamContext", "RoleViewerContext"]
+      
+    eventBus:
+      description: "Components communicate via event emitters"
+      examples: ["Point explosions", "Achievement unlocks"]
+      
+    directImport:
+      description: "Component directly imports and uses another"
+      examples: ["Modals importing forms", "Pages importing layouts"]
+      
+  criticalPaths:
+    authentication:
+      flow: "Login->AuthContext->Dashboard->RoleBasedView"
+      components: ["LoginForm", "AuthProvider", "Dashboard", "RoleViewerSelector"]
+      
+    practiceCreation:
+      flow: "PracticePlanner->DrillLibrary->Timeline->SaveModal"
+      components: ["PracticePlanner", "DrillLibraryTabbed", "PracticeTimeline", "SavePracticeModal"]
+      
+    workoutCompletion:
+      flow: "WorkoutList->WorkoutPlayer->PointCounter->ReviewModal"
+      components: ["WorkoutBrowser", "WorkoutPlayer", "PointCounter", "WorkoutReviewModal"]
+
+# ===== OUTPUT REQUIREMENTS =====
+deliverables:
+  individualContracts:
+    location: "contracts/components/"
+    naming: "component-[name]-contract.yaml"
+    totalExpected: 122 # Based on component count analysis
+    
+  updatedIndex:
+    file: "POWLAX_PAGE_COMPONENT_INDEX.md"
+    additions:
+      - Component contract references
+      - Supabase table usage summary
+      - Data integration status
+      - MVP readiness indicators
+      - Component interaction matrix
+      - Duplicate function mappings
+      
+  summaryReport:
+    file: "COMPONENT_ANALYSIS_SUMMARY.md"
+    contents:
+      - Total components analyzed
+      - Supabase integration statistics
+      - Hardcoded vs database-driven breakdown
+      - MVP readiness assessment
+      - Critical issues identified
+      - Component interaction matrix
+      - Duplicate function analysis
+      - Consolidation recommendations
+      - Recommended next steps
+      
+  duplicateAnalysisReport:
+    file: "COMPONENT_DUPLICATE_ANALYSIS.md"
+    contents:
+      - Complete duplicate mapping
+      - Consolidation priority list
+      - Supabase integration winners
+      - Migration strategy for duplicates
+      - Estimated effort for consolidation
+      
+  interactionMatrixReport:
+    file: "COMPONENT_INTERACTION_MATRIX.md"
+    contents:
+      - Full component dependency graph
+      - Critical user journey paths
+      - Shared state analysis
+      - Event communication map
+      - Data flow diagrams
+
+# ===== SUCCESS CRITERIA =====
+successCriteria:
+  functional:
+    - All 122 components have individual contracts
+    - Every Supabase table connection is documented
+    - Hardcoded vs database-driven status is clear
+    - MVP readiness is assessed for each component
+    
+  quality:
+    - Component contracts follow the template exactly
+    - Analysis is thorough and accurate
+    - No components are missed or duplicated
+    - Supabase table usage is correctly identified
+    
+  documentation:
+    - Master index is updated with contract references
+    - Summary report provides clear overview
+    - MVP prioritization is actionable
+    - Critical issues are highlighted
+
+# ===== QUALITY GATES =====
+qualityGates:
+  contractCompleteness: 100% # All components must have contracts
+  supabaseAccuracy: 95% # Database connections must be accurately identified
+  mvpAssessment: 100% # Every component needs MVP readiness evaluation
+  documentationQuality: 90% # Contracts must be well-documented
+  
+# ===== PARALLEL EXECUTION CHECKLIST =====
+parallelProgress:
+  - agent: 1
+    task: "UI Components Analysis"
+    status: not_started
+    componentCount: 22
+    completedAt: ""
+    contractsCreated: 0
+    
+  - agent: 2
+    task: "Dashboard Components Analysis"
+    status: not_started
+    componentCount: 12
+    completedAt: ""
+    contractsCreated: 0
+    
+  - agent: 3
+    task: "Practice Planner Components Analysis"
+    status: not_started
+    componentCount: 25
+    completedAt: ""
+    contractsCreated: 0
+    
+  - agent: 4
+    task: "Skills Academy Components Analysis"
+    status: not_started
+    componentCount: 15
+    completedAt: ""
+    contractsCreated: 0
+    
+  - agent: 5
+    task: "Team Management Components Analysis"
+    status: not_started
+    componentCount: 11
+    completedAt: ""
+    contractsCreated: 0
+    
+  - agent: 6
+    task: "Admin & Navigation Components Analysis"
+    status: not_started
+    componentCount: 15
+    completedAt: ""
+    contractsCreated: 0
+    
+  - agent: 7
+    task: "Gamification Components Analysis"
+    status: not_started
+    componentCount: 10
+    completedAt: ""
+    contractsCreated: 0
+    
+  - agent: 8
+    task: "Miscellaneous Components Analysis"
+    status: not_started
+    componentCount: 12
+    completedAt: ""
+    contractsCreated: 0
+
+# ===== INTEGRATION CHECKLIST =====
+integrationChecklist:
+  - [ ] All 8 agents completed their component analysis
+  - [ ] Total of 122 component contracts created
+  - [ ] No components missed or duplicated
+  - [ ] Master index updated with contract references
+  - [ ] Summary report generated
+  - [ ] MVP prioritization completed
+  - [ ] Critical issues documented
+  - [ ] Quality gates met (100% completeness, 95% accuracy)
+
+# ===== SUPABASE INTEGRATION OPTIMIZATION =====
+supabaseIntegrationOptimization:
+  bestPracticeComponents:
+    realtimeComponents:
+      description: "Components that benefit from Supabase realtime subscriptions"
+      examples:
+        - "TeamRoster - Live member updates"
+        - "PracticeTimeline - Collaborative editing"
+        - "PointCounter - Live point updates"
+        - "Leaderboard - Real-time rankings"
+      supabaseFeatures: ["Realtime subscriptions", "Presence", "Broadcast"]
+      
+    authComponents:
+      description: "Components leveraging Supabase Auth"
+      examples:
+        - "LoginForm - Magic link authentication"
+        - "UserProfile - Profile management"
+        - "RoleSelector - Role-based access"
+      supabaseFeatures: ["Auth", "RLS policies", "User metadata"]
+      
+    fileComponents:
+      description: "Components using Supabase Storage"
+      examples:
+        - "DrillVideoPlayer - Video streaming"
+        - "ImageUploader - Media uploads"
+        - "ResourceLibrary - Document storage"
+      supabaseFeatures: ["Storage buckets", "CDN delivery", "Signed URLs"]
+      
+  migrationPriorities:
+    immediate:
+      description: "Components with hardcoded data that should use Supabase"
+      components:
+        - "Components returning mock teams/users"
+        - "Components with static drill/strategy data"
+        - "Components with fake progress data"
+      targetTables: ["teams", "users", "powlax_drills", "powlax_strategies"]
+      
+    shortTerm:
+      description: "Components that would benefit from database integration"
+      components:
+        - "Static resource lists"
+        - "Hardcoded badge definitions"
+        - "Fixed workout sequences"
+      targetTables: ["powlax_resources", "badges", "skills_academy_workouts"]
+      
+    longTerm:
+      description: "Components that could be enhanced with Supabase"
+      components:
+        - "Analytics dashboards"
+        - "Report generators"
+        - "Data visualizations"
+      targetFeatures: ["Database functions", "Aggregations", "Views"]
+      
+  integrationPatterns:
+    optimal:
+      - "Use hooks for data fetching (useTeams, useDrills)"
+      - "Implement optimistic updates for user actions"
+      - "Cache frequently accessed data"
+      - "Use RLS for security instead of client filtering"
+      
+    avoid:
+      - "Direct Supabase calls in render methods"
+      - "Uncached repeated queries"
+      - "Client-side data filtering (use RLS)"
+      - "Storing sensitive data in component state"
+
+# ===== TRACKING =====
+tracking:
+  totalComponents: 122
+  componentsAnalyzed: 0
+  contractsCreated: 0
+  supabaseConnectionsFound: 0
+  hardcodedComponentsFound: 0
+  mvpReadyComponents: 0
+  criticalIssues: 0
+  duplicateComponentSets: 0
+  componentInteractionsMapped: 0
+  
+  lastUpdated: ""
+  completionPercentage: 0
+  estimatedTimeRemaining: "8-12 hours (parallel execution)"
+  
+# ===== NOTES =====
+notes:
+  - Component count based on POWLAX_PAGE_COMPONENT_INDEX.md analysis
+  - Agents should focus on analysis, not code modification
+  - Supabase table reference provided for consistency
+  - MVP readiness assessment is critical for next phase
+  - Quality over speed - thorough analysis is essential

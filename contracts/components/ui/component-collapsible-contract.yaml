@@ -1,0 +1,93 @@
+# Component Contract: Collapsible UI Component
+
+contractId: "component-collapsible-20250113"
+componentInfo:
+  name: "Collapsible"
+  filePath: "src/components/ui/collapsible.tsx"
+  category: "ui-foundation"
+  parentPage: "multiple"
+  complexity: "simple"
+  
+functionalAnalysis:
+  purpose: "Provides collapsible content areas with toggle functionality for space-efficient layouts"
+  primaryFunction: "Shows/hides content sections with smooth transitions and state management"
+  userInteractions: ["trigger click to expand/collapse", "keyboard navigation"]
+  businessLogic: "Simple open/closed state management with content visibility control"
+  stateManagement: "Radix primitive handles internal state - can be controlled via props"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements: ["No styling applied - relies on Radix primitives"]
+  mockDataUsage: []
+  realDataPercentage: 0
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: []
+  externalLibraries: ["@radix-ui/react-collapsible"]
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: []
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: ["Add default styling", "Add animation variants", "Add size constraints"]
+  priority: "low"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation: ["usage examples", "styling patterns", "integration with other components"]
+  
+componentInteractions:
+  callsComponents: []
+  calledByComponents: ["Advanced UI layouts", "Dashboard sections", "Settings panels"]
+  sharedState: []
+  eventCommunication: ["onOpenChange events"]
+  propsPassedTo: ["content via children"]
+  propsReceivedFrom: ["open, onOpenChange from parent"]
+  
+userJourneyContext:
+  userFlows: ["Dashboard->Section Management", "Settings->Advanced Options"]
+  criticalForMVP: false
+  usageFrequency: "low"
+  primaryUserTypes: ["admin", "advanced users"]
+  featureArea: "ui-foundation"
+  journeyStage: "advanced"
+  
+duplicateFunctionality:
+  hasDuplicates: true
+  duplicateComponents: ["Accordion (provides similar collapsible functionality)"]
+  primaryComponent: "Accordion"
+  reasonForDuplication: "Accordion provides more features and styling"
+  consolidationStrategy: "Use Accordion for styled collapsible content, Collapsible for custom implementations"
+  supabaseIntegrationWinner: "Neither - both are pure UI components"
+
+# Usage Analysis
+usagePatterns:
+  minimalUse: "Less used than Accordion component"
+  customLayouts: "When custom collapsible behavior is needed without Accordion styling"
+  unstyled: "Provides behavior only, requires custom styling"
+  mobileFriendly: true
+  
+comparisonWithAccordion:
+  collapsible: "Basic open/close functionality, no default styling"
+  accordion: "Full styling, animations, multiple items support, better UX"
+  
+recommendation: "Consider consolidating usage to favor Accordion unless custom styling is specifically needed"

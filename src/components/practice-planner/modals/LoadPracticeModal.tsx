@@ -115,14 +115,18 @@ export default function LoadPracticeModal({
                         <Calendar className="h-3 w-3" />
                         {new Date(plan.practice_date).toLocaleDateString()}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {plan.duration_minutes} min
-                      </span>
-                      {plan.drill_sequence?.timeSlots && (
-                        <span>
-                          {plan.drill_sequence.timeSlots.length} drills
-                        </span>
+                      {plan.drill_sequence?.timeSlots && plan.drill_sequence.timeSlots.length > 0 && (
+                        <>
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {plan.drill_sequence.timeSlots.reduce((total: number, slot: any) => 
+                              total + (slot.duration || 0), 0
+                            )} min
+                          </span>
+                          <span>
+                            {plan.drill_sequence.timeSlots.length} drills
+                          </span>
+                        </>
                       )}
                     </div>
                     

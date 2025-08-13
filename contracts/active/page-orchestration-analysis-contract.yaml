@@ -1,0 +1,468 @@
+# Page-Level Orchestration Analysis Contract
+# Analysis of page files to understand component composition, data fetching, and routing logic
+
+contractId: "page-orchestration-analysis-001"
+type: PAGE_ORCHESTRATION_ANALYSIS
+version: 1.0.0
+created: 2025-01-15
+priority: HIGH
+complementsContract: "component-evaluation-master-001"
+
+# ===== CONTRACT OVERVIEW =====
+intent:
+  goal: "Analyze all POWLAX page files to understand page-level orchestration, server-side data fetching, component composition, and routing patterns"
+  
+  scope:
+    - Analyze all page.tsx files in src/app/
+    - Document server vs client components
+    - Map page-level data fetching strategies
+    - Identify component composition patterns
+    - Document route guards and middleware
+    - Analyze layout files and their impact
+    - Map page-to-page navigation flows
+    - Identify page-specific business logic
+    
+  outOfScope:
+    - Component internals (already analyzed)
+    - Database schema (already documented)
+    - Component-level hooks (already mapped)
+    
+  rationale: "Complete the final 5% of system understanding by analyzing how pages orchestrate components, fetch data at the page level, and manage routing/navigation flows"
+
+# ===== PAGE CATEGORIES =====
+pageCategories:
+  rootPages:
+    count: 4
+    pages:
+      - "/" # Home page
+      - "/simple-test"
+      - "/direct-login"
+      - "/offline"
+    priority: low
+    
+  authenticationPages:
+    count: 3
+    pages:
+      - "/auth/login"
+      - "/auth/magic-link"
+      - "/register/[token]"
+    priority: high
+    
+  dashboardPages:
+    count: 1
+    pages:
+      - "/dashboard"
+    priority: critical # Role-based routing logic
+    
+  teamPages:
+    count: 4
+    pages:
+      - "/teams"
+      - "/teams/[teamId]/dashboard"
+      - "/teams/[teamId]/hq"
+      - "/teams/[teamId]/practiceplan"
+      - "/teams/[teamId]/playbook"
+    priority: high
+    
+  skillsAcademyPages:
+    count: 5
+    pages:
+      - "/skills-academy"
+      - "/skills-academy/workouts"
+      - "/skills-academy/workout/[id]"
+      - "/skills-academy/animations"
+      - "/academy"
+    priority: high
+    
+  gamificationPages:
+    count: 4
+    pages:
+      - "/gamification"
+      - "/gamification-demo"
+      - "/gamification-showcase"
+      - "/test-gamification"
+    priority: medium
+    
+  resourcePages:
+    count: 2
+    pages:
+      - "/resources"
+      - "/strategies"
+    priority: medium
+    
+  adminPages:
+    count: 5
+    pages:
+      - "/admin/management"
+      - "/admin/role-management"
+      - "/admin/drill-editor"
+      - "/admin/sync"
+      - "/admin/wp-import-check"
+    priority: high
+    
+  testDebugPages:
+    count: 10
+    pages:
+      - "/debug-auth"
+      - "/debug-auth-state"
+      - "/test-supabase"
+      - "/test-wordpress"
+      - "/test/auth"
+      - "/test-animations"
+      - "/test-cross-domain"
+      - "/print-test"
+      - "/test-practice-planner"
+    priority: low
+
+# ===== EXECUTION STRATEGY =====
+executionStrategy:
+  type: parallel
+  agentCount: 6
+  
+  agentDistribution:
+    agent_1:
+      type: core-pages-specialist
+      scope: "Authentication, Dashboard, and Root Pages"
+      pageCount: 8
+      focus:
+        - Authentication flow orchestration
+        - Role-based dashboard routing
+        - Session management at page level
+        - Server-side auth checks
+      deliverables:
+        - Page orchestration contracts
+        - Auth flow analysis
+        - Dashboard routing matrix
+        
+    agent_2:
+      type: team-pages-specialist
+      scope: "Team Management Pages"
+      pageCount: 5
+      focus:
+        - Team context propagation
+        - Dynamic routing with [teamId]
+        - Team data prefetching
+        - Multi-role view orchestration
+      deliverables:
+        - Team page contracts
+        - Dynamic routing analysis
+        - Team data flow documentation
+        
+    agent_3:
+      type: skills-academy-specialist
+      scope: "Skills Academy Pages"
+      pageCount: 5
+      focus:
+        - Workout data fetching
+        - Dynamic workout routing
+        - Gamification integration at page level
+        - Video streaming setup
+      deliverables:
+        - Skills Academy page contracts
+        - Workout flow orchestration
+        - Point system initialization
+        
+    agent_4:
+      type: content-pages-specialist
+      scope: "Resources, Strategies, and Community"
+      pageCount: 3
+      focus:
+        - Content loading strategies
+        - Filter state management
+        - Resource data fetching
+        - Community features
+      deliverables:
+        - Content page contracts
+        - Data loading analysis
+        - Filter orchestration patterns
+        
+    agent_5:
+      type: admin-pages-specialist
+      scope: "Admin and Management Pages"
+      pageCount: 5
+      focus:
+        - Admin route protection
+        - Role verification at page level
+        - Management data prefetching
+        - Bulk operation orchestration
+      deliverables:
+        - Admin page contracts
+        - Security flow analysis
+        - Data management patterns
+        
+    agent_6:
+      type: layout-specialist
+      scope: "Layout Files and Middleware"
+      focus:
+        - Root layout configuration
+        - Authenticated layout wrapper
+        - Middleware and guards
+        - Provider hierarchy
+        - Global state initialization
+      deliverables:
+        - Layout analysis
+        - Provider hierarchy map
+        - Middleware flow documentation
+
+# ===== PAGE CONTRACT TEMPLATE =====
+pageContractTemplate:
+  contractId: "page-[route]-[timestamp]"
+  
+  pageInfo:
+    route: ""
+    filePath: ""
+    pageType: "" # server | client | hybrid
+    category: "" # dashboard | team | skills | admin | etc.
+    dynamicSegments: [] # [teamId], [id], [token]
+    
+  renderingStrategy:
+    componentType: "" # Server Component | Client Component
+    dataFetching: "" # server-side | client-side | mixed
+    streamingEnabled: false
+    suspenseBoundaries: []
+    errorBoundaries: []
+    
+  dataOrchestration:
+    serverDataFetching:
+      - source: "" # Supabase | API | Static
+        method: "" # Direct query | API route | Props
+        tables: []
+        timing: "" # Build time | Request time
+        caching: ""
+        
+    clientDataFetching:
+      - hook: ""
+        trigger: "" # On mount | User action | Route change
+        tables: []
+        realtime: false
+        
+    propsFlow:
+      - fromServer: {} # Server Component props
+        toClient: {} # Props passed to Client Components
+        
+  componentComposition:
+    componentsUsed:
+      - name: ""
+        source: "" # Path to component
+        props: {} # Props passed
+        conditionalRendering: "" # Role-based | State-based | Always
+        
+    layoutUsed: "" # Which layout wraps this page
+    providerDependencies: [] # Required contexts
+    
+  routingLogic:
+    guards:
+      - type: "" # Auth | Role | Team membership
+        implementation: "" # Middleware | Page-level | Component
+        redirectTo: ""
+        
+    navigation:
+      - triggers: [] # User actions that trigger navigation
+        destinations: [] # Where navigation leads
+        method: "" # router.push | Link | redirect
+        
+    dynamicRouting:
+      - parameter: "" # [teamId], [id]
+        validation: "" # How parameter is validated
+        fallback: "" # 404 | Redirect | Default
+        
+  pageSpecificLogic:
+    businessLogic: "" # Logic unique to this page
+    stateManagement: "" # Page-level state management
+    sideEffects: [] # Analytics, logging, etc.
+    formHandling: "" # Form submission patterns
+    
+  serverClientBoundary:
+    serverComponents: [] # Components that run on server
+    clientComponents: [] # Components that run on client
+    boundaryLocation: "" # Where the boundary is
+    dataSerializationPoints: [] # Where data crosses boundary
+    
+  performancePatterns:
+    prefetching: [] # Links or routes prefetched
+    lazyLoading: [] # Components lazy loaded
+    codeSpliiting: [] # Dynamic imports
+    optimizations: [] # Memoization, virtualization
+    
+  securityPatterns:
+    authentication: "" # How auth is checked
+    authorization: "" # How permissions are verified
+    dataValidation: "" # Input validation
+    csrfProtection: false
+    
+  integrationPoints:
+    supabaseUsage:
+      directQueries: false # Page makes direct Supabase calls
+      throughHooks: false # Page uses hooks for data
+      serverSideOnly: false # Supabase used only server-side
+      
+    externalAPIs: []
+    webhooks: []
+    realtimeSubscriptions: []
+
+# ===== ANALYSIS GUIDELINES =====
+analysisGuidelines:
+  serverVsClient:
+    identifyingServerComponents:
+      - No 'use client' directive
+      - Async components
+      - Direct database queries
+      - Server-only imports
+      
+    identifyingClientComponents:
+      - 'use client' directive
+      - Uses hooks (useState, useEffect)
+      - Event handlers
+      - Browser APIs
+      
+  dataFetchingPatterns:
+    serverSide:
+      - Direct Supabase queries in component
+      - fetch() in Server Components
+      - generateStaticParams
+      - generateMetadata
+      
+    clientSide:
+      - useEffect data fetching
+      - SWR or React Query
+      - Custom hooks
+      - Event-triggered fetches
+      
+  criticalAnalysisPoints:
+    - How initial page data is loaded
+    - Where authentication is verified
+    - How components receive data
+    - When realtime subscriptions start
+    - How errors are handled
+    - Where navigation decisions are made
+
+# ===== OUTPUT REQUIREMENTS =====
+deliverables:
+  individualPageContracts:
+    location: "contracts/pages/"
+    naming: "page-[route-name]-contract.yaml"
+    totalExpected: 50 # Approximate page count
+    
+  layoutAnalysis:
+    location: "contracts/layouts/"
+    files:
+      - "layout-root-contract.yaml"
+      - "layout-authenticated-contract.yaml"
+      - "middleware-analysis.yaml"
+      
+  orchestrationReport:
+    file: "PAGE_ORCHESTRATION_SUMMARY.md"
+    contents:
+      - Page rendering strategies overview
+      - Server vs client component distribution
+      - Data fetching pattern analysis
+      - Route protection implementation
+      - Component composition patterns
+      - Performance optimization findings
+      - Security pattern assessment
+      
+  dataFlowDiagrams:
+    file: "PAGE_DATA_FLOW_DIAGRAMS.md"
+    contents:
+      - Server to client data flow
+      - Page to component prop flow
+      - Authentication flow through pages
+      - Navigation state machines
+      
+  integrationMatrix:
+    file: "PAGE_COMPONENT_INTEGRATION_MATRIX.md"
+    contents:
+      - Which pages use which components
+      - How pages pass data to components
+      - Component initialization patterns
+      - Conditional rendering logic
+
+# ===== SUCCESS CRITERIA =====
+successCriteria:
+  functional:
+    - All page files analyzed
+    - All layouts documented
+    - Middleware flows mapped
+    - Data fetching strategies identified
+    
+  quality:
+    - Clear server/client boundaries identified
+    - Complete prop flow documentation
+    - Security patterns assessed
+    - Performance patterns noted
+    
+  integration:
+    - Links to component contracts
+    - Database query patterns mapped
+    - Navigation flows documented
+    - Error handling analyzed
+
+# ===== QUALITY GATES =====
+qualityGates:
+  pageCompleteness: 100% # All pages must be analyzed
+  routingAccuracy: 100% # All routes correctly mapped
+  dataFlowClarity: 95% # Data flow must be clear
+  securityAssessment: 100% # All pages checked for auth
+
+# ===== INTEGRATION WITH COMPONENT ANALYSIS =====
+integrationWithComponents:
+  linkingStrategy:
+    - Reference component contracts by ID
+    - Map page → component relationships
+    - Document data flow from page to component
+    - Identify orchestration patterns
+    
+  gapAnalysis:
+    - Components used but not previously analyzed
+    - Page-specific logic not in components
+    - Data transformations at page level
+    - Routing logic outside components
+
+# ===== TRACKING =====
+tracking:
+  totalPages: 50 # Approximate
+  pagesAnalyzed: 0
+  contractsCreated: 0
+  serverComponents: 0
+  clientComponents: 0
+  hybridPages: 0
+  
+  criticalFindings: 0
+  securityIssues: 0
+  performanceIssues: 0
+  
+  lastUpdated: ""
+  completionPercentage: 0
+  estimatedTimeRemaining: "4-6 hours (parallel execution)"
+
+# ===== PRIORITY FOCUS AREAS =====
+priorityAreas:
+  critical:
+    - Dashboard page role-based routing
+    - Authentication page flows
+    - Admin page security
+    - Team page data fetching
+    
+  high:
+    - Skills Academy workout loading
+    - Practice planner initialization
+    - Payment/subscription flows
+    
+  medium:
+    - Resource page filtering
+    - Gamification page setup
+    - Search functionality
+    
+  low:
+    - Test pages
+    - Debug pages
+    - Static pages
+
+# ===== NOTES =====
+notes:
+  - This contract complements the Component Analysis to provide 100% system understanding
+  - Focus on orchestration and data flow, not component internals
+  - Pay special attention to Next.js 14 App Router patterns
+  - Document React Server Components usage
+  - Note any anti-patterns or technical debt
+  - Identify opportunities for optimization

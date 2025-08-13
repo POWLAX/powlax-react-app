@@ -1,0 +1,129 @@
+# Page Contract: Admin Role Management Page
+# Route: /admin/role-management
+
+contractId: "page-admin-role-management-20250113"
+pageInfo:
+  route: "/admin/role-management"
+  filePath: "src/app/(authenticated)/admin/role-management/page.tsx"
+  pageType: "client"
+  category: "admin"
+  dynamicSegments: []
+
+renderingStrategy:
+  componentType: "Client Component"
+  dataFetching: "client-side"
+  streamingEnabled: false
+  suspenseBoundaries: []
+  errorBoundaries: []
+
+dataOrchestration:
+  serverDataFetching: []
+  clientDataFetching:
+    - hook: "useAuth"
+      trigger: "On mount"
+      tables: []
+      realtime: false
+    - hook: "useEffect + fetchUsers"
+      trigger: "On mount if isAdmin"
+      tables: ["users"]
+      realtime: false
+  propsFlow:
+    fromServer: {}
+    toClient: {}
+
+componentComposition:
+  componentsUsed:
+    - name: "Various UI components"
+      source: "@/components/ui/*"
+      props: "Standard UI props"
+      conditionalRendering: "Always after admin check"
+  layoutUsed: "(authenticated)/layout.tsx"
+  providerDependencies: ["SupabaseAuthContext"]
+
+routingLogic:
+  guards:
+    - type: "Admin role"
+      implementation: "Page-level"
+      redirectTo: "Access denied card display"
+  navigation:
+    - triggers: ["Direct URL access", "Admin navigation"]
+      destinations: ["/admin/role-management"]
+      method: "Direct navigation"
+  dynamicRouting: []
+
+pageSpecificLogic:
+  businessLogic: "Dedicated role management interface with user listing, statistics, and modification capabilities"
+  stateManagement: "Multiple useState hooks for users, statistics, search/filter, and modal state"
+  sideEffects: ["Toast notifications", "Data refetching after changes"]
+  formHandling: "Modal form for role changes with checkbox selection"
+
+serverClientBoundary:
+  serverComponents: []
+  clientComponents: 
+    - "RoleManagementPage (root component)"
+    - "All UI components"
+  boundaryLocation: "Entire page is client-side"
+  dataSerializationPoints: []
+
+performancePatterns:
+  prefetching: []
+  lazyLoading: []
+  codeSpliiting: []
+  optimizations: 
+    - "Filtered user list computed on-demand"
+    - "Role statistics calculated client-side"
+
+securityPatterns:
+  authentication: "useAuth hook verification"
+  authorization: "Admin role and email verification"
+  dataValidation: "Form validation for role changes"
+  csrfProtection: false
+
+integrationPoints:
+  supabaseUsage:
+    directQueries: true
+    throughHooks: true
+    serverSideOnly: false
+  externalAPIs: []
+  webhooks: []
+  realtimeSubscriptions: []
+
+adminSpecificFeatures:
+  permissionChecking:
+    method: "Role and email verification"
+    criteria:
+      - "User roles include 'administrator'"
+      - "Email contains admin@powlax.com"
+      - "Email contains patrick@powlax.com"
+    fallback: "Access denied card"
+  
+  dataManagement:
+    tables: ["users"]
+    operations: ["READ", "UPDATE"]
+    bulkOperations: false
+    realTimeUpdates: false
+    
+  roleManagementFeatures:
+    availableRoles: ["administrator", "club_director", "team_coach", "player", "parent"]
+    roleStatistics: "Grid display of role counts"
+    searchAndFilter: "Email/name search + role filtering"
+    roleModification: "Modal interface for role editing"
+    userProtection: "Prevents self-role modification"
+    
+  uiPatterns:
+    layout: "Clean admin interface with statistics grid"
+    userDisplay: "Table format with role badges"
+    interactions: "Modal-based role editing"
+
+differences_from_management_page:
+  - "Standalone page vs tab content"
+  - "Simpler layout without ManagementTabs wrapper"
+  - "No DocumentationHelper integration"
+  - "Directly renders all role management UI"
+  - "Less comprehensive than management page version"
+
+notes:
+  - "Duplicate of role management functionality in management page"
+  - "Could be consolidated or deprecated"
+  - "Provides direct access to role management without tabs"
+  - "Nearly identical logic to management page role management"

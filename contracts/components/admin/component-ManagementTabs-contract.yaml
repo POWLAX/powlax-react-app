@@ -1,0 +1,104 @@
+# Component Contract: ManagementTabs
+contractId: "component-ManagementTabs-20250113"
+componentInfo:
+  name: "ManagementTabs"
+  filePath: "/src/components/admin/management/ManagementTabs.tsx"
+  category: "admin"
+  parentPage: "admin management"
+  complexity: "simple"
+  
+functionalAnalysis:
+  purpose: "Tab navigation container for admin management features"
+  primaryFunction: "Organize admin tools into categorized tabs with navigation"
+  userInteractions:
+    - "Switch between management tabs"
+    - "Access Users, Roles, Memberpress, Magic Links, Clubs, Teams, Coaching, Analytics"
+  businessLogic: "Tab-based organization of administrative functions"
+  stateManagement: "Tab state management with default tab selection"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements:
+    - "Management tab configuration array"
+    - "Tab icons and labels"
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: []
+  externalLibraries:
+    - "lucide-react (icons)"
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: []
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Add role-based tab visibility"
+    - "Add tab-specific permissions"
+    - "Add keyboard navigation"
+  priority: "high"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation:
+    - "Tab organization rationale"
+    - "Permission requirements per tab"
+  
+componentInteractions:
+  callsComponents:
+    - "Tabs (UI component)"
+    - "UsersTabContent"
+    - "MemberpressStatusPanel"
+    - "MagicLinkPanel"
+    - "DocumentationHelper"
+    - "ClubsManagementTab"
+    - "TeamHQManagementTab"
+    - "CoachingKitManagementTab"
+    - "PlatformAnalyticsDashboard"
+  calledByComponents:
+    - "Admin management page"
+  sharedState: []
+  eventCommunication: []
+  propsPassedTo:
+    - "children to roles tab content"
+    - "feature prop to DocumentationHelper"
+  propsReceivedFrom:
+    - "children (role management content)"
+    - "defaultTab (optional default tab)"
+  
+userJourneyContext:
+  userFlows:
+    - "Admin -> Management -> Select Tab -> Use Tab-Specific Tools"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["admin"]
+  featureArea: "admin"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "ManagementTabs"
+  reasonForDuplication: ""
+  consolidationStrategy: ""
+  supabaseIntegrationWinner: "N/A"

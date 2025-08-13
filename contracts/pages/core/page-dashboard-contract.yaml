@@ -1,0 +1,129 @@
+# Dashboard Page Orchestration Contract
+contractId: "page-dashboard-20250113"
+
+pageInfo:
+  route: "/dashboard"
+  filePath: "src/app/(authenticated)/dashboard/page.tsx"
+  pageType: "client"
+  category: "dashboard"
+  dynamicSegments: []
+  
+renderingStrategy:
+  componentType: "Client Component"
+  dataFetching: "client-side"
+  streamingEnabled: false
+  suspenseBoundaries: []
+  errorBoundaries: []
+  
+dataOrchestration:
+  serverDataFetching: []
+  clientDataFetching:
+    - hook: "useAuth"
+      trigger: "On mount"
+      tables: ["users"]
+      realtime: false
+    - hook: "useRoleViewer"
+      trigger: "On mount"
+      tables: []
+      realtime: false
+  propsFlow:
+    - fromServer: {}
+      toClient: { "user": "Auth context user object", "viewingRole": "Role viewer context" }
+        
+componentComposition:
+  componentsUsed:
+    - name: "PlayerDashboard"
+      source: "@/components/dashboards/PlayerDashboard"
+      props: { "user": "Modified user object with effective role" }
+      conditionalRendering: "Role-based"
+    - name: "CoachDashboard"
+      source: "@/components/dashboards/CoachDashboard"
+      props: { "user": "Modified user object with effective role" }
+      conditionalRendering: "Role-based"
+    - name: "ParentDashboard"
+      source: "@/components/dashboards/ParentDashboard"
+      props: { "user": "Modified user object with effective role" }
+      conditionalRendering: "Role-based"
+    - name: "DirectorDashboard"
+      source: "@/components/dashboards/DirectorDashboard"
+      props: { "user": "Modified user object with effective role" }
+      conditionalRendering: "Role-based"
+    - name: "AdminDashboard"
+      source: "@/components/dashboards/AdminDashboard"
+      props: { "user": "Modified user object with effective role" }
+      conditionalRendering: "Role-based"
+    - name: "PublicDashboard"
+      source: "@/components/dashboards/PublicDashboard"
+      props: { "user": "Modified user object with effective role" }
+      conditionalRendering: "Role-based"
+  layoutUsed: "Authenticated Layout (with navigation)"
+  providerDependencies: ["SupabaseAuthProvider", "RoleViewerProvider"]
+  
+routingLogic:
+  guards: 
+    - type: "Auth"
+      implementation: "Layout-level"
+      redirectTo: "Auth modal or login page"
+  navigation: []
+  dynamicRouting: []
+  
+pageSpecificLogic:
+  businessLogic: "Role-based dashboard routing with role viewer support, fallback user creation for development"
+  stateManagement: "Role viewer context integration with auth context"
+  sideEffects: ["Console logging for debugging", "Development fallback user creation"]
+  formHandling: "None"
+  
+serverClientBoundary:
+  serverComponents: []
+  clientComponents: ["DashboardPage component", "All dashboard components"]
+  boundaryLocation: "Page level - entire page is client component"
+  dataSerializationPoints: []
+  
+performancePatterns:
+  prefetching: []
+  lazyLoading: []
+  codeSpliiting: []
+  optimizations: []
+  
+securityPatterns:
+  authentication: "Layout-level auth requirement"
+  authorization: "Role-based dashboard display"
+  dataValidation: "Role validation for dashboard selection"
+  csrfProtection: false
+  
+integrationPoints:
+  supabaseUsage:
+    directQueries: false
+    throughHooks: true
+    serverSideOnly: false
+  externalAPIs: []
+  webhooks: []
+  realtimeSubscriptions: []
+
+roleBasedRouting:
+  routingMatrix:
+    player: "PlayerDashboard"
+    team_coach: "CoachDashboard"
+    parent: "ParentDashboard"
+    club_director: "DirectorDashboard"
+    administrator: "AdminDashboard"
+    null: "AdminDashboard (when admin viewing as admin)"
+    default: "AdminDashboard (fallback)"
+  
+  roleViewerIntegration:
+    effectiveRoleLogic: "isViewingAs ? viewingRole : user.role"
+    roleOverride: "Role viewer takes precedence over actual user role"
+    fallbackBehavior: "Default to administrator dashboard"
+  
+  developmentFeatures:
+    testUserCreation: "Fallback user with administrator role"
+    authBypass: "Loading state bypass for development"
+    debugging: "Extensive console logging"
+
+analysisNotes:
+  - "Central routing hub for entire application"
+  - "Sophisticated role-based dashboard selection"
+  - "Integration with role viewer for admin testing"
+  - "Development-friendly with fallback user creation"
+  - "Clean separation of concerns - orchestration only"
+  - "All business logic delegated to dashboard components"

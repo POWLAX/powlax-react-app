@@ -1,0 +1,113 @@
+contractId: "component-themetoggle-20250113"
+componentInfo:
+  name: "ThemeToggle"
+  filePath: "src/components/theme/ThemeToggle.tsx"
+  category: "Theme Management"
+  parentPage: "Universal (embedded in layouts/settings)"
+  complexity: "simple"
+  
+functionalAnalysis:
+  purpose: "Theme switching component supporting light, dark, and system theme preferences"
+  primaryFunction: "Provide intuitive theme switching with visual feedback and persistence"
+  userInteractions:
+    - "Click to cycle through themes (light -> dark -> system)"
+    - "Dropdown selection for specific theme choice"
+    - "Visual icon feedback for current theme"
+    - "Tooltip showing current theme and system preference"
+  businessLogic: "Theme state management, localStorage persistence, system preference detection"
+  stateManagement: "Theme context integration with local UI state"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "context"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements:
+    - "Theme options (light, dark, system)"
+    - "Icon mappings (Sun, Moon, Monitor)"
+    - "Size variants (sm, md, lg)"
+    - "Component variants (button, dropdown)"
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks:
+    - "useTheme"
+  contexts:
+    - "ThemeContext"
+  utilities:
+    - "Button (ui)"
+  externalLibraries:
+    - "lucide-react"
+    
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations:
+    - "Theme string to icon component mapping"
+    - "Theme preference to display label"
+    - "Size prop to icon sizing"
+    
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Add theme preview functionality"
+    - "Support for custom theme colors"
+    - "Add accessibility announcements for theme changes"
+    - "Implement theme scheduling (auto dark at night)"
+  priority: "low"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation:
+    - "Theme system architecture"
+    - "Variant usage guidelines"
+    - "Integration with ThemeContext"
+    
+componentInteractions:
+  callsComponents:
+    - "Button (ui)"
+  calledByComponents:
+    - "Navigation components"
+    - "Settings pages"
+    - "User preference panels"
+  sharedState:
+    - "ThemeContext (theme, actualTheme, setTheme)"
+  eventCommunication:
+    - "Theme change events via context"
+  propsPassedTo:
+    - "variant?: 'button' | 'dropdown'"
+    - "size?: 'sm' | 'md' | 'lg'"
+    - "showLabel?: boolean"
+  propsReceivedFrom:
+    - "Parent components define appearance preferences"
+    
+userJourneyContext:
+  userFlows:
+    - "User preference -> Find theme toggle -> Switch to preferred theme"
+    - "Accessibility needs -> Dark mode for eye strain -> Theme toggle"
+    - "System integration -> Auto theme switching -> Respects user OS preference"
+  criticalForMVP: false
+  usageFrequency: "low"
+  primaryUserTypes: ["all users with theme preferences"]
+  featureArea: "ui"
+  journeyStage: "advanced"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "ThemeToggle"
+  reasonForDuplication: "Unique theme management functionality"
+  consolidationStrategy: "N/A"
+  supabaseIntegrationWinner: "N/A (no database integration needed)"

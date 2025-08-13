@@ -136,19 +136,21 @@ export default function PracticePlansPage() {
   const handleAddDrill = (
     drill: any
   ) => {
+    const timestamp = Date.now()
+    const randomId = Math.random().toString(36).substr(2, 9)
     const newDrill = {
       ...drill,
-      id: `${drill.id}-${Date.now()}`, // Create unique ID
+      id: `${drill.id}-${timestamp}-${randomId}`, // Create unique ID with timestamp and random string
     }
     
     // Add as a new time slot
     const newSlot: PracticePlanTimeSlot = {
-      id: `slot-${Date.now()}`,
+      id: `slot-${timestamp}-${randomId}`,
       drills: [newDrill],
       duration: newDrill.duration
     }
     
-    setTimeSlots([...timeSlots, newSlot])
+    setTimeSlots(prevSlots => [...prevSlots, newSlot])
     
     // Close mobile drill library after adding drill
     if (showDrillLibrary) {

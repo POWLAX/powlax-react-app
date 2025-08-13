@@ -1,0 +1,328 @@
+# Interactive Development Workflow Contract
+# Establishes guided contract-driven development process for all POWLAX changes
+
+contractId: "interactive-development-workflow-001"
+type: DEVELOPMENT_WORKFLOW_SYSTEM
+version: 1.0.0
+created: 2025-01-15
+priority: CRITICAL
+status: ACTIVE
+
+# ===== PURPOSE =====
+purpose:
+  goal: "Create an interactive, guided workflow for all POWLAX development that maintains contract integrity while providing step-by-step guidance"
+  
+  benefits:
+    - Ensures all changes follow contract system
+    - Creates dual todo lists (user + Claude)
+    - Maintains source of truth documentation
+    - Guides through MVP development
+    - Validates database reality
+    - Tracks progress in real-time
+
+# ===== WORKFLOW TRIGGERS =====
+activationTriggers:
+  userPhrases:
+    - "I want to change [component/page]"
+    - "Help me fix [issue]"
+    - "Guide me through [task]"
+    - "I want to build an MVP"
+    - "I need to update [feature]"
+    - "Let's work on [component]"
+    
+  claudeResponse: "Immediately activate interactive workflow"
+
+# ===== WORKFLOW STEPS =====
+workflowSteps:
+  
+  step1_analysis:
+    name: "Change Request Analysis"
+    actions:
+      - Identify affected components
+      - Locate relevant contracts
+      - Check database tables
+      - Assess current state
+      - Identify blockers
+    output: "Change Analysis Report with checkboxes"
+    
+  step2_planning:
+    name: "Workflow Generation"
+    actions:
+      - Create user todo list
+      - Create Claude todo list
+      - Estimate timeline
+      - Identify dependencies
+      - Plan sub-agent deployment
+    output: "Dual todo lists with timeline"
+    
+  step3_enhancement:
+    name: "Contract Enhancement"
+    actions:
+      - Add enhancement notes to contracts
+      - Define acceptance criteria
+      - Specify database requirements
+      - Document desired state
+    output: "Enhanced contract with requirements"
+    
+  step4_implementation:
+    name: "Guided Implementation"
+    actions:
+      - Provide step-by-step guide
+      - Execute database checks
+      - Deploy sub-agents if needed
+      - Implement changes
+      - Run validation
+    output: "Completed implementation with validation"
+    
+  step5_verification:
+    name: "Contract Update & Verification"
+    actions:
+      - Update contracts with new state
+      - Add implementation history
+      - Verify acceptance criteria
+      - Update progress tracking
+    output: "Updated contracts reflecting reality"
+
+# ===== USER TODO TEMPLATE =====
+userTodoTemplate:
+  format: "Markdown checklist"
+  items:
+    - "[ ] Review current component contract"
+    - "[ ] Approve enhancement notes"
+    - "[ ] Confirm database tables exist"
+    - "[ ] Review implementation approach"
+    - "[ ] Test implementation"
+    - "[ ] Approve contract updates"
+    - "[ ] Confirm completion"
+    
+  mvpSpecific:
+    - "[ ] Define MVP pages (6-7)"
+    - "[ ] Prioritize features"
+    - "[ ] Approve navigation changes"
+    - "[ ] Review hidden pages list"
+
+# ===== CLAUDE TODO TEMPLATE =====
+claudeTodoTemplate:
+  format: "TodoWrite tool tasks"
+  items:
+    - "Analyze current contracts"
+    - "Create enhancement notes"
+    - "Verify database tables"
+    - "Deploy sub-agents if needed"
+    - "Implement changes"
+    - "Update contracts"
+    - "Run validation tests"
+    - "Generate progress report"
+
+# ===== CONTRACT ENHANCEMENT PATTERN =====
+enhancementPattern:
+  location: "Add to existing contract file"
+  
+  template: |
+    enhancementRequest:
+      id: "ER-{date}-{sequence}"
+      requestedBy: "{user}"
+      analyzedBy: "Claude"
+      date: "{timestamp}"
+      
+      currentState:
+        summary: "{what exists now}"
+        issues: []
+        
+      desiredState:
+        summary: "{what user wants}"
+        changes: []
+        
+      databaseRequirements:
+        tables: []
+        operations: []
+        
+      acceptanceCriteria:
+        - "[ ] {specific measurable criteria}"
+        
+      implementationNotes:
+        approach: "{how to implement}"
+        dependencies: []
+        estimatedTime: "{time estimate}"
+
+# ===== DATABASE VERIFICATION =====
+databaseVerification:
+  automatic: true
+  
+  checks:
+    - Verify tables exist
+    - Check record counts
+    - Validate schema
+    - Compare with contract
+    - Identify gaps
+    
+  methods:
+    preferred: "Supabase MCP direct query"
+    fallback1: "npx tsx scripts/check-actual-tables.ts"
+    fallback2: "Reference database-truth-sync-002.yaml"
+    
+  reportFormat: |
+    ## Database Verification
+    Table: {name}
+    Exists: {yes/no}
+    Records: {count}
+    Schema Match: {percentage}
+    Action Required: {description}
+
+# ===== MVP WORKFLOW =====
+mvpWorkflow:
+  
+  activation: "User expresses MVP requirements"
+  
+  process:
+    1_current_analysis:
+      - Analyze all 122 components
+      - Review 40+ pages
+      - Identify production-ready items
+      
+    2_mvp_scoping:
+      - User defines 6-7 core pages
+      - Map required components
+      - Identify blockers
+      
+    3_navigation_planning:
+      - Plan which pages to hide
+      - Keep pages accessible via URL
+      - Update navigation components
+      
+    4_blocker_resolution:
+      - List all MVP blockers
+      - Create resolution plan
+      - Prioritize by impact
+      
+    5_implementation:
+      - Fix blockers first
+      - Update navigation
+      - Validate MVP flow
+
+# ===== PROGRESS TRACKING =====
+progressTracking:
+  
+  realTimeUpdates:
+    - Show current task status
+    - Display time elapsed
+    - Show blockers found
+    - Track sub-agent progress
+    
+  sessionSummary:
+    - Changes completed
+    - Contracts updated
+    - Tests passed
+    - Blockers resolved
+    
+  sprintTracking:
+    - MVP percentage complete
+    - Components ready
+    - Pages ready
+    - Days to completion
+
+# ===== SUB-AGENT COORDINATION =====
+subAgentCoordination:
+  
+  whenToUse:
+    - Multiple components affected
+    - Parallel work possible
+    - Complex changes needed
+    
+  deploymentPattern: |
+    Task({
+      subagent_type: "general-purpose",
+      description: "{specific task}",
+      prompt: "Follow contract at {path} with enhancement notes {id}"
+    })
+    
+  coordination:
+    - Main Claude tracks all agents
+    - Updates user on progress
+    - Handles conflicts
+    - Merges results
+
+# ===== VALIDATION REQUIREMENTS =====
+validationRequirements:
+  
+  beforeComplete:
+    - npm run lint
+    - npm run typecheck  
+    - npm run build
+    - Browser testing
+    - Contract updated
+    
+  acceptanceCriteria:
+    - All checkboxes checked
+    - No mock data remaining
+    - Database connected
+    - Tests passing
+    - User approval
+
+# ===== WORKFLOW PREFERENCES =====
+defaultPreferences:
+  alwaysCreateTodos: true
+  requireDatabaseCheck: true
+  autoDeploySubAgents: false  # Ask first
+  updateContractsAfter: true
+  validateBeforeComplete: true
+  
+  mvpFocus:
+    prioritizeMVPBlockers: true
+    hideNonMVPPages: true
+    keepPagesAccessible: true
+    
+  changeTracking:
+    useEnhancementNotes: true
+    keepImplementationHistory: true
+    requireAcceptanceCriteria: true
+
+# ===== ERROR HANDLING =====
+errorHandling:
+  
+  contractNotFound:
+    action: "Create new contract from template"
+    notify: "User that new contract needed"
+    
+  databaseMismatch:
+    action: "Show comparison and ask for resolution"
+    options: ["Update contract", "Fix database", "Create migration"]
+    
+  validationFailure:
+    action: "Show errors and create fix tasks"
+    retry: true
+
+# ===== SUCCESS CRITERIA =====
+successCriteria:
+  - User understands each step
+  - Changes follow contracts
+  - Database stays synchronized
+  - Documentation stays current
+  - MVP progress is trackable
+  - No mock data in production
+
+# ===== INTEGRATION WITH CLAUDE.MD =====
+claudeMdIntegration:
+  
+  addToSection: "DEVELOPMENT WORKFLOW"
+  
+  content: |
+    ## 🎯 MANDATORY DEVELOPMENT WORKFLOW
+    
+    **All changes MUST follow the Interactive Development Workflow:**
+    1. Express your change request
+    2. Claude analyzes and creates workflow
+    3. Follow the guided steps
+    4. Validate completion
+    
+    **Activation:** Say "I want to [change]"
+    **Reference:** contracts/active/interactive-development-workflow-contract.yaml
+    **Enhanced Commands:** .claude/commands/contracts.md
+
+# ===== NOTES =====
+notes:
+  - This workflow ensures consistency across all development
+  - Contracts remain the source of truth
+  - Every change is tracked and validated
+  - MVP focus is maintained throughout
+  - Database reality is constantly verified

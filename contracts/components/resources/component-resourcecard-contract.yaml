@@ -1,0 +1,131 @@
+contractId: "component-resourcecard-20250113"
+componentInfo:
+  name: "ResourceCard"
+  filePath: "src/components/resources/ResourceCard.tsx"
+  category: "Resource Display"
+  parentPage: "/resources"
+  complexity: "moderate"
+  
+functionalAnalysis:
+  purpose: "Display resource information in card format with compact and full view modes"
+  primaryFunction: "Render resource cards with metadata, actions, and responsive layouts"
+  userInteractions:
+    - "Click to view resource details"
+    - "Toggle favorite status"
+    - "Download resource"
+    - "Share resource via dropdown menu"
+    - "Add to collection"
+  businessLogic: "Handles resource display formatting, file size/duration conversion, and interaction tracking"
+  stateManagement: "Local state for hover effects, uses useResourceFavorites hook for favorite management"
+  
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "hook"
+  supabaseTables:
+    - "user_resource_interactions"
+    - "powlax_resources (indirect via view tracking)"
+  tableUsage:
+    - tableName: "user_resource_interactions"
+      operations: ["select", "insert", "update"]
+      purpose: "Track favorites, views, and downloads"
+      dataFlow: "Via useResourceFavorites hook"
+    - tableName: "powlax_resources"
+      operations: ["update"]
+      purpose: "Increment view/download counts via RPC"
+      dataFlow: "Via trackView RPC function"
+      
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements: []
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks:
+    - "useResourceFavorites"
+  contexts: []
+  utilities:
+    - "toast (sonner)"
+  externalLibraries:
+    - "lucide-react"
+    - "@/components/ui/*"
+    
+supabaseTableDetails:
+  tablesUsed:
+    - "user_resource_interactions"
+    - "powlax_resources"
+  tableRelationships:
+    - "user_resource_interactions.resource_id -> powlax_resources.id"
+    - "user_resource_interactions.user_id -> users.id"
+  queryPatterns:
+    - "Favorite toggle via toggleFavorite hook"
+    - "View tracking via trackView hook"
+    - "Download tracking via handleDownload"
+  dataTransformations:
+    - "File size bytes to MB conversion"
+    - "Duration seconds to MM:SS format"
+    - "Resource type to icon mapping"
+    
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Could add resource type-specific styling"
+    - "Could implement drag-and-drop for collections"
+    - "Could add keyboard navigation"
+  priority: "high"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation:
+    - "Component props interface"
+    - "Interaction patterns"
+    - "Theme support documentation"
+    
+componentInteractions:
+  callsComponents:
+    - "Button (ui)"
+    - "Card, CardContent, CardHeader (ui)"
+    - "Badge (ui)"
+    - "DropdownMenu components (ui)"
+  calledByComponents:
+    - "Resources page"
+    - "ResourceDetailModal"
+  sharedState:
+    - "useResourceFavorites hook state"
+  eventCommunication:
+    - "onClick for resource selection"
+    - "onFavorite for favorite toggle"
+  propsPassedTo:
+    - "resource: Resource object"
+    - "onClick: () => void"
+    - "isFavorite: boolean"
+    - "isCompact: boolean"
+    - "showActions: boolean"
+  propsReceivedFrom:
+    - "Parent components pass Resource objects"
+    
+userJourneyContext:
+  userFlows:
+    - "Browse resources -> View card -> Click for details"
+    - "Search resources -> View results -> Interact with cards"
+    - "Favorite management -> Toggle favorites -> Track in database"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["coach", "player", "parent", "director", "admin"]
+  featureArea: "resources"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "ResourceCard"
+  reasonForDuplication: "No duplicates identified"
+  consolidationStrategy: "N/A"
+  supabaseIntegrationWinner: "ResourceCard (current component)"

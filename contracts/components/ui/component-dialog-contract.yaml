@@ -1,0 +1,114 @@
+# Component Contract: Dialog UI Component
+
+contractId: "component-dialog-20250113"
+componentInfo:
+  name: "Dialog"
+  filePath: "src/components/ui/dialog.tsx"
+  category: "ui-foundation"
+  parentPage: "multiple"
+  complexity: "moderate"
+  
+functionalAnalysis:
+  purpose: "Primary modal component for displaying overlaid content, forms, and confirmations"
+  primaryFunction: "Shows modal dialogs with backdrop, focus management, and accessibility features"
+  userInteractions: ["close button", "escape key", "backdrop click", "keyboard navigation"]
+  businessLogic: "Modal state management, focus trapping, scroll locking, portal rendering"
+  stateManagement: "Radix primitive handles open/close state and focus management"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements: ["max-width (lg)", "positioning (centered)", "backdrop opacity", "animations"]
+  mockDataUsage: []
+  realDataPercentage: 0
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: ["cn (className utility)"]
+  externalLibraries: ["@radix-ui/react-dialog", "@radix-ui/react-icons"]
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: []
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: ["Add size variants", "Add animation customization", "Add mobile-specific optimizations"]
+  priority: "high"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation: ["modal patterns", "accessibility features", "mobile behavior"]
+  
+componentInteractions:
+  callsComponents: []
+  calledByComponents: ["ALL modal implementations", "Practice planner modals", "Skills academy modals", "Admin forms", "Confirmation dialogs"]
+  sharedState: ["Modal open/close state"]
+  eventCommunication: ["onOpenChange events", "form submissions from modal content"]
+  propsPassedTo: ["content to DialogHeader, DialogContent, DialogFooter"]
+  propsReceivedFrom: ["open state, content from all modal-using components"]
+  
+userJourneyContext:
+  userFlows: ["ALL workflows requiring modal interactions"]
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["player", "coach", "parent", "admin", "director"]
+  featureArea: "ui-foundation"
+  journeyStage: "all stages"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "Dialog"
+  reasonForDuplication: "n/a"
+  consolidationStrategy: "n/a"
+  supabaseIntegrationWinner: "n/a"
+
+# Usage Analysis
+usagePatterns:
+  practiceModals: "Drill study, strategy details, save practice plans"
+  skillsModals: "Workout reviews, achievement celebrations, progress tracking"
+  adminModals: "User management, system settings, data operations"
+  confirmationDialogs: "Delete confirmations, unsaved changes warnings"
+  formDialogs: "Quick forms, data entry, profile updates"
+  mobileFriendly: true
+  accessibility:
+    - "Focus trapping within modal"
+    - "Escape key to close"
+    - "Backdrop click to close"
+    - "ARIA labels and roles"
+    - "Screen reader announcements"
+  
+components:
+  Dialog: "Root component managing state"
+  DialogTrigger: "Button/element that opens dialog" 
+  DialogContent: "Main modal container with styling"
+  DialogHeader: "Title and description area"
+  DialogTitle: "Modal title with proper heading hierarchy"
+  DialogDescription: "Modal description/subtitle"
+  DialogFooter: "Action buttons area (Cancel/Submit)"
+  DialogClose: "Close button functionality"
+  DialogPortal: "Renders modal outside normal DOM tree"
+  DialogOverlay: "Semi-transparent backdrop"
+  
+criticalForWorkflows:
+  - "Practice plan creation and modification"
+  - "User authentication and profile management"
+  - "Skills academy workout completion"
+  - "Team management and member operations"
+  - "Admin system management and data operations"

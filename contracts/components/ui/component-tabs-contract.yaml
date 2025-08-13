@@ -1,0 +1,126 @@
+# Component Contract: Tabs UI Component
+
+contractId: "component-tabs-20250113"
+componentInfo:
+  name: "Tabs"
+  filePath: "src/components/ui/tabs.tsx"
+  category: "ui-foundation"
+  parentPage: "multiple"
+  complexity: "moderate"
+  
+functionalAnalysis:
+  purpose: "Navigation component for organizing related content into switchable sections"
+  primaryFunction: "Provides tabbed interface with keyboard navigation and state management"
+  userInteractions: ["tab clicking", "keyboard arrow navigation", "content switching"]
+  businessLogic: "Content organization and section navigation with active state management"
+  stateManagement: "Radix primitive handles active tab state and focus management"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements: ["tab height", "padding", "active styling", "animation transitions"]
+  mockDataUsage: []
+  realDataPercentage: 0
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: ["cn (className utility)"]
+  externalLibraries: ["@radix-ui/react-tabs"]
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: []
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: ["Add vertical tab orientation", "Add tab close functionality", "Add scroll support for many tabs"]
+  priority: "high"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation: ["accessibility features", "keyboard navigation", "content organization patterns"]
+  
+componentInteractions:
+  callsComponents: []
+  calledByComponents: ["Practice planner drill library", "Skills academy sections", "Admin panels", "Resource categories", "Gamification displays"]
+  sharedState: ["Active tab state"]
+  eventCommunication: ["onValueChange events for tab switching"]
+  propsPassedTo: ["tab content to TabsContent components"]
+  propsReceivedFrom: ["tabs configuration and content from parent"]
+  
+userJourneyContext:
+  userFlows: ["Practice->Drill Categories", "Skills->Workout Types", "Admin->Management Sections", "Resources->Content Types"]
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["coach", "admin", "director"]
+  featureArea: "practice"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "Tabs"
+  reasonForDuplication: "n/a"
+  consolidationStrategy: "n/a"
+  supabaseIntegrationWinner: "n/a"
+
+# Usage Analysis
+usagePatterns:
+  practiceUse: "Drill library categories (Fundamental, Intermediate, Advanced)"
+  skillsUse: "Workout types, skill categories, progress sections"
+  adminUse: "Management sections (Users, Teams, Settings, Analytics)"
+  resourceUse: "Content categories, resource types, favorites"
+  mobileFriendly: true
+  
+components:
+  Tabs: "Root tabs container managing state"
+  TabsList: "Tab button container with styling"
+  TabsTrigger: "Individual tab button with active states"
+  TabsContent: "Content panel for each tab"
+  
+accessibility:
+  - "ARIA tab roles and states"
+  - "Keyboard navigation (arrow keys)"
+  - "Focus management"
+  - "Screen reader support"
+  - "Proper tab panel associations"
+  
+visualDesign:
+  - "Consistent height (40px) for tab buttons"
+  - "Clear active/inactive state distinction"
+  - "Smooth transitions between tabs"
+  - "POWLAX brand colors for active states"
+  - "Mobile-optimized touch targets"
+  
+navigationPatterns:
+  contentOrganization: "Logically group related content"
+  informationHierarchy: "Present most important content in first tab"
+  userWorkflow: "Organize tabs in order of typical user journey"
+  
+integrationOpportunity: "Could display dynamic tabs based on database categories"
+potentialConnections:
+  - "Dynamic drill categories from powlax_drills metadata"
+  - "User role-based tab visibility"
+  - "Progress-based tab unlocking in skills academy"
+  - "Team-specific content tabs"
+  
+commonUseCases:
+  drillLibrary: "Fundamental | Intermediate | Advanced | Custom"
+  adminPanel: "Users | Teams | Settings | Analytics" 
+  resources: "Videos | Documents | Equipment | External"
+  gamification: "Achievements | Leaderboards | Progress | Badges"

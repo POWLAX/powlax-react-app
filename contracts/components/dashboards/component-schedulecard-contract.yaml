@@ -1,0 +1,96 @@
+# Component Contract: ScheduleCard
+contractId: "component-schedulecard-20250113"
+componentInfo:
+  name: "ScheduleCard"
+  filePath: "src/components/dashboards/ScheduleCard.tsx"
+  category: "dashboard-support"
+  parentPage: "Used by PlayerDashboard, AdminDashboard, DirectorDashboard"
+  complexity: "moderate"
+  
+functionalAnalysis:
+  purpose: "Reusable schedule display card for showing upcoming events, practices, games, and appointments"
+  primaryFunction: "Display list of scheduled events with date, time, location, type badges, and status indicators"
+  userInteractions: 
+    - "View upcoming events and schedule items"
+    - "Navigate to event details via links"
+    - "Expand to see more events if available"
+  businessLogic: "Event filtering, status-based styling, type categorization, and truncation with show-more functionality"
+  stateManagement: "No state - pure presentation component with data processing"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements: 
+    - "Event type styling mappings"
+    - "Status color schemes"
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: []
+  externalLibraries: ["lucide-react", "next/link"]
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: []
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Add time zone support"
+    - "Implement calendar integration"
+    - "Add event reminder functionality"
+    - "Enhance mobile responsive design"
+  priority: "medium"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation: ["ScheduleEvent interface", "Event type and status mappings", "Display limits and truncation"]
+  
+componentInteractions:
+  callsComponents: ["Card", "CardContent", "CardDescription", "CardHeader", "CardTitle", "Badge", "Button"]
+  calledByComponents: ["PlayerDashboard", "AdminDashboard", "DirectorDashboard"]
+  sharedState: []
+  eventCommunication: []
+  propsPassedTo: ["Event data to badges and buttons"]
+  propsReceivedFrom: ["ScheduleCardProps: title, description, events, icon, maxEvents, showMoreHref"]
+  
+userJourneyContext:
+  userFlows: ["Dashboard -> Schedule Overview -> Event Details"]
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["player", "parent", "admin", "director"]
+  featureArea: "scheduling"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "ScheduleCard"
+  reasonForDuplication: ""
+  consolidationStrategy: ""
+  supabaseIntegrationWinner: ""
+
+notes:
+  - "Comprehensive schedule display component"
+  - "Supports multiple event types with color coding"
+  - "Status-based visual indicators"
+  - "Truncation with show-more functionality"
+  - "Good foundation for calendar integration"
+  - "Could be enhanced with real calendar/scheduling system"

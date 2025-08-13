@@ -1,0 +1,112 @@
+# Component Contract: Card UI Component
+
+contractId: "component-card-20250113"
+componentInfo:
+  name: "Card"
+  filePath: "src/components/ui/card.tsx"
+  category: "ui-foundation"
+  parentPage: "multiple"
+  complexity: "simple"
+  
+functionalAnalysis:
+  purpose: "Primary content container for displaying organized information across all POWLAX features"
+  primaryFunction: "Provides consistent, elevated content containers with header, body, and footer sections"
+  userInteractions: ["reading content", "potential click interactions", "scrolling within content"]
+  businessLogic: "Content organization and visual hierarchy with modular sections"
+  stateManagement: "Stateless - content provided via children"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements: ["border radius (xl)", "shadow styling", "padding values", "color scheme"]
+  mockDataUsage: []
+  realDataPercentage: 0
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: ["cn (className utility)"]
+  externalLibraries: []
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: []
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: ["Add hover states for interactive cards", "Add loading skeleton states", "Add collapsible variants"]
+  priority: "high"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation: ["component composition patterns", "responsive behavior", "content organization guidelines"]
+  
+componentInteractions:
+  callsComponents: []
+  calledByComponents: ["Dashboard components", "Team displays", "Practice planners", "Skills academy", "Resource lists", "Admin panels"]
+  sharedState: []
+  eventCommunication: []
+  propsPassedTo: ["content to CardHeader, CardContent, CardFooter"]
+  propsReceivedFrom: ["data and content from ALL feature components"]
+  
+userJourneyContext:
+  userFlows: ["ALL user journeys - primary content container"]
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["player", "coach", "parent", "admin", "director"]
+  featureArea: "ui-foundation"
+  journeyStage: "all stages"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "Card"
+  reasonForDuplication: "n/a"
+  consolidationStrategy: "n/a"
+  supabaseIntegrationWinner: "n/a"
+
+# Usage Analysis
+usagePatterns:
+  dashboardUse: "Primary container for dashboard widgets and statistics"
+  practiceUse: "Drill cards, strategy cards, practice plan summaries"
+  teamUse: "Team information, member cards, roster displays"
+  skillsUse: "Workout cards, progress tracking, achievement displays"
+  adminUse: "Management panels, user information, system status"
+  mobileFriendly: true
+  responsive: "Full width on mobile, constrained on desktop"
+  contentTypes:
+    - "Statistical data and metrics"
+    - "User/team profiles and information"
+    - "Action items and interactive elements"
+    - "Media content with descriptions"
+    - "List items and collections"
+  
+components:
+  Card: "Main container with shadow and border"
+  CardHeader: "Title area with consistent spacing"
+  CardTitle: "Primary heading with proper typography"
+  CardDescription: "Subtitle/description with muted styling"
+  CardContent: "Main content area with standard padding"
+  CardFooter: "Action area typically containing buttons"
+  
+integrationOpportunity: "Highly suitable for displaying Supabase data across all tables"
+potentialConnections:
+  - "teams (team information cards)"
+  - "users (user profile cards)"
+  - "powlax_drills (drill information cards)"
+  - "practices (practice summary cards)"
+  - "skills_academy_workouts (workout cards)"

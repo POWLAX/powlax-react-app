@@ -1,0 +1,89 @@
+# Component Contract: Accordion UI Component
+
+contractId: "component-accordion-20250113"
+componentInfo:
+  name: "Accordion"
+  filePath: "src/components/ui/accordion.tsx"
+  category: "ui-foundation"
+  parentPage: "multiple"
+  complexity: "simple"
+  
+functionalAnalysis:
+  purpose: "Collapsible content sections with smooth animations for organizing information hierarchically"
+  primaryFunction: "Provides expandable/collapsible content areas with animated transitions"
+  userInteractions: ["click to expand/collapse", "keyboard navigation", "focus management"]
+  businessLogic: "Simple state management for open/closed states with smooth transitions"
+  stateManagement: "Radix UI primitive handles internal state - no external state required"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements: ["UI styling classes", "animation durations"]
+  mockDataUsage: []
+  realDataPercentage: 0
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: ["cn (className utility)"]
+  externalLibraries: ["@radix-ui/react-accordion", "@radix-ui/react-icons"]
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: []
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: ["Consider adding custom icons for different content types"]
+  priority: "low"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation: ["usage examples", "accessibility guidelines", "custom styling patterns"]
+  
+componentInteractions:
+  callsComponents: []
+  calledByComponents: ["Practice Planner components", "Admin panels", "Settings pages"]
+  sharedState: []
+  eventCommunication: []
+  propsPassedTo: ["content via children prop"]
+  propsReceivedFrom: ["content from parent components"]
+  
+userJourneyContext:
+  userFlows: ["Practice Planning->Drill Organization", "Admin->Settings Management", "Team->Information Browsing"]
+  criticalForMVP: false
+  usageFrequency: "medium"
+  primaryUserTypes: ["coach", "admin"]
+  featureArea: "ui-foundation"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "Accordion"
+  reasonForDuplication: "n/a"
+  consolidationStrategy: "n/a"
+  supabaseIntegrationWinner: "n/a"
+
+# Usage Analysis
+usagePatterns:
+  practiceUse: "Organizing drill categories and sections"
+  adminUse: "Collapsible settings and configuration sections"
+  teamUse: "Player information and statistics organization"
+  mobileFriendly: true
+  touchTargets: "44px minimum maintained"
+  fieldUsage: "Excellent - reduces screen space on mobile"

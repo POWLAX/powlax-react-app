@@ -1,0 +1,558 @@
+# 🧩 **POWLAX Component Evaluation Master Contract**
+## **Complete Component Analysis with Sub-Agent Instructions**
+
+contractId: "component-evaluation-complete-001"
+type: COMPONENT_EVALUATION_COMPLETE
+version: 1.0.0
+created: 2025-01-15
+priority: CRITICAL
+
+# ===== CONTRACT OVERVIEW =====
+intent:
+  goal: "Systematically analyze every POWLAX React component, document their functionality, map Supabase table connections, and create comprehensive component contracts for MVP evaluation"
+  scope:
+    - Analyze all 122+ components identified in POWLAX_PAGE_COMPONENT_INDEX.md
+    - Document component functionality and business purpose
+    - Map all Supabase table connections and data flow patterns
+    - Identify hardcoded vs database-driven components
+    - Create individual Component Contracts for each component
+    - Update master index with contract references and database mappings
+    - Generate MVP readiness assessment for each component
+  outOfScope:
+    - Code modifications or fixes (analysis only)
+    - Database schema changes
+    - Component refactoring or optimization
+    - New feature development
+  assumptions:
+    - All components are accessible in the codebase
+    - Supabase schema documentation is available
+    - Components follow consistent React patterns
+    - Database connections exist through hooks or direct queries
+  risks:
+    - Component complexity may overwhelm individual sub-agents
+    - Some components may have nested dependencies requiring cross-analysis
+    - Database connections may be indirect through multiple hook layers
+    - Analysis scope may be too broad for single-pass completion
+
+# ===== CRITICAL: NO MOCK DATA ANALYSIS POLICY =====
+dataIntegrityPolicy:
+  noMockData: true
+  analysisRequirements:
+    - IDENTIFY and FLAG any hardcoded mock users, teams, or clubs in components
+    - DOCUMENT any fake WordPress associations or connections
+    - MARK components returning mock data vs real database queries
+    - CLASSIFY components as: REAL_DATA | MOCK_DATA | MIXED | NO_DATA
+    - PRIORITIZE real data components for MVP readiness
+  rationale:
+    - Mock data components create false positives in MVP assessment
+    - Must distinguish working features from demo components
+    - Database integration analysis requires real connection identification
+
+# ===== EXECUTION STRATEGY =====
+executionStrategy:
+  type: parallel
+  agentCount: 8
+  
+  # MANDATORY planning phase
+  ultraThinkPlanning:
+    completed: false  # MUST be set to true before execution
+    duration: "15+ minutes"
+    commonErrorsEvaluated: true
+    fileCollisionRisksAssessed: true
+    scopeBalancingCompleted: false
+    componentDistributionVerified: false
+    
+  # Balanced agent distribution by component category
+  agentDistribution:
+    agent_1:
+      type: general-purpose
+      specialization: "UI Foundation Components"
+      scope: "Basic UI building blocks and form elements"
+      componentCount: 22
+      estimatedTime: "2-3 hours"
+      files: ["src/components/ui/**"]
+      focus: "UI components, form controls, layout elements"
+      deliverables:
+        - "22 UI Component Contracts"
+        - "UI Component Database Integration Analysis"
+        - "Reusability Assessment Report"
+      supabaseExpectation: "Minimal direct database connections"
+      
+    agent_2:
+      type: general-purpose
+      specialization: "Dashboard & Role Management"
+      scope: "Role-based dashboards and user management components"
+      componentCount: 18
+      estimatedTime: "3-4 hours"
+      files: ["src/components/dashboards/**", "src/components/admin/RoleViewerSelector.tsx"]
+      focus: "Dashboard components, role-based rendering, user management"
+      deliverables:
+        - "18 Dashboard Component Contracts"
+        - "Role-Based Data Flow Analysis"
+        - "User/Team Table Integration Mapping"
+      supabaseExpectation: "Heavy users, teams, roles table usage"
+      
+    agent_3:
+      type: general-purpose
+      specialization: "Practice Planning System"
+      scope: "Practice planner, drill library, and planning components"
+      componentCount: 25
+      estimatedTime: "4-5 hours"
+      files: ["src/components/practice-planner/**"]
+      focus: "Practice planning workflow, drill management, timeline components"
+      deliverables:
+        - "25 Practice Planner Component Contracts"
+        - "Drill/Strategy Table Integration Analysis"
+        - "Practice Planning Data Flow Documentation"
+      supabaseExpectation: "Heavy drills, strategies, practice_plans table usage"
+      
+    agent_4:
+      type: general-purpose
+      specialization: "Skills Academy & Gamification"
+      scope: "Workout system, point tracking, and gamification components"
+      componentCount: 20
+      estimatedTime: "3-4 hours"
+      files: ["src/components/skills-academy/**", "src/components/gamification/**"]
+      focus: "Workout delivery, point systems, badges, achievements"
+      deliverables:
+        - "20 Skills Academy Component Contracts"
+        - "Gamification Table Integration Analysis"
+        - "Point System Data Flow Documentation"
+      supabaseExpectation: "Heavy skills_academy_*, user_points, badges table usage"
+      
+    agent_5:
+      type: general-purpose
+      specialization: "Team Management & Communication"
+      scope: "Team components, roster management, and communication"
+      componentCount: 15
+      estimatedTime: "2-3 hours"
+      files: ["src/components/teams/**"]
+      focus: "Team dashboard, roster management, team communication"
+      deliverables:
+        - "15 Team Component Contracts"
+        - "Team/Member Table Integration Analysis"
+        - "Team Communication Data Flow Documentation"
+      supabaseExpectation: "Heavy teams, team_members, organizations table usage"
+      
+    agent_6:
+      type: general-purpose
+      specialization: "Admin & System Management"
+      scope: "Admin tools, user management, and system components"
+      componentCount: 12
+      estimatedTime: "2-3 hours"
+      files: ["src/components/admin/**"]
+      focus: "Admin interfaces, user management, system configuration"
+      deliverables:
+        - "12 Admin Component Contracts"
+        - "User Management Table Integration Analysis"
+        - "Admin System Data Flow Documentation"
+      supabaseExpectation: "Heavy users, user_roles, system tables usage"
+      
+    agent_7:
+      type: general-purpose
+      specialization: "Navigation & Authentication"
+      scope: "Navigation, authentication, and core app components"
+      componentCount: 8
+      estimatedTime: "1-2 hours"
+      files: ["src/components/navigation/**", "src/components/auth/**"]
+      focus: "App navigation, authentication flows, core app structure"
+      deliverables:
+        - "8 Navigation Component Contracts"
+        - "Authentication Data Flow Analysis"
+        - "Navigation State Management Documentation"
+      supabaseExpectation: "Moderate users, sessions table usage"
+      
+    agent_8:
+      type: general-purpose
+      specialization: "Resources & Miscellaneous"
+      scope: "Resource management, search, themes, and utility components"
+      componentCount: 12
+      estimatedTime: "2-3 hours"
+      files: ["src/components/resources/**", "src/components/search/**", "src/components/theme/**", "src/components/animations/**"]
+      focus: "Resource library, search functionality, themes, animations"
+      deliverables:
+        - "12 Miscellaneous Component Contracts"
+        - "Resource/Search Table Integration Analysis"
+        - "Utility Component Documentation"
+      supabaseExpectation: "Moderate powlax_resources, search tables usage"
+
+# ===== SUB-AGENT INSTRUCTIONS =====
+subAgentInstructions:
+  format: "Claude-to-Claude Sub Agent Workflow"
+  responseStructure: "JSON with detailed analysis"
+  
+  # MANDATORY: Each sub-agent MUST follow this exact workflow
+  workflowSteps:
+    step1_preparation:
+      duration: "10-15 minutes"
+      tasks:
+        - "Read and understand the component evaluation contract"
+        - "Review POWLAX_PAGE_COMPONENT_INDEX.md for component context"
+        - "Examine assigned component files and understand their structure"
+        - "Identify parent pages and usage contexts"
+        - "Plan analysis approach for assigned components"
+      
+    step2_component_analysis:
+      duration: "Per component: Simple(5-10min) | Moderate(10-20min) | Complex(20-40min)"
+      tasks:
+        - "Analyze component functionality and purpose"
+        - "Document user interactions and business logic"
+        - "Identify state management patterns"
+        - "Map component dependencies and relationships"
+        - "Assess component complexity and reusability"
+      
+    step3_database_integration_analysis:
+      duration: "15-30 minutes per component with database connections"
+      tasks:
+        - "Identify all Supabase table connections (direct, hook, context)"
+        - "Document query patterns and data operations"
+        - "Map data flow: component ↔ database"
+        - "Identify hardcoded vs dynamic data usage"
+        - "Assess real data vs mock data percentage"
+      
+    step4_contract_creation:
+      duration: "10-15 minutes per component"
+      tasks:
+        - "Create individual component contract using template"
+        - "Complete all required sections thoroughly"
+        - "Provide MVP readiness assessment"
+        - "Document recommendations and improvements"
+        - "Save contract to contracts/components/ directory"
+      
+    step5_quality_validation:
+      duration: "5-10 minutes per component"
+      tasks:
+        - "Validate contract completeness"
+        - "Verify database connection accuracy"
+        - "Check MVP assessment consistency"
+        - "Ensure all template sections completed"
+        - "Review recommendations for actionability"
+
+  # CRITICAL: Response format requirements
+  responseFormat:
+    structure: "JSON"
+    requiredSections:
+      - contractId
+      - agentType
+      - timestamp
+      - iteration
+      - implementation
+      - testing
+      - qualityMetrics
+      - stateChanges
+      - issues
+      - nextSteps
+      - completionStatus
+      - completionPercentage
+      - readyForUser
+
+# ===== COMPONENT CONTRACT TEMPLATE =====
+componentContractTemplate:
+  contractId: "component-[component-name]-[timestamp]"
+  componentInfo:
+    name: ""
+    filePath: ""
+    category: ""
+    parentPage: ""
+    complexity: "" # simple | moderate | complex
+    
+  functionalAnalysis:
+    purpose: ""
+    primaryFunction: ""
+    userInteractions: []
+    businessLogic: ""
+    stateManagement: ""
+    
+  dataIntegration:
+    hasSupabaseConnection: false
+    connectionType: "" # direct | hook | context | none
+    supabaseTables: []
+    tableUsage:
+      - tableName: ""
+        operations: [] # select | insert | update | delete
+        purpose: ""
+        dataFlow: ""
+    
+  codeAnalysis:
+    isHardcoded: false
+    hardcodedElements: []
+    mockDataUsage: []
+    realDataPercentage: 0 # 0-100%
+    
+  mvpReadiness:
+    isProductionReady: false
+    blockers: []
+    improvements: []
+    priority: "" # critical | high | medium | low
+
+# ===== SUPABASE TABLE REFERENCE =====
+supabaseTableReference:
+  userManagement:
+    - users
+    - user_profiles
+    - user_roles
+    - user_sessions
+    
+  teamManagement:
+    - teams
+    - team_members
+    - clubs
+    - organizations
+    
+  practiceSystem:
+    - practice_plans
+    - drills
+    - drill_library
+    - strategies
+    - powlax_strategies
+    - user_strategies
+    
+  skillsAcademy:
+    - skills_academy_workouts
+    - skills_academy_series
+    - workout_completions
+    - drill_completions
+    - wall_ball_drill_library
+    
+  gamification:
+    - user_points
+    - point_currencies
+    - badges
+    - user_badges
+    - ranks
+    - user_ranks
+    - achievements
+    
+  resources:
+    - powlax_resources
+    - resource_favorites
+    - resource_views
+
+# ===== ANALYSIS GUIDELINES =====
+analysisGuidelines:
+  componentComplexity:
+    simple:
+      criteria: "< 50 lines, basic UI, no complex logic, minimal props"
+      timeAllocation: "5-10 minutes per component"
+      examples: ["Button", "Card", "Badge", "Input"]
+      
+    moderate:
+      criteria: "50-200 lines, some business logic, hooks usage, multiple props"
+      timeAllocation: "10-20 minutes per component"
+      examples: ["DrillCard", "TeamHeader", "ProgressCard"]
+      
+    complex:
+      criteria: "> 200 lines, complex logic, multiple integrations, state management"
+      timeAllocation: "20-40 minutes per component"
+      examples: ["PracticePlanner", "SkillsAcademyHub", "AdminDashboard"]
+      
+  dataConnectionAnalysis:
+    direct:
+      description: "Component directly calls supabase client"
+      indicators: ["supabase.from()", "supabase.rpc()", "import { supabase }"]
+      
+    hook:
+      description: "Component uses custom hooks that connect to Supabase"
+      indicators: ["useTeams()", "useDrills()", "useAuth()", "useSupabase()"]
+      
+    context:
+      description: "Component gets data through React context"
+      indicators: ["useContext()", "Provider components", "Context.Consumer"]
+      
+    none:
+      description: "Component has no database connection"
+      indicators: ["Static content", "UI-only components", "Pure presentational"]
+
+# ===== QUALITY GATES =====
+qualityGates:
+  contractCompleteness: 100% # All components must have contracts
+  supabaseAccuracy: 95% # Database connections must be accurately identified
+  mvpAssessment: 100% # Every component needs MVP readiness evaluation
+  documentationQuality: 90% # Contracts must be well-documented
+  analysisDepth: 85% # Analysis must be thorough and actionable
+
+# ===== DELIVERABLES =====
+deliverables:
+  individualContracts:
+    location: "contracts/components/"
+    naming: "component-[name]-contract.yaml"
+    totalExpected: 132 # Updated count based on refined analysis
+    
+  updatedIndex:
+    file: "POWLAX_PAGE_COMPONENT_INDEX.md"
+    additions:
+      - Component contract references
+      - Supabase table usage summary
+      - Data integration status
+      - MVP readiness indicators
+      - Database connection mapping
+      
+  summaryReport:
+    file: "COMPONENT_ANALYSIS_SUMMARY.md"
+    contents:
+      - Total components analyzed by category
+      - Supabase integration statistics and patterns
+      - Hardcoded vs database-driven breakdown
+      - MVP readiness assessment and prioritization
+      - Critical issues identified by component
+      - Database table usage frequency analysis
+      - Recommended next steps for MVP preparation
+
+# ===== SUCCESS CRITERIA =====
+successCriteria:
+  functional:
+    - All 132 components have individual contracts created
+    - Every Supabase table connection is documented and verified
+    - Hardcoded vs database-driven status is clearly identified
+    - MVP readiness is assessed for each component with specific criteria
+    - Database integration patterns are mapped and documented
+    
+  quality:
+    - Component contracts follow the template exactly with no missing sections
+    - Analysis is thorough, accurate, and actionable
+    - No components are missed, duplicated, or incorrectly categorized
+    - Supabase table usage is correctly identified and documented
+    - MVP assessments are consistent and realistic
+    
+  documentation:
+    - Master index is updated with contract references and database mappings
+    - Summary report provides clear overview and actionable insights
+    - MVP prioritization is specific and actionable
+    - Critical issues are highlighted with severity levels
+    - Database integration patterns are clearly documented
+
+# ===== PARALLEL EXECUTION TRACKING =====
+parallelProgress:
+  - agent: 1
+    task: "UI Foundation Components Analysis"
+    status: not_started
+    componentCount: 22
+    estimatedCompletion: ""
+    actualCompletion: ""
+    contractsCreated: 0
+    qualityScore: 0
+    
+  - agent: 2
+    task: "Dashboard & Role Management Analysis"
+    status: not_started
+    componentCount: 18
+    estimatedCompletion: ""
+    actualCompletion: ""
+    contractsCreated: 0
+    qualityScore: 0
+    
+  - agent: 3
+    task: "Practice Planning System Analysis"
+    status: not_started
+    componentCount: 25
+    estimatedCompletion: ""
+    actualCompletion: ""
+    contractsCreated: 0
+    qualityScore: 0
+    
+  - agent: 4
+    task: "Skills Academy & Gamification Analysis"
+    status: not_started
+    componentCount: 20
+    estimatedCompletion: ""
+    actualCompletion: ""
+    contractsCreated: 0
+    qualityScore: 0
+    
+  - agent: 5
+    task: "Team Management & Communication Analysis"
+    status: not_started
+    componentCount: 15
+    estimatedCompletion: ""
+    actualCompletion: ""
+    contractsCreated: 0
+    qualityScore: 0
+    
+  - agent: 6
+    task: "Admin & System Management Analysis"
+    status: not_started
+    componentCount: 12
+    estimatedCompletion: ""
+    actualCompletion: ""
+    contractsCreated: 0
+    qualityScore: 0
+    
+  - agent: 7
+    task: "Navigation & Authentication Analysis"
+    status: not_started
+    componentCount: 8
+    estimatedCompletion: ""
+    actualCompletion: ""
+    contractsCreated: 0
+    qualityScore: 0
+    
+  - agent: 8
+    task: "Resources & Miscellaneous Analysis"
+    status: not_started
+    componentCount: 12
+    estimatedCompletion: ""
+    actualCompletion: ""
+    contractsCreated: 0
+    qualityScore: 0
+
+# ===== INTEGRATION CHECKLIST =====
+integrationChecklist:
+  - [ ] All 8 agents completed their component analysis
+  - [ ] Total of 132 component contracts created in contracts/components/
+  - [ ] No components missed, duplicated, or incorrectly categorized
+  - [ ] All database connections accurately identified and documented
+  - [ ] Master index updated with contract references and database mappings
+  - [ ] Summary report generated with actionable insights
+  - [ ] MVP prioritization completed with specific criteria
+  - [ ] Critical issues documented with severity levels
+  - [ ] Quality gates met (100% completeness, 95% accuracy, 90% documentation)
+  - [ ] Database integration patterns mapped and documented
+
+# ===== NOTIFICATION SYSTEM =====
+notificationPlan:
+  agentCompletion:
+    trigger: "Each agent completes their analysis"
+    action: "Notify progress: 'Agent X completed - Y/132 components analyzed'"
+    
+  qualityGateFailure:
+    trigger: "Quality gates not met"
+    action: "Notify for iteration: 'Quality issues found - auto-iterating'"
+    
+  finalCompletion:
+    trigger: "All agents complete with quality gates passed"
+    action: "Notify success: 'Component analysis complete - MVP assessment ready'"
+
+# ===== TRACKING METADATA =====
+tracking:
+  totalComponents: 132
+  componentsAnalyzed: 0
+  contractsCreated: 0
+  supabaseConnectionsFound: 0
+  hardcodedComponentsFound: 0
+  mvpReadyComponents: 0
+  criticalIssues: 0
+  
+  lastUpdated: ""
+  completionPercentage: 0
+  estimatedTimeRemaining: "16-24 hours (parallel execution)"
+  
+  databaseIntegrationStats:
+    directConnections: 0
+    hookConnections: 0
+    contextConnections: 0
+    noConnections: 0
+  
+  mvpReadinessStats:
+    productionReady: 0
+    needsMinorFixes: 0
+    needsMajorWork: 0
+    notMvpCritical: 0
+
+# ===== NOTES =====
+notes:
+  - Component count updated to 132 based on detailed analysis
+  - Focus on database integration analysis for MVP readiness
+  - Prioritize components with real data connections
+  - Flag any mock data usage for immediate attention
+  - Quality over speed - thorough analysis is essential for MVP success
+  - Database connection accuracy is critical for next phase planning

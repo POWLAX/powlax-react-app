@@ -1,0 +1,131 @@
+# Component Contract: DirectorDashboard
+contractId: "component-directordashboard-20250113"
+componentInfo:
+  name: "DirectorDashboard"
+  filePath: "src/components/dashboards/DirectorDashboard.tsx"
+  category: "dashboard"
+  parentPage: "/dashboard (when user role is director)"
+  complexity: "complex"
+  
+functionalAnalysis:
+  purpose: "Club director dashboard showing organizational metrics, team performance, and facility management for 'Your Club OS'"
+  primaryFunction: "Provide club-level overview with real team/member data and mock facility/engagement metrics"
+  userInteractions: 
+    - "View club-wide statistics and team performance"
+    - "Access team management and analytics"
+    - "Monitor system health and platform adoption"
+    - "Review facility and equipment metrics"
+    - "Check upcoming club events and meetings"
+  businessLogic: "Aggregates real team/member data from specific club, combines with mock engagement and facility metrics"
+  stateManagement: "React useState with useEffect for data fetching, calculated statistics from real data"
+  
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "direct"
+  supabaseTables: ["clubs", "teams", "team_members", "users"]
+  tableUsage:
+    - tableName: "clubs"
+      operations: ["select"]
+      purpose: "Get specific club details (Your Club OS)"
+      dataFlow: "club_id -> club information"
+    - tableName: "teams"
+      operations: ["select"]
+      purpose: "Get all teams in the club with member details"
+      dataFlow: "club_id -> teams -> members -> user details"
+    - tableName: "team_members"
+      operations: ["select"]
+      purpose: "Count players and coaches across teams"
+      dataFlow: "team -> members -> role aggregation"
+    - tableName: "users"
+      operations: ["select"]
+      purpose: "Get member profile information"
+      dataFlow: "member -> user profile data"
+  
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements:
+    - "Specific club ID (Your Club OS)"
+    - "Mock facility metrics and engagement rates"
+    - "Mock system health data"
+    - "Mock upcoming events"
+  mockDataUsage:
+    - "facilityMetrics array with fake usage stats"
+    - "engagementRate calculations"
+    - "systemHealth metrics"
+    - "upcomingEvents schedule"
+  realDataPercentage: 60
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: ["supabase client"]
+  externalLibraries: ["lucide-react", "next/link"]
+  
+supabaseTableDetails:
+  tablesUsed: ["clubs", "teams", "team_members", "users"]
+  tableRelationships: 
+    - "clubs.id -> teams.club_id"
+    - "teams.id -> team_members.team_id"
+    - "team_members.user_id -> users.id"
+  queryPatterns:
+    - "Club-specific team queries with nested member joins"
+    - "Role-based member counting and aggregation"
+    - "Complex nested select with multiple joins"
+  dataTransformations:
+    - "Member role counting (players vs coaches)"
+    - "Team performance status calculation"
+    - "Coach name concatenation for display"
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Add real facility usage tracking"
+    - "Implement actual engagement metrics"
+    - "Connect to real event/calendar system"
+    - "Add financial reporting integration"
+    - "Enhance system health monitoring"
+  priority: "high"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation: ["Club management features", "Data aggregation logic", "Director role permissions"]
+  
+componentInteractions:
+  callsComponents: ["StatCard", "ActionCard", "ProgressCard", "ScheduleCard"]
+  calledByComponents: ["Main dashboard page when user role is director"]
+  sharedState: ["User object passed as prop"]
+  eventCommunication: []
+  propsPassedTo: ["Aggregated club data to various cards"]
+  propsReceivedFrom: ["user prop from parent dashboard"]
+  
+userJourneyContext:
+  userFlows: ["Director Login -> Club Overview -> Team Management", "Director -> Analytics -> Performance Reports", "Director -> Facility Management -> Resource Planning"]
+  criticalForMVP: true
+  usageFrequency: "medium"
+  primaryUserTypes: ["director"]
+  featureArea: "teams"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "DirectorDashboard"
+  reasonForDuplication: ""
+  consolidationStrategy: ""
+  supabaseIntegrationWinner: "DirectorDashboard"
+
+notes:
+  - "Good real database integration for team/member data"
+  - "Hardcoded to specific club ('Your Club OS')"
+  - "Real team counting and coach/player aggregation"
+  - "Mock facility and engagement data could be enhanced"
+  - "Strong foundation for club management features"
+  - "Team performance calculations based on real member counts"
+  - "Should generalize club selection for multi-club directors"

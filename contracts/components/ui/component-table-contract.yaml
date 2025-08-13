@@ -1,0 +1,125 @@
+# Component Contract: Table UI Component
+
+contractId: "component-table-20250113"
+componentInfo:
+  name: "Table"
+  filePath: "src/components/ui/table.tsx"
+  category: "ui-foundation"
+  parentPage: "multiple"
+  complexity: "moderate"
+  
+functionalAnalysis:
+  purpose: "Structured data display component for team rosters, statistics, and administrative data"
+  primaryFunction: "Provides accessible, responsive tables with consistent styling and behavior"
+  userInteractions: ["row selection", "column sorting", "scrolling", "cell interaction"]
+  businessLogic: "Tabular data presentation with responsive design and accessibility features"
+  stateManagement: "Stateless - content and interactions managed by parent components"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements: ["cell padding", "border styling", "hover states", "responsive overflow"]
+  mockDataUsage: []
+  realDataPercentage: 0
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: ["cn (className utility)"]
+  externalLibraries: []
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: []
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: ["Add sorting functionality", "Add filtering capabilities", "Add pagination support"]
+  priority: "high"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation: ["responsive behavior", "accessibility features", "data integration patterns"]
+  
+componentInteractions:
+  callsComponents: []
+  calledByComponents: ["Team rosters", "Admin user management", "Statistics displays", "Practice schedules", "Resource listings"]
+  sharedState: ["Table data from parent queries"]
+  eventCommunication: ["row click events", "sorting requests"]
+  propsPassedTo: []
+  propsReceivedFrom: ["table data, columns, actions from parent components"]
+  
+userJourneyContext:
+  userFlows: ["Team->Roster View", "Admin->User Management", "Statistics->Data Analysis", "Practice->Schedule View"]
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["coach", "admin", "director"]
+  featureArea: "team-management"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "Table"
+  reasonForDuplication: "n/a"
+  consolidationStrategy: "n/a"
+  supabaseIntegrationWinner: "n/a"
+
+# Usage Analysis
+usagePatterns:
+  teamRosters: "Player lists with stats, contact info, positions"
+  adminData: "User management, system configuration, audit logs"
+  statistics: "Performance metrics, progress tracking, comparisons"
+  schedules: "Practice schedules, game calendars, availability"
+  mobileFriendly: true
+  
+components:
+  Table: "Root table with overflow wrapper"
+  TableHeader: "Table header section with borders"
+  TableBody: "Main table content with row styling"
+  TableFooter: "Footer section with summary styling"
+  TableRow: "Individual rows with hover states"
+  TableHead: "Header cells with proper typography"
+  TableCell: "Data cells with consistent padding"
+  TableCaption: "Accessible table description"
+  
+responsiveDesign:
+  - "Horizontal scroll on mobile for wide tables"
+  - "Consistent cell padding across screen sizes"
+  - "Proper text sizing and readability"
+  - "Touch-friendly interaction areas"
+  
+accessibility:
+  - "Semantic table structure"
+  - "Proper header associations"
+  - "Screen reader compatible"
+  - "Keyboard navigation support"
+  - "Caption support for context"
+  
+integrationOpportunity: "Perfect for displaying Supabase relational data"
+potentialConnections:
+  - "team_members (roster data with user details)"
+  - "users (admin user management tables)"
+  - "practices (practice schedule tables)"
+  - "skills_academy_user_progress (progress tracking tables)"
+  - "user_points_wallets (leaderboard tables)"
+  
+dataPatterns:
+  roster: "User info + team role + contact details"
+  statistics: "Numerical data + comparisons + trends"
+  admin: "User data + actions + status indicators"
+  schedule: "Date/time + activity + location + attendees"

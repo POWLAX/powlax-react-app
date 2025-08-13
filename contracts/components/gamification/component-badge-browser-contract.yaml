@@ -1,0 +1,165 @@
+# BadgeBrowser Component Contract
+
+contractId: "component-badge-browser-20250113"
+componentInfo:
+  name: "BadgeBrowser"
+  filePath: "/src/components/gamification/BadgeBrowser.tsx"
+  category: "gamification"
+  parentPage: "/gamification"
+  complexity: "complex"
+
+functionalAnalysis:
+  purpose: "Interactive badge collection browser with category filtering and progress tracking for Skills Academy achievements"
+  primaryFunction: "Display all available badges with user progress, categories, and direct navigation to training series"
+  userInteractions:
+    - "Category filter selection (All, Solid Start, Attack, Defense, Midfield, Wall Ball, Lacrosse IQ)"
+    - "Badge card hover and click interactions"
+    - "Navigate to Skills Academy series for training"
+    - "View progress bars and completion status"
+  businessLogic: "Fetches badge definitions and merges with user progress data to show earning status and training opportunities"
+  stateManagement: "React hooks for badges data, category filtering, loading states"
+
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "direct"
+  supabaseTables:
+    - "badges_powlax"
+    - "user_badge_progress"
+    - "skills_academy_series"
+  tableUsage:
+    - tableName: "badges_powlax"
+      operations: ["select"]
+      purpose: "Fetch all available badge definitions with icons and categories"
+      dataFlow: "Static badge library -> UI display with progress overlay"
+    - tableName: "user_badge_progress" 
+      operations: ["select"]
+      purpose: "Get user's progress toward each badge (drills completed, eligibility)"
+      dataFlow: "User progress data -> merged with badge definitions -> progress indicators"
+    - tableName: "skills_academy_series"
+      operations: ["select"]
+      purpose: "Get series information for navigation links via foreign key"
+      dataFlow: "Series metadata -> Training buttons navigation"
+
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements:
+    - "Category definitions and colors (7 predefined categories)"
+    - "Badge icon fallback logic with initials"
+    - "Navigation route pattern for series"
+  mockDataUsage: []
+  realDataPercentage: 95
+
+dependencies:
+  hooks:
+    - "useAuth (SupabaseAuthContext)"
+    - "useState, useEffect (React)"
+  contexts:
+    - "SupabaseAuthContext"
+  utilities:
+    - "supabase client"
+    - "Next.js Image component"
+    - "Next.js router"
+  externalLibraries:
+    - "next/image"
+    - "next/navigation"
+
+supabaseTableDetails:
+  tablesUsed:
+    - "badges_powlax"
+    - "user_badge_progress" 
+    - "skills_academy_series"
+  tableRelationships:
+    - "user_badge_progress.badge_id -> badges_powlax.id"
+    - "user_badge_progress.series_id -> skills_academy_series.id"
+    - "user_badge_progress.user_id -> users.id"
+  queryPatterns:
+    - "SELECT * FROM badges_powlax ORDER BY category"
+    - "SELECT *, series:skills_academy_series!series_id(...) FROM user_badge_progress WHERE user_id = ?"
+  dataTransformations:
+    - "Merging badge definitions with user progress"
+    - "Calculating progress percentages and eligibility status"
+    - "Category-based filtering of badge collection"
+
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Add real-time progress updates when badges are earned elsewhere"
+    - "Implement badge rarity tiers (common, rare, legendary)"
+    - "Add badge collection statistics and achievements"
+    - "Improve mobile responsiveness for badge grid"
+  priority: "medium"
+
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation:
+    - "Badge category system explanation"
+    - "Progress calculation methodology" 
+    - "Navigation flow to Skills Academy"
+
+componentInteractions:
+  callsComponents: []
+  calledByComponents:
+    - "GamificationDashboard"
+    - "PlayerDashboard"
+  sharedState:
+    - "SupabaseAuthContext (user authentication)"
+  eventCommunication: []
+  propsPassedTo: []
+  propsReceivedFrom: []
+
+userJourneyContext:
+  userFlows:
+    - "Gamification Dashboard -> BadgeBrowser -> Skills Academy Training"
+    - "Player Dashboard -> Badge Progress -> Category Filter -> Training"
+  criticalForMVP: false
+  usageFrequency: "medium"
+  primaryUserTypes: ["player", "parent"]
+  featureArea: "gamification"
+  journeyStage: "core-loop"
+
+duplicateFunctionality:
+  hasDuplicates: true
+  duplicateComponents:
+    - "RankDisplay (overlapping progress visualization)"
+    - "Skills Academy badge displays (embedded in workout flows)"
+  primaryComponent: "BadgeBrowser"
+  reasonForDuplication: "Different contexts - full browser vs embedded displays"
+  consolidationStrategy: "Keep BadgeBrowser as master, create reusable BadgeCard component"
+  supabaseIntegrationWinner: "BadgeBrowser (most comprehensive)"
+
+gamificationSystemDetails:
+  badgeCategories:
+    - "solid_start: Green badges for foundational skills"
+    - "attack: Red badges for offensive skills"
+    - "defense: Blue badges for defensive skills"
+    - "midfield: Purple badges for transition skills"
+    - "wall_ball: Orange badges for wall ball mastery"
+    - "lacrosse_iq: Indigo badges for game intelligence"
+  progressCalculation:
+    - "Drills completed / drills required = progress percentage"
+    - "is_eligible flag determines badge earning status"
+    - "Series-based training progression with direct navigation"
+  achievementTriggers:
+    - "Drill completion in Skills Academy -> badge progress update"
+    - "Meeting drill threshold -> badge eligibility -> badge earning"
+    - "Badge earning -> potential combination badge checks"
+
+animationIntegration:
+  celebrationEffects:
+    - "Shimmer animation on progress bars"
+    - "Hover scale effects on badge cards"
+    - "Earned badge checkmark indicators"
+  visualFeedback:
+    - "Loading spinner during data fetch"
+    - "Category button active states"
+    - "Progress bar fill animations"
+  performanceOptimizations:
+    - "Image optimization with Next.js Image"
+    - "CSS-only animations for lightweight performance"

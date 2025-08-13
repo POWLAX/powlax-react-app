@@ -18,6 +18,7 @@ import WorkoutReviewModal from '@/components/skills-academy/WorkoutReviewModal'
 import CelebrationAnimation from '@/components/skills-academy/CelebrationAnimation'
 import WorkoutErrorBoundary from '@/components/skills-academy/WorkoutErrorBoundary'
 import { useWorkoutSession } from '@/hooks/useSkillsAcademyWorkouts'
+import { useGamificationTracking } from '@/hooks/useGamificationTracking'
 
 // Helper function to extract Vimeo ID from drill data
 function extractVimeoId(drill: any): string | null {
@@ -87,6 +88,9 @@ function WorkoutPageContent() {
   
   // Get point types for display
   const { pointTypes } = usePointTypes()
+  
+  // Get gamification tracking
+  const { trackDrillCompletion } = useGamificationTracking()
   
   // State management
   const [userId, setUserId] = useState<string | null>(null)
@@ -301,6 +305,24 @@ function WorkoutPageContent() {
           p_drill_id: drillId,
           p_points: drillPointValues
         })
+        
+        // Track drill completion for badge progress (GAMIFICATION)
+        const seriesId = workout?.series_id || workout?.skills_academy_series?.id
+        if (seriesId && drillId) {
+          const result = await trackDrillCompletion(drillId, seriesId)
+          
+          // Show badge earned notification if badge was earned
+          if (result?.badgeEarned) {
+            console.log('🏆 Badge Earned!', result.badgeEarned.title)
+            // TODO: Show badge earned modal/notification
+          }
+          
+          // Show rank up notification if rank changed
+          if (result?.rankUp) {
+            console.log('🎉 Rank Up!', result.rankUp.title)
+            // TODO: Show rank up modal/notification
+          }
+        }
       } catch (error) {
         console.error('Error saving points:', error)
       }
