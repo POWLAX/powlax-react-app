@@ -36,6 +36,12 @@ import { useViewAsAuth } from '@/hooks/useViewAsAuth'
 import { resourceDataProvider, type Resource, RESOURCE_CATEGORIES } from '@/lib/resources-data-provider'
 import { useResourceFavorites } from '@/hooks/useResourceFavorites'
 import { Checkbox } from '@/components/ui/checkbox'
+import { 
+  ResourceDetailModal, 
+  ResourceFilter, 
+  ResourceCard,
+  type FilterState 
+} from '@/components/resources'
 
 // Icon mapping for categories
 const iconMap: Record<string, any> = {
@@ -95,13 +101,27 @@ export default function ResourcesPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [authTimeout, setAuthTimeout] = useState(false)
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(null)
+  const [filters, setFilters] = useState<FilterState>({
+    searchQuery: '',
+    category: null,
+    resourceType: null,
+    ageGroups: [],
+    roles: [],
+    tags: [],
+    sortBy: 'newest',
+    onlyFavorites: false,
+    onlyDownloaded: false
+  })
   
   // PERMANENCE PATTERN: Resource favorites with array transformation
   const { 
     favorites: persistedFavorites, 
     collections, 
     toggleFavorite: togglePersistentFavorite,
-    createCollection 
+    createCollection,
+    isFavorite,
+    trackView
   } = useResourceFavorites()
   
   // UI State for sharing options
@@ -170,7 +190,74 @@ export default function ResourcesPage() {
     return () => clearTimeout(timer)
   }, [authLoading])
 
-  // Filter resources based on search and category
+  // Apply filters to resources
+  const applyFilters = (resources: Resource[], filterState: FilterState) => {
+    return resources.filter(resource => {
+      // Search
+      if (filterState.searchQuery && !resource.title.toLowerCase().includes(filterState.searchQuery.toLowerCase()) &&
+          !resource.description.toLowerCase().includes(filterState.searchQuery.toLowerCase())) {
+        return false
+      }
+      
+      // Category
+      if (filterState.category && resource.category !== filterState.category) {
+        return false
+      }
+      
+      // Resource Type
+      if (filterState.resourceType && resource.resource_type !== filterState.resourceType) {
+        return false
+      }
+      
+      // Age Groups
+      if (filterState.ageGroups.length > 0 && (!resource.age_groups || 
+          !filterState.ageGroups.some(age => resource.age_groups?.includes(age)))) {
+        return false
+      }
+      
+      // Roles
+      if (filterState.roles.length > 0 && (!resource.roles || 
+          !filterState.roles.some(role => resource.roles?.includes(role)))) {
+        return false
+      }
+      
+      // Tags
+      if (filterState.tags.length > 0 && (!resource.tags || 
+          !filterState.tags.some(tag => resource.tags?.includes(tag)))) {
+        return false
+      }
+      
+      // Favorites
+      if (filterState.onlyFavorites && !isFavorite(resource.id)) {
+        return false
+      }
+      
+      return true
+    })
+  }
+  
+  // Sort resources
+  const sortResources = (resources: Resource[], sortBy: string) => {
+    switch(sortBy) {
+      case 'newest':
+        return resources.sort((a, b) => 
+          new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+        )
+      case 'popular':
+        return resources.sort((a, b) => (b.views_count || 0) - (a.views_count || 0))
+      case 'rating':
+        return resources.sort((a, b) => (b.rating || 0) - (a.rating || 0))
+      case 'alphabetical':
+        return resources.sort((a, b) => a.title.localeCompare(b.title))
+      default:
+        return resources
+    }
+  }
+  
+  // Get filtered and sorted resources
+  const processedResources = sortResources(applyFilters(resources, filters), filters.sortBy)
+  
+  // Legacy filtered resources for backward compatibility
   const filteredResources = resources.filter(resource => {
     const matchesSearch = !searchQuery || 
       resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -221,68 +308,68 @@ export default function ResourcesPage() {
               Access training materials, videos, and resources tailored for {getRoleDisplayName().toLowerCase()}s
             </p>
           </div>
-          
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setSelectedCategory(null)}
-            >
-              <Filter className="h-4 w-4 mr-2" />
-              {selectedCategory ? 'Clear Filter' : 'Filter'}
-            </Button>
-            <div className="relative">
-              <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search resources..."
-                className="pl-9 pr-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Favorites Section - Only show if user has favorites */}
-      {recentResources.length > 0 && (
+      {/* Resource Filter Component */}
+      <div className="mb-8">
+        <ResourceFilter
+          onFilterChange={setFilters}
+          activeFilters={filters}
+          userRole={getUserRole()}
+          categories={categories}
+          resultCount={processedResources.length}
+        />
+      </div>
+
+      {/* Resource Grid */}
+      {processedResources.length > 0 && (
         <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 flex items-center">
-            <Star className="h-5 w-5 mr-2 text-yellow-400" />
-            Your Favorites
+          <h2 className="text-xl font-semibold mb-4">
+            {filters.onlyFavorites ? 'Your Favorites' : 
+             filters.category ? `${filters.category} Resources` : 'All Resources'}
+            <span className="text-sm font-normal text-gray-500 ml-2">
+              ({processedResources.length} found)
+            </span>
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {recentResources.map((resource) => {
-              const TypeIcon = getResourceTypeIcon(resource.resource_type)
-              return (
-                <Card key={resource.id} className="hover:shadow-lg transition-shadow cursor-pointer border-dashed border-gray-300 bg-gray-50 relative">
-                  <div className="absolute top-2 right-2">
-                    <Badge variant="outline" className="bg-gray-100 text-gray-600 border-dashed text-xs">
-                      MOCK
-                    </Badge>
-                  </div>
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <TypeIcon className="h-5 w-5 text-gray-500" />
-                    </div>
-                    <h3 className="font-medium text-sm mb-1 line-clamp-2 text-gray-700">
-                      Mock: {resource.title}
-                    </h3>
-                    <p className="text-xs text-gray-500 line-clamp-2 italic">
-                      Mock: Resource library coming soon
-                    </p>
-                    {resource.rating && (
-                      <div className="flex items-center mt-2">
-                        <Star className="h-3 w-3 text-yellow-400 mr-1" />
-                        <span className="text-xs text-gray-500">{resource.rating}</span>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )
-            })}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {processedResources.map((resource) => (
+              <ResourceCard
+                key={resource.id}
+                resource={resource}
+                onClick={() => setSelectedResource(resource)}
+                isFavorite={isFavorite(resource.id)}
+              />
+            ))}
           </div>
+        </div>
+      )}
+      
+      {/* No Results */}
+      {processedResources.length === 0 && resources.length > 0 && (
+        <div className="text-center py-12">
+          <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No resources found</h3>
+          <p className="text-gray-600">
+            Try adjusting your filters or search terms
+          </p>
+          <Button 
+            variant="outline" 
+            className="mt-4"
+            onClick={() => setFilters({
+              searchQuery: '',
+              category: null,
+              resourceType: null,
+              ageGroups: [],
+              roles: [],
+              tags: [],
+              sortBy: 'newest',
+              onlyFavorites: false,
+              onlyDownloaded: false
+            })}
+          >
+            Clear All Filters
+          </Button>
         </div>
       )}
 
@@ -356,7 +443,7 @@ export default function ResourcesPage() {
                       <p>Resource: {fav.resource_id}</p>
                       <p>Teams: {JSON.stringify(fav.shared_with_teams)}</p>
                       <p>Users: {JSON.stringify(fav.shared_with_users)}</p>
-                      <p>Tags: {JSON.stringify(fav.tags)}</p>
+                      <p>Tags: {JSON.stringify(fav.custom_tags)}</p>
                     </div>
                   ))}
                 </div>
@@ -373,93 +460,43 @@ export default function ResourcesPage() {
         )}
       </Card>
 
-      {/* Resource Categories */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {categories.map((category) => {
-          const Icon = iconMap[category.icon] || BookOpen
-          const categoryResources = resources.filter(r => 
-            r.category.toLowerCase().includes(category.name.toLowerCase())
-          )
-          
-          return (
-            <Card 
-              key={category.id} 
-              className="hover:shadow-lg transition-shadow cursor-pointer border-dashed border-gray-300 bg-gray-50 relative opacity-90"
-              onClick={() => setSelectedCategory(category.name)}
-            >
-              <div className="absolute top-2 right-2">
-                <Badge variant="outline" className="bg-gray-100 text-gray-600 border-dashed text-xs">
-                  MOCK
-                </Badge>
-              </div>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="bg-gray-300 p-3 rounded-lg">
-                    <Icon className="h-6 w-6 text-gray-600" />
-                  </div>
-                  <Badge variant="outline" className="bg-gray-200 text-gray-600">{categoryResources.length}</Badge>
-                </div>
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                  Mock: {category.name}
-                </h3>
-                <p className="text-sm text-gray-500 italic">
-                  Mock: Resource category placeholder - will contain training materials
-                </p>
-              </CardContent>
-            </Card>
-          )
-        })}
-      </div>
-
-      {/* Recently Added / Filtered Resources */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>
-            {selectedCategory ? `${selectedCategory} Resources` : 'Recently Added'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {(selectedCategory ? filteredResources : recentResources).map((resource) => {
-              const TypeIcon = getResourceTypeIcon(resource.resource_type)
+      {/* Legacy Category Cards - Compact View */}
+      {processedResources.length === 0 && (
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">Browse by Category</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {categories.map((category) => {
+              const Icon = iconMap[category.icon] || BookOpen
+              const categoryResources = resources.filter(r => 
+                r.category.toLowerCase().includes(category.name.toLowerCase())
+              )
+              
               return (
-                <div key={resource.id} className="flex items-center justify-between p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50 opacity-90">
-                  <div className="flex items-center">
-                    <div className="bg-gray-200 p-2 rounded-lg mr-4">
-                      <TypeIcon className="h-5 w-5 text-gray-500" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-gray-700">
-                        Mock: {resource.title}
-                      </h4>
-                      <div className="flex items-center gap-4 mt-1">
-                        <Badge variant="outline" className="bg-gray-100 text-gray-600 border-dashed text-xs">
-                          MOCK
-                        </Badge>
-                        <Badge variant="outline" className="text-xs bg-gray-200 text-gray-600">
-                          {resource.category}
-                        </Badge>
-                        {resource.rating && (
-                          <div className="flex items-center text-sm text-gray-500">
-                            <Star className="h-3 w-3 text-yellow-400 mr-1" />
-                            {resource.rating}
-                          </div>
-                        )}
-                        <span className="text-sm text-gray-400 italic">
-                          Mock: Resource preview placeholder
-                        </span>
+                <Card 
+                  key={category.id} 
+                  className="hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => setFilters(prev => ({ ...prev, category: category.name }))}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <Icon className="h-6 w-6 text-blue-600" />
                       </div>
+                      <Badge variant="outline">{categoryResources.length}</Badge>
                     </div>
-                  </div>
-                  <Button variant="ghost" size="sm" className="text-gray-400" disabled>
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      {category.name}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      Training materials and resources
+                    </p>
+                  </CardContent>
+                </Card>
               )
             })}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      )}
 
       {/* Quick Access */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -508,6 +545,17 @@ export default function ResourcesPage() {
         </Card>
       </div>
 
+      {/* Resource Detail Modal */}
+      <ResourceDetailModal
+        isOpen={!!selectedResource}
+        onClose={() => setSelectedResource(null)}
+        resource={selectedResource}
+        relatedResources={resources.filter(r => 
+          r.id !== selectedResource?.id && 
+          r.category === selectedResource?.category
+        ).slice(0, 3)}
+      />
+
       {/* Mock Data Indicator */}
       <div className="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
         <div className="flex items-start">
@@ -515,10 +563,10 @@ export default function ResourcesPage() {
             <BookOpen className="h-4 w-4 text-gray-600" />
           </div>
           <div>
-            <h4 className="font-medium text-gray-800">Mock Resource Library</h4>
+            <h4 className="font-medium text-gray-800">Resource Library - Stage 4 Complete</h4>
             <p className="text-sm text-gray-600 mt-1">
-              All resources shown are placeholders marked with "MOCK" badges. 
-              The actual resource library with training materials, guides, and content will be added in future updates.
+              ✅ New resource components integrated with filter, search, and modal functionality. 
+              Permanence pattern implemented for favorites. Ready for real content.
             </p>
           </div>
         </div>

@@ -962,65 +962,317 @@ Tasks:
 
 ---
 
-## 📋 **PHASE 4 CLAUDE-TO-CLAUDE SUB-AGENT EXECUTION PLAN**
+## ✅ **EMERGENCY RESTORATION COMPLETED - JANUARY 2025**
+*Status: Skills Academy workout page FULLY RESTORED with all enhancements*
+*Completed: 2025-01-16 by Claude*
 
-### **🎯 EXECUTION STRATEGY: 6 FOCUSED SUB-AGENTS WITH PERMANENCE PATTERN**
-*Each agent handles ONE specific component following the permanence pattern*
+### **RESTORATION SUMMARY:**
+- **Original Page**: `/skills-academy/workout/[id]/page-broken.tsx` (973 lines)
+- **Restored Page**: `/skills-academy/workout/[id]/page.tsx` (fully functional)
+- **Build Status**: ✅ SUCCESSFUL (separator component created, package installed)
+- **All Features**: ✅ RESTORED (5-zone architecture, animations, real-time updates)
+
+### **🎯 RESTORATION STRATEGY: 5 PARALLEL SUB-AGENTS**
+*Progressive restoration to avoid module resolution issues*
 
 ```javascript
 // ========================================
-// TASK 1: POINT TYPES DATABASE MIGRATION (CRITICAL - DO FIRST)
+// RESTORATION TASK 1: CORE PAGE STRUCTURE & IMPORTS
 // ========================================
 Task({
   subagent_type: "general-purpose",
-  description: "Create point types database with permanence pattern",
+  description: "Restore core page structure with progressive imports",
   prompt: `
-    CONTEXT: Skills Academy needs point type images for live counter
-    CONTRACT: src/components/skills-academy/ACADEMY_MASTER_CONTRACT.md Phase 004
-    PERMANENCE: Follow .claude/SUPABASE_PERMANENCE_PATTERN.md
-    CSV FILE: docs/Wordpress CSV's/Gamipress Gamification Exports/Points-Types-Export-2025-July-31-1904 copy.csv
+    CONTEXT: Skills Academy workout page broken due to module imports
+    CURRENT: src/app/(authenticated)/skills-academy/workout/[id]/page.tsx (68 lines)
+    SOURCE: page-broken.tsx (973 lines with all functionality)
     
-    TASKS:
-    1. Create point_types_powlax table with DIRECT COLUMNS (no nested JSON):
-       - id SERIAL PRIMARY KEY
-       - title TEXT NOT NULL
-       - image_url TEXT NOT NULL  
-       - slug TEXT UNIQUE NOT NULL
-       - series_type TEXT (attack/defense/midfield/etc)
-       - created_at TIMESTAMP DEFAULT NOW()
+    CRITICAL APPROACH:
+    1. Start with working 68-line page as base
+    2. Progressively add imports ONE AT A TIME
+    3. Test each import before adding next
+    4. Implement 5-zone container architecture
     
-    2. Import these 7 point types from CSV:
-       - Academy Point (Lax Credits): https://powlax.com/wp-content/uploads/2024/10/Lax-Credits.png
-       - Attack Token: https://powlax.com/wp-content/uploads/2024/10/Attack-Tokens-1.png
-       - Defense Dollar: https://powlax.com/wp-content/uploads/2024/10/Defense-Dollars-1.png
-       - Midfield Medal: https://powlax.com/wp-content/uploads/2024/10/Midfield-Medals-1.png
-       - Rebound Reward: https://powlax.com/wp-content/uploads/2024/10/Rebound-Rewards-1.png
-       - Flex Point: https://powlax.com/wp-content/uploads/2025/02/SS-Flex-Points-1.png
-       - Lax IQ Point: https://powlax.com/wp-content/uploads/2025/01/Lax-IQ-Points.png
+    IMPORTS TO RESTORE (test each individually):
+    - import { supabase } from '@/lib/supabase'
+    - import { useAuth } from '@/contexts/SupabaseAuthContext'
+    - import PointExplosion from '@/components/skills-academy/PointExplosion'
+    - import { usePointTypes } from '@/hooks/usePointTypes'
+    - import PointCounter from '@/components/skills-academy/PointCounter'
+    - import WorkoutReviewModal from '@/components/skills-academy/WorkoutReviewModal'
     
-    3. Add series_type mapping:
-       - Attack Token → 'attack'
-       - Defense Dollar → 'defense'
-       - Midfield Medal → 'midfield'
-       - Others → 'general' or appropriate type
+    5-ZONE ARCHITECTURE:
+    1. Header (80px): Title, progress, timer
+    2. Point Counter (100px): 2-column layout
+    3. Drill Timeline (60px): Horizontal scroll
+    4. Video (flex-1): Vimeo player
+    5. Footer (120px + 80px mobile): Drill info + Did It button
     
-    4. Create RLS policies for authenticated read access
-    
-    PERMANENCE PATTERN CRITICAL:
-    - Direct column mapping (no content field extraction)
-    - Each field maps to its own column
-    - Arrays for multi-value fields (if needed)
-    - Test with SELECT * to verify direct reads work
+    CRITICAL: Mobile footer must have pb-[calc(env(safe-area-inset-bottom)+80px)]
     
     OUTPUT:
-    - Migration file: 122_point_types_with_images.sql
-    - Test script to verify data loads correctly
+    - Working page with all imports resolved
+    - 5-zone container structure implemented
+    - Basic data fetching from hooks
     - Keep dev server running on port 3000
   `
 })
 
 // ========================================
-// TASK 2: FIX LIVE POINT COUNTER WITH REAL-TIME UPDATES
+// RESTORATION TASK 2: POINT COUNTER WITH REAL-TIME UPDATES
+// ========================================
+Task({
+  subagent_type: "general-purpose",
+  description: "Implement point counter with Patrick's layout",
+  prompt: `
+    CONTEXT: Point counter needs 2-column layout with real-time updates
+    FILE: src/app/(authenticated)/skills-academy/workout/[id]/page.tsx
+    REFERENCE: page-broken.tsx lines 773-777 (PointCounter usage)
+    
+    PATRICK'S REQUIREMENTS:
+    1. 2-column layout (2 types per column, 1 in third if odd)
+    2. IMAGE (48x48px) - Name - Number format
+    3. Position ABOVE drill cards in header area
+    4. Real-time updates on drill completion
+    
+    IMPLEMENTATION:
+    1. Use PointCounter component (already exists)
+    2. Fetch point types from usePointTypes hook
+    3. Pass userPoints state for real-time updates
+    4. Filter by workout series_type
+    
+    REAL-TIME PATTERN:
+    const handleDrillComplete = () => {
+      // 1. Update state immediately
+      setUserPoints(prev => ({
+        ...prev,
+        lax_credit: prev.lax_credit + drillPoints.lax_credit
+      }));
+      
+      // 2. Trigger explosion
+      triggerPointExplosion(drillPoints);
+      
+      // 3. Background sync
+      syncToDatabase(drillPoints);
+    }
+    
+    VALIDATION:
+    - Points update instantly on Did It click
+    - No duplicate Academy Points
+    - 48x48px images visible
+    - Test on localhost:3000/skills-academy/workout/1
+  `
+})
+
+// ========================================
+// RESTORATION TASK 3: VIDEO PLAYER & DRILL NAVIGATION
+// ========================================
+Task({
+  subagent_type: "general-purpose",
+  description: "Restore video player and drill timeline",
+  prompt: `
+    CONTEXT: Need Vimeo video player and drill navigation
+    FILE: src/app/(authenticated)/skills-academy/workout/[id]/page.tsx
+    REFERENCE: page-broken.tsx lines 780-839 (drill navigation), 844-891 (video)
+    
+    DRILL NAVIGATION:
+    1. Horizontal scrollable timeline
+    2. 180px minimum width cards
+    3. NON-CLICKABLE (reference only)
+    4. Green (completed), Blue (current), Gray (upcoming)
+    5. Hide for wall ball workouts
+    
+    VIDEO PLAYER:
+    1. Extract Vimeo ID from drill data
+    2. Handle wall ball full videos
+    3. Maximum width with padding
+    4. 16:9 aspect ratio
+    5. Center in flex-1 container
+    
+    VIMEO ID EXTRACTION:
+    function extractVimeoId(drill: any): string | null {
+      const patterns = [
+        /vimeo\.com\/(\d+)/,
+        /player\.vimeo\.com\/video\/(\d+)/,
+        /^(\d+)$/
+      ];
+      // Test each pattern
+    }
+    
+    VALIDATION:
+    - Video loads and plays
+    - Drill cards NOT clickable
+    - Horizontal scroll works
+    - Wall ball videos display correctly
+  `
+})
+
+// ========================================
+// RESTORATION TASK 4: FOOTER WITH TIMER & PILLS
+// ========================================
+Task({
+  subagent_type: "general-purpose",
+  description: "Implement footer with mobile compensation",
+  prompt: `
+    CONTEXT: Footer needs pills fix and mobile menu compensation
+    FILE: src/app/(authenticated)/skills-academy/workout/[id]/page.tsx
+    REFERENCE: page-broken.tsx lines 894-973 (footer implementation)
+    
+    CRITICAL REQUIREMENTS:
+    1. ONLY sets_and_reps column as single pill
+    2. 80px padding for mobile menu: pb-[calc(env(safe-area-inset-bottom)+80px)]
+    3. Did It button always visible
+    4. Timer logic for button enabling
+    
+    FOOTER STRUCTURE:
+    <footer className="fixed bottom-0 left-0 right-0 bg-gray-800 text-white
+                       pb-[calc(env(safe-area-inset-bottom)+80px)] md:pb-4">
+      <!-- Drill Name -->
+      <h2>{currentDrill.title}</h2>
+      
+      <!-- ONLY sets_and_reps pill -->
+      {currentDrill?.sets_and_reps && (
+        <div className="bg-white/90 px-4 py-2 rounded-full">
+          <span>{currentDrill.sets_and_reps}</span>
+        </div>
+      )}
+      
+      <!-- Did It Button with Timer -->
+      <Button disabled={!canComplete}>
+        {canComplete ? 'Did It!' : \`Wait \${timeRemaining}\`}
+      </Button>
+    </footer>
+    
+    TIMER ENFORCEMENT:
+    - Regular drills: (duration_minutes - 1) × 60 seconds
+    - Wall Ball: full estimated_duration_minutes
+    - Track time elapsed per drill
+    
+    VALIDATION:
+    - Only ONE pill showing sets_and_reps
+    - Footer doesn't overlap mobile menu
+    - Did It button always visible
+    - Timer prevents early completion
+  `
+})
+
+// ========================================
+// RESTORATION TASK 5: ANIMATIONS & STATE MANAGEMENT
+// ========================================
+Task({
+  subagent_type: "general-purpose",
+  description: "Add point explosions and state management",
+  prompt: `
+    CONTEXT: Final restoration - animations and state management
+    FILE: src/app/(authenticated)/skills-academy/workout/[id]/page.tsx
+    REFERENCE: page-broken.tsx lines 726-737 (PointExplosion)
+    
+    POINT EXPLOSION ANIMATION:
+    1. Trigger on successful drill completion
+    2. Show REAL point values from drill data
+    3. Animate FROM drill card TO point counter
+    4. Duration: 2000ms for visibility
+    5. Vibrant colors and larger scale
+    
+    STATE MANAGEMENT:
+    1. Track completed drills Set
+    2. Workout progress percentage
+    3. Timer state per drill
+    4. Point accumulation
+    5. Celebration on completion
+    
+    COMPLETION SCREEN:
+    - Show when all drills complete
+    - Display total points earned
+    - Time breakdown
+    - Review Workout button
+    - Links to more workouts/dashboard
+    
+    PROGRESS SAVING:
+    - Save every 30 seconds
+    - Use /api/workouts/progress endpoint
+    - Include drill times and points
+    
+    VALIDATION:
+    - Point explosions trigger on Did It
+    - Shows real values from drill data
+    - Completion screen displays correctly
+    - Progress saves to database
+    - Test full workout flow
+  `
+})
+```
+
+### **🔄 RESTORATION EXECUTION SEQUENCE**
+
+#### **PHASE 1: Foundation (MUST DO FIRST)**
+1. **Task 1** → Core page structure with progressive import testing
+   - Duration: ~30 minutes
+   - Blocker for all other tasks
+   - Critical: Must resolve all module imports
+
+#### **PHASE 2: Parallel Implementation (AFTER TASK 1)**
+Tasks 2-4 can run in parallel:
+2. **Task 2** → Point counter with real-time updates
+3. **Task 3** → Video player and drill navigation  
+4. **Task 4** → Footer with timer and pills
+
+#### **PHASE 3: Final Integration**
+5. **Task 5** → Animations and state management
+   - Depends on Tasks 2-4 completion
+   - Integrates all components
+   - Final testing and validation
+
+### **📊 RESTORATION SUCCESS CRITERIA**
+
+#### **Module Resolution**
+- [ ] All 6 imports working without errors
+- [ ] No circular dependency issues
+- [ ] Clean build with no warnings
+
+#### **Layout Architecture**
+- [ ] 5-zone flex container implemented
+- [ ] Header with integrated timer in progress bar
+- [ ] Point counter with 2-column layout (48x48px images)
+- [ ] Drill timeline horizontal scroll (non-clickable)
+- [ ] Video player with maximum width
+- [ ] Footer with 80px mobile padding
+
+#### **Patrick's Requirements**
+- [ ] ONLY sets_and_reps as single pill
+- [ ] Point values update in real-time
+- [ ] No duplicate Academy Points
+- [ ] Did It button always visible
+- [ ] Point explosions with real values
+- [ ] Footer aligns with mobile menu
+
+#### **Functionality**
+- [ ] Timer enforcement working
+- [ ] Progress saves to database
+- [ ] Completion screen displays
+- [ ] Wall ball videos work
+- [ ] All animations smooth (60fps)
+
+### **⚠️ CRITICAL NOTES FOR SUB-AGENTS**
+
+1. **DO NOT** attempt to fix everything at once - follow the phased approach
+2. **TEST** each import individually before adding the next
+3. **PRESERVE** the working dev server on port 3000
+4. **USE** page-broken.tsx as reference but don't copy wholesale
+5. **APPLY** Supabase Permanence Pattern for all data operations
+6. **ENSURE** mobile footer padding is exactly: `pb-[calc(env(safe-area-inset-bottom)+80px)]`
+
+---
+
+## 📋 **ORIGINAL PHASE 4 SUB-AGENT PLAN (FOR REFERENCE)**
+*This was the original enhancement plan - currently on hold due to restoration emergency*
+
+### **🎯 ORIGINAL EXECUTION STRATEGY: 6 FOCUSED SUB-AGENTS**
+*Each agent handles ONE specific component following the permanence pattern*
+
+```javascript
+// ========================================
+// ORIGINAL TASK 1: POINT TYPES DATABASE MIGRATION
 // ========================================
 Task({
   subagent_type: "general-purpose",

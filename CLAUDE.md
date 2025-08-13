@@ -15,6 +15,38 @@
 - **NEVER turn off server** - Leave running for user review
 - **Server MUST be running on port 3000 when work is complete!**
 
+## 🔧 CRITICAL: Build Error Prevention
+
+### Framer Motion Module Resolution Issue
+**Problem:** Next.js cannot find `./vendor-chunks/framer-motion.js` during builds/compilation
+**Symptoms:** "Cannot find module './vendor-chunks/framer-motion.js'" error in browser/terminal
+
+**MANDATORY FIX SEQUENCE BEFORE COMPLETING ANY WORK:**
+```bash
+# 1. Clear Next.js cache
+rm -rf .next
+
+# 2. Start new dev server (will auto-select available port)
+npm run dev
+```
+
+**Full Reset (if needed):**
+```bash
+# Only if quick fix doesn't work
+npm cache clean --force
+rm -rf node_modules package-lock.json
+npm install
+npm run dev
+```
+
+**When to Run:** Execute this sequence if you see:
+- Framer motion module errors
+- Vendor chunks missing errors  
+- Build compilation failures
+- Page loading with "missing required error components"
+
+**Integration:** ALL Claude agents must run this sequence before marking work complete to prevent user-facing build errors.
+
 ---
 
 ## 🚨 MANDATORY READS BEFORE ANY WORK

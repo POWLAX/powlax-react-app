@@ -1,0 +1,340 @@
+# User Management Suite Contract
+# Contract ID: user-management-003
+# Created: 2025-01-12
+# Priority: HIGH - Phase 3 Implementation
+# STATUS: ACTIVE
+
+## 🎯 CONTRACT OBJECTIVE
+Build a comprehensive user management suite with complete editing capabilities, enhanced magic link system with capability-aware routing, and bulk operations for efficient administration. This phase builds on the membership capability system from Phase 2.
+
+## 📋 SUCCESS CRITERIA
+
+### Mandatory Requirements
+- [ ] Complete user editor with 6-tab interface
+- [ ] All user data fields editable
+- [ ] Magic link system with capability-aware routing
+- [ ] Bulk operations for role and membership changes
+- [ ] CSV import/export functionality
+- [ ] User data sync with WordPress
+- [ ] Session management capabilities
+- [ ] Audit trail for all changes
+- [ ] Mobile-responsive interface
+
+### Quality Gates
+- Build status: PASS
+- Type errors: 0
+- Performance: Handle 500+ users
+- CSV processing: <5s for 1000 records
+- UI responsiveness: <100ms interactions
+- Data integrity: 100% maintained
+
+## 🔧 TECHNICAL SPECIFICATIONS
+
+### User Editor Tabs
+```typescript
+const userEditorTabs = [
+  {
+    id: 'profile',
+    label: 'Profile',
+    fields: ['name', 'email', 'phone', 'avatar', 'bio']
+  },
+  {
+    id: 'authentication',
+    label: 'Authentication',
+    fields: ['auth_status', 'last_login', 'sessions', 'magic_links']
+  },
+  {
+    id: 'membership',
+    label: 'Membership',
+    fields: ['products', 'entitlements', 'capabilities', 'expiration']
+  },
+  {
+    id: 'team',
+    label: 'Team & Club',
+    fields: ['teams', 'clubs', 'roles_in_team', 'position']
+  },
+  {
+    id: 'family',
+    label: 'Family',
+    fields: ['parent_relationships', 'child_accounts', 'purchases']
+  },
+  {
+    id: 'activity',
+    label: 'Activity',
+    fields: ['points', 'badges', 'progress', 'achievements']
+  }
+]
+```
+
+### Files to Create
+```
+src/components/admin/CompleteUserEditor.tsx → Main editor component
+src/components/admin/user-editor/ProfileTab.tsx → Profile editing
+src/components/admin/user-editor/AuthenticationTab.tsx → Auth management
+src/components/admin/user-editor/MembershipTab.tsx → Membership editing
+src/components/admin/user-editor/TeamTab.tsx → Team assignments
+src/components/admin/user-editor/FamilyTab.tsx → Family relationships
+src/components/admin/user-editor/ActivityTab.tsx → Activity tracking
+src/components/admin/MagicLinkPanel.tsx → Enhanced magic links
+src/components/admin/BulkOperationsPanel.tsx → Bulk operations UI
+src/hooks/useMagicLinkManagement.ts → Magic link operations
+src/hooks/useBulkUserOperations.ts → Bulk operations logic
+src/lib/csv/user-import-export.ts → CSV processing
+tests/user-management.spec.ts → Comprehensive tests
+```
+
+### Files to Modify
+```
+src/components/admin/management/UsersTabContent.tsx → Add editor modal
+src/app/(authenticated)/admin/management/page.tsx → Integrate new features
+```
+
+## 📝 IMPLEMENTATION DETAILS
+
+### Step 1: Complete User Editor
+```typescript
+interface CompleteUserEditor {
+  // Load all user data
+  userData: {
+    profile: UserProfile
+    auth: AuthenticationData
+    membership: MembershipData
+    team: TeamData
+    family: FamilyData
+    activity: ActivityData
+  }
+  
+  // Save with Permanence Pattern
+  saveChanges(): Promise<SaveResult>
+  
+  // Validate all fields
+  validateData(): ValidationResult
+  
+  // Track changes for audit
+  getChangedFields(): ChangedField[]
+}
+```
+
+### Step 2: Magic Link Enhancement
+```typescript
+interface EnhancedMagicLink {
+  // Generate capability-aware links
+  generateLink(userId: string, options: {
+    expiresIn?: number
+    redirectTo?: string
+    capabilities?: string[]
+    forceRoute?: boolean
+  }): Promise<MagicLink>
+  
+  // Route based on user capabilities
+  getOptimalRoute(capabilities: string[]): string
+  
+  // WordPress email integration
+  sendViaWordPress(link: MagicLink): Promise<EmailResult>
+  
+  // Revocation and management
+  revokeLink(linkId: string): Promise<void>
+  listActiveLinks(userId: string): Promise<MagicLink[]>
+}
+```
+
+### Step 3: Bulk Operations
+```typescript
+interface BulkOperations {
+  // Filter users for bulk actions
+  filterUsers(criteria: {
+    roles?: string[]
+    teams?: number[]
+    memberships?: string[]
+    dateRange?: DateRange
+  }): Promise<User[]>
+  
+  // Bulk role changes
+  bulkUpdateRoles(userIds: string[], operations: {
+    add?: string[]
+    remove?: string[]
+    set?: string[]
+  }): Promise<BulkResult>
+  
+  // Bulk membership assignments
+  bulkAssignMemberships(userIds: string[], products: string[]): Promise<BulkResult>
+  
+  // Progress tracking
+  trackProgress(operationId: string): ProgressUpdate
+}
+```
+
+### Step 4: CSV Import/Export
+```typescript
+interface CSVOperations {
+  // Export with all data
+  exportUsers(userIds?: string[], options: {
+    includeRoles: boolean
+    includeMemberships: boolean
+    includeTeams: boolean
+    includeActivity: boolean
+  }): Promise<CSVData>
+  
+  // Import with validation
+  importUsers(csvData: string, options: {
+    updateExisting: boolean
+    createNew: boolean
+    validateEmails: boolean
+    assignDefaultRole?: string
+  }): Promise<ImportResult>
+  
+  // Preview changes before commit
+  previewImport(csvData: string): Promise<PreviewResult>
+}
+```
+
+### Step 5: Session Management
+```typescript
+interface SessionManagement {
+  // View active sessions
+  getUserSessions(userId: string): Promise<Session[]>
+  
+  // Terminate sessions
+  terminateSession(sessionId: string): Promise<void>
+  terminateAllSessions(userId: string): Promise<void>
+  
+  // Impersonation (admin only)
+  startImpersonation(userId: string, reason: string): Promise<ImpersonationToken>
+  endImpersonation(token: string): Promise<void>
+  
+  // Session analytics
+  getSessionAnalytics(userId: string): Promise<Analytics>
+}
+```
+
+## 🔍 VALIDATION TESTS
+
+### Editor Tests
+```typescript
+describe('Complete User Editor', () => {
+  test('All tabs load with correct data')
+  test('Changes save using Permanence Pattern')
+  test('Validation prevents invalid data')
+  test('Audit trail captures all changes')
+  test('Mobile responsive layout works')
+})
+```
+
+### Magic Link Tests
+```typescript
+describe('Enhanced Magic Links', () => {
+  test('Capability-aware routing works')
+  test('Links expire correctly')
+  test('WordPress email integration sends')
+  test('Revocation removes access')
+  test('Bulk link generation succeeds')
+})
+```
+
+### Bulk Operations Tests
+```typescript
+describe('Bulk Operations', () => {
+  test('Filters work correctly')
+  test('Bulk role changes apply')
+  test('Progress tracking updates')
+  test('Handles 500+ users efficiently')
+  test('Rollback on failure works')
+})
+```
+
+### CSV Tests
+```typescript
+describe('CSV Import/Export', () => {
+  test('Export includes all selected data')
+  test('Import validates data correctly')
+  test('Preview shows accurate changes')
+  test('Handles large files (1000+ rows)')
+  test('Error reporting is comprehensive')
+})
+```
+
+## ⚠️ CRITICAL WARNINGS
+
+### Performance Considerations
+- Paginate user lists (50 per page)
+- Lazy load tab content in editor
+- Stream CSV exports for large datasets
+- Use background processing for bulk ops
+- Cache frequently accessed data
+
+### Data Integrity
+- Always use transactions for bulk operations
+- Validate parent-child relationships
+- Maintain audit trail for all changes
+- Backup before bulk imports
+- Test with production-like data volumes
+
+### Security Requirements
+- Admin-only access for all features
+- Log all impersonation attempts
+- Sanitize CSV input data
+- Rate limit magic link generation
+- Validate all user inputs
+
+## 📊 EXPECTED OUTCOME
+
+### Deliverables
+1. Complete 6-tab user editor
+2. Enhanced magic link system
+3. Bulk operations interface
+4. CSV import/export functionality
+5. Session management tools
+6. Comprehensive audit logging
+
+### State After Completion
+```yaml
+component: management-admin
+version: 3.0.0
+status: USER_MANAGEMENT_COMPLETE
+functionality:
+  userEditor: true
+  magicLinks: true
+  bulkOperations: true
+  csvImportExport: true
+  sessionManagement: true
+  auditLogging: true
+testing:
+  coverage: 85
+  performance: <2s_page_load
+  bulkCapacity: 500+_users
+```
+
+## 🚀 DEPLOYMENT INSTRUCTIONS
+
+### For Sub-Agents (Deploy 3 in parallel)
+
+**Agent 1: User Editor**
+- Focus on CompleteUserEditor and all 6 tabs
+- Integrate with existing user data
+- Use Permanence Pattern for saves
+
+**Agent 2: Magic Links & Sessions**
+- Implement enhanced magic link system
+- Add session management features
+- Include impersonation capabilities
+
+**Agent 3: Bulk Operations & CSV**
+- Build bulk operations panel
+- Implement CSV import/export
+- Add progress tracking
+
+### Testing Checklist
+- [ ] User editor saves all fields
+- [ ] Magic links route correctly
+- [ ] Bulk operations handle 500+ users
+- [ ] CSV import validates data
+- [ ] Sessions can be managed
+- [ ] Audit trail is complete
+- [ ] Mobile interface works
+
+---
+
+**Contract Status:** READY FOR DEPLOYMENT
+**Estimated Time:** 5-6 hours (parallel execution)
+**Risk Level:** Medium (data operations at scale)
+**Dependencies:** Phase 2 completion

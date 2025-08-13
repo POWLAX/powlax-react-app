@@ -1,0 +1,199 @@
+# Management Foundation Contract
+# Contract ID: management-foundation-001
+# Created: 2025-01-12
+# Priority: URGENT - Phase 1 Implementation
+# STATUS: ACTIVE
+
+## 🎯 CONTRACT OBJECTIVE
+Transform the Role Management page into a comprehensive Management admin suite with tabbed interface, rename the page, update navigation, and set up WordPress API foundation for Memberpress integration.
+
+## 📋 SUCCESS CRITERIA
+
+### Mandatory Requirements
+- [ ] Page renamed from "Role Management" to "Management" in all locations
+- [ ] Tabbed interface implemented with 8 main sections
+- [ ] Navigation updated in both desktop and mobile views
+- [ ] WordPress API endpoints created and documented
+- [ ] Basic membership capability checking foundation in place
+- [ ] All existing role management functionality preserved
+- [ ] No breaking changes to current functionality
+- [ ] Build passes without errors
+- [ ] Page loads successfully with tabs visible
+
+### Quality Gates
+- Build status: PASS
+- Lint errors: 0
+- Type errors: 0
+- Page load time: <2s
+- Mobile responsive: YES
+- Accessibility: Keyboard navigation works
+
+## 🔧 TECHNICAL SPECIFICATIONS
+
+### Files to Modify
+```
+src/app/(authenticated)/admin/role-management/page.tsx → Rename to management/page.tsx
+src/components/navigation/SidebarNavigation.tsx → Update link text and path
+src/components/navigation/BottomNavigation.tsx → Update link text and path
+```
+
+### Files to Create
+```
+src/app/api/wordpress/memberpress/route.ts → WordPress API endpoint
+src/hooks/useWordPressAPI.ts → WordPress API client hook
+src/components/admin/management/ManagementTabs.tsx → Tab navigation component
+src/lib/wordpress/memberpress-client.ts → Memberpress API client
+```
+
+### Tab Structure
+```typescript
+const managementTabs = [
+  { id: 'users', label: 'Users', icon: Users },
+  { id: 'roles', label: 'Roles & Permissions', icon: Shield },
+  { id: 'memberpress', label: 'Memberpress Sync', icon: RefreshCw },
+  { id: 'magic-links', label: 'Magic Links', icon: Link },
+  { id: 'clubs', label: 'Clubs', icon: Building },
+  { id: 'teams', label: 'Team HQ', icon: Users2 },
+  { id: 'coaching', label: 'Coaching Kit', icon: Clipboard },
+  { id: 'analytics', label: 'Analytics', icon: BarChart }
+]
+```
+
+### WordPress API Structure
+```typescript
+// Memberpress endpoints needed
+interface MemberpressAPI {
+  checkStatus(userId: string): Promise<MembershipStatus>
+  syncUser(userId: string): Promise<SyncResult>
+  bulkSync(userIds: string[]): Promise<BulkSyncResult>
+  getSubscriptions(userId: string): Promise<Subscription[]>
+  validateMembership(userId: string, productId: string): Promise<boolean>
+}
+```
+
+## 📝 IMPLEMENTATION DETAILS
+
+### Step 1: Rename and Restructure
+1. Create new directory: `/admin/management/`
+2. Move page.tsx to new location
+3. Update imports and references
+4. Preserve all existing role management code
+
+### Step 2: Implement Tab Navigation
+1. Create ManagementTabs component
+2. Use Shadcn/UI Tabs component
+3. Move existing role management to "Roles & Permissions" tab
+4. Create placeholder content for other tabs
+
+### Step 3: Update Navigation
+1. Update SidebarNavigation.tsx link
+2. Update BottomNavigation.tsx link
+3. Change icon from Shield to Settings
+4. Update any breadcrumbs or references
+
+### Step 4: WordPress API Foundation
+1. Create API route handler
+2. Implement basic authentication
+3. Create client hook
+4. Add error handling
+5. Set up CORS properly
+
+### Step 5: Basic Membership Display
+1. Add membership status to user list
+2. Show membership products in user cards
+3. Add sync status indicators
+4. Implement refresh capability
+
+## 🔍 VALIDATION TESTS
+
+### Must Pass
+```bash
+# Page loads without errors
+curl -s "http://localhost:3000/admin/management" | grep -i "Management"
+
+# Tabs render correctly
+curl -s "http://localhost:3000/admin/management" | grep -i "Users"
+
+# Build succeeds
+npm run build
+
+# Type checking passes
+npm run typecheck
+
+# No lint errors
+npm run lint
+```
+
+### User Flow Tests
+- [ ] Navigate to /admin/management
+- [ ] See tabbed interface
+- [ ] Click on Roles & Permissions tab
+- [ ] Existing role management works
+- [ ] Other tabs show placeholder content
+- [ ] Mobile navigation updated
+- [ ] Desktop sidebar updated
+
+## ⚠️ CRITICAL WARNINGS
+
+### DO NOT
+- Break existing role management functionality
+- Create database tables without data
+- Implement complex features in Phase 1
+- Add heavy dependencies
+- Make non-reversible changes
+
+### MUST DO
+- Preserve all current functionality
+- Keep changes minimal and focused
+- Test thoroughly before marking complete
+- Document any API keys needed
+- Leave clear TODOs for next phases
+
+## 📊 EXPECTED OUTCOME
+
+### Deliverables
+1. Renamed page at `/admin/management`
+2. Working tabbed interface
+3. Updated navigation in all locations
+4. WordPress API foundation ready
+5. Existing functionality preserved
+6. Clear structure for Phase 2
+
+### State After Completion
+```yaml
+component: management-admin
+version: 1.0.0
+status: FOUNDATION_COMPLETE
+functionality:
+  pageRenamed: true
+  tabbedInterface: true
+  navigationUpdated: true
+  wordPressAPIReady: true
+  existingRolesWork: true
+  membershipFoundation: true
+```
+
+## 🚀 DEPLOYMENT INSTRUCTIONS
+
+### For Sub-Agent
+1. Read this contract completely
+2. Check current page structure
+3. Make changes incrementally
+4. Test after each major change
+5. Ensure build passes
+6. Leave server running on port 3000
+
+### Quality Check
+- All tabs visible and clickable
+- Role management still works
+- Navigation links updated
+- No console errors
+- Mobile responsive
+- Build succeeds
+
+---
+
+**Contract Status:** READY FOR DEPLOYMENT
+**Estimated Time:** 2-3 hours
+**Risk Level:** Low (mostly UI changes)
+**Dependencies:** None

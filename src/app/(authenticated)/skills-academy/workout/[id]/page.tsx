@@ -1,68 +1,648 @@
 'use client'
 
 import { useParams } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useEffect, useState } from 'react'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, PlayCircle } from 'lucide-react'
+import { Progress } from '@/components/ui/progress'
+import { 
+  ArrowLeft, CheckCircle, Trophy, PlayCircle, Check, Loader2
+} from 'lucide-react'
 import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
+import PointExplosion from '@/components/skills-academy/PointExplosion'
+import { usePointTypes } from '@/hooks/usePointTypes'
+import PointCounter from '@/components/skills-academy/PointCounter'
+import WorkoutReviewModal from '@/components/skills-academy/WorkoutReviewModal'
+import CelebrationAnimation from '@/components/skills-academy/CelebrationAnimation'
+import WorkoutErrorBoundary from '@/components/skills-academy/WorkoutErrorBoundary'
+import { useWorkoutSession } from '@/hooks/useSkillsAcademyWorkouts'
 
-export default function WorkoutPage() {
+// Helper function to extract Vimeo ID from drill data
+function extractVimeoId(drill: any): string | null {
+  const videoUrl = drill?.video_url;
+  if (videoUrl) {
+    const patterns = [
+      /vimeo\.com\/(\d+)/,
+      /player\.vimeo\.com\/video\/(\d+)/,
+      /^(\d+)$/
+    ];
+    
+    for (const pattern of patterns) {
+      const match = videoUrl.match(pattern);
+      if (match) {
+        return match[1];
+      }
+    }
+  }
+  
+  if (drill?.vimeo_id) {
+    return drill.vimeo_id;
+  }
+  
+  return null;
+}
+
+// Helper function to check if this is a wall ball workout
+async function getWallBallVideoId(workout: any): Promise<string | null> {
+  if (workout?.original_json_name?.startsWith('vimeo:')) {
+    return workout.original_json_name.replace('vimeo:', '');
+  }
+  
+  if (workout?.series?.series_type === 'wall_ball') {
+    try {
+      const { data: drillSegments } = await supabase
+        .from('wall_ball_drill_library')
+        .select('vimeo_id, video_url')
+        .eq('workout_name', workout.workout_name)
+        .limit(1)
+        .single();
+      
+      if (drillSegments?.vimeo_id) {
+        return drillSegments.vimeo_id;
+      }
+      
+      if (drillSegments?.video_url) {
+        const match = drillSegments.video_url.match(/vimeo\.com\/(\d+)/);
+        if (match) return match[1];
+      }
+    } catch (error) {
+      console.error('Error fetching wall ball drill:', error);
+    }
+  }
+  
+  return null;
+}
+
+function WorkoutPageContent() {
   const params = useParams()
   const workoutId = params?.id ? parseInt(params.id as string) : 1
+  const { user, loading: authLoading } = useAuth()
+  
+  // Get workout data
+  const { session, loading, error } = useWorkoutSession(workoutId)
+  const workout = session?.workout
+  const drills = session?.drills || []
+  
+  // Get point types for display
+  const { pointTypes } = usePointTypes()
+  
+  // State management
+  const [userId, setUserId] = useState<string | null>(null)
+  const [isWallBallWorkout, setIsWallBallWorkout] = useState(false)
+  const [wallBallVimeoId, setWallBallVimeoId] = useState<string | null>(null)
+  const [seriesInfo, setSeriesInfo] = useState<any>(null)
+  const [localCurrentDrillIndex, setLocalCurrentDrillIndex] = useState(0)
+  const [completedDrills, setCompletedDrills] = useState<Set<number>>(new Set())
+  const [isCompleted, setIsCompleted] = useState(false)
+  const [drillTimer, setDrillTimer] = useState(0)
+  const [showCelebration, setShowCelebration] = useState(false)
+  const [showReviewModal, setShowReviewModal] = useState(false)
+  
+  // Points tracking with real-time updates
+  const [userPoints, setUserPoints] = useState<any>({
+    lax_credit: 0,
+    attack_token: 0,
+    defense_dollar: 0,
+    midfield_medal: 0,
+    lax_iq_point: 0
+  })
+  const [localTotalPoints, setLocalTotalPoints] = useState(0)
+  
+  // Point explosion animation state
+  const [showPointExplosion, setShowPointExplosion] = useState(false)
+  const [explosionOrigin, setExplosionOrigin] = useState<HTMLElement | null>(null)
+  const [explosionPoints, setExplosionPoints] = useState<Record<string, number>>({})  
+  
+  // Timer enforcement state
+  const [drillStartTime, setDrillStartTime] = useState<number | null>(null)
+  const [drillTimeElapsed, setDrillTimeElapsed] = useState(0)
+  const [drillTimes, setDrillTimes] = useState<Record<number, any>>({})  
+  
+  // Set user ID
+  useEffect(() => {
+    setUserId(user?.id || null)
+  }, [user])
+  
+  // Check for wall ball workout
+  useEffect(() => {
+    const checkWallBall = async () => {
+      if (session?.workout) {
+        const vimeoId = await getWallBallVideoId(session.workout)
+        if (vimeoId) {
+          setIsWallBallWorkout(true)
+          setWallBallVimeoId(vimeoId)
+        }
+      }
+    }
+    checkWallBall()
+  }, [session?.workout])
+  
+  // Fetch series info
+  useEffect(() => {
+    const fetchSeriesInfo = async () => {
+      if (session?.workout?.series_id) {
+        const { data } = await supabase
+          .from('skills_academy_series')
+          .select('*')
+          .eq('id', session.workout.series_id)
+          .single()
+        setSeriesInfo(data)
+      }
+    }
+    fetchSeriesInfo()
+  }, [session?.workout?.series_id])
+  
+  // Fetch user points
+  useEffect(() => {
+    const fetchUserPoints = async () => {
+      if (!userId) return;
+      
+      const { data, error } = await supabase
+        .rpc('get_user_points', { p_user_id: userId });
+      
+      if (!error && data) {
+        setUserPoints(data);
+      }
+    };
+    
+    fetchUserPoints();
+  }, [userId]);
+  
+  // Workout timer
+  useEffect(() => {
+    if (!isCompleted) {
+      const interval = setInterval(() => {
+        setDrillTimer(prev => prev + 1)
+      }, 1000)
+      return () => clearInterval(interval)
+    }
+  }, [isCompleted])
+  
+  // Drill timer enforcement
+  useEffect(() => {
+    if (drillStartTime && !completedDrills.has(localCurrentDrillIndex) && !isCompleted) {
+      const interval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - drillStartTime) / 1000)
+        setDrillTimeElapsed(elapsed)
+      }, 1000)
+      return () => clearInterval(interval)
+    }
+  }, [drillStartTime, localCurrentDrillIndex, completedDrills, isCompleted])
+  
+  // Start timer when drill changes
+  useEffect(() => {
+    if (!isCompleted && !completedDrills.has(localCurrentDrillIndex)) {
+      const startTime = Date.now()
+      setDrillStartTime(startTime)
+      setDrillTimeElapsed(0)
+      
+      const currentDrill = session?.drills?.[localCurrentDrillIndex]
+      if (currentDrill) {
+        const drillName = isWallBallWorkout 
+          ? (session?.workout?.workout_name || 'Wall Ball Workout')
+          : (currentDrill?.drill?.title || currentDrill?.title || `Drill ${localCurrentDrillIndex + 1}`)
+        
+        let requiredSeconds: number
+        if (isWallBallWorkout) {
+          requiredSeconds = (session?.workout?.estimated_duration_minutes || 10) * 60
+        } else {
+          const durationMinutes = currentDrill?.drill?.duration_minutes || currentDrill?.duration_minutes || 3
+          requiredSeconds = Math.max((durationMinutes - 1), 1) * 60
+        }
+        
+        setDrillTimes(prev => ({
+          ...prev,
+          [localCurrentDrillIndex]: {
+            drill_name: drillName,
+            started_at: startTime,
+            actual_seconds: 0,
+            required_seconds: requiredSeconds
+          }
+        }))
+      }
+    }
+  }, [localCurrentDrillIndex, isCompleted, completedDrills, isWallBallWorkout, session])
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
-        <div className="flex items-center gap-3">
-          <Link href="/skills-academy/workouts" className="p-2 hover:bg-gray-100 rounded-lg">
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <div>
-            <h1 className="text-lg font-semibold">Skills Academy Workout</h1>
-            <p className="text-sm text-gray-600">Workout #{workoutId}</p>
-          </div>
+  // Handle drill completion with real-time updates
+  const handleMarkComplete = async () => {
+    if (!session?.drills) return
+    
+    const currentDrill = drills[localCurrentDrillIndex]
+    const drillId = currentDrill?.drill?.id || currentDrill?.id
+    
+    // Mark as completed
+    const newCompleted = new Set(completedDrills)
+    newCompleted.add(localCurrentDrillIndex)
+    setCompletedDrills(newCompleted)
+    
+    // IMMEDIATE state update for real-time point counter (Patrick's requirement)
+    const drillPointValues = currentDrill?.drill?.point_values || currentDrill?.point_values || {
+      lax_credit: 10
+    }
+    
+    // Update points immediately in UI
+    setUserPoints((prevPoints: any) => ({
+      ...prevPoints,
+      lax_credit: (prevPoints.lax_credit || 0) + (drillPointValues.lax_credit || 10),
+      attack_token: (prevPoints.attack_token || 0) + (drillPointValues.attack_token || 0),
+      defense_dollar: (prevPoints.defense_dollar || 0) + (drillPointValues.defense_dollar || 0),
+      midfield_medal: (prevPoints.midfield_medal || 0) + (drillPointValues.midfield_medal || 0),
+      lax_iq_point: (prevPoints.lax_iq_point || 0) + (drillPointValues.lax_iq_point || 0)
+    }))
+    
+    setLocalTotalPoints(prev => prev + (drillPointValues.lax_credit || 10))
+    
+    // Trigger point explosion animation with REAL values
+    const didItButton = document.querySelector('[data-did-it-button]') as HTMLElement
+    if (didItButton) {
+      setExplosionOrigin(didItButton)
+      setExplosionPoints(drillPointValues)
+      setShowPointExplosion(true)
+      
+      setTimeout(() => {
+        setShowPointExplosion(false)
+      }, 2500)
+    }
+    
+    // Save progress to database (background)
+    if (userId) {
+      try {
+        await supabase.rpc('award_drill_points', {
+          p_user_id: userId,
+          p_drill_id: drillId,
+          p_points: drillPointValues
+        })
+      } catch (error) {
+        console.error('Error saving points:', error)
+      }
+    }
+    
+    // Check if last drill
+    const isLastDrill = localCurrentDrillIndex === drills.length - 1
+    if (isLastDrill) {
+      setIsCompleted(true)
+      setTimeout(() => setShowCelebration(true), 500)
+    } else {
+      setTimeout(() => {
+        setLocalCurrentDrillIndex(prev => prev + 1)
+      }, 1000)
+    }
+  }
+  
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+  
+  // Loading state
+  if (loading || authLoading) {
+    return (
+      <div className="h-full min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="animate-spin h-16 w-16 text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading workout...</p>
         </div>
       </div>
-
-      {/* Main Content */}
-      <div className="p-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <PlayCircle className="w-6 h-6 text-blue-600" />
-              Workout Loading...
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600 mb-4">Setting up your workout experience...</p>
-              <p className="text-sm text-gray-500">
-                We're working on fixing the Skills Academy workout page. 
-                Please check back soon for the enhanced experience with point tracking, 
-                real-time updates, and vibrant animations!
-              </p>
+    )
+  }
+  
+  // Error state
+  if (error || !workout) {
+    return (
+      <div className="h-full min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Workout Not Found</h2>
+          <p className="text-gray-600 mb-8">This workout could not be loaded.</p>
+          <Button asChild>
+            <Link href="/skills-academy/workouts">Back to Workouts</Link>
+          </Button>
+        </div>
+      </div>
+    )
+  }
+  
+  // No drills state
+  if (drills.length === 0 && !isWallBallWorkout) {
+    return (
+      <div className="h-full min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">No Drills Available</h2>
+          <p className="text-gray-600 mb-8">This workout doesn&apos;t have any drills yet.</p>
+          <Button asChild>
+            <Link href="/skills-academy/workouts">Back to Workouts</Link>
+          </Button>
+        </div>
+      </div>
+    )
+  }
+  
+  // Completion screen
+  if (isCompleted && showCelebration) {
+    return (
+      <>
+        {showCelebration && (
+          <CelebrationAnimation 
+            points={localTotalPoints}
+            isVisible={showCelebration}
+            onAnimationEnd={() => setShowCelebration(false)}
+          />
+        )}
+        <div className="h-full min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50">
+          <div className="text-center max-w-md mx-auto p-8">
+            <Trophy className="w-24 h-24 text-yellow-500 mx-auto mb-6 animate-bounce" />
+            <h1 className="text-4xl font-bold mb-4">Workout Complete!</h1>
+            <div className="space-y-4 mb-8">
+              <Card className="bg-white/90">
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold text-blue-600">{localTotalPoints}</div>
+                  <div className="text-sm text-gray-600">Points Earned</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-white/90">
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold text-green-600">{drills.length}</div>
+                  <div className="text-sm text-gray-600">Drills Completed</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-white/90">
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold text-blue-600">{formatTime(drillTimer)}</div>
+                  <div className="text-sm text-gray-600">Total Time</div>
+                </CardContent>
+              </Card>
             </div>
-            
-            <div className="border-t pt-4">
-              <h3 className="font-medium mb-2">Quick Access:</h3>
-              <div className="space-y-2">
-                <Link href="/skills-academy/workouts">
-                  <Button variant="outline" className="w-full justify-start">
-                    ← Back to Workout Browser
-                  </Button>
-                </Link>
-                <Link href="/dashboard">
-                  <Button variant="outline" className="w-full justify-start">
-                    ← Back to Dashboard
-                  </Button>
-                </Link>
+            <div className="flex gap-4">
+              <Button 
+                onClick={() => setShowReviewModal(true)}
+                variant="outline" 
+                className="flex-1"
+              >
+                Review Workout
+              </Button>
+              <Button asChild className="flex-1">
+                <Link href="/skills-academy/workouts">More Workouts</Link>
+              </Button>
+            </div>
+            <Button asChild variant="ghost" className="w-full mt-2">
+              <Link href="/dashboard">Back to Dashboard</Link>
+            </Button>
+          </div>
+        </div>
+        
+        <WorkoutReviewModal
+          isOpen={showReviewModal}
+          onClose={() => setShowReviewModal(false)}
+          workout={workout}
+          drills={drills}
+          drillTimes={drillTimes}
+          totalPoints={localTotalPoints}
+          totalTime={drillTimer}
+          completedDrills={completedDrills}
+          isWallBallWorkout={isWallBallWorkout}
+        />
+      </>
+    )
+  }
+  
+  const currentDrill = drills[localCurrentDrillIndex]
+  const progress = drills.length > 0 ? (completedDrills.size / drills.length) * 100 : 0
+  
+  // Calculate timer enforcement
+  let requiredSeconds: number
+  if (isWallBallWorkout) {
+    requiredSeconds = (workout?.estimated_duration_minutes || 10) * 60
+  } else {
+    const durationMinutes = currentDrill?.drill?.duration_minutes || currentDrill?.duration_minutes || 3
+    requiredSeconds = Math.max((durationMinutes - 1), 1) * 60
+  }
+  const timeRemaining = Math.max(0, requiredSeconds - drillTimeElapsed)
+  const canMarkComplete = drillTimeElapsed >= requiredSeconds
+  const isAlreadyCompleted = completedDrills.has(localCurrentDrillIndex)
+
+  return (
+    <WorkoutErrorBoundary>
+      <PointExplosion
+        isVisible={showPointExplosion}
+        originElement={explosionOrigin}
+        points={explosionPoints}
+        pointTypes={pointTypes.map((pt: any) => ({
+          name: pt.name || pt.slug,
+          display_name: pt.display_name || pt.title,
+          icon_url: pt.icon_url || pt.image_url
+        }))}
+        onAnimationComplete={() => setShowPointExplosion(false)}
+        duration={2000}
+      />
+      
+      {/* 5-ZONE CONTAINER ARCHITECTURE */}
+      <div className="h-full flex flex-col bg-gray-50 overflow-hidden">
+        
+        {/* ZONE 1: HEADER */}
+        <header className="bg-white border-b border-gray-200 flex-shrink-0 px-4 py-3">
+          <div className="flex items-center justify-between">
+            <Link href="/skills-academy/workouts" className="p-1">
+              <ArrowLeft className="w-5 h-5 text-gray-600" />
+            </Link>
+            <div className="text-center flex-1 px-2">
+              <h1 className="text-base md:text-lg font-bold text-blue-600 truncate">
+                {seriesInfo?.series_name && workout?.workout_size 
+                  ? `${seriesInfo.series_name.replace(/^SS\d+\s*-?\s*/, '').trim()} - ${workout.workout_size.charAt(0).toUpperCase() + workout.workout_size.slice(1)}` 
+                  : workout?.workout_name || 'Loading...'}
+              </h1>
+            </div>
+            <div className="text-right">
+              <div className="text-xs font-semibold text-blue-600">
+                Credits: {userPoints.lax_credit || 0}
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </header>
+        
+        {/* ZONE 2: POINT COUNTER with horizontal layout and 48x48px images */}
+        <section className="bg-white/95 backdrop-blur-sm border-b flex-shrink-0" data-point-counter>
+          <PointCounter 
+            points={userPoints}
+            seriesType={workout?.series?.series_type || seriesInfo?.series_type}
+            animate={true}
+          />
+        </section>
+        
+        {/* ZONE 3: DRILL TIMELINE (horizontal scroll, non-clickable) */}
+        {!isWallBallWorkout && (
+          <nav className="bg-white border-b flex-shrink-0 px-3 py-2">
+            <div className="overflow-x-auto scrollbar-hide">
+              <div className="flex space-x-2">
+                {drills.map((drill: any, index: number) => (
+                  <div
+                    key={index}
+                    className={`relative flex-shrink-0 px-3 py-2 rounded-lg border-2 pointer-events-none ${
+                      completedDrills.has(index) 
+                        ? 'border-green-500 bg-green-50' 
+                        : index === localCurrentDrillIndex 
+                        ? 'border-blue-600 bg-blue-50' 
+                        : 'border-gray-300 bg-white'
+                    }`}
+                    style={{ minWidth: '180px' }}
+                    role="img"
+                    aria-label={`Drill ${index + 1} reference - ${drill?.drill?.title || drill?.title}`}
+                  >
+                    {completedDrills.has(index) && (
+                      <div className="absolute -top-1 -right-1">
+                        <div className="bg-green-500 text-white rounded-full p-0.5">
+                          <Check className="w-3 h-3" />
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center space-x-2">
+                      <span className={`text-xs font-semibold ${
+                        completedDrills.has(index) 
+                          ? 'text-green-700' 
+                          : index === localCurrentDrillIndex 
+                          ? 'text-blue-600' 
+                          : 'text-gray-500'
+                      }`}>
+                        Drill {index + 1}
+                      </span>
+                      <span className="text-xs text-gray-400">-</span>
+                      <span className={`text-xs truncate ${
+                        completedDrills.has(index) 
+                          ? 'text-green-700' 
+                          : index === localCurrentDrillIndex 
+                          ? 'text-blue-600' 
+                          : 'text-gray-700'
+                      }`}>
+                        {drill?.drill?.title || drill?.title || `Exercise ${index + 1}`}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </nav>
+        )}
+        
+        {/* PROGRESS BAR - Moved below drill timeline */}
+        <div className="bg-white border-b flex-shrink-0 px-4 py-2">
+          <div className="relative">
+            <Progress value={progress} className="h-3 bg-gray-100" />
+            <div className="absolute inset-0 flex items-center justify-end pr-2">
+              <span className="text-xs text-white font-semibold backdrop-blur-sm bg-black/20 px-1 rounded">
+                {Math.round(progress)}% • {formatTime(drillTimer)} • {completedDrills.size}/{drills.length}
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        {/* ZONE 4: VIDEO PLAYER - Maximized to fill available space */}
+        <main className="flex-1 bg-black flex flex-col overflow-hidden">
+          {/* Video Container - fills all available space */}
+          <div className="flex-1 relative">
+            {(() => {
+              if (isWallBallWorkout && wallBallVimeoId) {
+                return (
+                  <iframe
+                    src={`https://player.vimeo.com/video/${wallBallVimeoId}?badge=0&autopause=0&player_id=0&app_id=58479`}
+                    className="absolute inset-0 w-full h-full"
+                    frameBorder="0"
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowFullScreen
+                    title={workout?.workout_name || 'Wall Ball Workout'}
+                  />
+                )
+              }
+              
+              const drill = currentDrill?.drill
+              const vimeoId = extractVimeoId(drill)
+              
+              if (vimeoId) {
+                return (
+                  <iframe
+                    src={`https://player.vimeo.com/video/${vimeoId}?badge=0&autopause=0&player_id=0&app_id=58479`}
+                    className="absolute inset-0 w-full h-full"
+                    frameBorder="0"
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowFullScreen
+                    title={drill?.title || 'Drill Video'}
+                  />
+                )
+              } else {
+                return (
+                  <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
+                    <div className="text-center">
+                      <PlayCircle className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                      <p className="text-gray-400">Video coming soon</p>
+                      <p className="text-sm text-gray-500 mt-2">{drill?.title}</p>
+                    </div>
+                  </div>
+                )
+              }
+            })()}
+          </div>
+          
+          {/* FOOTER SPACER: Matches exact footer height to prevent overlap */}
+          <div className="flex-shrink-0 h-[calc(env(safe-area-inset-bottom)+80px)] md:h-32"></div>
+        </main>
+        
+        {/* ZONE 5: FOOTER with 80px mobile padding and ONLY sets_and_reps pill */}
+        <footer className="fixed bottom-0 left-0 right-0 md:left-64 bg-gray-800 text-white px-4 py-2 md:py-4 flex-shrink-0 z-10
+                         pb-[calc(env(safe-area-inset-bottom)+80px)] md:pb-4">
+          {/* Drill Name */}
+          <div className="mb-1 md:mb-1.5">
+            <h2 className="text-lg font-bold text-center">
+              {isWallBallWorkout 
+                ? (workout?.workout_name || 'Wall Ball Workout')
+                : (currentDrill?.drill?.title || currentDrill?.title || `Drill ${localCurrentDrillIndex + 1}`)}
+            </h2>
+          </div>
+          
+          {/* ONLY sets_and_reps pill (Patrick's requirement) */}
+          <div className="flex justify-center mb-1 md:mb-2">
+            {(currentDrill?.drill?.sets_and_reps || currentDrill?.sets_and_reps) && (
+              <div className="bg-white/90 px-4 py-2 rounded-full">
+                <span className="font-bold text-gray-800 text-sm">
+                  {currentDrill?.drill?.sets_and_reps || currentDrill?.sets_and_reps}
+                </span>
+              </div>
+            )}
+          </div>
+          
+          {/* Always-visible Did It button with timer enforcement */}
+          <Button 
+            data-did-it-button
+            onClick={isWallBallWorkout ? () => {
+              setIsCompleted(true)
+              setTimeout(() => setShowCelebration(true), 500)
+            } : handleMarkComplete}
+            className={`w-full h-12 text-base font-bold ${
+              canMarkComplete || isAlreadyCompleted
+                ? 'bg-blue-600 hover:bg-blue-700' 
+                : 'bg-gray-400 cursor-not-allowed'
+            }`}
+            disabled={!canMarkComplete && !isAlreadyCompleted}
+          >
+            {isAlreadyCompleted ? (
+              <>
+                <CheckCircle className="w-5 h-5 mr-2" />
+                <span>Completed</span>
+              </>
+            ) : canMarkComplete ? (
+              <span>Did It!</span>
+            ) : (
+              <span>
+                Wait {Math.ceil(timeRemaining / 60)}m {timeRemaining % 60}s
+              </span>
+            )}
+          </Button>
+        </footer>
       </div>
-    </div>
+    </WorkoutErrorBoundary>
   )
+}
+
+export default function WorkoutPage() {
+  return <WorkoutPageContent />
 }

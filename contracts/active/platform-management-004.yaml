@@ -1,0 +1,338 @@
+# Platform Management Contract
+# Contract ID: platform-management-004
+# Created: 2025-01-12
+# Priority: HIGH - Phase 4 Implementation
+# STATUS: ACTIVE
+
+## 🎯 CONTRACT OBJECTIVE
+Build comprehensive platform management interfaces for Clubs, Team HQ, and Coaching Kit administration with membership tier enforcement, feature toggles, and bulk operations. This phase completes the Management suite with full platform administration capabilities.
+
+## 📋 SUCCESS CRITERIA
+
+### Mandatory Requirements
+- [ ] Clubs management with Club OS tier enforcement
+- [ ] Team HQ management with team tier capabilities
+- [ ] Coaching Kit content management interface
+- [ ] Feature toggles based on membership tiers
+- [ ] Bulk operations for platform-wide changes
+- [ ] Analytics dashboard for platform usage
+- [ ] Settings management for each tier level
+- [ ] Integration with existing membership capability system
+
+### Quality Gates
+- Build status: PASS
+- Type errors: 0
+- Performance: <2s page loads
+- Mobile responsive: 100%
+- Feature toggle response: <100ms
+- Analytics refresh: <3s
+
+## 🔧 TECHNICAL SPECIFICATIONS
+
+### Platform Management Tabs
+```typescript
+const platformTabs = [
+  {
+    id: 'clubs',
+    label: 'Clubs Management',
+    tiers: ['club_os_foundation', 'club_os_growth', 'club_os_command'],
+    features: ['settings', 'teams', 'billing', 'analytics']
+  },
+  {
+    id: 'team-hq',
+    label: 'Team HQ',
+    tiers: ['team_hq_structure', 'team_hq_leadership', 'team_hq_activated'],
+    features: ['roster', 'scheduling', 'playbook', 'analytics']
+  },
+  {
+    id: 'coaching-kit',
+    label: 'Coaching Kit',
+    tiers: ['coach_essentials_kit', 'coach_confidence_kit'],
+    features: ['content', 'resources', 'training', 'custom']
+  }
+]
+```
+
+### Files to Create
+```
+src/components/admin/platform/ClubsManagementTab.tsx → Club administration
+src/components/admin/platform/TeamHQManagementTab.tsx → Team management
+src/components/admin/platform/CoachingKitManagementTab.tsx → Coaching content
+src/components/admin/platform/PlatformAnalyticsDashboard.tsx → Usage analytics
+src/hooks/useClubsManagement.ts → Club operations
+src/hooks/useTeamHQManagement.ts → Team operations
+src/hooks/useCoachingKitManagement.ts → Coaching content ops
+src/hooks/usePlatformAnalytics.ts → Analytics data
+src/lib/platform/tier-enforcement.ts → Tier-based feature control
+src/lib/platform/feature-toggles.ts → Feature management system
+tests/platform-management.spec.ts → Comprehensive tests
+```
+
+### Files to Modify
+```
+src/components/admin/management/ManagementTabs.tsx → Activate platform tabs
+src/app/(authenticated)/admin/management/page.tsx → Platform integration
+```
+
+## 📝 IMPLEMENTATION DETAILS
+
+### Step 1: Clubs Management
+```typescript
+interface ClubsManagement {
+  // Club OS tier features
+  tiers: {
+    foundation: ['basic_settings', 'team_overview', 'billing_view']
+    growth: ['advanced_settings', 'team_management', 'analytics', 'bulk_ops']
+    command: ['full_admin', 'custom_features', 'api_access', 'white_label']
+  }
+  
+  // Club operations
+  operations: {
+    updateSettings(clubId: number, settings: ClubSettings): Promise<void>
+    manageTeams(clubId: number): Promise<Team[]>
+    viewAnalytics(clubId: number): Promise<Analytics>
+    bulkOperations(clubId: number, action: BulkAction): Promise<BulkResult>
+  }
+  
+  // Feature enforcement
+  enforceFeatures(club: Club, requestedFeature: string): boolean
+}
+```
+
+### Step 2: Team HQ Management
+```typescript
+interface TeamHQManagement {
+  // Team tier capabilities
+  tiers: {
+    structure: ['roster_management', 'basic_scheduling']
+    leadership: ['playbook_access', 'advanced_scheduling', 'parent_communication']
+    activated: ['full_analytics', 'custom_playbooks', 'advanced_features']
+  }
+  
+  // Team operations
+  operations: {
+    manageRoster(teamId: number): Promise<TeamMember[]>
+    scheduleManagement(teamId: number): Promise<Schedule[]>
+    playbookAccess(teamId: number): Promise<Playbook[]>
+    teamAnalytics(teamId: number): Promise<TeamAnalytics>
+  }
+  
+  // Academy access for team members
+  academyAccess: {
+    checkPlayerLimit(teamId: number): Promise<PlayerLimitResult>
+    assignAcademyAccess(playerId: string): Promise<void>
+    removeAcademyAccess(playerId: string): Promise<void>
+  }
+}
+```
+
+### Step 3: Coaching Kit Management
+```typescript
+interface CoachingKitManagement {
+  // Coach tier features
+  tiers: {
+    essentials_kit: ['practice_planner', 'basic_resources']
+    confidence_kit: ['custom_content', 'advanced_training', 'personal_coaching']
+  }
+  
+  // Content management
+  content: {
+    manageResources(coachId: string): Promise<Resource[]>
+    approveContent(contentId: string): Promise<void>
+    createCustomContent(coach: Coach, content: Content): Promise<void>
+    analyzeUsage(coachId: string): Promise<UsageAnalytics>
+  }
+  
+  // Training features
+  training: {
+    accessTrainingModules(coachId: string): Promise<Module[]>
+    trackProgress(coachId: string): Promise<Progress>
+    certificateManagement(coachId: string): Promise<Certificate[]>
+  }
+}
+```
+
+### Step 4: Platform Analytics
+```typescript
+interface PlatformAnalytics {
+  // Usage metrics
+  metrics: {
+    clubsActive: number
+    teamsActive: number
+    coachesActive: number
+    playersActive: number
+    monthlyGrowth: GrowthData
+    tierDistribution: TierData
+  }
+  
+  // Feature usage
+  featureUsage: {
+    practicesPlannerUsage: UsageStats
+    skillsAcademyUsage: UsageStats
+    teamManagementUsage: UsageStats
+    membershipConversions: ConversionData
+  }
+  
+  // Revenue analytics
+  revenue: {
+    monthlyRecurringRevenue: number
+    tierRevenue: TierRevenueData
+    churnRate: number
+    upgradeDowngradeMetrics: UpgradeData
+  }
+}
+```
+
+### Step 5: Feature Toggle System
+```typescript
+interface FeatureToggleSystem {
+  // Tier-based features
+  checkFeatureAccess(userId: string, feature: string): Promise<boolean>
+  
+  // Feature definitions
+  features: {
+    'advanced_analytics': ['club_os_growth', 'club_os_command']
+    'custom_playbooks': ['team_hq_activated']
+    'api_access': ['club_os_command']
+    'white_label': ['club_os_command']
+    'personal_coaching': ['coach_confidence_kit']
+  }
+  
+  // Dynamic feature management
+  enableFeature(feature: string, tiers: string[]): Promise<void>
+  disableFeature(feature: string): Promise<void>
+  getFeatureMatrix(): Promise<FeatureMatrix>
+}
+```
+
+## 🔍 VALIDATION TESTS
+
+### Clubs Management Tests
+```typescript
+describe('Clubs Management', () => {
+  test('Club OS Foundation tier shows basic features only')
+  test('Club OS Growth tier enables team management')
+  test('Club OS Command tier provides full admin access')
+  test('Feature toggles work correctly per tier')
+  test('Bulk operations handle multiple teams')
+})
+```
+
+### Team HQ Tests
+```typescript
+describe('Team HQ Management', () => {
+  test('Team Structure tier provides roster management')
+  test('Team Leadership tier enables playbook access')
+  test('Team Activated tier provides full analytics')
+  test('25-player academy limit enforced correctly')
+  test('Team operations respect tier limitations')
+})
+```
+
+### Coaching Kit Tests
+```typescript
+describe('Coaching Kit Management', () => {
+  test('Essentials kit provides basic resources')
+  test('Confidence kit enables custom content')
+  test('Content approval workflow functions')
+  test('Training module access based on tier')
+  test('Usage analytics track coach engagement')
+})
+```
+
+### Platform Analytics Tests
+```typescript
+describe('Platform Analytics', () => {
+  test('Usage metrics calculate correctly')
+  test('Revenue analytics include all tiers')
+  test('Growth data tracks monthly changes')
+  test('Feature usage statistics accurate')
+  test('Dashboard loads within performance limits')
+})
+```
+
+## ⚠️ CRITICAL WARNINGS
+
+### Performance Considerations
+- Cache analytics data (refresh every 5 minutes)
+- Paginate large team/club lists
+- Use background processing for bulk operations
+- Optimize database queries for analytics
+- Implement lazy loading for heavy components
+
+### Security Requirements
+- Admin-only access for all platform management
+- Validate tier permissions before operations
+- Log all administrative actions
+- Secure API endpoints for analytics
+- Rate limit bulk operations
+
+### Data Integrity
+- Maintain referential integrity in bulk operations
+- Validate tier changes before applying
+- Backup before major platform changes
+- Test feature toggles in staging environment
+- Monitor for cascade effects of tier changes
+
+## 📊 EXPECTED OUTCOME
+
+### Deliverables
+1. Complete clubs management interface
+2. Team HQ administration tools
+3. Coaching Kit content management
+4. Platform analytics dashboard
+5. Feature toggle system
+6. Bulk platform operations
+
+### State After Completion
+```yaml
+component: management-admin
+version: 4.0.0
+status: PLATFORM_MANAGEMENT_COMPLETE
+functionality:
+  clubsManagement: true
+  teamHQManagement: true
+  coachingKitManagement: true
+  platformAnalytics: true
+  featureToggles: true
+  bulkPlatformOps: true
+testing:
+  coverage: 85
+  performance: <2s_load
+  analytics: <3s_refresh
+```
+
+## 🚀 DEPLOYMENT INSTRUCTIONS
+
+### For Sub-Agents (Deploy 3 in parallel)
+
+**Agent 1: Clubs & Team HQ Management**
+- Focus on ClubsManagementTab and TeamHQManagementTab
+- Implement tier enforcement logic
+- Add bulk operations for platform management
+
+**Agent 2: Coaching Kit & Analytics**
+- Build CoachingKitManagementTab
+- Implement PlatformAnalyticsDashboard
+- Add content management features
+
+**Agent 3: Feature Toggles & Integration**
+- Create feature toggle system
+- Integrate all tabs into management interface
+- Add platform-wide settings
+
+### Testing Checklist
+- [ ] Club tiers enforce correct features
+- [ ] Team HQ respects tier limitations
+- [ ] Coaching Kit content management works
+- [ ] Analytics dashboard loads correctly
+- [ ] Feature toggles respond quickly
+- [ ] Bulk operations complete successfully
+- [ ] Mobile interface functional
+
+---
+
+**Contract Status:** READY FOR DEPLOYMENT
+**Estimated Time:** 4-5 hours (parallel execution)
+**Risk Level:** Medium (complex platform operations)
+**Dependencies:** Phase 3 completion, membership system

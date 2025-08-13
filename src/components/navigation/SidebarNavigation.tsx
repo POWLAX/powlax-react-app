@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Users, GraduationCap, BookOpen, LogOut, User, ChevronLeft, ChevronRight, Shield, UserCog, Database, Edit3, Eye, Calendar } from 'lucide-react'
+import { Home, Users, GraduationCap, BookOpen, LogOut, User, ChevronLeft, ChevronRight, Shield, UserCog, Database, Edit3, Eye, Calendar, Settings } from 'lucide-react'
 import { useAuth } from '@/contexts/SupabaseAuthContext'
 import { useRoleViewer } from '@/contexts/RoleViewerContext'
 import { useViewAsAuth } from '@/hooks/useViewAsAuth'
@@ -44,9 +44,9 @@ const navItems = [
 // Admin navigation items - only shown to administrators
 const adminItems = [
   {
-    name: 'Role Management',
-    href: '/admin/role-management',
-    icon: UserCog,
+    name: 'Management',
+    href: '/admin/management',
+    icon: Settings,
   },
   {
     name: 'Drill Editor',

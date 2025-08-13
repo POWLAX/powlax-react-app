@@ -1,0 +1,295 @@
+# Membership Capability System Contract
+# Contract ID: membership-capability-002
+# Created: 2025-01-12
+# Priority: HIGH - Phase 2 Implementation
+# STATUS: ACTIVE
+
+## 🎯 CONTRACT OBJECTIVE
+Implement the comprehensive membership capability system with product hierarchy, entitlement checking, Memberpress sync integration, and parent purchase management. This phase builds on the foundation created in Phase 1.
+
+## 📋 SUCCESS CRITERIA
+
+### Mandatory Requirements
+- [ ] Membership capability checking system implemented
+- [ ] Product hierarchy properly mapped (Individual → Team → Club)
+- [ ] Memberpress status sync functional
+- [ ] Parent-child purchase management working
+- [ ] Team 25-player limit enforced
+- [ ] Capability inheritance logic correct
+- [ ] UI displays membership status in user cards
+- [ ] Sync dashboard shows real-time status
+- [ ] All existing functionality preserved
+
+### Quality Gates
+- Build status: PASS
+- Type errors: 0
+- Tests pass: 100%
+- Capability calculations: Accurate
+- Sync reliability: >95%
+- Performance: <2s response time
+
+## 🔧 TECHNICAL SPECIFICATIONS
+
+### Membership Product Hierarchy
+```typescript
+// Individual Products
+const individualProducts = {
+  'skills_academy_monthly': { capabilities: ['full_academy', 'drills', 'workouts'] },
+  'skills_academy_annual': { capabilities: ['full_academy', 'drills', 'workouts'] },
+  'skills_academy_basic': { capabilities: ['basic_academy', 'limited_drills'] },
+  'coach_essentials_kit': { capabilities: ['practice_planner', 'resources'], excludes: ['academy'] },
+  'coach_confidence_kit': { capabilities: ['practice_planner', 'custom_content', 'training'], excludes: ['academy'] },
+  'create_account': { capabilities: ['platform_access'] }
+}
+
+// Team Products (includes first 25 players)
+const teamProducts = {
+  'team_hq_structure': {
+    coach: ['coach_essentials_kit'],
+    players: ['skills_academy_basic'], // First 25
+    capabilities: ['team_management', 'roster']
+  },
+  'team_hq_leadership': {
+    coach: ['coach_confidence_kit'],
+    players: ['skills_academy_basic'], // First 25
+    capabilities: ['team_management', 'playbook', 'roster']
+  },
+  'team_hq_activated': {
+    coach: ['coach_confidence_kit'],
+    players: ['skills_academy_monthly'], // First 25
+    capabilities: ['team_management', 'playbook', 'roster', 'analytics']
+  }
+}
+
+// Club Products (cascade to all teams)
+const clubProducts = {
+  'club_os_foundation': { teamTier: 'team_hq_structure' },
+  'club_os_growth': { teamTier: 'team_hq_leadership' },
+  'club_os_command': { teamTier: 'team_hq_activated' }
+}
+```
+
+### Files to Create
+```
+src/hooks/useMembershipCapabilities.ts → Core capability checking
+src/lib/membership/capability-engine.ts → Capability calculation logic
+src/lib/membership/product-hierarchy.ts → Product definitions
+src/components/admin/MemberpressStatusPanel.tsx → Sync UI component
+src/components/admin/MembershipCapabilityDisplay.tsx → Capability viewer
+src/hooks/useMemberpressSync.ts → Sync operations hook
+src/lib/membership/parent-purchase-manager.ts → Parent-child logic
+tests/membership-capabilities.spec.ts → Comprehensive tests
+```
+
+### Files to Modify
+```
+src/app/(authenticated)/admin/management/page.tsx → Add capability display
+src/components/admin/management/ManagementTabs.tsx → Activate Memberpress tab
+src/lib/wordpress/memberpress-client.ts → Implement real API calls
+```
+
+## 📝 IMPLEMENTATION DETAILS
+
+### Step 1: Capability Engine
+```typescript
+// Core capability checking
+class CapabilityEngine {
+  // Check if user has specific capability
+  hasCapability(userId: string, capability: string): boolean
+  
+  // Get all capabilities for user
+  getUserCapabilities(userId: string): string[]
+  
+  // Check team player limits
+  checkTeamPlayerLimit(teamId: number): {
+    limit: number,
+    used: number,
+    available: number
+  }
+  
+  // Calculate inherited capabilities
+  calculateInheritance(user: User): Capabilities
+}
+```
+
+### Step 2: Product Hierarchy
+```typescript
+interface ProductHierarchy {
+  // Individual → Team → Club inheritance
+  getEffectiveProduct(userId: string): Product
+  
+  // Parent purchase management
+  getParentPurchases(childId: string): Purchase[]
+  
+  // Team membership benefits
+  getTeamBenefits(teamId: number): Benefits
+  
+  // Club cascade benefits
+  getClubCascade(clubId: number): CascadeResult
+}
+```
+
+### Step 3: Memberpress Integration
+```typescript
+interface MemberpressSync {
+  // Real-time status check
+  checkCurrentStatus(userId: string): Promise<MembershipStatus>
+  
+  // Sync with WordPress
+  syncFromWordPress(userId: string): Promise<SyncResult>
+  
+  // Bulk operations
+  bulkSyncUsers(userIds: string[]): Promise<BulkResult>
+  
+  // Webhook handler
+  handleWebhook(event: WebhookEvent): Promise<void>
+}
+```
+
+### Step 4: UI Components
+```typescript
+// Membership display in user cards
+<MembershipCapabilityDisplay
+  userId={user.id}
+  showProducts={true}
+  showCapabilities={true}
+  showExpiration={true}
+/>
+
+// Sync status panel
+<MemberpressStatusPanel
+  onSync={handleSync}
+  lastSyncTime={lastSync}
+  syncStatus={status}
+  conflicts={conflicts}
+/>
+```
+
+### Step 5: Parent Purchase Flow
+```typescript
+// Parent purchasing for children
+interface ParentPurchaseManager {
+  // Validate parent-child relationship
+  validateRelationship(parentId: string, childId: string): boolean
+  
+  // Process parent purchase
+  processPurchase(purchase: ParentPurchase): Promise<Result>
+  
+  // Apply to child account
+  applyToChild(childId: string, product: Product): Promise<void>
+  
+  // Track purchase history
+  trackPurchaseHistory(purchase: Purchase): Promise<void>
+}
+```
+
+## 🔍 VALIDATION TESTS
+
+### Capability Tests
+```typescript
+describe('Membership Capabilities', () => {
+  test('Individual products grant correct capabilities')
+  test('Team products include first 25 players')
+  test('Club products cascade to all teams')
+  test('Parent purchases apply to children')
+  test('Capability inheritance works correctly')
+  test('Exclusions are properly enforced')
+})
+```
+
+### Sync Tests
+```typescript
+describe('Memberpress Sync', () => {
+  test('Status checks return accurate data')
+  test('Sync updates local database')
+  test('Conflicts are detected and reported')
+  test('Bulk sync handles large datasets')
+  test('Webhooks process correctly')
+})
+```
+
+### UI Tests
+```typescript
+describe('UI Components', () => {
+  test('Membership status displays in user cards')
+  test('Sync panel shows real-time status')
+  test('Capability viewer shows all entitlements')
+  test('Parent purchase UI works correctly')
+})
+```
+
+## ⚠️ CRITICAL WARNINGS
+
+### Database Considerations
+- Use existing `membership_products` table (12 records)
+- Use existing `membership_entitlements` table (7 records)
+- Do NOT create new tables without data
+- Reference `users` table, not `user_profiles`
+
+### Performance Requirements
+- Capability checks must be <50ms
+- Sync operations should batch efficiently
+- Cache calculations where possible
+- Minimize WordPress API calls
+
+### Security Requirements
+- Validate all parent-child relationships
+- Verify membership ownership
+- Sanitize all WordPress data
+- Log all capability changes
+
+## 📊 EXPECTED OUTCOME
+
+### Deliverables
+1. Working capability engine with inheritance
+2. Memberpress sync with real-time status
+3. Parent purchase management system
+4. UI components showing membership data
+5. Comprehensive test coverage
+6. Documentation of capability rules
+
+### State After Completion
+```yaml
+component: management-admin
+version: 2.0.0
+status: MEMBERSHIP_SYSTEM_COMPLETE
+functionality:
+  capabilityEngine: true
+  productHierarchy: true
+  memberpressSync: true
+  parentPurchases: true
+  teamLimits: true
+  clubCascading: true
+  uiIntegration: true
+testing:
+  coverage: 80
+  passing: 100
+  performance: <2s
+```
+
+## 🚀 DEPLOYMENT INSTRUCTIONS
+
+### For Sub-Agent
+1. Read Phase 1 implementation first
+2. Study existing membership tables
+3. Implement capability engine core
+4. Add Memberpress integration
+5. Create UI components
+6. Test all scenarios thoroughly
+7. Ensure backwards compatibility
+
+### Testing Checklist
+- [ ] Individual memberships work
+- [ ] Team benefits apply correctly
+- [ ] Club cascading functions
+- [ ] Parent purchases process
+- [ ] 25-player limit enforced
+- [ ] Sync with WordPress works
+- [ ] UI displays accurately
+
+---
+
+**Contract Status:** READY FOR DEPLOYMENT
+**Estimated Time:** 4-5 hours
+**Risk Level:** Medium (external API integration)
+**Dependencies:** Phase 1 completion, WordPress API access

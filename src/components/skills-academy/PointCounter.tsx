@@ -31,8 +31,11 @@ export default function PointCounter({
   const { pointTypes, loading } = usePointTypes()
   const [displayPoints, setDisplayPoints] = useState<PointDisplay[]>([])
   const [animatingPoints, setAnimatingPoints] = useState<Set<string>>(new Set())
+  const [hoveredPoint, setHoveredPoint] = useState<string | null>(null)
+  const [touchedPoint, setTouchedPoint] = useState<string | null>(null)
+  const [touchPosition, setTouchPosition] = useState<{ x: number, y: number } | null>(null)
 
-  // Get relevant point types and eliminate duplicates (fix for Patrick's duplicate Academy Points issue)
+  // Get relevant point types and eliminate duplicates
   const getRelevantPointTypes = (series?: string) => {
     if (!pointTypes.length) return []
 
@@ -45,7 +48,7 @@ export default function PointCounter({
       return true
     })
 
-    // Map series types to relevant point types - using exact names that match database
+    // Map series types to relevant point types
     const seriesPointMap: Record<string, string[]> = {
       'attack': ['lax_credit', 'attack_token', 'lax_iq_point'],
       'defense': ['lax_credit', 'defense_dollar', 'rebound_reward'], 
@@ -61,15 +64,14 @@ export default function PointCounter({
         type.name === relevant ||
         type.slug === relevant
       )
-    ).slice(0, 5) // Allow up to 5 point types for 2-column layout
+    )
   }
 
-  // Update display points when points or point types change (PERMANENCE PATTERN: Direct column reads)
+  // Update display points when points or point types change
   useEffect(() => {
     const relevantTypes = getRelevantPointTypes(seriesType)
     
     const newDisplayPoints: PointDisplay[] = relevantTypes.map(type => {
-      // PERMANENCE PATTERN: Direct column reads - use display_name and icon_url directly
       const pointValue = 
         points[type.name] || 
         points[type.slug] || 
@@ -78,21 +80,21 @@ export default function PointCounter({
       return {
         type: type.name,
         value: pointValue,
-        icon: type.icon_url || '', // Direct from database column
-        displayName: type.display_name || type.name // Direct from database column
+        icon: type.icon_url || type.image_url || '',
+        displayName: type.display_name || type.title || type.name
       }
     })
 
-    // If no specific types found, show lax credits at minimum (but only one Academy Point type)
+    // If no specific types found, show lax credits at minimum
     if (newDisplayPoints.length === 0) {
       const laxCreditType = pointTypes.find(t => t.name === 'lax_credit')
       
       if (laxCreditType) {
         newDisplayPoints.push({
           type: 'lax_credit',
-          value: points.lax_credit || points.academy_points || points.academy_point || 0,
-          icon: laxCreditType.icon_url || '',
-          displayName: laxCreditType.display_name || 'Lax Credits'
+          value: points.lax_credit || points.academy_points || 0,
+          icon: laxCreditType.icon_url || laxCreditType.image_url || '',
+          displayName: laxCreditType.display_name || laxCreditType.title || 'Lax Credits'
         })
       }
     }
@@ -100,7 +102,7 @@ export default function PointCounter({
     setDisplayPoints(newDisplayPoints)
   }, [points, pointTypes, seriesType])
 
-  // Animate point changes - REAL-TIME updates for Patrick's requirements
+  // Animate point changes
   useEffect(() => {
     if (!animate) return
 
@@ -108,17 +110,28 @@ export default function PointCounter({
       if (point.value > 0) {
         setAnimatingPoints(prev => new Set([...prev, point.type]))
         
-        // Remove animation after duration
         setTimeout(() => {
           setAnimatingPoints(prev => {
             const newSet = new Set(prev)
             newSet.delete(point.type)
             return newSet
           })
-        }, 800) // Slightly longer for more vibrant effect
+        }, 800)
       }
     })
   }, [displayPoints, animate])
+
+  // Handle touch events for mobile
+  const handleTouchStart = (pointType: string, event: React.TouchEvent) => {
+    const touch = event.touches[0]
+    setTouchedPoint(pointType)
+    setTouchPosition({ x: touch.clientX, y: touch.clientY })
+  }
+
+  const handleTouchEnd = () => {
+    setTouchedPoint(null)
+    setTouchPosition(null)
+  }
 
   if (loading) {
     return (
@@ -130,169 +143,116 @@ export default function PointCounter({
     )
   }
 
-  // Show default points if no specific points are displayed
+  // Show default if no points
   if (displayPoints.length === 0) {
     return (
-      <div className={`grid grid-cols-3 gap-2 py-3 px-4 bg-white/95 backdrop-blur-sm border-b border-gray-200 ${className}`}>
-        <div className="flex items-center justify-center">
-          <div className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-50">
-            <div className="relative w-12 h-12 flex-shrink-0">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-blue-600 font-bold text-sm">LC</span>
-              </div>
+      <div className={`py-3 px-4 bg-white/95 backdrop-blur-sm border-b border-gray-200 ${className}`}>
+        <div className="flex items-center justify-center gap-6">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <span className="text-blue-600 font-bold text-xs">LC</span>
             </div>
-            <div className="flex flex-col">
-              <span className="text-lg font-bold text-gray-800">0</span>
-              <span className="text-xs text-gray-600">Lax Credits</span>
-            </div>
+            <span className="text-xl font-bold text-gray-800">0</span>
           </div>
         </div>
       </div>
     )
   }
 
-  // Patrick's 2-column layout: Column 1: 2 points, Column 2: 2 points, Column 3: 1 point (if odd)
-  // Layout: IMAGE (bigger - 48x48px) - Name - Number
-  const column1Points = displayPoints.slice(0, 2)
-  const column2Points = displayPoints.slice(2, 4)
-  const column3Points = displayPoints.slice(4, 5) // Only 1 point if odd number
-
   return (
-    <div className={`grid grid-cols-3 gap-2 py-3 px-4 bg-white/95 backdrop-blur-sm border-b border-gray-200 ${className}`}>
-      {/* Column 1: First 2 point types */}
-      <div className="flex flex-col space-y-2">
-        {column1Points.map((point) => (
-          <div 
-            key={point.type}
-            className={`flex items-center space-x-2 px-2 py-2 rounded-lg bg-gray-50 transition-all duration-300 ${
-              animatingPoints.has(point.type) 
-                ? 'scale-105 bg-blue-100 shadow-md' 
-                : 'scale-100'
-            }`}
-          >
-            {/* Point Type Icon - BIGGER (48x48px) */}
-            {point.icon && (
-              <div className="relative w-12 h-12 flex-shrink-0">
-                <Image
-                  src={point.icon}
-                  alt={point.displayName}
-                  fill
-                  className="object-contain"
-                  sizes="48px"
-                  onError={(e) => {
-                    // Hide broken images gracefully
-                    e.currentTarget.style.display = 'none'
-                  }}
-                />
-              </div>
-            )}
-            
-            {/* Point Value and Name */}
-            <div className="flex flex-col min-w-0">
-              <div className={`text-base font-bold transition-all duration-300 ${
+    <>
+      {/* Horizontal bar layout */}
+      <div 
+        className={`relative py-3 px-4 bg-white/95 backdrop-blur-sm border-b border-gray-200 ${className}`}
+        onMouseEnter={() => !touchedPoint && setHoveredPoint('header')}
+        onMouseLeave={() => setHoveredPoint(null)}
+      >
+        {/* Header tooltip on hover */}
+        {hoveredPoint === 'header' && !touchedPoint && (
+          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full mb-2 px-3 py-1 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap z-50">
+            Points earned during this workout!
+            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
+              <div className="border-4 border-transparent border-t-gray-900"></div>
+            </div>
+          </div>
+        )}
+
+        <div className="flex items-center justify-center gap-4 md:gap-6">
+          {displayPoints.map((point) => (
+            <div 
+              key={point.type}
+              className={`relative flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 transition-all duration-300 ${
+                animatingPoints.has(point.type) 
+                  ? 'scale-110 bg-blue-100 shadow-lg' 
+                  : 'scale-100 hover:bg-gray-100'
+              }`}
+              onMouseEnter={() => !touchedPoint && setHoveredPoint(point.type)}
+              onMouseLeave={() => setHoveredPoint(null)}
+              onTouchStart={(e) => handleTouchStart(point.type, e)}
+              onTouchEnd={handleTouchEnd}
+            >
+              {/* Tooltip for point name */}
+              {(hoveredPoint === point.type || touchedPoint === point.type) && (
+                <div 
+                  className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap z-50"
+                  style={touchPosition ? {
+                    position: 'fixed',
+                    left: touchPosition.x,
+                    top: touchPosition.y - 40,
+                    transform: 'translateX(-50%)'
+                  } : undefined}
+                >
+                  {point.displayName}
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2">
+                    <div className="border-4 border-transparent border-b-gray-900"></div>
+                  </div>
+                </div>
+              )}
+
+              {/* Point Type Icon */}
+              {point.icon ? (
+                <div className="relative w-10 h-10 flex-shrink-0">
+                  <Image
+                    src={point.icon}
+                    alt={point.displayName}
+                    fill
+                    className="object-contain"
+                    sizes="40px"
+                    onError={(e) => {
+                      // Fallback to initials if image fails
+                      const parent = e.currentTarget.parentElement
+                      if (parent) {
+                        parent.innerHTML = `
+                          <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span class="text-blue-600 font-bold text-xs">
+                              ${point.displayName.split(' ').map(w => w[0]).join('').slice(0, 2)}
+                            </span>
+                          </div>
+                        `
+                      }
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span className="text-blue-600 font-bold text-xs">
+                    {point.displayName.split(' ').map(w => w[0]).join('').slice(0, 2)}
+                  </span>
+                </div>
+              )}
+              
+              {/* Point Value (no name) */}
+              <div className={`text-xl font-bold transition-all duration-300 ${
                 animatingPoints.has(point.type) 
                   ? 'text-blue-600 transform scale-110' 
                   : 'text-gray-800'
               }`}>
                 {point.value.toLocaleString()}
               </div>
-              <div className="text-xs text-gray-600 truncate">
-                {point.displayName}
-              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-      
-      {/* Column 2: Next 2 point types */}
-      <div className="flex flex-col space-y-2">
-        {column2Points.map((point) => (
-          <div 
-            key={point.type}
-            className={`flex items-center space-x-2 px-2 py-2 rounded-lg bg-gray-50 transition-all duration-300 ${
-              animatingPoints.has(point.type) 
-                ? 'scale-105 bg-blue-100 shadow-md' 
-                : 'scale-100'
-            }`}
-          >
-            {/* Point Type Icon - BIGGER (48x48px) */}
-            {point.icon && (
-              <div className="relative w-12 h-12 flex-shrink-0">
-                <Image
-                  src={point.icon}
-                  alt={point.displayName}
-                  fill
-                  className="object-contain"
-                  sizes="48px"
-                  onError={(e) => {
-                    // Hide broken images gracefully
-                    e.currentTarget.style.display = 'none'
-                  }}
-                />
-              </div>
-            )}
-            
-            {/* Point Value and Name */}
-            <div className="flex flex-col min-w-0">
-              <div className={`text-base font-bold transition-all duration-300 ${
-                animatingPoints.has(point.type) 
-                  ? 'text-blue-600 transform scale-110' 
-                  : 'text-gray-800'
-              }`}>
-                {point.value.toLocaleString()}
-              </div>
-              <div className="text-xs text-gray-600 truncate">
-                {point.displayName}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-      
-      {/* Column 3: Last point type (if odd number) */}
-      <div className="flex flex-col justify-center">
-        {column3Points.map((point) => (
-          <div 
-            key={point.type}
-            className={`flex items-center space-x-2 px-2 py-2 rounded-lg bg-gray-50 transition-all duration-300 ${
-              animatingPoints.has(point.type) 
-                ? 'scale-105 bg-blue-100 shadow-md' 
-                : 'scale-100'
-            }`}
-          >
-            {/* Point Type Icon - BIGGER (48x48px) */}
-            {point.icon && (
-              <div className="relative w-12 h-12 flex-shrink-0">
-                <Image
-                  src={point.icon}
-                  alt={point.displayName}
-                  fill
-                  className="object-contain"
-                  sizes="48px"
-                  onError={(e) => {
-                    // Hide broken images gracefully
-                    e.currentTarget.style.display = 'none'
-                  }}
-                />
-              </div>
-            )}
-            
-            {/* Point Value and Name */}
-            <div className="flex flex-col min-w-0">
-              <div className={`text-base font-bold transition-all duration-300 ${
-                animatingPoints.has(point.type) 
-                  ? 'text-blue-600 transform scale-110' 
-                  : 'text-gray-800'
-              }`}>
-                {point.value.toLocaleString()}
-              </div>
-              <div className="text-xs text-gray-600 truncate">
-                {point.displayName}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+    </>
   )
 }
