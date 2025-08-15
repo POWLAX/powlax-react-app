@@ -25,7 +25,7 @@ export default function BottomNavigation() {
   // Special collapsible behavior for Practice Planner and Skills Academy Workout pages
   if (pathname?.includes('/practiceplan') || pathname?.includes('/skills-academy/workout/')) {
     return (
-      <div className="fixed bottom-0 left-0 right-0 md:hidden z-50">
+      <div className="fixed bottom-0 left-0 right-0 md:hidden z-[60]">
         {/* Navigation items - shown when expanded */}
         {isExpanded && (
           <nav className="bg-white border-t border-gray-200">
@@ -57,7 +57,10 @@ export default function BottomNavigation() {
                       // Ensure proper touch target size for mobile
                       minHeight: '48px',
                       minWidth: '48px',
-                      WebkitTapHighlightColor: 'transparent'
+                      WebkitTapHighlightColor: 'transparent',
+                      touchAction: 'manipulation',
+                      userSelect: 'none',
+                      WebkitUserSelect: 'none'
                     }}
                   >
                     <Icon className="h-6 w-6 mb-1" />
@@ -93,7 +96,7 @@ export default function BottomNavigation() {
 
   // Regular navigation for other pages
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden z-40">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden z-[60]">
       <div className="flex justify-around">
         {navItems.map((item) => {
           const isActive = pathname.startsWith(item.href)
@@ -115,7 +118,10 @@ export default function BottomNavigation() {
                 // Ensure proper touch target size for mobile
                 minHeight: '48px',
                 minWidth: '48px',
-                WebkitTapHighlightColor: 'transparent'
+                WebkitTapHighlightColor: 'transparent',
+                touchAction: 'manipulation',
+                userSelect: 'none',
+                WebkitUserSelect: 'none'
               }}
             >
               <Icon className="h-6 w-6 mb-1" />
