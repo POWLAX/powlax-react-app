@@ -5,10 +5,26 @@ export async function middleware(req: NextRequest) {
   // NO AUTHENTICATION - ALL ROUTES ACCESSIBLE
   // Simple routing middleware only
   
-  // HANDLE ROOT PATH - Redirect to dashboard
-  if (req.nextUrl.pathname === '/') {
+  const pathname = req.nextUrl.pathname
+  const hostname = req.headers.get('host') || ''
+  
+  // Avoid redirect loops - don't redirect if already on target path
+  if (pathname === '/teams/no-team/practiceplan') {
+    return NextResponse.next()
+  }
+  
+  // HANDLE DOMAIN-BASED REDIRECTS
+  // Redirect app.powlax.com root to practice planner (only if not already there)
+  if (hostname.includes('app.powlax.com') && pathname === '/') {
     const redirectUrl = req.nextUrl.clone()
-    redirectUrl.pathname = '/dashboard'
+    redirectUrl.pathname = '/teams/no-team/practiceplan'
+    return NextResponse.redirect(redirectUrl)
+  }
+  
+  // HANDLE ROOT PATH - Redirect to practice planner for localhost too
+  if (pathname === '/') {
+    const redirectUrl = req.nextUrl.clone()
+    redirectUrl.pathname = '/teams/no-team/practiceplan'
     return NextResponse.redirect(redirectUrl)
   }
   
