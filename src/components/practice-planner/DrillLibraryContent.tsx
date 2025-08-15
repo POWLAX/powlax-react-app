@@ -80,8 +80,7 @@ export default function DrillLibraryContent({
   const [selectedGamePhases, setSelectedGamePhases] = useState<string[]>([])
   const [selectedDrillTypes, setSelectedDrillTypes] = useState<string[]>([])
   
-  // Mobile drill selection state
-  const [selectedDrillsForMobile, setSelectedDrillsForMobile] = useState<string[]>([])
+  // Mobile drill selection removed - now uses immediate add/remove
 
   // Get unique drill categories from drills (Concept Drills, Skill Development, Admin, Live Play)
   const drillCategories = useMemo(() => {
@@ -183,25 +182,24 @@ export default function DrillLibraryContent({
     setShowEditDrillModal(true)
   }
 
-  const handleMobileToggleDrill = (drillId: string, e: React.MouseEvent) => {
-    e.stopPropagation()
-    if (selectedDrillsForMobile.includes(drillId)) {
-      setSelectedDrillsForMobile(selectedDrillsForMobile.filter(id => id !== drillId))
+  const handleMobileToggleDrill = (drillId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const drill = supabaseDrills.find(d => d.id === drillId)
+    if (!drill) return
+
+    const isChecked = e.target.checked
+    
+    if (isChecked) {
+      // Add drill immediately
+      onAddDrill(drill)
     } else {
-      setSelectedDrillsForMobile([...selectedDrillsForMobile, drillId])
+      // Remove drill if onRemoveDrill function is provided
+      if (onRemoveDrill) {
+        onRemoveDrill(drillId)
+      }
     }
   }
 
-  const handleAddSelectedDrills = () => {
-    selectedDrillsForMobile.forEach(drillId => {
-      const drill = supabaseDrills.find(d => d.id === drillId)
-      if (drill) {
-        onAddDrill(drill)
-      }
-    })
-    setSelectedDrillsForMobile([])
-    toast.success(`Added ${selectedDrillsForMobile.length} drill(s) to practice plan`)
-  }
+  // Batch operations removed - mobile now uses immediate add/remove
 
   const handleFilterApply = (filters: any) => {
     setSelectedGamePhases(filters.gamePhases || [])
@@ -218,10 +216,8 @@ export default function DrillLibraryContent({
   const renderDrillCard = (drill: Drill) => (
     <div
       key={drill.id}
-      className={`bg-white border rounded-lg p-3 hover:shadow-sm transition-shadow cursor-pointer ${
-        selectedDrillsForMobile.includes(drill.id) ? 'ring-2 ring-blue-500 bg-blue-50' : ''
-      }`}
-      onClick={() => isMobile ? handleMobileToggleDrill(drill.id, {} as React.MouseEvent) : onAddDrill(drill)}
+      className="bg-white border rounded-lg p-3 hover:shadow-sm transition-shadow cursor-pointer"
+      onClick={() => !isMobile ? onAddDrill(drill) : undefined}
     >
       <div className="flex items-start justify-between mb-2">
         <div className="flex-1 min-w-0">
@@ -237,7 +233,6 @@ export default function DrillLibraryContent({
         {isMobile && (
           <input
             type="checkbox"
-            checked={selectedDrillsForMobile.includes(drill.id)}
             onChange={(e) => handleMobileToggleDrill(drill.id, e)}
             className="ml-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
           />
@@ -368,26 +363,7 @@ export default function DrillLibraryContent({
       
       {/* Drills List */}
       <div className="flex-1 overflow-y-auto relative">
-        {/* Mobile: Show selected drills accordion */}
-        {isMobile && selectedDrillsForMobile.length > 0 && (
-          <div className="mx-4 mt-4 mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="font-medium text-sm">Drills to Add ({selectedDrillsForMobile.length})</h4>
-              <button
-                onClick={handleAddSelectedDrills}
-                className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-              >
-                Add to Plan
-              </button>
-            </div>
-            <button
-              onClick={() => setSelectedDrillsForMobile([])}
-              className="text-xs text-blue-600 hover:text-blue-700"
-            >
-              Clear Selection
-            </button>
-          </div>
-        )}
+        {/* Mobile accordion removed - now uses immediate add/remove */}
         
         {/* Drill Categories */}
         <div className="px-4 pt-4 pb-4 space-y-2">
