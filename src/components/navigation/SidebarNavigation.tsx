@@ -2,42 +2,27 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Users, GraduationCap, BookOpen, LogOut, User, ChevronLeft, ChevronRight, Shield, UserCog, Database, Edit3, Eye, Calendar, Settings } from 'lucide-react'
+import { GraduationCap, LogOut, User, ChevronLeft, ChevronRight, Shield, UserCog, Database, Edit3, Eye, Calendar, Settings } from 'lucide-react'
 import { useAuth } from '@/contexts/SupabaseAuthContext'
 import { useRoleViewer } from '@/contexts/RoleViewerContext'
 import { useViewAsAuth } from '@/hooks/useViewAsAuth'
 import { useSidebar } from '@/contexts/SidebarContext'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import SearchTrigger from '@/components/search/SearchTrigger'
+
 import ThemeToggle from '@/components/theme/ThemeToggle'
 import Image from 'next/image'
 
 const navItems = [
   {
-    name: 'Dashboard',
-    href: '/dashboard',
-    icon: Home,
-  },
-  {
-    name: 'Teams',
-    href: '/teams',
-    icon: Users,
-  },
-  {
-    name: 'Practice Planner',
-    href: '/practiceplan',
+    name: 'Practice Plan',
+    href: '/teams/no-team/practiceplan',
     icon: Calendar,
   },
   {
     name: 'Academy',
     href: '/skills-academy/workouts',
     icon: GraduationCap,
-  },
-  {
-    name: 'Resources',
-    href: '/resources',
-    icon: BookOpen,
   },
 ]
 
@@ -132,17 +117,6 @@ export default function SidebarNavigation() {
                 )}
               </div>
             </div>
-            
-            {/* Search Bar - Hidden when collapsed */}
-            {!isCollapsed && (
-              <div className="px-4 mt-4 transition-opacity duration-300">
-                <SearchTrigger 
-                  variant="input" 
-                  placeholder="Search drills, strategies..." 
-                  className="w-full search-trigger"
-                />
-              </div>
-            )}
             
             <nav className="mt-5 flex-1 px-2 space-y-1 overflow-hidden">
               {navItems.map((item) => {

@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useMemo, Fragment } from 'react'
-import { Filter, Plus, Video, Image, Beaker, ChevronDown, ChevronRight, Search, Play, BookOpen, Pencil, Star } from 'lucide-react'
+import { Filter, Plus, Video, Image, Beaker, ChevronDown, ChevronRight, Search, Play, BookOpen, Pencil, Star, Save } from 'lucide-react'
 import { useStrategies, getStrategiesByActualCategory, getStrategiesBySource, searchStrategies } from '@/hooks/useStrategies'
 import { useAuth } from '@/contexts/SupabaseAuthContext'
 import { useFavorites } from '@/hooks/useFavorites'
+import { useLocalStorageContext } from '@/contexts/LocalStorageContext'
 import { toast } from 'sonner'
 import VideoModal from './modals/VideoModal'
 import LacrosseLabModal from './modals/LacrosseLabModal'
@@ -54,8 +55,9 @@ export default function StrategiesTab({
   const { strategies, loading, error, refreshStrategies } = useStrategies()
   const { user } = useAuth()
   const { toggleFavorite, isFavorite, getFavoriteStrategies } = useFavorites()
+  const { saveStrategy, savedStrategies } = useLocalStorageContext()
   const [searchTerm, setSearchTerm] = useState('')
-  const [expandedCategories, setExpandedCategories] = useState<string[]>(['Favorite Strategies', 'Face Off', 'Face Offs'])
+  const [expandedCategories, setExpandedCategories] = useState<string[]>(['Favorites', 'Face Off', 'Face Offs'])
   const [showEditModal, setShowEditModal] = useState(false)
   const [showFilterModal, setShowFilterModal] = useState(false)
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
@@ -92,7 +94,32 @@ export default function StrategiesTab({
 
   // Separate strategies by source
   const powlaxStrategies = useMemo(() => getStrategiesBySource(strategies, 'powlax'), [strategies])
-  const userStrategies = useMemo(() => getStrategiesBySource(strategies, 'user').filter(s => s.user_id === user?.id), [strategies, user?.id])
+  const userStrategies = useMemo(() => {
+    // Get database user strategies
+    const dbUserStrategies = getStrategiesBySource(strategies, 'user').filter(s => s.user_id === user?.id)
+    
+    // Convert locally saved strategies to match expected format
+    const localUserStrategies = savedStrategies.map((savedStrategy: any) => ({
+      id: savedStrategy.id || Date.now(),
+      strategy_name: savedStrategy.strategy_name || savedStrategy.title || 'Untitled Strategy',
+      description: savedStrategy.description || savedStrategy.content || '',
+      lesson_category: savedStrategy.lesson_category || savedStrategy.game_phase || '',
+      strategy_categories: savedStrategy.strategy_categories || savedStrategy.game_phase || '',
+      vimeo_link: savedStrategy.vimeo_link || savedStrategy.video_url || null,
+      lacrosse_lab_links: savedStrategy.lacrosse_lab_links || [],
+      target_audience: savedStrategy.target_audience || '',
+      see_it_ages: savedStrategy.see_it_ages || '',
+      coach_it_ages: savedStrategy.coach_it_ages || '',
+      own_it_ages: savedStrategy.own_it_ages || '',
+      source: 'local' as const,
+      user_id: user?.id || 'local-user',
+      isLocal: true,
+      created_at: savedStrategy.createdAt || savedStrategy.savedAt || new Date().toISOString(),
+      updated_at: savedStrategy.createdAt || savedStrategy.savedAt || new Date().toISOString()
+    }))
+    
+    return [...dbUserStrategies, ...localUserStrategies]
+  }, [strategies, user?.id, savedStrategies])
   
   // Get favorite strategies from both powlax and user strategies
   const favoriteStrategies = useMemo(() => {
@@ -142,6 +169,24 @@ export default function StrategiesTab({
         toast.success(`Added "${strategy.strategy_name}" to practice`)
       }
     }
+  }
+
+  const handleSaveStrategy = (strategy: Strategy) => {
+    saveStrategy({ ...strategy, originalId: strategy.id })
+    toast.success(`"${strategy.strategy_name}" saved locally!`)
+  }
+
+  const isStrategySaved = (strategyId: number | string) => {
+    // Check if it's already a local strategy
+    if (typeof strategyId === 'string' && strategyId.toString().includes('local')) {
+      return true
+    }
+    // Check if it's in saved strategies
+    return savedStrategies.some((savedStrategy: any) => 
+      savedStrategy.id === strategyId || 
+      savedStrategy.originalId === strategyId ||
+      savedStrategy.id?.toString() === strategyId?.toString()
+    )
   }
 
   const openVideoModal = (strategy: Strategy, e: React.MouseEvent) => {
@@ -252,14 +297,7 @@ export default function StrategiesTab({
             )}
           </button>
           
-          {/* Add Custom Strategy Button - RESTORED */}
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md"
-          >
-            <Plus className="h-4 w-4" />
-            Add Custom Strategy
-          </button>
+
         </div>
 
         {/* Search */}
@@ -281,24 +319,24 @@ export default function StrategiesTab({
           {/* Favorites Section */}
           <div className="border rounded-lg mb-4">
             <button
-              onClick={() => toggleCategory('Favorite Strategies')}
+              onClick={() => toggleCategory('Favorites')}
               className={`w-full px-4 py-3 flex items-center justify-between bg-yellow-50 hover:bg-yellow-100 rounded-t-lg transition-all ${
-                expandedCategories.includes('Favorite Strategies') ? 'sticky top-0 -mx-4 px-8 z-20 shadow-md border-b bg-white' : ''
+                expandedCategories.includes('Favorites') ? 'sticky top-0 -mx-4 px-8 z-20 shadow-md border-b bg-white' : ''
               }`}
             >
               <div className="flex items-center gap-2">
-                {expandedCategories.includes('Favorite Strategies') ? (
+                {expandedCategories.includes('Favorites') ? (
                   <ChevronDown className="h-4 w-4" />
                 ) : (
                   <ChevronRight className="h-4 w-4" />
                 )}
                 <Star className="h-4 w-4 text-yellow-600" />
-                <span className="font-medium text-yellow-800">Favorite Strategies</span>
+                <span className="font-medium text-yellow-800">Favorites</span>
                 <span className="text-sm text-yellow-600">({favoriteStrategies.length})</span>
               </div>
             </button>
             
-            {expandedCategories.includes('Favorite Strategies') && (
+            {expandedCategories.includes('Favorites') && (
               <div className="p-2 space-y-2">
                 {favoriteStrategies.length === 0 ? (
                   <p className="px-3 py-2 text-sm text-gray-500">No favorite strategies yet</p>
@@ -322,18 +360,44 @@ export default function StrategiesTab({
                               className="flex-shrink-0"
                             />
                           ) : (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleStrategySelect(strategy)
-                              }}
-                              className="p-1 border border-gray-300 hover:bg-gray-50 rounded flex-shrink-0"
-                              title="Add to Practice"
-                            >
-                              <Plus className="h-4 w-4 text-gray-600" />
-                            </button>
+                            <div className="flex gap-1">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleStrategySelect(strategy)
+                                }}
+                                className="p-1 border border-gray-300 hover:bg-gray-50 rounded flex-shrink-0"
+                                title="Add to Practice"
+                              >
+                                <Plus className="h-4 w-4 text-gray-600" />
+                              </button>
+                              {!strategy.isLocal && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleSaveStrategy(strategy)
+                                  }}
+                                  className={`p-1 border rounded flex-shrink-0 ${
+                                    isStrategySaved(strategy.id) 
+                                      ? 'border-green-300 bg-green-50 text-green-600' 
+                                      : 'border-gray-300 hover:bg-gray-50 text-gray-600'
+                                  }`}
+                                  title={isStrategySaved(strategy.id) ? "Already saved locally" : "Save locally"}
+                                  disabled={isStrategySaved(strategy.id)}
+                                >
+                                  <Save className="h-4 w-4" />
+                                </button>
+                              )}
+                            </div>
                           )}
-                          <h4 className="font-medium text-sm flex-1">{strategy.strategy_name}</h4>
+                          <h4 className="font-medium text-sm flex-1">
+                            {strategy.strategy_name}
+                            {strategy.isLocal && (
+                              <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                Local
+                              </span>
+                            )}
+                          </h4>
                           
                           {/* Favorite button (filled since it's in favorites) */}
                           <button
@@ -435,18 +499,44 @@ export default function StrategiesTab({
                               className="flex-shrink-0"
                             />
                           ) : (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleStrategySelect(strategy)
-                              }}
-                              className="p-1 border border-gray-300 hover:bg-gray-50 rounded flex-shrink-0"
-                              title="Add to Practice"
-                            >
-                              <Plus className="h-4 w-4 text-gray-600" />
-                            </button>
+                            <div className="flex gap-1">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleStrategySelect(strategy)
+                                }}
+                                className="p-1 border border-gray-300 hover:bg-gray-50 rounded flex-shrink-0"
+                                title="Add to Practice"
+                              >
+                                <Plus className="h-4 w-4 text-gray-600" />
+                              </button>
+                              {!strategy.isLocal && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleSaveStrategy(strategy)
+                                  }}
+                                  className={`p-1 border rounded flex-shrink-0 ${
+                                    isStrategySaved(strategy.id) 
+                                      ? 'border-green-300 bg-green-50 text-green-600' 
+                                      : 'border-gray-300 hover:bg-gray-50 text-gray-600'
+                                  }`}
+                                  title={isStrategySaved(strategy.id) ? "Already saved locally" : "Save locally"}
+                                  disabled={isStrategySaved(strategy.id)}
+                                >
+                                  <Save className="h-4 w-4" />
+                                </button>
+                              )}
+                            </div>
                           )}
-                          <h4 className="font-medium text-sm flex-1">{strategy.strategy_name}</h4>
+                          <h4 className="font-medium text-sm flex-1">
+                            {strategy.strategy_name}
+                            {strategy.isLocal && (
+                              <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                Local
+                              </span>
+                            )}
+                          </h4>
                           
                           {/* Edit button for user-owned strategies */}
                           {strategy.user_id === user?.id && (
@@ -585,7 +675,14 @@ export default function StrategiesTab({
                                 <Plus className="h-4 w-4 text-gray-600" />
                               </button>
                             )}
-                            <h4 className="font-medium text-sm flex-1">{strategy.strategy_name}</h4>
+                            <h4 className="font-medium text-sm flex-1">
+                            {strategy.strategy_name}
+                            {strategy.isLocal && (
+                              <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                Local
+                              </span>
+                            )}
+                          </h4>
                             {/* Favorite button */}
                             <button
                               onClick={(e) => handleToggleFavorite(strategy, e)}

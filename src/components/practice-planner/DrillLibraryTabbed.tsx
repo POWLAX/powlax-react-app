@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { Filter, Plus, Star, ChevronDown, ChevronRight, Video, Link, Beaker, User, Search, Play } from 'lucide-react'
+import { Filter, Plus, Star, ChevronDown, ChevronRight, Video, Link, Beaker, User, Search, Play, Save } from 'lucide-react'
 import { toast } from 'sonner'
 import { useDrills } from '@/hooks/useDrills'
 import { useFavorites } from '@/hooks/useFavorites'
+import { useLocalStorageContext } from '@/contexts/LocalStorageContext'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import AddCustomDrillModal from './modals/AddCustomDrillModal'
 import FilterDrillsModal from './FilterDrillsModal'
@@ -75,6 +76,7 @@ export default function DrillLibraryTabbed({
 }: DrillLibraryProps) {
   const { drills: supabaseDrills, loading, error, refreshDrills } = useDrills()
   const { toggleFavorite, isFavorite, getFavoriteDrills, loading: favoritesLoading } = useFavorites()
+  const { saveDrill, savedDrills } = useLocalStorageContext()
   const [searchTerm, setSearchTerm] = useState('')
   const [expandedCategories, setExpandedCategories] = useState<string[]>(['favorites'])
   const [showFilterModal, setShowFilterModal] = useState(false)
@@ -121,7 +123,7 @@ export default function DrillLibraryTabbed({
       organized[category] = []
     })
     
-    // Organize drills
+    // Organize database drills
     supabaseDrills.forEach(drill => {
       // Check if it's a favorite
       if (isFavorite(drill.id, 'drill')) {
@@ -139,8 +141,42 @@ export default function DrillLibraryTabbed({
       }
     })
     
+    // Add locally saved drills to User Drills category
+    savedDrills.forEach((savedDrill: any) => {
+      // Convert saved drill to match expected drill format
+      const localDrill: Drill = {
+        id: savedDrill.id || savedDrill.originalId || Date.now(),
+        title: savedDrill.title || savedDrill.strategy_name || 'Untitled Drill',
+        content: savedDrill.content || savedDrill.description || '',
+        duration_minutes: savedDrill.duration_minutes || savedDrill.duration || 10,
+        category: savedDrill.category || 'Custom',
+        equipment: savedDrill.equipment || '',
+        tags: savedDrill.tags || '',
+        game_phase: savedDrill.game_phase || '',
+        video_url: savedDrill.video_url || null,
+        source: 'local' as const,
+        user_id: user?.id || 'local-user',
+        isLocal: true,
+        // Add other required fields with defaults
+        description: savedDrill.content || savedDrill.description || '',
+        drill_types: savedDrill.drill_types || savedDrill.tags || '',
+        drill_emphasis: savedDrill.drill_emphasis || savedDrill.game_phase || '',
+        notes: savedDrill.notes || '',
+        status: 'active',
+        created_at: savedDrill.createdAt || savedDrill.savedAt || new Date().toISOString(),
+        updated_at: savedDrill.createdAt || savedDrill.savedAt || new Date().toISOString()
+      }
+      
+      organized['User Drills'].push(localDrill)
+      
+      // Also add to favorites if it was saved as a favorite
+      if (savedDrill.isFavorite) {
+        organized['Favorites'].push(localDrill)
+      }
+    })
+    
     return organized
-  }, [supabaseDrills, drillCategories, isFavorite])
+  }, [supabaseDrills, drillCategories, isFavorite, savedDrills, user?.id])
 
   // Filter drills based on search and filters
   const filteredDrillsByCategory = useMemo(() => {
@@ -223,6 +259,24 @@ export default function DrillLibraryTabbed({
     } else if (onSelectDrill) {
       onSelectDrill(drill)
     }
+  }
+
+  const handleSaveDrill = (drill: Drill) => {
+    saveDrill({ ...drill, originalId: drill.id })
+    toast.success(`"${drill.title}" saved locally!`)
+  }
+
+  const isDrillSaved = (drillId: number | string) => {
+    // Check if it's already a local drill
+    if (typeof drillId === 'string' && drillId.toString().includes('local')) {
+      return true
+    }
+    // Check if it's in saved drills
+    return savedDrills.some((savedDrill: any) => 
+      savedDrill.id === drillId || 
+      savedDrill.originalId === drillId ||
+      savedDrill.id?.toString() === drillId?.toString()
+    )
   }
 
   // Handle mobile drill selection - MOBILE ONLY: immediate add/remove with notifications
@@ -322,15 +376,38 @@ export default function DrillLibraryTabbed({
               )}
             </div>
           ) : (
-            <button
-              onClick={() => handleAddDrillUnified(drill)}
-              className="p-1 border border-gray-300 hover:bg-gray-50 rounded flex-shrink-0"
-              title="Add to Practice"
-            >
-              <Plus className="h-4 w-4 text-gray-600" />
-            </button>
+            <div className="flex gap-1">
+              <button
+                onClick={() => handleAddDrillUnified(drill)}
+                className="p-1 border border-gray-300 hover:bg-gray-50 rounded flex-shrink-0"
+                title="Add to Practice"
+              >
+                <Plus className="h-4 w-4 text-gray-600" />
+              </button>
+              {!drill.isLocal && (
+                <button
+                  onClick={() => handleSaveDrill(drill)}
+                  className={`p-1 border rounded flex-shrink-0 ${
+                    isDrillSaved(drill.id) 
+                      ? 'border-green-300 bg-green-50 text-green-600' 
+                      : 'border-gray-300 hover:bg-gray-50 text-gray-600'
+                  }`}
+                  title={isDrillSaved(drill.id) ? "Already saved locally" : "Save locally"}
+                  disabled={isDrillSaved(drill.id)}
+                >
+                  <Save className="h-4 w-4" />
+                </button>
+              )}
+            </div>
           )}
-          <h4 className="font-medium text-sm flex-1">{drill.title}</h4>
+          <h4 className="font-medium text-sm flex-1">
+            {drill.title}
+            {drill.isLocal && (
+              <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                Local
+              </span>
+            )}
+          </h4>
           
           {/* Edit button for any drill - show for drill owner or admin */}
           {user && (
@@ -423,13 +500,7 @@ export default function DrillLibraryTabbed({
                   </span>
                 )}
               </button>
-              <button 
-                onClick={() => setShowAddDrillModal(true)}
-                className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-md"
-              >
-                <Plus className="h-4 w-4" />
-                Add Custom Drill
-              </button>
+
             </div>
             
             {/* Search */}

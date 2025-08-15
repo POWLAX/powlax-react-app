@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { useUserStrategies } from '@/hooks/useUserStrategies'
 import { useAuth } from '@/contexts/SupabaseAuthContext'
+import { useLocalStorageContext } from '@/contexts/LocalStorageContext'
 import { toast } from 'sonner'
 import { GAME_PHASES } from '@/hooks/useStrategies'
 
@@ -34,6 +35,7 @@ export default function AddCustomStrategiesModal({
 }: AddCustomStrategiesModalProps) {
   const { createUserStrategy, updateUserStrategy, loading: creating } = useUserStrategies()
   const { user } = useAuth()
+  const { saveStrategy } = useLocalStorageContext()
   const isEditMode = !!editStrategy
   
   // Form state - essential fields matching the drill modal pattern
@@ -50,6 +52,7 @@ export default function AddCustomStrategiesModal({
   const [seeItAges, setSeeItAges] = useState('')
   const [coachItAges, setCoachItAges] = useState('')
   const [ownItAges, setOwnItAges] = useState('')
+  const [saveLocally, setSaveLocally] = useState(false)
 
   // Pre-populate fields when editing
   useEffect(() => {
@@ -118,8 +121,21 @@ export default function AddCustomStrategiesModal({
 
       let resultStrategy
       
-      if (isEditMode && editStrategy?.id) {
-        // Update existing strategy
+      if (saveLocally) {
+        // Save to local storage
+        resultStrategy = {
+          id: Date.now(), // Temporary ID for local strategies
+          strategy_name: strategyName.trim(),
+          ...strategyData,
+          isCustom: true,
+          isLocal: true,
+          createdAt: new Date().toISOString()
+        }
+        
+        saveStrategy(resultStrategy)
+        toast.success('Custom strategy saved locally!')
+      } else if (isEditMode && editStrategy?.id) {
+        // Update existing strategy in database
         resultStrategy = await updateUserStrategy(editStrategy.id, strategyData)
         
         // Call update callback
@@ -129,7 +145,7 @@ export default function AddCustomStrategiesModal({
         
         toast.success('Strategy updated successfully!')
       } else {
-        // Create new strategy
+        // Create new strategy in database
         resultStrategy = await createUserStrategy(strategyData)
         
         // Also add to practice planner immediately if onAdd is provided (only for new strategies)
@@ -366,6 +382,26 @@ export default function AddCustomStrategiesModal({
               placeholder="e.g., Attackmen, Midfielders"
             />
           </div>
+
+          {/* Storage Option */}
+          {!isEditMode && (
+            <div className="border-t pt-4">
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={saveLocally}
+                  onChange={(e) => setSaveLocally(e.target.checked)}
+                  className="rounded border-gray-300"
+                />
+                <span className="text-gray-700">
+                  💾 Save locally only (no account sync, but works offline)
+                </span>
+              </label>
+              <p className="text-xs text-gray-500 mt-1 ml-6">
+                Local strategies are saved in your browser and won&apos;t sync across devices.
+              </p>
+            </div>
+          )}
 
           <DialogFooter>
             <Button

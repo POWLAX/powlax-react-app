@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'next/navigation'
-import { Calendar, Clock, MapPin, Save, Printer, RefreshCw, FolderOpen, Plus, Target, Loader2 } from 'lucide-react'
+import { Calendar, Clock, MapPin, Save, Printer, RefreshCw, FolderOpen, Plus, Target, Loader2, Archive } from 'lucide-react'
 import SidebarLibrary from '@/components/practice-planner/SidebarLibrary'
 import StrategyCard from '@/components/practice-planner/StrategyCard'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
@@ -18,6 +18,7 @@ import PracticeScheduleCard from '@/components/practice-planner/PracticeSchedule
 import ActiveStrategiesSection from '@/components/practice-planner/ActiveStrategiesSection'
 import StudyDrillModal from '@/components/practice-planner/modals/StudyDrillModal'
 import StudyStrategyModal from '@/components/practice-planner/modals/StudyStrategyModal'
+import SavedDataModal from '@/components/practice-planner/SavedDataModal'
 import { usePracticePlans, type TimeSlot as PracticePlanTimeSlot } from '@/hooks/usePracticePlans'
 import { useDrills } from '@/hooks/useDrills'
 import { usePrint } from '@/hooks/usePrint'
@@ -59,6 +60,7 @@ export default function PracticePlansPage() {
   const [selectedDrill, setSelectedDrill] = useState<any>(null)
   const [showStudyStrategyModal, setShowStudyStrategyModal] = useState(false)
   const [selectedStrategy, setSelectedStrategy] = useState<any>(null)
+  const [showSavedDataModal, setShowSavedDataModal] = useState(false)
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // Calculate total drill time from all time slots
@@ -320,6 +322,13 @@ export default function PracticePlansPage() {
               <Save className="h-5 w-5" />
             </button>
             <button 
+              onClick={() => setShowSavedDataModal(true)}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
+              title="View Saved Data"
+            >
+              <Archive className="h-5 w-5" />
+            </button>
+            <button 
               onClick={handlePrint}
               className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
               title="Print Practice Plan"
@@ -361,13 +370,6 @@ export default function PracticePlansPage() {
               <FolderOpen className="h-5 w-5" />
             </button>
             <button 
-              onClick={() => setShowStrategiesListModal(true)}
-              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
-              title="View Strategies"
-            >
-              <Target className="h-5 w-5" />
-            </button>
-            <button 
               onClick={() => setShowAddStrategiesModal(true)}
               className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
               title="Add Custom Strategy"
@@ -380,6 +382,13 @@ export default function PracticePlansPage() {
               title="Save Practice Plan"
             >
               <Save className="h-5 w-5" />
+            </button>
+            <button 
+              onClick={() => setShowSavedDataModal(true)}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
+              title="View Saved Data"
+            >
+              <Archive className="h-5 w-5" />
             </button>
             <button 
               onClick={handlePrint}
@@ -511,6 +520,16 @@ export default function PracticePlansPage() {
         onClose={() => setShowSaveModal(false)}
         onSave={handleSavePracticePlan}
         defaultNotes={practiceNotes}
+        practiceData={{
+          date: practiceDate,
+          startTime: startTime,
+          duration: duration,
+          field: field,
+          drills: timeSlots,
+          strategies: selectedStrategies,
+          setupTime: addSetupTime ? setupDuration : undefined,
+          setupNotes: setupNotes
+        }}
       />
 
       {/* Load Practice Modal */}
@@ -621,6 +640,12 @@ export default function PracticePlansPage() {
           </div>
         </div>
       )}
+
+      {/* Saved Data Modal */}
+      <SavedDataModal
+        isOpen={showSavedDataModal}
+        onClose={() => setShowSavedDataModal(false)}
+      />
     </div>
   )
 }

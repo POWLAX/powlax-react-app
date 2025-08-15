@@ -35,7 +35,7 @@ export function CelebrationAnimation({ points, isVisible, onAnimationEnd }: Cele
   if (!isVisible) return null
   
   return (
-    <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+    <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden">
       {/* Background celebration glow */}
       <div 
         className={`absolute inset-0 bg-gradient-to-br from-yellow-400/20 via-orange-500/20 to-green-500/20 transition-opacity duration-1000 ${

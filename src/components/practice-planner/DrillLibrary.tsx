@@ -223,14 +223,7 @@ export default function DrillLibrary({ onAddDrill }: DrillLibraryProps) {
           Add Custom Drill
         </button>
         
-        <button 
-          onClick={() => setShowAddStrategiesModal(true)}
-          className="w-full touch-target bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center justify-center font-semibold shadow-md transition-colors"
-          data-testid="add-custom-strategy-btn"
-        >
-          <Plus className="h-5 w-5 mr-2" />
-          Add Custom Strategy
-        </button>
+        
       </div>
 
       {/* Search */}

@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { useUserDrills } from '@/hooks/useUserDrills'
 import { useAuth } from '@/contexts/SupabaseAuthContext'
+import { useLocalStorageContext } from '@/contexts/LocalStorageContext'
 import { toast } from 'sonner'
 
 // Drill categories - matching practice planner expectations
@@ -57,6 +58,7 @@ export default function AddCustomDrillModal({
 }: AddCustomDrillModalProps) {
   const { createUserDrill, updateUserDrill, loading: creating } = useUserDrills()
   const { user } = useAuth()
+  const { saveDrill } = useLocalStorageContext()
   const isEditMode = !!editDrill
   
   // Form state - all essential fields for drills
@@ -75,6 +77,9 @@ export default function AddCustomDrillModal({
   const [drillLabUrl3, setDrillLabUrl3] = useState('')
   const [drillLabUrl4, setDrillLabUrl4] = useState('')
   const [drillLabUrl5, setDrillLabUrl5] = useState('')
+  
+  // Storage preference
+  const [saveLocally, setSaveLocally] = useState(false)
   
   // Age appropriateness
   const [doItAges, setDoItAges] = useState('')
@@ -198,8 +203,20 @@ export default function AddCustomDrillModal({
 
       let resultDrill
       
-      if (isEditMode && editDrill?.id) {
-        // Update existing drill
+      if (saveLocally) {
+        // Save to local storage
+        resultDrill = {
+          id: Date.now(), // Temporary ID for local drills
+          ...drillData,
+          isCustom: true,
+          isLocal: true,
+          createdAt: new Date().toISOString()
+        }
+        
+        saveDrill(resultDrill)
+        toast.success('Custom drill saved locally!')
+      } else if (isEditMode && editDrill?.id) {
+        // Update existing drill in database
         resultDrill = await updateUserDrill(editDrill.id, drillData)
         
         // Call update callback
@@ -209,7 +226,7 @@ export default function AddCustomDrillModal({
         
         toast.success('Drill updated successfully!')
       } else {
-        // Create new drill
+        // Create new drill in database
         resultDrill = await createUserDrill(drillData)
         
         // Call created callback
@@ -547,6 +564,26 @@ export default function AddCustomDrillModal({
               </label>
             </div>
           </div>
+
+          {/* Storage Option */}
+          {!isEditMode && (
+            <div className="border-t pt-4">
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={saveLocally}
+                  onChange={(e) => setSaveLocally(e.target.checked)}
+                  className="rounded border-gray-300"
+                />
+                <span className="text-gray-700">
+                  💾 Save locally only (no account sync, but works offline)
+                </span>
+              </label>
+              <p className="text-xs text-gray-500 mt-1 ml-6">
+                Local drills are saved in your browser and won&apos;t sync across devices.
+              </p>
+            </div>
+          )}
 
           <DialogFooter>
             <Button

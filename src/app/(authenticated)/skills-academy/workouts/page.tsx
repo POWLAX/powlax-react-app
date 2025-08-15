@@ -8,6 +8,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { 
   PlayCircle, X, Users, Clock, Target, Shield, Zap, Loader2, Circle, Sparkles
 } from 'lucide-react';
+import { CelebrationAnimation } from '@/components/skills-academy/CelebrationAnimation';
+import { SkillTreeDemo } from '@/components/animations/SkillTreeSVG';
+import BadgeUnlockCSS from '@/components/animations/BadgeUnlockCSS';
 import { supabase } from '@/lib/supabase';
 import { WallBallSeries, WallBallVariant, GroupedVariants } from '@/types/wall-ball';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
@@ -47,6 +50,21 @@ export default function SkillsAcademyWorkoutsPage() {
   const [loading, setLoading] = useState(false);
   const [showTrackSelector, setShowTrackSelector] = useState(false);
   const [showAnimationsModal, setShowAnimationsModal] = useState(false);
+  const [animationPhase, setAnimationPhase] = useState<'academy-points' | 'badge-unlock' | 'completion'>('academy-points');
+  const [showSkillTreeModal, setShowSkillTreeModal] = useState(false);
+
+  // Auto-progress from Academy Points to Badge Unlock after 4 seconds
+  useEffect(() => {
+    if (showAnimationsModal && animationPhase === 'academy-points') {
+      const timer = setTimeout(() => {
+        setAnimationPhase('badge-unlock');
+      }, 4000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [showAnimationsModal, animationPhase]);
+
+
 
   const tracks: Track[] = [
     {
@@ -240,11 +258,21 @@ export default function SkillsAcademyWorkoutsPage() {
             </div>
             <Button
               size="sm"
-              variant="outline"
               onClick={() => setShowAnimationsModal(true)}
-              className="ml-2"
+              className="ml-2 bg-gray-100 text-black border border-gray-400 hover:bg-gray-200"
             >
-              <Sparkles className="w-4 h-4" />
+              Workout Completion
+            </Button>
+          </div>
+          
+          {/* Skill Tree Button - Mobile Only */}
+          <div className="mt-4">
+            <Button
+              size="sm"
+              onClick={() => setShowSkillTreeModal(true)}
+              className="w-full bg-gray-100 text-black border border-gray-400 hover:bg-gray-200"
+            >
+              Skill Tree
             </Button>
           </div>
         </div>
@@ -569,107 +597,127 @@ export default function SkillsAcademyWorkoutsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Animations Modal */}
-      <Dialog open={showAnimationsModal} onOpenChange={setShowAnimationsModal}>
-        <DialogContent className="bg-white max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <Sparkles className="w-6 h-6 text-orange-600" />
-              Workout Completion Animations
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-6 mt-4">
-            {/* Mock Animation Preview */}
-            <div className="bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">🎉 Workout Complete Animation Preview</h3>
-              
-              {/* Mock Animation Container */}
-              <div className="relative bg-white rounded-lg border-2 border-dashed border-orange-300 h-64 flex items-center justify-center mb-4">
-                <div className="text-center space-y-4">
-                  {/* Animated Trophy */}
-                  <div className="animate-bounce">
-                    <div className="w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <span className="text-2xl">🏆</span>
+      {/* Enhanced Workout Completion Animation */}
+      {showAnimationsModal && (
+        <>
+          {/* Academy Points Animation Phase */}
+          {animationPhase === 'academy-points' && (
+            <div 
+              className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 cursor-pointer"
+              onClick={() => setAnimationPhase('badge-unlock')}
+            >
+              <div className="text-center max-w-md mx-auto p-8 animate-fade-in">
+                <div className="bg-white rounded-xl p-8 shadow-2xl border-4 border-yellow-400">
+                  <div className="mb-6">
+                    <img 
+                      src="https://powlax.com/wp-content/uploads/2024/10/Lax-Credits.png" 
+                      alt="Academy Points" 
+                      className="w-20 h-20 mx-auto mb-4 animate-bounce"
+                    />
+                    <div className="text-3xl font-bold text-yellow-600 mb-2 animate-pulse">
+                      You&apos;ve earned
+                    </div>
+                    <div className="text-5xl font-bold text-yellow-600 mb-2">
+                      67 Academy Points!
                     </div>
                   </div>
                   
-                  {/* Success Text */}
-                  <div className="space-y-2">
-                    <h4 className="text-xl font-bold text-gray-900 animate-pulse">Workout Complete!</h4>
-                    <p className="text-gray-600">Great job! You earned 50 Attack Tokens</p>
-                  </div>
-                  
-                  {/* Mock Progress Bar */}
-                  <div className="w-48 mx-auto">
-                    <div className="bg-gray-200 rounded-full h-2 mb-2">
-                      <div className="bg-gradient-to-r from-orange-500 to-yellow-500 h-2 rounded-full animate-pulse" style={{width: '75%'}}></div>
-                    </div>
-                    <p className="text-xs text-gray-500">Level Progress: 75%</p>
+                  <div className="text-sm text-gray-500">
+                    Tap to continue or wait 4 seconds...
                   </div>
                 </div>
               </div>
-              
-              <p className="text-sm text-gray-600 italic">
-                * This is a mock representation. The actual animations will include particle effects, 
-                sound feedback, and personalized achievement celebrations.
-              </p>
             </div>
+          )}
 
-            {/* Animation Features */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-blue-500" />
-                  Dynamic Celebrations
-                </h4>
-                <p className="text-sm text-gray-600">
-                  Unique animations based on workout type, difficulty, and personal achievements
-                </p>
-              </div>
+          {/* Badge Unlock Animation Phase - CSS Animation */}
+          {animationPhase === 'badge-unlock' && (
+            <div 
+              className="fixed inset-0 z-[110] bg-black cursor-pointer"
+              onClick={() => setAnimationPhase('completion')}
+            >
+              <BadgeUnlockCSS
+                badgeName="Foundation Ace"
+                badgeImage="https://powlax.com/wp-content/uploads/2024/10/WB2-Dominant-Dodger.png"
+                category="wallball"
+                onComplete={() => {
+                  // Don't auto-complete - let it persist until clicked!
+                  // The user needs to click to continue
+                }}
+              />
               
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                  <Target className="w-4 h-4 text-green-500" />
-                  Progress Visualization
-                </h4>
-                <p className="text-sm text-gray-600">
-                  Visual progress bars and level-up effects to show skill development
-                </p>
-              </div>
-              
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                  <Users className="w-4 h-4 text-purple-500" />
-                  Social Sharing
-                </h4>
-                <p className="text-sm text-gray-600">
-                  Share achievements with teammates and celebrate milestones together
-                </p>
-              </div>
-              
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-orange-500" />
-                  Streak Rewards
-                </h4>
-                <p className="text-sm text-gray-600">
-                  Special animations for daily streaks and consistency achievements
-                </p>
+              {/* Click instruction overlay */}
+              <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white text-center animate-pulse">
+                <div className="bg-black/50 rounded-lg px-6 py-3">
+                  <p className="text-lg font-semibold">🎉 Foundation Ace Badge Unlocked! 🎉</p>
+                  <p className="text-sm mt-1">Tap anywhere to continue...</p>
+                </div>
               </div>
             </div>
+          )}
 
-            {/* Coming Soon Notice */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
-              <h4 className="font-semibold text-blue-900 mb-2">🚀 Coming Soon</h4>
-              <p className="text-sm text-blue-700">
-                Full animation system will be implemented once the workout completion flow is finalized. 
-                This preview shows the planned celebration experience for completing Skills Academy workouts.
-              </p>
+          {/* Final Completion Screen */}
+          {animationPhase === 'completion' && (
+            <div className="fixed inset-0 z-[90] flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50">
+              <div className="text-center max-w-md mx-auto p-8">
+                <div className="mb-6">
+                  <div className="text-4xl font-bold mb-4 text-gray-900">Workout Complete!</div>
+                  <div className="text-lg text-gray-600 mb-4">
+                    Great job completing <strong>Attack Training - SS1</strong>!
+                  </div>
+                </div>
+
+                <div className="space-y-4 mb-8">
+                  <div className="bg-white/90 rounded-lg p-4 border border-gray-200 shadow-sm">
+                    <div className="text-3xl font-bold text-blue-600">85</div>
+                    <div className="text-sm text-gray-600">Points Earned</div>
+                  </div>
+                  <div className="bg-white/90 rounded-lg p-4 border border-gray-200 shadow-sm">
+                    <div className="text-xl font-bold text-green-600">7 Day Streak!</div>
+                    <div className="text-sm text-gray-600">Keep it up!</div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <button
+                    onClick={() => {
+                      setShowAnimationsModal(false);
+                      setAnimationPhase('academy-points'); // Reset for next time
+                    }}
+                    className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                  >
+                    Continue Training
+                  </button>
+                </div>
+              </div>
             </div>
+          )}
+
+          {/* Background celebration animation - runs during academy-points and badge-unlock phases */}
+          <CelebrationAnimation 
+            points={85}
+            isVisible={showAnimationsModal && (animationPhase === 'academy-points' || animationPhase === 'badge-unlock')}
+            onAnimationEnd={() => {
+              // Don't auto-close, let user progress through phases
+            }}
+          />
+        </>
+      )}
+
+      {/* Skill Tree Modal */}
+      {showSkillTreeModal && (
+        <div className="fixed inset-0 z-[100] bg-black">
+          <div className="absolute top-4 right-4 z-[101]">
+            <button
+              onClick={() => setShowSkillTreeModal(false)}
+              className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
           </div>
-        </DialogContent>
-      </Dialog>
+          <SkillTreeDemo />
+        </div>
+      )}
     </div>
   );
 }

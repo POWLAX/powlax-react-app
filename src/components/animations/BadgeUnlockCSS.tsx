@@ -15,6 +15,7 @@ export default function BadgeUnlockCSS({
   onComplete 
 }: BadgeUnlockCSSProps) {
   const [isAnimating, setIsAnimating] = useState(true)
+  const [showPersistentBadge, setShowPersistentBadge] = useState(false)
 
   // Color themes per category
   const categoryColors = {
@@ -26,7 +27,9 @@ export default function BadgeUnlockCSS({
 
   const handleAnimationEnd = () => {
     setIsAnimating(false)
-    onComplete?.()
+    setShowPersistentBadge(true)
+    // Don't call onComplete - let the badge persist
+    // onComplete?.()
   }
 
   return (
@@ -73,6 +76,22 @@ export default function BadgeUnlockCSS({
           />
         ))}
       </div>
+
+      {/* Persistent badge after animation */}
+      {showPersistentBadge && (
+        <div className="badge-wrapper" style={{ transform: 'scale(1)', opacity: 1 }}>
+          <div className="badge-glow" />
+          <img 
+            src={badgeImage} 
+            alt={badgeName}
+            className="badge-image"
+            style={{
+              animation: 'pulseGlow 2s ease-in-out infinite',
+              filter: 'drop-shadow(0 0 30px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 60px rgba(255, 165, 0, 0.6))'
+            }}
+          />
+        </div>
+      )}
 
       {/* Text reveal */}
       <div className="badge-info">
