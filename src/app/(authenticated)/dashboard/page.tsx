@@ -24,9 +24,9 @@ export default function DashboardPage() {
   const testUser = user || {
     id: 'test-user',
     email: 'test@example.com',
-    display_name: 'Test Admin',
-    role: 'administrator', // Default to admin so role switcher appears
-    roles: ['administrator']
+    display_name: 'Demo Coach',
+    role: 'team_coach', // Default to coach view for demo
+    roles: ['team_coach']
   }
 
   // Temporarily bypass loading for development

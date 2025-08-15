@@ -78,7 +78,7 @@ export function CoachDashboard() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="container mx-auto px-4 py-6 max-w-7xl bg-gray-50 min-h-screen space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Coach Dashboard - Permanence Pattern Test</h1>
         <Button onClick={refreshFavorites} variant="outline">
@@ -88,7 +88,7 @@ export function CoachDashboard() {
       </div>
 
       {/* Add Favorites Section */}
-      <Card>
+      <Card className="bg-white border-gray-200 shadow-sm">
         <CardHeader>
           <CardTitle>Add Favorites (Test Permanence)</CardTitle>
         </CardHeader>
@@ -154,7 +154,7 @@ export function CoachDashboard() {
       </Card>
 
       {/* Current Favorites */}
-      <Card>
+      <Card className="bg-white border-gray-200 shadow-sm">
         <CardHeader>
           <CardTitle>My Favorites ({favorites.length})</CardTitle>
         </CardHeader>
@@ -236,7 +236,7 @@ export function CoachDashboard() {
       </Card>
 
       {/* Permanence Test Results */}
-      <Card className="border-green-500">
+      <Card className="bg-white border-gray-200 shadow-sm">
         <CardHeader>
           <CardTitle className="text-green-600">🧪 Permanence Pattern Test</CardTitle>
         </CardHeader>

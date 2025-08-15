@@ -45,11 +45,6 @@ export function usePracticePlans(teamId?: string) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    // Always fetch plans, even for "no-team" 
-    fetchPracticePlans()
-  }, [teamId, user, /* stable callback */])
-
   const fetchPracticePlans = useCallback(async () => {
     try {
       setLoading(true)
@@ -111,6 +106,11 @@ export function usePracticePlans(teamId?: string) {
       setLoading(false)
     }
   }, [teamId, user?.id])
+
+  useEffect(() => {
+    // Always fetch plans, even for "no-team" 
+    fetchPracticePlans()
+  }, [fetchPracticePlans])
 
   const savePracticePlan = async (plan: Omit<PracticePlan, 'id' | 'created_at' | 'updated_at'>) => {
     try {

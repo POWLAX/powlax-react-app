@@ -172,7 +172,7 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-8">
+    <div className="container mx-auto px-4 py-6 max-w-7xl bg-gray-50 min-h-screen">
       {/* Welcome Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">
@@ -183,7 +183,7 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
 
       {/* Children Overview (if Patrick has parent role) */}
       {children.length > 0 && (
-        <Card className="mb-6 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+        <Card className="mb-6 bg-white border-gray-200 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <UserPlus className="h-5 w-5 text-purple-600" />

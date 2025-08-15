@@ -87,7 +87,7 @@ export function PlayerDashboard({ user }: PlayerDashboardProps) {
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-8">
+    <div className="container mx-auto px-4 py-6 max-w-7xl bg-gray-50 min-h-screen">
       {/* Welcome Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">
@@ -97,18 +97,18 @@ export function PlayerDashboard({ user }: PlayerDashboardProps) {
       </div>
 
       {/* Current Streak Banner */}
-      <Card className="mb-6 bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-200">
+      <Card className="mb-6 bg-white border-gray-200 shadow-sm">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                <Trophy className="h-6 w-6 text-orange-600" />
+              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                <Trophy className="h-6 w-6 text-gray-700" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-orange-900">
+                <h3 className="text-lg font-semibold text-gray-900">
                   {mockData.streak} Day Streak! 🔥
                 </h3>
-                <p className="text-orange-700">Keep up the momentum!</p>
+                <p className="text-gray-700">Keep up the momentum!</p>
               </div>
             </div>
             <Button asChild className="bg-orange-600 hover:bg-orange-700">
@@ -187,7 +187,7 @@ export function PlayerDashboard({ user }: PlayerDashboardProps) {
 
       {/* Team Workouts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <Card>
+        <Card className="bg-white border-gray-200 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5 text-blue-600" />
@@ -202,7 +202,7 @@ export function PlayerDashboard({ user }: PlayerDashboardProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-l-blue-500">
+              <div className="p-3 bg-gray-50 rounded-lg border-l-4 border-l-gray-400">
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="font-medium text-sm text-gray-600 italic">Mock: Wall Ball Challenge</h4>
@@ -219,7 +219,7 @@ export function PlayerDashboard({ user }: PlayerDashboardProps) {
                 </div>
               </div>
               
-              <div className="p-3 bg-gray-50 rounded-lg border-l-4 border-l-gray-300">
+              <div className="p-3 bg-gray-100 rounded-lg border-l-4 border-l-gray-400">
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="font-medium text-sm text-gray-600 italic">Mock: Shooting Accuracy</h4>
@@ -240,7 +240,7 @@ export function PlayerDashboard({ user }: PlayerDashboardProps) {
         </Card>
 
         {/* Recent Achievements */}
-        <Card>
+        <Card className="bg-white border-gray-200 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Award className="h-5 w-5 text-yellow-600" />
@@ -253,7 +253,7 @@ export function PlayerDashboard({ user }: PlayerDashboardProps) {
           <CardContent>
             <div className="space-y-3">
               {mockData.recentBadges.map((badge, index) => (
-                <div key={index} className="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg">
+                <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                   <div className="text-2xl">{badge.icon}</div>
                   <div className="flex-1">
                     <h4 className="font-medium text-sm">{badge.name}</h4>

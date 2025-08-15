@@ -313,13 +313,7 @@ export default function PracticePlannerMain({ teamId, teamName }: PracticePlanne
           <RefreshCw className="h-4 w-4" />
           Restart
         </button>
-        <button
-          onClick={() => setShowStrategiesListModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
-        >
-          <Target className="h-4 w-4" />
-          Strategies
-        </button>
+
         <button
           onClick={handleShareToTeam}
           className="flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors"

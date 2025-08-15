@@ -81,7 +81,7 @@ function WorkoutPageContent() {
   const { user, loading: authLoading } = useAuth()
   
   // Get workout data
-  const { session, loading, error } = useWorkoutSession(workoutId)
+  const { session, loading, error } = useWorkoutSession(workoutId, user?.id)
   const workout = session?.workout
   const drills = session?.drills || []
   
@@ -89,7 +89,7 @@ function WorkoutPageContent() {
   const { pointTypes } = usePointTypes()
   
   // State management
-  const [userId, setUserId] = useState<string | null>(null)
+  const userId = user?.id || null
   const [isWallBallWorkout, setIsWallBallWorkout] = useState(false)
   const [wallBallVimeoId, setWallBallVimeoId] = useState<string | null>(null)
   const [seriesInfo, setSeriesInfo] = useState<any>(null)
@@ -121,11 +121,6 @@ function WorkoutPageContent() {
   const [drillStartTime, setDrillStartTime] = useState<number | null>(null)
   const [drillTimeElapsed, setDrillTimeElapsed] = useState(0)
   const [drillTimes, setDrillTimes] = useState<Record<number, any>>({})  
-  
-  // Set user ID
-  useEffect(() => {
-    setUserId(user?.id || null)
-  }, [user])
   
   // Check for wall ball workout
   useEffect(() => {

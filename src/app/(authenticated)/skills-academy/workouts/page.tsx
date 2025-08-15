@@ -46,6 +46,7 @@ export default function SkillsAcademyWorkoutsPage() {
   const [series, setSeries] = useState<Series[]>([]);
   const [loading, setLoading] = useState(false);
   const [showTrackSelector, setShowTrackSelector] = useState(false);
+  const [showAnimationsModal, setShowAnimationsModal] = useState(false);
 
   const tracks: Track[] = [
     {
@@ -184,7 +185,7 @@ export default function SkillsAcademyWorkoutsPage() {
           </div>
           <Button
             variant="outline"
-            onClick={() => router.push('/skills-academy/animations')}
+            onClick={() => setShowAnimationsModal(true)}
             className="flex items-center space-x-2"
           >
             <Sparkles className="w-4 h-4" />
@@ -240,7 +241,7 @@ export default function SkillsAcademyWorkoutsPage() {
             <Button
               size="sm"
               variant="outline"
-              onClick={() => router.push('/skills-academy/animations')}
+              onClick={() => setShowAnimationsModal(true)}
               className="ml-2"
             >
               <Sparkles className="w-4 h-4" />
@@ -565,6 +566,108 @@ export default function SkillsAcademyWorkoutsPage() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Animations Modal */}
+      <Dialog open={showAnimationsModal} onOpenChange={setShowAnimationsModal}>
+        <DialogContent className="bg-white max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <Sparkles className="w-6 h-6 text-orange-600" />
+              Workout Completion Animations
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-6 mt-4">
+            {/* Mock Animation Preview */}
+            <div className="bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">🎉 Workout Complete Animation Preview</h3>
+              
+              {/* Mock Animation Container */}
+              <div className="relative bg-white rounded-lg border-2 border-dashed border-orange-300 h-64 flex items-center justify-center mb-4">
+                <div className="text-center space-y-4">
+                  {/* Animated Trophy */}
+                  <div className="animate-bounce">
+                    <div className="w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <span className="text-2xl">🏆</span>
+                    </div>
+                  </div>
+                  
+                  {/* Success Text */}
+                  <div className="space-y-2">
+                    <h4 className="text-xl font-bold text-gray-900 animate-pulse">Workout Complete!</h4>
+                    <p className="text-gray-600">Great job! You earned 50 Attack Tokens</p>
+                  </div>
+                  
+                  {/* Mock Progress Bar */}
+                  <div className="w-48 mx-auto">
+                    <div className="bg-gray-200 rounded-full h-2 mb-2">
+                      <div className="bg-gradient-to-r from-orange-500 to-yellow-500 h-2 rounded-full animate-pulse" style={{width: '75%'}}></div>
+                    </div>
+                    <p className="text-xs text-gray-500">Level Progress: 75%</p>
+                  </div>
+                </div>
+              </div>
+              
+              <p className="text-sm text-gray-600 italic">
+                * This is a mock representation. The actual animations will include particle effects, 
+                sound feedback, and personalized achievement celebrations.
+              </p>
+            </div>
+
+            {/* Animation Features */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-blue-500" />
+                  Dynamic Celebrations
+                </h4>
+                <p className="text-sm text-gray-600">
+                  Unique animations based on workout type, difficulty, and personal achievements
+                </p>
+              </div>
+              
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                  <Target className="w-4 h-4 text-green-500" />
+                  Progress Visualization
+                </h4>
+                <p className="text-sm text-gray-600">
+                  Visual progress bars and level-up effects to show skill development
+                </p>
+              </div>
+              
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                  <Users className="w-4 h-4 text-purple-500" />
+                  Social Sharing
+                </h4>
+                <p className="text-sm text-gray-600">
+                  Share achievements with teammates and celebrate milestones together
+                </p>
+              </div>
+              
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-orange-500" />
+                  Streak Rewards
+                </h4>
+                <p className="text-sm text-gray-600">
+                  Special animations for daily streaks and consistency achievements
+                </p>
+              </div>
+            </div>
+
+            {/* Coming Soon Notice */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+              <h4 className="font-semibold text-blue-900 mb-2">🚀 Coming Soon</h4>
+              <p className="text-sm text-blue-700">
+                Full animation system will be implemented once the workout completion flow is finalized. 
+                This preview shows the planned celebration experience for completing Skills Academy workouts.
+              </p>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

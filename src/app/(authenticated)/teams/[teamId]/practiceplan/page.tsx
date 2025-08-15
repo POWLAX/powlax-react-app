@@ -475,7 +475,7 @@ export default function PracticePlansPage() {
       {showDrillLibrary && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 md:hidden">
           <div className="absolute inset-x-0 top-0 bg-white rounded-b-xl max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
+            <div className="sticky top-0 bg-white border-b p-4 flex justify-between items-center z-30">
               <h3 className="text-lg font-semibold">Add to Plan</h3>
               <button
                 onClick={() => setShowDrillLibrary(false)}
