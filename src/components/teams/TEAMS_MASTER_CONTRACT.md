@@ -471,9 +471,9 @@ interface TeamsPageRequirements {
   // Permissions
   permissions: {
     viewTeams: 'all authenticated users',
-    createTeam: ['coach', 'director', 'admin'],
+    createTeam: ['coach', 'director', 'administrator'],
     joinTeam: ['player', 'parent'],
-    manageTeam: ['coach', 'director', 'admin']
+    manageTeam: ['coach', 'director', 'administrator']
   }
 }
 ```

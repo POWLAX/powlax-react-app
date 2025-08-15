@@ -1,0 +1,327 @@
+# Team Dashboard Page Contract
+contractId: "page-team-dashboard-20250813"
+type: PAGE_ORCHESTRATION_CONTRACT
+version: 1.0.0
+created: 2025-08-13
+priority: CRITICAL
+
+# ===== PAGE INFO =====
+pageInfo:
+  route: "/teams/[teamId]/dashboard"
+  filePath: "src/app/(authenticated)/teams/[teamId]/dashboard/page.tsx"
+  pageType: "client"
+  category: "team"
+  dynamicSegments: ["teamId"]
+
+# ===== RENDERING STRATEGY =====
+renderingStrategy:
+  componentType: "Client Component"
+  dataFetching: "client-side"
+  streamingEnabled: false
+  suspenseBoundaries: []
+  errorBoundaries: []
+
+# ===== DATA ORCHESTRATION =====
+dataOrchestration:
+  serverDataFetching: []
+  
+  clientDataFetching:
+    - hook: "useParams"
+      trigger: "On mount"
+      tables: []
+      realtime: false
+      purpose: "Extract teamId from route"
+      
+    - hook: "useSupabase"
+      trigger: "On mount"
+      tables: ["users"]
+      realtime: false
+      purpose: "Get current user context"
+      
+    - hook: "useTeam"
+      trigger: "On mount with teamId"
+      tables: ["teams", "team_members", "clubs"]
+      realtime: false
+      purpose: "Fetch team data and members"
+      
+    - hook: "useTeamDashboard"
+      trigger: "On mount with teamId"
+      tables: ["events", "team_stats", "activity_log"]
+      realtime: false
+      purpose: "Fetch dashboard-specific data"
+      
+  propsFlow:
+    fromServer: {}
+    toClient:
+      teamId: "Extracted from route params"
+      user: "Current authenticated user"
+      team: "Team data with club information"
+      members: "Team members with roles"
+      upcomingEvents: "Scheduled team events"
+      teamStats: "Team performance metrics"
+      recentActivity: "Team activity feed"
+
+# ===== COMPONENT COMPOSITION =====
+componentComposition:
+  componentsUsed:
+    - name: "TeamHeader"
+      source: "@/components/teams/dashboard/TeamHeader"
+      props:
+        team: "Team object"
+        userRole: "Current user's role on team"
+        members: "Team members array"
+      conditionalRendering: "Always"
+      
+    - name: "CoachQuickActions"
+      source: "@/components/teams/dashboard/CoachQuickActions"
+      props:
+        team: "Team object"
+        upcomingEvents: "Events array"
+      conditionalRendering: "Coach role only"
+      
+    - name: "ParentView"
+      source: "@/components/teams/dashboard/ParentView"
+      props:
+        team: "Team object"
+        playerMembers: "Filtered player members"
+        upcomingEvents: "Events array"
+        recentActivity: "Activity array"
+      conditionalRendering: "Parent role only"
+      
+    - name: "PlayerView"
+      source: "@/components/teams/dashboard/PlayerView"
+      props:
+        team: "Team object"
+        player: "Current user's player member record"
+        ageGroup: "Calculated from team age_group"
+        upcomingEvents: "Events array"
+        teamStats: "Stats object"
+        recentActivity: "Activity array"
+      conditionalRendering: "Player role only"
+      
+    - name: "UpcomingSchedule"
+      source: "@/components/teams/dashboard/UpcomingSchedule"
+      props:
+        events: "Events array"
+        team: "Team object"
+        canManage: "Coach permission boolean"
+      conditionalRendering: "Coach view (main dashboard)"
+      
+    - name: "TeamRoster"
+      source: "@/components/teams/dashboard/TeamRoster"
+      props:
+        team: "Team object"
+        members: "Members array"
+        canTakeAttendance: "Coach permission boolean"
+        upcomingEvent: "Next event object"
+      conditionalRendering: "Coach view (main dashboard)"
+      
+    - name: "TeamPlaybookSection"
+      source: "@/components/teams/dashboard/TeamPlaybookSection"
+      props:
+        teamId: "Route parameter"
+        teamName: "Team name"
+        isCoach: "Coach permission boolean"
+      conditionalRendering: "Coach view (main dashboard)"
+      
+    - name: "ProgressOverview"
+      source: "@/components/teams/dashboard/ProgressOverview"
+      props:
+        team: "Team object"
+        members: "Members array"
+        stats: "Team stats object"
+      conditionalRendering: "Coach view (main dashboard)"
+      
+    - name: "RecentActivity"
+      source: "@/components/teams/dashboard/RecentActivity"
+      props:
+        activity: "Activity array"
+        team: "Team object"
+        canManage: "Coach permission boolean"
+      conditionalRendering: "Coach view (main dashboard)"
+      
+  layoutUsed: "(authenticated) layout"
+  providerDependencies:
+    - "SupabaseAuthContext"
+
+# ===== ROUTING LOGIC =====
+routingLogic:
+  guards:
+    - type: "Auth"
+      implementation: "Layout-level"
+      redirectTo: "/auth/login"
+    - type: "Team membership"
+      implementation: "Page-level via useTeam"
+      redirectTo: "/teams"
+      
+  navigation:
+    - triggers: ["Error state - Back to Teams"]
+      destinations: ["/teams"]
+      method: "Link component"
+      
+  dynamicRouting:
+    - parameter: "teamId"
+      validation: "useTeam hook validates team exists and user is member"
+      fallback: "Error state with navigation back to teams"
+
+# ===== PAGE SPECIFIC LOGIC =====
+pageSpecificLogic:
+  businessLogic: |
+    - Multi-role dashboard orchestration (Coach/Parent/Player)
+    - Role-based component rendering and permissions
+    - Age-based player view customization
+    - Team context validation and error handling
+    - Real-time team data coordination
+    
+  stateManagement: |
+    - Role determination from team members and current user
+    - Age group calculation from team.age_group field
+    - Loading state coordination across multiple hooks
+    - Error state handling with fallback navigation
+    
+  sideEffects: []
+  formHandling: "None"
+
+# ===== ROLE-BASED ORCHESTRATION =====
+roleBasedOrchestration:
+  roleDetection: |
+    - Finds user in team members array
+    - Extracts role property (head_coach, assistant_coach, team_admin, player, parent)
+    - Determines coach status from role array
+    
+  coachView:
+    layout: "Two-column desktop, stacked mobile"
+    components:
+      - "TeamHeader"
+      - "CoachQuickActions"
+      - "UpcomingSchedule"
+      - "TeamRoster"
+      - "TeamPlaybookSection"
+      - "ProgressOverview"
+      - "RecentActivity"
+    permissions:
+      canManage: true
+      canTakeAttendance: true
+      
+  parentView:
+    layout: "Single column"
+    components:
+      - "TeamHeader"
+      - "ParentView"
+    permissions:
+      canManage: false
+      canTakeAttendance: false
+      
+  playerView:
+    layout: "Single column"
+    components:
+      - "TeamHeader"
+      - "PlayerView (age-based)"
+    permissions:
+      canManage: false
+      canTakeAttendance: false
+    ageGroupLogic: |
+      - Parses age from team.age_group field
+      - Maps to youth (≤10), middle (11-14), teen (15+)
+      - Customizes PlayerView based on age group
+
+# ===== SERVER/CLIENT BOUNDARY =====
+serverClientBoundary:
+  serverComponents: []
+  clientComponents:
+    - "TeamDashboardPage (root component)"
+    - "All dashboard view components"
+    - "All UI components"
+  boundaryLocation: "Page level - entire page is client component"
+  dataSerializationPoints: []
+
+# ===== PERFORMANCE PATTERNS =====
+performancePatterns:
+  prefetching: []
+  lazyLoading: []
+  codeSplitting: []
+  optimizations:
+    - "Conditional component rendering based on role"
+    - "Memoized role calculations"
+    - "Loading state coordination"
+
+# ===== SECURITY PATTERNS =====
+securityPatterns:
+  authentication: "Layout-level authentication required"
+  authorization: |
+    - Team membership validation via useTeam hook
+    - Role-based component access control
+    - Permission-based action availability
+  dataValidation: "Hook-level validation of team membership"
+  csrfProtection: false
+
+# ===== INTEGRATION POINTS =====
+integrationPoints:
+  supabaseUsage:
+    directQueries: false
+    throughHooks: true # All data via hooks
+    serverSideOnly: false
+    
+  externalAPIs: []
+  webhooks: []
+  realtimeSubscriptions: []
+
+# ===== TEAM CONTEXT ORCHESTRATION =====
+teamContextOrchestration:
+  teamIdExtraction: |
+    - useParams extracts teamId from route
+    - Passes to hooks for data fetching
+    
+  teamValidation: |
+    - useTeam validates team exists
+    - Validates user is team member
+    - Returns team data and member list
+    
+  teamDataPropagation: |
+    - Team data flows to all view components
+    - Members array used for role detection
+    - Events and stats flow to relevant components
+
+# ===== ERROR HANDLING =====
+errorHandling:
+  loadingStates:
+    - "Coordinated loading across useTeam and useTeamDashboard"
+    - "Loading spinner with descriptive text"
+    
+  errorStates:
+    - "Team not found error handling"
+    - "useTeam error handling with navigation fallback"
+    - "Dashboard data error handling"
+    
+  fallbackBehavior: |
+    - Shows error with "Back to Teams" navigation
+    - Graceful handling of missing team data
+    - Role-based fallback to limited functionality
+
+# ===== MULTI-ROLE VIEW COORDINATION =====
+multiRoleViewCoordination:
+  viewSelection: |
+    1. Extract user role from team members
+    2. Determine view type (coach/parent/player)
+    3. Render appropriate component tree
+    4. Pass role-specific permissions
+    
+  dataSharing: |
+    - Common data (team, members) shared across all views
+    - Role-specific data (events, stats) passed to relevant views
+    - Permission flags calculated and passed down
+    
+  layoutOrchestration: |
+    - Coach view: Complex two-column layout with multiple sections
+    - Parent view: Simplified single-column layout
+    - Player view: Age-appropriate single-column layout
+
+# ===== NOTES =====
+notes: |
+  - Central orchestration point for team management
+  - Complex role-based rendering logic
+  - Handles team validation and membership verification
+  - Age-based customization for player experience
+  - Mobile-optimized responsive layouts
+  - Comprehensive error handling with navigation fallbacks
+  - Real-time data coordination across multiple hooks

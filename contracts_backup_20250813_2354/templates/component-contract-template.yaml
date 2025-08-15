@@ -1,0 +1,298 @@
+# Component Contract Template
+# Template for individual component analysis contracts
+
+contractId: "component-[component-name]-[timestamp]"
+type: COMPONENT_CONTRACT
+version: 1.0.0
+created: ""
+componentAnalyst: "" # Sub-agent identifier
+
+# ===== COMPONENT IDENTIFICATION =====
+componentInfo:
+  name: ""
+  displayName: ""
+  filePath: ""
+  category: "" # ui | dashboard | practice-planner | skills-academy | team | admin | gamification | misc
+  parentPage: ""
+  pageUrl: ""
+  complexity: "" # simple | moderate | complex
+  lineCount: 0
+  
+# ===== FUNCTIONAL ANALYSIS =====
+functionalAnalysis:
+  purpose: ""
+  primaryFunction: ""
+  secondaryFunctions: []
+  userInteractions:
+    - interaction: ""
+      trigger: ""
+      result: ""
+  businessLogic: ""
+  stateManagement:
+    hasLocalState: false
+    stateVariables: []
+    stateManagementPattern: "" # useState | useReducer | context | external
+  
+# ===== DATA INTEGRATION ANALYSIS =====
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "" # direct | hook | context | none
+  connectionMethod: "" # supabase.from() | custom hook | context provider
+  
+  supabaseTables:
+    - tableName: ""
+      operations: [] # select | insert | update | delete | rpc
+      purpose: ""
+      dataFlow: "" # component -> table | table -> component | bidirectional
+      queryExample: ""
+      
+  realTimeSubscriptions: []
+  
+# ===== CODE ANALYSIS =====
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements:
+    - element: ""
+      type: "" # data | text | configuration
+      location: ""
+      shouldBeDatabase: false
+      
+  mockDataUsage:
+    - mockData: ""
+      location: ""
+      purpose: ""
+      
+  realDataPercentage: 0 # 0-100%
+  
+  imports:
+    reactComponents: []
+    hooks: []
+    utilities: []
+    types: []
+    externalLibraries: []
+    
+# ===== DEPENDENCIES ANALYSIS =====
+dependencies:
+  hooks:
+    - hookName: ""
+      filePath: ""
+      purpose: ""
+      supabaseConnection: false
+      
+  contexts:
+    - contextName: ""
+      filePath: ""
+      purpose: ""
+      
+  utilities:
+    - utilityName: ""
+      filePath: ""
+      purpose: ""
+      
+  externalLibraries:
+    - library: ""
+      usage: ""
+      
+  childComponents:
+    - componentName: ""
+      filePath: ""
+      relationship: ""
+
+# ===== SUPABASE TABLE DETAILS =====
+supabaseTableDetails:
+  tablesUsed:
+    - tableName: ""
+      schema: ""
+      primaryPurpose: ""
+      accessPattern: ""
+      
+  tableRelationships:
+    - relationship: ""
+      tables: []
+      joinType: ""
+      
+  queryPatterns:
+    - pattern: ""
+      frequency: ""
+      performance: ""
+      
+  dataTransformations:
+    - transformation: ""
+      inputFormat: ""
+      outputFormat: ""
+      
+  rpcFunctions:
+    - functionName: ""
+      purpose: ""
+      parameters: []
+
+# ===== PROPS & INTERFACE ANALYSIS =====
+interfaceAnalysis:
+  props:
+    - propName: ""
+      type: ""
+      required: false
+      purpose: ""
+      
+  events:
+    - eventName: ""
+      purpose: ""
+      dataFlow: ""
+      
+  callbacks:
+    - callbackName: ""
+      purpose: ""
+      parameters: []
+
+# ===== MVP READINESS ASSESSMENT =====
+mvpReadiness:
+  isProductionReady: false
+  readinessScore: 0 # 0-100%
+  
+  blockers:
+    - blocker: ""
+      severity: "" # critical | high | medium | low
+      description: ""
+      
+  improvements:
+    - improvement: ""
+      priority: "" # critical | high | medium | low
+      effort: "" # small | medium | large
+      
+  priority: "" # critical | high | medium | low
+  
+  mvpRequirements:
+    hasRealData: false
+    hasErrorHandling: false
+    isMobileResponsive: false
+    hasAccessibility: false
+    performsWell: false
+
+# ===== TESTING STATUS =====
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes:
+    - unit: false
+    - integration: false
+    - e2e: false
+    
+  testFiles: []
+  
+  testingNeeds:
+    - testType: ""
+      priority: ""
+      description: ""
+
+# ===== DOCUMENTATION STATUS =====
+documentation:
+  hasDocumentation: false
+  documentationQuality: "" # excellent | good | fair | poor | none
+  documentationLocation: ""
+  
+  needsDocumentation:
+    - area: ""
+      priority: ""
+      description: ""
+      
+  hasTypeDefinitions: false
+  hasComments: false
+  hasExamples: false
+
+# ===== PERFORMANCE ANALYSIS =====
+performance:
+  hasPerformanceIssues: false
+  performanceIssues:
+    - issue: ""
+      impact: ""
+      solution: ""
+      
+  optimizationOpportunities:
+    - opportunity: ""
+      benefit: ""
+      effort: ""
+      
+  renderingPattern: "" # static | dynamic | conditional
+  reRenderTriggers: []
+
+# ===== ACCESSIBILITY ANALYSIS =====
+accessibility:
+  hasAccessibilityFeatures: false
+  accessibilityFeatures:
+    - feature: ""
+      implementation: ""
+      
+  accessibilityIssues:
+    - issue: ""
+      severity: ""
+      solution: ""
+      
+  wcagCompliance: "" # AA | A | none
+
+# ===== SECURITY ANALYSIS =====
+security:
+  hasSecurityConsiderations: false
+  securityFeatures:
+    - feature: ""
+      implementation: ""
+      
+  securityConcerns:
+    - concern: ""
+      risk: ""
+      mitigation: ""
+      
+  dataValidation: false
+  inputSanitization: false
+
+# ===== INTEGRATION POINTS =====
+integrationPoints:
+  parentComponents: []
+  childComponents: []
+  siblingComponents: []
+  
+  externalIntegrations:
+    - integration: ""
+      type: ""
+      purpose: ""
+      
+  apiEndpoints: []
+  eventHandlers: []
+
+# ===== RECOMMENDATIONS =====
+recommendations:
+  immediate:
+    - recommendation: ""
+      priority: ""
+      effort: ""
+      
+  shortTerm:
+    - recommendation: ""
+      priority: ""
+      effort: ""
+      
+  longTerm:
+    - recommendation: ""
+      priority: ""
+      effort: ""
+
+# ===== ANALYSIS METADATA =====
+analysisMetadata:
+  analysisDate: ""
+  analysisTime: ""
+  analyst: ""
+  reviewStatus: "" # pending | reviewed | approved
+  confidence: "" # high | medium | low
+  
+  analysisNotes: []
+  followUpRequired: false
+  followUpItems: []
+  
+# ===== COMPONENT CLASSIFICATION =====
+classification:
+  componentType: "" # presentational | container | hybrid
+  reusability: "" # high | medium | low
+  businessCriticality: "" # critical | important | nice-to-have
+  userFacing: true
+  
+  tags: []
+  keywords: []

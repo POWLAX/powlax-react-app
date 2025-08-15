@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { Filter, Plus, Star, ChevronDown, ChevronRight, Video, Link, Beaker, User, Search, Play } from 'lucide-react'
+import { toast } from 'sonner'
 import { useDrills } from '@/hooks/useDrills'
 import { useFavorites } from '@/hooks/useFavorites'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -52,7 +53,10 @@ interface Drill {
 }
 
 interface DrillLibraryProps {
-  onAddDrill: (drill: Drill) => void
+  onAddDrill?: (drill: Drill) => void
+  onSelectDrill?: (drill: Drill) => void  // Legacy prop name for compatibility
+  onRemoveDrill?: (drillId: string) => void
+  selectedDrillIds?: string[]
   onSelectStrategy?: (strategy: any) => void
   selectedStrategies?: string[]
   isMobile?: boolean
@@ -60,7 +64,10 @@ interface DrillLibraryProps {
 }
 
 export default function DrillLibraryTabbed({ 
-  onAddDrill, 
+  onAddDrill,
+  onSelectDrill,
+  onRemoveDrill,
+  selectedDrillIds = [],
   onSelectStrategy,
   selectedStrategies = [],
   isMobile = false,
@@ -87,8 +94,8 @@ export default function DrillLibraryTabbed({
   const [selectedGamePhases, setSelectedGamePhases] = useState<string[]>([])
   const [selectedDrillTypes, setSelectedDrillTypes] = useState<string[]>([])
   
-  // Mobile drill selection state
-  const [selectedDrillsForMobile, setSelectedDrillsForMobile] = useState<string[]>([])
+  // Mobile drill notifications state
+  const [drillNotifications, setDrillNotifications] = useState<{[drillId: string]: {message: string, timestamp: number}}>({})
   const [currentTab, setCurrentTab] = useState('drills')
 
   // Get unique drill categories from drills (Concept Drills, Skill Development, Admin, Live Play)
@@ -173,7 +180,7 @@ export default function DrillLibraryTabbed({
   }
 
   const handleAddCustomDrill = (drill: Drill) => {
-    onAddDrill(drill)
+    handleAddDrillUnified(drill)
     setShowAddDrillModal(false)
   }
 
@@ -209,35 +216,59 @@ export default function DrillLibraryTabbed({
 
   const activeFilterCount = selectedGamePhases.length + selectedDrillTypes.length
 
-  // Handle mobile drill selection
-  const handleMobileDrillToggle = (drillId: string) => {
-    if (selectedDrillsForMobile.includes(drillId)) {
-      setSelectedDrillsForMobile(selectedDrillsForMobile.filter(id => id !== drillId))
-    } else {
-      setSelectedDrillsForMobile([...selectedDrillsForMobile, drillId])
+  // Unified drill handler - works with both onAddDrill and onSelectDrill prop names
+  const handleAddDrillUnified = (drill: Drill) => {
+    if (onAddDrill) {
+      onAddDrill(drill)
+    } else if (onSelectDrill) {
+      onSelectDrill(drill)
     }
   }
 
-  const handleAddSelectedDrills = () => {
-    selectedDrillsForMobile.forEach(drillId => {
-      const drill = supabaseDrills.find(d => d.id === drillId)
-      if (drill) {
-        onAddDrill(drill)
+  // Handle mobile drill selection - MOBILE ONLY: immediate add/remove with notifications
+  const handleMobileDrillToggle = (drillId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const drill = supabaseDrills.find(d => d.id === drillId)
+    if (!drill) return
+
+    const isChecked = e.target.checked
+    
+    if (isChecked) {
+      // Add drill immediately
+      handleAddDrillUnified(drill)
+      // Show "Drill Added" notification
+      setDrillNotifications(prev => ({
+        ...prev,
+        [drillId]: { message: 'Drill Added', timestamp: Date.now() }
+      }))
+      toast.success(`Added "${drill.title}" to practice`)
+    } else {
+      // Remove drill if onRemoveDrill function is provided
+      if (onRemoveDrill) {
+        onRemoveDrill(drillId)
       }
-    })
-    setSelectedDrillsForMobile([])
+      // Show "Drill Removed" notification
+      setDrillNotifications(prev => ({
+        ...prev,
+        [drillId]: { message: 'Drill Removed', timestamp: Date.now() }
+      }))
+      toast.success(`Removed "${drill.title}" from practice`)
+    }
+
+    // Clear notification after 1.5 seconds
+    setTimeout(() => {
+      setDrillNotifications(prev => {
+        const updated = { ...prev }
+        delete updated[drillId]
+        return updated
+      })
+    }, 1500)
   }
 
-  // Handle tab switching with validation
+  // Batch operations removed - mobile now uses immediate add/remove
+
+  // Handle tab switching - no validation needed since mobile uses immediate operations
   const handleTabChange = (value: string) => {
-    if (isMobile && selectedDrillsForMobile.length > 0 && value !== currentTab) {
-      if (confirm('Please add the selected drills before switching tabs. Do you want to add them now?')) {
-        handleAddSelectedDrills()
-        setCurrentTab(value)
-      }
-    } else {
-      setCurrentTab(value)
-    }
+    setCurrentTab(value)
   }
 
   if (loading) {
@@ -271,15 +302,28 @@ export default function DrillLibraryTabbed({
         {/* Title row with Plus button on left */}
         <div className="flex items-center gap-2">
           {isMobile ? (
-            <input
-              type="checkbox"
-              checked={selectedDrillsForMobile.includes(drill.id)}
-              onChange={() => handleMobileDrillToggle(drill.id)}
-              className="flex-shrink-0"
-            />
+            <div className="relative flex-shrink-0">
+              <input
+                type="checkbox"
+                checked={selectedDrillIds.includes(drill.id)}
+                onChange={(e) => {
+                  e.stopPropagation()
+                  handleMobileDrillToggle(drill.id, e)
+                }}
+                onClick={(e) => e.stopPropagation()}
+                className="flex-shrink-0"
+              />
+              {/* Notification overlay - MOBILE ONLY */}
+              {drillNotifications[drill.id] && (
+                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-green-600 text-white text-xs px-2 py-1 rounded shadow-lg z-50 whitespace-nowrap">
+                  {drillNotifications[drill.id].message}
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-2 border-r-2 border-t-2 border-transparent border-t-green-600"></div>
+                </div>
+              )}
+            </div>
           ) : (
             <button
-              onClick={() => onAddDrill(drill)}
+              onClick={() => handleAddDrillUnified(drill)}
               className="p-1 border border-gray-300 hover:bg-gray-50 rounded flex-shrink-0"
               title="Add to Practice"
             >
@@ -291,7 +335,7 @@ export default function DrillLibraryTabbed({
           {/* Edit button for any drill - show for drill owner or admin */}
           {user && (
             (drill.user_id === user.id) || 
-            (user.role === 'administrator' || user.role === 'admin')
+            (user?.roles?.includes('administrator'))
           ) && (
             <button
               onClick={(e) => {
@@ -403,27 +447,6 @@ export default function DrillLibraryTabbed({
           
           {/* Drills List */}
           <div className="flex-1 overflow-y-auto relative">
-            {/* Mobile: Show selected drills accordion */}
-            {isMobile && selectedDrillsForMobile.length > 0 && (
-              <div className="mx-4 mt-4 mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-medium text-sm">Drills to Add ({selectedDrillsForMobile.length})</h4>
-                  <button
-                    onClick={handleAddSelectedDrills}
-                    className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-                  >
-                    Add to Plan
-                  </button>
-                </div>
-                <button
-                  onClick={() => setSelectedDrillsForMobile([])}
-                  className="text-xs text-blue-600 hover:text-blue-700"
-                >
-                  Clear Selection
-                </button>
-              </div>
-            )}
-            
             {/* Drill Categories */}
             <div className="px-4 pt-4 pb-4 space-y-2">
               {Object.entries(filteredDrillsByCategory).map(([category, drills]) => {

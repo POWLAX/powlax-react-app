@@ -1,0 +1,127 @@
+# Practice Planner Component Contract: DrillCard
+contractId: "component-drill-card-20250113"
+componentInfo:
+  name: "DrillCard"
+  filePath: "src/components/practice-planner/DrillCard.tsx"
+  category: "practice-planner"
+  parentPage: "Practice Planner (/teams/[teamId]/practiceplan)"
+  complexity: "complex"
+  
+functionalAnalysis:
+  purpose: "Interactive drill display card for practice timeline with editing capabilities and content access. Core component for drill management in timeline."
+  primaryFunction: "Individual drill display with timeline integration and content access"
+  userInteractions: 
+    - "View drill information with start time calculation"
+    - "Edit drill duration inline with number input"
+    - "Move drill up/down in timeline sequence"
+    - "Remove drill from timeline"
+    - "Add/edit coaching notes with inline editing"
+    - "Access drill study content via Study button"
+    - "Add parallel activities to time slot"
+    - "View content indicators (video, lab, images)"
+  businessLogic: "Dual layout modes (single vs parallel), time calculations, inline editing for duration and notes, content detection and indicators"
+  stateManagement: "Local state for editing modes (notes, duration), temporary values for editing"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements: []
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: []
+  externalLibraries: 
+    - "lucide-react (Play, Trash2, ChevronUp, ChevronDown, X, Monitor, Circle, Image icons)"
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: 
+    - "Handles dual drill data formats (duration vs duration_minutes)"
+    - "Processes various URL formats for content detection"
+    - "Manages parallel vs single drill layout switching"
+    
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: 
+    - "Could add drag-and-drop for reordering"
+    - "Could implement auto-save for notes"
+    - "Could add drill templates"
+    - "Could implement time conflict warnings"
+  priority: "critical"
+  
+implementationHistory:
+  - id: "BF-2025-01-15-001"
+    date: "2025-01-15"
+    type: "bug-fix"
+    description: "Fixed drill card time cascading on practice timeline"
+    changes:
+      - "Added custom memo comparison function to properly re-render when startTime changes"
+      - "Ensures drill cards update when duration changes affect subsequent drill times"
+    validation:
+      - "Times now cascade correctly when drill durations are modified"
+      - "Performance optimized with proper memo dependencies"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation: 
+    - "Parallel vs single drill layouts"
+    - "Inline editing workflows"
+    - "Content detection logic"
+    
+componentInteractions:
+  callsComponents: []
+  calledByComponents: 
+    - "PracticeTimelineWithParallel"
+  sharedState: []
+  eventCommunication: 
+    - "onUpdate callback for drill modifications"
+    - "onRemove callback for drill removal"
+    - "onMoveUp/onMoveDown for drill reordering"
+    - "onAddParallel for parallel activity addition"
+    - "onStudyDrill for content access"
+  propsPassedTo: []
+  propsReceivedFrom: 
+    - "drill object with full metadata"
+    - "startTime for timeline display"
+    - "index for position tracking"
+    - "Navigation callbacks (onMoveUp, onMoveDown)"
+    - "isParallel flag for layout mode"
+    - "parallelLane number for parallel display"
+    
+userJourneyContext:
+  userFlows: 
+    - "Timeline Management: View drill in timeline → Edit duration → Move position → Add notes"
+    - "Content Access: See drill in timeline → Click Study → View detailed content"
+    - "Parallel Activities: Have single drill → Add parallel → Manage multiple activities"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["coach"]
+  featureArea: "practice"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: true
+  duplicateComponents: 
+    - "DrillCard variations in DrillLibraryTabbed (different context)"
+    - "Drill display components in other areas"
+  primaryComponent: "DrillCard (timeline version)"
+  reasonForDuplication: "Different contexts require different interactions (library vs timeline)"
+  consolidationStrategy: "Could consolidate with context-aware props"
+  supabaseIntegrationWinner: "N/A - presentation component only"

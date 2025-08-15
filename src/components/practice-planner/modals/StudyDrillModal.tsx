@@ -144,11 +144,24 @@ export default function StudyDrillModal({ isOpen, onClose, drill, onUpdateDrill 
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className={`max-w-3xl ${modalHeight} p-0 overflow-hidden bg-white ${contentClass}`}>
         <DialogHeader className="px-6 pt-6 pb-4 border-b flex-shrink-0">
-          <DialogTitle className="flex items-center gap-2 text-xl pr-48">
-            <BookOpen className="h-5 w-5" />
-            {drill?.title || ''}
-          </DialogTitle>
-          <div className="absolute top-6 right-6 flex items-center gap-2">
+          <div className="flex items-center justify-between">
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <BookOpen className="h-5 w-5" />
+              {drill?.title || ''}
+              {/* Favorite button next to title */}
+              <button 
+                onClick={async () => {
+                  if (drill) {
+                    await toggleFavorite(drill.id, 'drill')
+                  }
+                }}
+                className="p-1.5 hover:bg-gray-100 rounded ml-2"
+                title={drill && isFavorite(drill.id, 'drill') ? 'Remove from favorites' : 'Add to favorites'}
+              >
+                <Star className={`h-6 w-6 ${drill && isFavorite(drill.id, 'drill') ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400 hover:text-yellow-500'}`} />
+              </button>
+            </DialogTitle>
+            {/* PDF download button on the right */}
             {drill?.master_pdf_url && (
               <button 
                 onClick={() => window.open(drill.master_pdf_url, '_blank')}
@@ -158,17 +171,6 @@ export default function StudyDrillModal({ isOpen, onClose, drill, onUpdateDrill 
                 Download Printable Playbook
               </button>
             )}
-            <button 
-              onClick={async () => {
-                if (drill) {
-                  await toggleFavorite(drill.id, 'drill')
-                }
-              }}
-              className="p-1.5 hover:bg-gray-100 rounded"
-              title={drill && isFavorite(drill.id, 'drill') ? 'Remove from favorites' : 'Add to favorites'}
-            >
-              <Star className={`h-6 w-6 ${drill && isFavorite(drill.id, 'drill') ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400 hover:text-yellow-500'}`} />
-            </button>
           </div>
         </DialogHeader>
 
@@ -295,16 +297,15 @@ export default function StudyDrillModal({ isOpen, onClose, drill, onUpdateDrill 
                         {currentDiagramIndex + 1} of {labUrls.length}
                       </Badge>
                     )}
-                    {/* Fullscreen button for mobile */}
+                    {/* Fullscreen button for mobile - opens in new tab */}
                     <button
                       onClick={() => {
-                        const iframe = document.querySelector(`#drill-diagram-${drill.id}`) as HTMLIFrameElement
-                        if (iframe && iframe.requestFullscreen) {
-                          iframe.requestFullscreen()
-                        }
+                        // Open the current diagram URL in a new tab for full viewing
+                        window.open(labUrls[currentDiagramIndex], '_blank')
                       }}
                       className="md:hidden p-2 bg-white hover:bg-gray-100 rounded-lg shadow-md border border-gray-200"
-                      aria-label="Fullscreen"
+                      aria-label="Open in fullscreen"
+                      title="Open diagram in new tab"
                     >
                       <Maximize2 className="h-4 w-4" />
                     </button>

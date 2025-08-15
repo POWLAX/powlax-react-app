@@ -1,0 +1,165 @@
+# Team Header Component Contract
+contractId: "component-team-header-20250113"
+componentInfo:
+  name: "TeamHeader"
+  filePath: "src/components/teams/dashboard/TeamHeader.tsx"
+  category: "Team Management"
+  parentPage: "Team Dashboard"
+  complexity: "moderate"
+
+functionalAnalysis:
+  purpose: "Primary team identification header with emergency contacts and quick settings access"
+  primaryFunction: "Team branding display with role-based action buttons and emergency contact modal"
+  userInteractions:
+    - "View team identification and metadata"
+    - "Access emergency contacts in modal"
+    - "Navigate to team settings (coaches only)"
+    - "View weather information for field conditions"
+    - "See coach roster preview"
+    - "View subscription tier status"
+  businessLogic: "Role-based button visibility, emergency contact filtering from team members"
+  stateManagement: "Local state for emergency modal, props-based team and member data"
+
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "direct"
+  supabaseTables:
+    - "teams"
+    - "team_members"
+    - "clubs"
+  tableUsage:
+    - tableName: "teams"
+      operations: ["select"]
+      purpose: "Display team information and branding"
+      dataFlow: "Team prop contains full team data including name, age_group, level, gender, subscription_tier"
+    - tableName: "team_members"
+      operations: ["select"]
+      purpose: "Filter coaches for emergency contacts and roster preview"
+      dataFlow: "Members prop filtered for head_coach and assistant_coach roles"
+    - tableName: "clubs"
+      operations: ["select"]
+      purpose: "Display organization hierarchy breadcrumb"
+      dataFlow: "Team.organization relationship for parent organization display"
+
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements:
+    - "Weather data (currentWeather object) - mock data structure"
+    - "Team logo generation from first letter"
+    - "Emergency contact phone numbers (not from database)"
+  mockDataUsage:
+    - "Weather information (temp: 72, condition: 'sunny')"
+    - "Coach phone numbers in emergency modal"
+  realDataPercentage: 80
+
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: []
+  externalLibraries:
+    - "lucide-react - icons"
+    - "next/link - navigation"
+
+supabaseTableDetails:
+  tablesUsed:
+    - "teams"
+    - "team_members" 
+    - "clubs"
+  tableRelationships:
+    - "teams.club_id -> clubs.id"
+    - "team_members.team_id -> teams.id"
+    - "team_members.user_id -> users.id"
+  queryPatterns:
+    - "Team data passed as prop from parent component"
+    - "Member filtering by role for coach identification"
+    - "Organization hierarchy traversal"
+  dataTransformations:
+    - "Role filtering for coaches (head_coach, assistant_coach)"
+    - "Team initial extraction for avatar"
+    - "Subscription tier badge styling"
+
+mvpReadiness:
+  isProductionReady: false
+  blockers:
+    - "Mock weather data needs real API integration"
+    - "Emergency contact phone numbers not from database"
+  improvements:
+    - "Integrate real weather API for field conditions"
+    - "Add team logo upload functionality"
+    - "Store coach emergency contact information in database"
+    - "Add field location management"
+  priority: "high"
+
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation:
+    - "Emergency contact system setup"
+    - "Weather API integration requirements"
+    - "Team branding and logo management"
+
+componentInteractions:
+  callsComponents:
+    - "Badge (UI)"
+    - "Button (UI)"
+    - "Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger (UI)"
+    - "Avatar, AvatarFallback (UI)"
+    - "Link (Next.js)"
+  calledByComponents:
+    - "Team Dashboard page"
+  sharedState: []
+  eventCommunication:
+    - "Emergency modal open/close state"
+  propsPassedTo: []
+  propsReceivedFrom:
+    - "team: Team - complete team data object"
+    - "userRole: string - current user's role on team"
+    - "members: UserTeamRole[] - all team members"
+
+userJourneyContext:
+  userFlows:
+    - "Coach->Team Dashboard->Emergency Contacts"
+    - "Any User->Team Dashboard->View Team Info"
+    - "Coach->Team Dashboard->Settings"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["coach", "parent", "player"]
+  featureArea: "teams"
+  journeyStage: "core-loop"
+
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "TeamHeader"
+  reasonForDuplication: "N/A"
+  consolidationStrategy: "N/A"
+  supabaseIntegrationWinner: "TeamHeader"
+
+# Team Management Specific Analysis
+teamManagementContext:
+  roleBasedDisplay: true
+  supportedRoles: ["head_coach", "assistant_coach", "team_admin", "player", "parent"]
+  teamDataIntegration: "Direct via team prop with full metadata"
+  emergencyFeatures:
+    - "Coach contact modal with call buttons"
+    - "911 emergency button"
+    - "Field-accessible emergency contacts"
+  organizationHierarchy: "Club/organization breadcrumb display"
+  
+criticalTeamFeatures:
+  teamIdentification: "Team name, age group, level, gender display"
+  emergencyAccess: "Quick access emergency contacts for field use"
+  roleBasedActions: "Settings access restricted to coaches"
+  subscriptionDisplay: "Subscription tier badge for feature access awareness"
+  weatherIntegration: "Field conditions display (currently mock data)"
+  
+fieldAccessibility:
+  mobileOptimized: true
+  largeTargets: "48px minimum touch targets for field use"
+  emergencyPriority: "Emergency button prominently placed and colored"
+  weatherDisplay: "Current conditions for practice decisions"

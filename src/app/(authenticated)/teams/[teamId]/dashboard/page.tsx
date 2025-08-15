@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation'
 import { useTeam } from '@/hooks/useTeams'
 import { useTeamDashboard } from '@/hooks/useTeamDashboard'
-import { useSupabase } from '@/hooks/useSupabase'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
 import { Loader2, AlertCircle } from 'lucide-react'
 import { TeamHeader } from '@/components/teams/dashboard/TeamHeader'
 import { CoachQuickActions } from '@/components/teams/dashboard/CoachQuickActions'
@@ -20,7 +20,7 @@ import Link from 'next/link'
 export default function TeamDashboardPage() {
   const params = useParams()
   const teamId = params.teamId as string
-  const { user } = useSupabase()
+  const { user } = useAuth()
   const { team, members, loading: teamLoading, error: teamError } = useTeam(teamId)
   const { 
     upcomingEvents, 

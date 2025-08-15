@@ -1,0 +1,99 @@
+# Magic Link Authentication Page Orchestration Contract
+contractId: "page-auth-magic-link-20250113"
+
+pageInfo:
+  route: "/auth/magic-link"
+  filePath: "src/app/auth/magic-link/page.tsx"
+  pageType: "client"
+  category: "authentication"
+  dynamicSegments: []
+  
+renderingStrategy:
+  componentType: "Client Component"
+  dataFetching: "client-side"
+  streamingEnabled: false
+  suspenseBoundaries: []
+  errorBoundaries: []
+  
+dataOrchestration:
+  serverDataFetching: []
+  clientDataFetching:
+    - hook: "useAuth (checkAuth method)"
+      trigger: "On mount with URL params"
+      tables: ["users"]
+      realtime: false
+  propsFlow: []
+        
+componentComposition:
+  componentsUsed: []
+  layoutUsed: "Root Layout only"
+  providerDependencies: ["SupabaseAuthProvider"]
+  
+routingLogic:
+  guards: []
+  navigation:
+    - triggers: ["Successful authentication"]
+      destinations: ["/dashboard"]
+      method: "router.push"
+    - triggers: ["Authentication error"]
+      destinations: ["/auth/login"]
+      method: "router.push"
+  dynamicRouting: []
+  
+pageSpecificLogic:
+  businessLogic: "Magic link token processing, authentication verification, status display with automatic redirect"
+  stateManagement: "useState for status messages and error states"
+  sideEffects: ["URL searchParams parsing", "Automatic redirect with setTimeout", "Console error logging"]
+  formHandling: "None - automated processing"
+  
+serverClientBoundary:
+  serverComponents: []
+  clientComponents: ["MagicLinkPage component"]
+  boundaryLocation: "Page level - entire page is client component"
+  dataSerializationPoints: []
+  
+performancePatterns:
+  prefetching: []
+  lazyLoading: []
+  codeSpliiting: []
+  optimizations: ["Single useEffect for all processing"]
+  
+securityPatterns:
+  authentication: "Magic link token validation via checkAuth"
+  authorization: "None - processing authentication"
+  dataValidation: "URL parameter validation (token, error)"
+  csrfProtection: false
+  
+integrationPoints:
+  supabaseUsage:
+    directQueries: false
+    throughHooks: true
+    serverSideOnly: false
+  externalAPIs: []
+  webhooks: []
+  realtimeSubscriptions: []
+
+magicLinkFlow:
+  tokenSources: ["URL searchParams"]
+  processingSteps:
+    1. "Parse token and error from URL"
+    2. "Validate token exists"
+    3. "Call checkAuth to verify authentication"
+    4. "Display success/error status"
+    5. "Automatic redirect or manual retry"
+  errorHandling:
+    - "URL error parameter"
+    - "Missing token"
+    - "Authentication verification failure"
+  userExperience:
+    - "Immediate processing on page load"
+    - "Clear status messages"
+    - "Loading spinner for processing state"
+    - "Error state with back to login option"
+
+analysisNotes:
+  - "Automated processing page - minimal user interaction"
+  - "Good error handling for various failure modes"
+  - "Clean separation of success/error paths"
+  - "Integrates with existing auth system via checkAuth"
+  - "Graceful fallback to login page on errors"

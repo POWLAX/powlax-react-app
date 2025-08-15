@@ -17,8 +17,8 @@ All POWLAX agents MUST follow this protocol before starting any development serv
 
 ### **STEP 1: Check for Running Servers**
 ```bash
-# Check what's running on common ports
-lsof -i :3000 :3001 :3002 :3003
+# Check what's running on common ports (prioritize 3002 for this branch)
+lsof -i :3002 :3000 :3001 :3003
 ```
 
 ### **STEP 2: Identify Active Development Server**
@@ -29,8 +29,8 @@ ps aux | grep -E "(next|npm.*dev)" | grep -v grep
 
 ### **STEP 3: Test Server Connectivity**
 ```bash
-# Test if server is responding
-curl -s http://localhost:3000/ | head -5
+# Test if server is responding (check branch-specific port first)
+curl -s http://localhost:3002/ | head -5 || curl -s http://localhost:3000/ | head -5
 ```
 
 ### **STEP 4: Report Status to User**
@@ -39,8 +39,8 @@ curl -s http://localhost:3000/ | head -5
 - ✅ "I'll use your existing server instead of starting a new one"
 
 **If no server found:**
-- ❓ "No development server detected. Should I start one for you?"
-- ⚠️ **WAIT for user confirmation before starting**
+- ❓ "No development server detected. Starting on port 3002 (Claude-to-Claude-Sub-Agent-Work-Flow branch)"
+- ✅ **AUTO-START on port 3002 for this branch** (matches CLAUDE.md requirements)
 
 ## **AGENT IMPLEMENTATION REQUIREMENTS**
 

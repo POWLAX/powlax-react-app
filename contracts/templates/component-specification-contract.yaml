@@ -1,0 +1,253 @@
+contract:
+  id: component-spec-template-001
+  title: "Component Specification Contract Template"
+  version: "1.0.0"
+  created: "2025-01-16"
+  type: "component-specification"
+  priority: high
+  
+purpose: |
+  Template for creating detailed component specifications that include:
+  1. Exact functionality requirements
+  2. Database table dependencies and usage patterns
+  3. Component relationships and data flow
+  4. Quality gates and success criteria
+  5. Testing requirements and validation
+  
+  This ensures sub-agents have precise specifications for what to build
+  and how each component should integrate with the POWLAX system.
+
+template_parameters:
+  component_name: "[COMPONENT_NAME]"
+  component_type: "[client|server|mixed]"
+  feature_area: "[practice-planner|skills-academy|teams|dashboard|auth]"
+  database_tables: ["[TABLE_1]", "[TABLE_2]"]
+  parent_components: ["[PARENT_1]", "[PARENT_2]"]
+  child_components: ["[CHILD_1]", "[CHILD_2]"]
+  hooks_required: ["[HOOK_1]", "[HOOK_2]"]
+  api_endpoints: ["[ENDPOINT_1]", "[ENDPOINT_2]"]
+
+specification_structure:
+  functional_requirements:
+    primary_purpose: "[What this component does for users]"
+    user_interactions: 
+      - "[User action 1] → [System response 1]"
+      - "[User action 2] → [System response 2]"
+    business_rules:
+      - "[Business rule 1 with rationale]"
+      - "[Business rule 2 with rationale]"
+    edge_cases:
+      - "[Edge case 1] → [Expected behavior]"
+      - "[Edge case 2] → [Expected behavior]"
+  
+  technical_requirements:
+    component_type: "[client|server|mixed]"
+    props_interface: |
+      interface ComponentProps {
+        // Define exact prop structure
+        requiredProp: string;
+        optionalProp?: number;
+      }
+    state_management:
+      local_state: ["[state1]", "[state2]"]
+      shared_state: ["[context1]", "[hook1]"]
+      external_state: ["[api1]", "[database_query1]"]
+    
+  database_integration:
+    primary_tables:
+      - table_name: "[TABLE_NAME]"
+        usage_pattern: "[SELECT|INSERT|UPDATE|DELETE]"
+        purpose: "[Why this component needs this table]"
+        queries:
+          - description: "[What data is fetched/modified]"
+            query_type: "[SELECT|INSERT|UPDATE|DELETE]"
+            performance_requirements: "[Response time, caching needs]"
+    
+    relationships:
+      - from_table: "[TABLE_A]"
+        to_table: "[TABLE_B]"
+        relationship_type: "[foreign_key|junction|array_column]"
+        component_usage: "[How component uses this relationship]"
+  
+  component_relationships:
+    parent_components:
+      - component: "[PARENT_NAME]"
+        relationship: "[How parent uses this component]"
+        data_flow: "[What data parent passes down]"
+    
+    child_components:
+      - component: "[CHILD_NAME]"
+        relationship: "[How this component uses child]"
+        data_flow: "[What data is passed to child]"
+    
+    sibling_components:
+      - component: "[SIBLING_NAME]"
+        shared_data: "[What data/state is shared]"
+        communication: "[How components communicate]"
+  
+  performance_requirements:
+    load_time: "[Maximum acceptable load time]"
+    render_performance: "[React profiler requirements]"
+    memory_usage: "[Memory constraints]"
+    mobile_performance: "[Mobile-specific requirements]"
+    caching_strategy: "[What should be cached and how]"
+  
+  quality_gates:
+    functionality:
+      - criteria: "[Functional requirement 1]"
+        validation: "[How to test this requirement]"
+      - criteria: "[Functional requirement 2]"
+        validation: "[How to test this requirement]"
+    
+    performance:
+      - criteria: "Load time < [X]ms"
+        validation: "Performance profiler measurement"
+      - criteria: "Mobile responsive on 375px+"
+        validation: "Browser dev tools testing"
+    
+    testing:
+      - criteria: "Unit tests for all functions"
+        validation: "Jest test coverage > 80%"
+      - criteria: "Integration tests for database queries"
+        validation: "Supabase query tests passing"
+      - criteria: "E2E tests for user interactions"
+        validation: "Playwright tests passing"
+    
+    code_quality:
+      - criteria: "No TypeScript errors"
+        validation: "tsc --noEmit passes"
+      - criteria: "ESLint clean"
+        validation: "npm run lint passes"
+      - criteria: "No console.log statements"
+        validation: "Code review checklist"
+
+success_criteria:
+  functional_completeness:
+    - "All user interactions work as specified"
+    - "All business rules are enforced"
+    - "All edge cases are handled gracefully"
+    - "Error states are user-friendly"
+  
+  technical_completeness:
+    - "Component follows POWLAX patterns"
+    - "Database queries use correct table names"
+    - "Props interface is properly typed"
+    - "State management follows best practices"
+  
+  integration_completeness:
+    - "Component integrates with parent/child components"
+    - "Data flows work as specified"
+    - "No breaking changes to existing components"
+    - "API endpoints respond correctly"
+  
+  quality_completeness:
+    - "All quality gates pass"
+    - "Performance requirements met"
+    - "Tests provide adequate coverage"
+    - "Code quality standards met"
+
+validation_checklist:
+  database_validation:
+    - "[ ] All table names verified against PROJECT_INDEX.json"
+    - "[ ] No references to non-existent tables"
+    - "[ ] Query patterns follow POWLAX conventions"
+    - "[ ] RLS policies respected"
+  
+  component_validation:
+    - "[ ] Component follows established patterns"
+    - "[ ] Props interface is complete and typed"
+    - "[ ] Error handling is comprehensive"
+    - "[ ] Loading states are implemented"
+  
+  integration_validation:
+    - "[ ] Parent component integration tested"
+    - "[ ] Child component integration tested"
+    - "[ ] API endpoint integration tested"
+    - "[ ] Data flow validation complete"
+  
+  quality_validation:
+    - "[ ] All automated tests pass"
+    - "[ ] Performance benchmarks met"
+    - "[ ] Mobile responsiveness verified"
+    - "[ ] Accessibility requirements met"
+
+sub_agent_instructions:
+  preparation:
+    - "Read PROJECT_INDEX.json for technical foundation"
+    - "Read this contract for exact specifications"
+    - "Review existing similar components for patterns"
+    - "Verify all database table names are correct"
+  
+  implementation:
+    - "Follow exact prop interface specified"
+    - "Implement all user interactions as defined"
+    - "Use specified database tables only"
+    - "Follow POWLAX component patterns"
+  
+  testing:
+    - "Write unit tests for all functions"
+    - "Create integration tests for database queries"
+    - "Add E2E tests for user workflows"
+    - "Verify mobile responsiveness"
+  
+  validation:
+    - "Check all success criteria are met"
+    - "Validate all quality gates pass"
+    - "Confirm no breaking changes introduced"
+    - "Verify performance requirements met"
+
+response_format:
+  required_structure: |
+    {
+      "contractId": "component-spec-template-001",
+      "componentName": "[COMPONENT_NAME]",
+      "implementation": {
+        "summary": "Brief description of what was built",
+        "filesCreated": ["path/to/new/file1.tsx"],
+        "filesModified": ["path/to/modified/file1.tsx"],
+        "databaseQueries": [
+          {
+            "table": "table_name",
+            "operation": "SELECT|INSERT|UPDATE|DELETE",
+            "purpose": "Why this query is needed"
+          }
+        ]
+      },
+      "testing": {
+        "unitTests": { "created": 5, "passing": 5 },
+        "integrationTests": { "created": 2, "passing": 2 },
+        "e2eTests": { "created": 1, "passing": 1 },
+        "coverage": 85
+      },
+      "qualityMetrics": {
+        "score": 92,
+        "breakdown": {
+          "functionality": 95,
+          "performance": 90,
+          "mobile": 88,
+          "accessibility": 90
+        }
+      },
+      "validation": {
+        "successCriteriaMet": 12,
+        "totalSuccessCriteria": 12,
+        "qualityGatesPassed": 8,
+        "totalQualityGates": 8
+      },
+      "nextSteps": {
+        "required": [],
+        "recommended": ["Consider adding loading animations"]
+      },
+      "completionStatus": "COMPLETE"
+    }
+
+notes: |
+  This template ensures that every component specification includes:
+  1. Exact functional requirements with business context
+  2. Precise technical specifications including database usage
+  3. Clear component relationships and data flows
+  4. Measurable quality gates and success criteria
+  5. Comprehensive testing requirements
+  
+  Sub-agents use this specification to build components that integrate
+  perfectly with the existing POWLAX system while meeting all quality standards.

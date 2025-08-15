@@ -13,7 +13,7 @@ export type DisplayContext =
   | 'coach_view'       // Coach viewing players
   | 'team_roster'      // Team roster display
   | 'practice_plan'    // Practice planning
-  | 'admin'            // Admin views
+  | 'administrator'    // Administrator views
   | 'profile_edit';    // User editing their own profile
 
 export interface UserDisplayInfo {
@@ -52,7 +52,7 @@ export function getUserDisplayName(
     'coach_view', 
     'team_roster', 
     'practice_plan',
-    'admin'
+    'administrator'
   ];
 
   // User editing their own profile - show both

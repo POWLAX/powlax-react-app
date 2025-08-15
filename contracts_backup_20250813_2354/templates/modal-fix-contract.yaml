@@ -1,0 +1,94 @@
+# Modal Fix Contract Template
+# Use for any modal functionality issues
+
+contractTemplate:
+  type: MODAL_FIX
+  version: 1.0.0
+  
+  # Configurable Parameters
+  parameters:
+    modalNames: []         # e.g., ["VideoModal", "StrategyModal"]
+    component: ""          # e.g., "PracticePlanner"
+    currentIssue: ""       # e.g., "Not opening on click"
+    
+  # Standard Intent
+  intent:
+    goal: "Make {modalNames} fully functional"
+    scope:
+      - Modal opening/closing mechanism
+      - Content loading from database
+      - Mobile responsiveness
+      - Keyboard navigation
+      - Error handling
+    outOfScope:
+      - Modal styling changes
+      - New features
+      - Unrelated components
+    assumptions:
+      - Modal components exist in codebase
+      - Database tables have required data
+      - Supabase connection is working
+    risks:
+      - Breaking existing functionality
+      - Performance degradation
+      - Mobile layout issues
+      
+  # Standard Deliverables
+  deliverables:
+    code:
+      files:
+        - "{component}/modals/{modalName}.tsx"
+        - "{component}/hooks/use{modalName}.ts"
+      functions:
+        - "handle{modalName}Open"
+        - "handle{modalName}Close"
+        - "load{modalName}Content"
+    tests:
+      playwright:
+        - "tests/e2e/{component}-modals.spec.ts"
+      unit:
+        - "tests/unit/{modalName}.test.tsx"
+    documentation:
+      - "Update component state file"
+      - "Document breaking changes"
+      
+  # Success Criteria (Non-negotiable)
+  successCriteria:
+    functional:
+      - All modals open when triggered
+      - All modals close on ESC/click-outside
+      - Content loads from correct database table
+      - Loading states display during fetch
+      - Error states handle failures gracefully
+    performance:
+      - Opens within 300ms of click
+      - Content loads within 2 seconds
+      - No UI jank or flicker
+    quality:
+      - Zero console errors
+      - Zero console warnings
+      - No memory leaks
+    mobile:
+      - Touch targets ≥44px
+      - Responsive at 375px viewport
+      - Swipe-to-close works
+    testing:
+      - All Playwright tests pass
+      - 80% code coverage minimum
+      - Mobile viewport tests pass
+      
+  # Quality Gates
+  qualityGates:
+    buildMustPass: true
+    lintMaxErrors: 0
+    typeMaxErrors: 0
+    testCoverage: 80
+    mobileResponsive: true
+    performanceTarget: 3
+    
+  # State Management
+  stateTracking:
+    createStateFile: true
+    trackFunctionality: true
+    documentIssues: true
+    maintainHistory: true

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 
+// !IMPORTANT - WE WILL NOT BE USING THIS SYSTEM - MEMBERPRESS WEBHOOK ONLY!
+// This API is for development testing only - NO WordPress integration planned
+// Self-contained payment system with Stripe/PayPal will replace this
 // TODO: Add proper environment variables in Phase 2
 const MEMBERPRESS_API_URL = process.env.MEMBERPRESS_API_URL || ''
 const MEMBERPRESS_API_KEY = process.env.MEMBERPRESS_API_KEY || ''
@@ -137,9 +140,10 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Helper functions - Phase 1 placeholders, full implementation in Phase 2
+// !IMPORTANT - WE WILL NOT BE USING THIS SYSTEM - MEMBERPRESS WEBHOOK ONLY!
+// Helper functions - Development placeholders, will be replaced with Stripe integration
 async function checkMembershipStatus(userId: string): Promise<NextResponse> {
-  // TODO: Implement actual Memberpress API call
+  // !IMPORTANT - NO MEMBERPRESS API CALLS PLANNED! Stripe integration only.
   const mockStatus: MembershipStatus = {
     userId,
     isActive: false,
@@ -150,7 +154,7 @@ async function checkMembershipStatus(userId: string): Promise<NextResponse> {
   return NextResponse.json({
     success: true,
     data: mockStatus,
-    message: 'Phase 1 placeholder - full implementation coming in Phase 2'
+    message: '!IMPORTANT - NO MEMBERPRESS INTEGRATION! Self-contained payment system planned.'
   })
 }
 

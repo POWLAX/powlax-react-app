@@ -1,0 +1,247 @@
+schema_name,function_name,function_definition
+public,create_or_link_auth_user,"CREATE OR REPLACE FUNCTION public.create_or_link_auth_user(p_email text, p_user_id uuid, p_full_name text DEFAULT NULL::text, p_wordpress_id bigint DEFAULT NULL::bigint)
+ RETURNS uuid
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+DECLARE
+  v_auth_user_id UUID;
+BEGIN
+  -- Check if auth user already exists for this email
+  SELECT id INTO v_auth_user_id
+  FROM auth.users
+  WHERE email = p_email
+  LIMIT 1;
+  
+  IF v_auth_user_id IS NULL THEN
+    -- Create new auth user
+    INSERT INTO auth.users (
+      id,
+      instance_id,
+      email,
+      encrypted_password,
+      email_confirmed_at,
+      raw_app_meta_data,
+      raw_user_meta_data,
+      created_at,
+      updated_at
+    ) VALUES (
+      gen_random_uuid(),
+      '00000000-0000-0000-0000-000000000000',
+      p_email,
+      crypt('temp_password_' || gen_random_uuid()::text, gen_salt('bf')),
+      NOW(), -- Auto-confirm email
+      jsonb_build_object(
+        'provider', 'email',
+        'providers', ARRAY['email']
+      ),
+      jsonb_build_object(
+        'full_name', p_full_name,
+        'wordpress_id', p_wordpress_id,
+        'app_user_id', p_user_id
+      ),
+      NOW(),
+      NOW()
+    )
+    RETURNING id INTO v_auth_user_id;
+  END IF;
+  
+  -- Update users table with auth_user_id
+  UPDATE users
+  SET auth_user_id = v_auth_user_id
+  WHERE id = p_user_id;
+  
+  RETURN v_auth_user_id;
+END;
+$function$
+"
+public,create_user_favorites_table_if_not_exists,"CREATE OR REPLACE FUNCTION public.create_user_favorites_table_if_not_exists()
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+BEGIN
+  -- This function is just a check - the table is already created above
+  -- Used by the hook to verify table existence
+  NULL;
+END;
+$function$
+"
+public,create_user_onboarding_steps,"CREATE OR REPLACE FUNCTION public.create_user_onboarding_steps(p_user_id uuid)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+BEGIN
+  INSERT INTO user_onboarding (user_id, step, completed, data) VALUES
+    (p_user_id, 'welcome', FALSE, '{""title"": ""Welcome to POWLAX"", ""description"": ""Get started with your lacrosse training journey""}'),
+    (p_user_id, 'profile_setup', FALSE, '{""title"": ""Complete Your Profile"", ""description"": ""Add your coaching experience and preferences""}'),
+    (p_user_id, 'team_selection', FALSE, '{""title"": ""Join or Create Teams"", ""description"": ""Connect with your lacrosse teams""}'),
+    (p_user_id, 'role_confirmation', FALSE, '{""title"": ""Confirm Your Role"", ""description"": ""Set up your coaching or player profile""}'),
+    (p_user_id, 'dashboard_tour', FALSE, '{""title"": ""Dashboard Overview"", ""description"": ""Learn about your coaching dashboard""}'),
+    (p_user_id, 'practice_planner_intro', FALSE, '{""title"": ""Practice Planner"", ""description"": ""Create your first practice plan""}'),
+    (p_user_id, 'skills_academy_intro', FALSE, '{""title"": ""Skills Academy"", ""description"": ""Explore training workouts""}'),
+    (p_user_id, 'gamification_intro', FALSE, '{""title"": ""Points & Badges"", ""description"": ""Understand the achievement system""}')
+  ON CONFLICT (user_id, step) DO NOTHING;
+END;
+$function$
+"
+public,get_user_onboarding_progress,"CREATE OR REPLACE FUNCTION public.get_user_onboarding_progress(p_user_id uuid)
+ RETURNS TABLE(total_steps integer, completed_steps integer, completion_percentage integer, current_step text, is_complete boolean)
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    COUNT(*)::INTEGER as total_steps,
+    COUNT(CASE WHEN completed THEN 1 END)::INTEGER as completed_steps,
+    ROUND((COUNT(CASE WHEN completed THEN 1 END)::DECIMAL / COUNT(*)::DECIMAL) * 100)::INTEGER as completion_percentage,
+    (SELECT step FROM user_onboarding WHERE user_id = p_user_id AND NOT completed ORDER BY created_at LIMIT 1) as current_step,
+    (COUNT(CASE WHEN NOT completed THEN 1 END) = 0) as is_complete
+  FROM user_onboarding 
+  WHERE user_id = p_user_id;
+END;
+$function$
+"
+public,get_user_organizations,"CREATE OR REPLACE FUNCTION public.get_user_organizations(user_uuid uuid)
+ RETURNS TABLE(organization_id uuid, organization_name text, organization_slug text, user_role text, organization_type text)
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+BEGIN
+  RETURN QUERY
+  SELECT DISTINCT
+    o.id,
+    o.name,
+    o.slug,
+    uor.role,
+    o.type
+  FROM organizations o
+  JOIN user_organization_roles uor ON o.id = uor.organization_id
+  WHERE uor.user_id = user_uuid
+  ORDER BY o.name;
+END;
+$function$
+"
+public,get_user_points,"CREATE OR REPLACE FUNCTION public.get_user_points(p_user_id uuid)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+DECLARE
+  v_points JSONB;
+BEGIN
+  -- Get all points with hyphenated names
+  SELECT jsonb_object_agg(currency, balance)
+  INTO v_points
+  FROM user_points_wallets
+  WHERE user_id = p_user_id
+    AND currency IN (
+      SELECT currency FROM powlax_points_currencies
+    );
+    
+  RETURN COALESCE(v_points, '{}'::JSONB);
+END;
+$function$
+"
+public,get_user_teams,"CREATE OR REPLACE FUNCTION public.get_user_teams(user_uuid uuid)
+ RETURNS TABLE(team_id uuid, team_name text, team_slug text, user_role text, club_name text, parent_club_name text)
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+BEGIN
+  RETURN QUERY
+  SELECT DISTINCT
+    t.id,
+    t.name::TEXT,
+    t.slug,
+    utr.role,
+    o1.name,
+    o2.name
+  FROM teams t
+  JOIN user_team_roles utr ON t.id = utr.team_id
+  LEFT JOIN organizations o1 ON t.club_id = o1.id
+  LEFT JOIN organizations o2 ON o1.parent_org_id = o2.id
+  WHERE utr.user_id = user_uuid
+  ORDER BY t.name;
+END;
+$function$
+"
+public,register_user_with_auth,"CREATE OR REPLACE FUNCTION public.register_user_with_auth(p_email text, p_full_name text, p_wordpress_id bigint DEFAULT NULL::bigint, p_role text DEFAULT 'player'::text)
+ RETURNS TABLE(user_id uuid, auth_user_id uuid, magic_link text)
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+DECLARE
+  v_user_id UUID;
+  v_auth_user_id UUID;
+  v_magic_link TEXT;
+BEGIN
+  -- Create or get user record
+  INSERT INTO users (
+    email,
+    full_name,
+    wordpress_id,
+    created_at
+  ) VALUES (
+    p_email,
+    p_full_name,
+    p_wordpress_id,
+    NOW()
+  )
+  ON CONFLICT (email) DO UPDATE
+  SET 
+    full_name = COALESCE(EXCLUDED.full_name, users.full_name),
+    wordpress_id = COALESCE(EXCLUDED.wordpress_id, users.wordpress_id)
+  RETURNING id INTO v_user_id;
+  
+  -- Create or link auth user
+  v_auth_user_id := create_or_link_auth_user(
+    p_email,
+    v_user_id,
+    p_full_name,
+    p_wordpress_id
+  );
+  
+  -- Generate magic link token
+  v_magic_link := encode(gen_random_bytes(32), 'base64');
+  
+  -- Store magic link in auth.users raw_app_meta_data
+  UPDATE auth.users
+  SET raw_app_meta_data = raw_app_meta_data || 
+    jsonb_build_object('magic_link_token', v_magic_link, 'magic_link_expires', NOW() + INTERVAL '1 hour')
+  WHERE id = v_auth_user_id;
+  
+  RETURN QUERY
+  SELECT v_user_id, v_auth_user_id, v_magic_link;
+END;
+$function$
+"
+public,sync_auth_users_to_users,"CREATE OR REPLACE FUNCTION public.sync_auth_users_to_users()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+BEGIN
+  -- Update users table when auth.users is updated
+  UPDATE users
+  SET 
+    email = NEW.email,
+    updated_at = NOW()
+  WHERE auth_user_id = NEW.id;
+  
+  RETURN NEW;
+END;
+$function$
+"
+public,update_user_onboarding_updated_at,"CREATE OR REPLACE FUNCTION public.update_user_onboarding_updated_at()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$function$
+"

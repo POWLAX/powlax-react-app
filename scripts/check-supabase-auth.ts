@@ -14,12 +14,12 @@ async function checkSupabaseAuth() {
   console.log('-'.repeat(40))
   
   const tables = [
-    'user_profiles',
+    'users',
     'teams',
     'team_members',
-    'practice_plans',
-    'drills_powlax',
-    'strategies_powlax',
+    'practices',
+    'powlax_drills',
+    'powlax_strategies',
     'user_drills',
     'user_strategies',
     'team_playbooks'
@@ -41,7 +41,7 @@ async function checkSupabaseAuth() {
     }
   }
   
-  // 2. Check for admin users in user_profiles
+  // 2. Check for admin users in users
   console.log('\n👤 ADMIN USERS:')
   console.log('-'.repeat(40))
   
@@ -49,7 +49,7 @@ async function checkSupabaseAuth() {
   
   for (const email of adminEmails) {
     const { data, error } = await supabase
-      .from('user_profiles')
+      .from('users')
       .select('id, email, full_name, roles')
       .eq('email', email)
       .single()
@@ -58,7 +58,7 @@ async function checkSupabaseAuth() {
       console.log(`✅ ${email}: Found (ID: ${data.id})`)
       console.log(`   Roles: ${data.roles || 'No roles set'}`)
     } else {
-      console.log(`⚠️  ${email}: Not found in user_profiles`)
+      console.log(`⚠️  ${email}: Not found in users`)
     }
   }
   
@@ -101,7 +101,7 @@ async function checkSupabaseAuth() {
   console.log('-'.repeat(40))
   
   const { data: plans, error: planError } = await supabase
-    .from('practice_plans')
+    .from('practices')
     .select('id, title, team_id')
     .limit(5)
   
@@ -123,7 +123,7 @@ async function checkSupabaseAuth() {
   console.log('\n📋 SUMMARY:')
   console.log('-'.repeat(40))
   console.log('1. Check if all tables show ✅ above')
-  console.log('2. Verify admin users exist in user_profiles')
+  console.log('2. Verify admin users exist in users')
   console.log('3. Ensure drills and strategies are accessible')
   console.log('4. If using app auth, RLS policies may need adjustment')
   console.log('\n💡 TIP: If admin features don\'t show, the user data')

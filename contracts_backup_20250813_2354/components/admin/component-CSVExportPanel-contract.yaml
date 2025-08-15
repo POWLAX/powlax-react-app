@@ -1,0 +1,135 @@
+# Component Contract: CSVExportPanel
+contractId: "component-CSVExportPanel-20250113"
+componentInfo:
+  name: "CSVExportPanel"
+  filePath: "/src/components/admin/CSVExportPanel.tsx"
+  category: "admin"
+  parentPage: "admin management"
+  complexity: "moderate"
+  
+functionalAnalysis:
+  purpose: "Export user data to CSV format with configurable options"
+  primaryFunction: "Generate and download CSV files of user data with field selection"
+  userInteractions:
+    - "Select export scope (all/selected/filtered users)"
+    - "Choose data fields to include"
+    - "Configure export options"
+    - "Download generated CSV file"
+  businessLogic: "Flexible data export with privacy controls and field selection"
+  stateManagement: "Export configuration state with preview calculations"
+  
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "hook"
+  supabaseTables:
+    - "users"
+    - "team_members"
+    - "teams"
+    - "membership_entitlements"
+    - "user_points_wallets"
+    - "user_badges"
+  tableUsage:
+    - tableName: "users"
+      operations: ["select"]
+      purpose: "Core user data for export"
+      dataFlow: "Queries user data based on export scope"
+    - tableName: "team_members"
+      operations: ["select"]
+      purpose: "Team association data"
+      dataFlow: "Joins team membership information"
+    - tableName: "membership_entitlements"
+      operations: ["select"]
+      purpose: "User product access data"
+      dataFlow: "Includes membership information in export"
+  
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements:
+    - "Field name mappings"
+    - "Export scope options"
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks:
+    - "useState (React state)"
+  contexts: []
+  utilities:
+    - "UserCSVProcessor (CSV generation)"
+  externalLibraries:
+    - "sonner (toast notifications)"
+    - "lucide-react (icons)"
+  
+supabaseTableDetails:
+  tablesUsed:
+    - "users (main export data)"
+    - "team_members (team associations)"
+    - "membership_entitlements (product access)"
+    - "user_points_wallets (gamification data)"
+  tableRelationships:
+    - "users -> team_members (one-to-many)"
+    - "users -> membership_entitlements (one-to-many)"
+    - "users -> user_points_wallets (one-to-many)"
+  queryPatterns:
+    - "Filtered user queries based on scope"
+    - "Left joins for optional data"
+    - "Aggregation of related data"
+  dataTransformations:
+    - "Flattens relational data into CSV columns"
+    - "Formats arrays as semicolon-separated values"
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Add CSV template download"
+    - "Support scheduled exports"
+    - "Add data encryption for sensitive exports"
+  priority: "medium"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation:
+    - "CSV format specifications"
+    - "Privacy considerations for exports"
+    - "Field mapping documentation"
+  
+componentInteractions:
+  callsComponents:
+    - "Dialog (UI component)"
+    - "Card (UI component)"
+    - "Button (UI component)"
+    - "Checkbox (UI component)"
+    - "Badge (UI component)"
+  calledByComponents:
+    - "UsersTabContent"
+    - "Admin bulk operations"
+  sharedState: []
+  eventCommunication:
+    - "onClose callback to parent"
+  propsPassedTo: []
+  propsReceivedFrom:
+    - "isOpen, onClose, selectedUserIds, totalUsers from parent"
+  
+userJourneyContext:
+  userFlows:
+    - "Admin -> User Management -> Export -> Configure Options -> Download CSV"
+  criticalForMVP: false
+  usageFrequency: "low"
+  primaryUserTypes: ["admin"]
+  featureArea: "admin"
+  journeyStage: "advanced"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "CSVExportPanel"
+  reasonForDuplication: ""
+  consolidationStrategy: ""
+  supabaseIntegrationWinner: "CSVExportPanel"

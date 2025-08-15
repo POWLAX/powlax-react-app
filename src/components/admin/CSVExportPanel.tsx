@@ -266,7 +266,7 @@ export default function CSVExportPanel({
                         User Roles
                       </Label>
                       <p className="text-sm text-gray-600">
-                        Include user role assignments (admin, coach, player, etc.)
+                        Include user role assignments (administrator, coach, player, etc.)
                       </p>
                     </div>
                   </div>

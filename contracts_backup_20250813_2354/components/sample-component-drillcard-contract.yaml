@@ -1,0 +1,276 @@
+# Component Contract - DrillCard (SAMPLE)
+# This is a sample contract showing the expected analysis depth and format
+
+contractId: "component-drillcard-20250115-sample"
+type: COMPONENT_CONTRACT
+version: 1.0.0
+created: "2025-01-15"
+componentAnalyst: "sample-analyst"
+
+# ===== COMPONENT IDENTIFICATION =====
+componentInfo:
+  name: "DrillCard"
+  displayName: "Drill Card Component"
+  filePath: "src/components/practice-planner/DrillCard.tsx"
+  category: "practice-planner"
+  parentPage: "Practice Planner"
+  pageUrl: "http://localhost:3000/teams/[teamId]/practiceplan"
+  complexity: "moderate"
+  lineCount: 156
+  
+# ===== FUNCTIONAL ANALYSIS =====
+functionalAnalysis:
+  purpose: "Display individual drill information in a card format with actions for adding to practice plans"
+  primaryFunction: "Render drill details and provide interaction buttons for drill selection"
+  secondaryFunctions:
+    - "Display drill video thumbnail"
+    - "Show drill metadata (duration, equipment, etc.)"
+    - "Handle drill selection for practice timeline"
+    - "Display drill difficulty and age recommendations"
+  userInteractions:
+    - interaction: "Add Drill Button Click"
+      trigger: "User clicks 'Add to Plan' button"
+      result: "Drill is added to practice timeline via callback"
+    - interaction: "Video Thumbnail Click"
+      trigger: "User clicks video thumbnail"
+      result: "Opens video modal or navigates to video view"
+    - interaction: "Drill Details Hover"
+      trigger: "User hovers over card"
+      result: "Shows additional drill information tooltip"
+  businessLogic: "Formats drill data for display, handles drill selection logic, manages video URL parsing"
+  stateManagement:
+    hasLocalState: true
+    stateVariables: ["isHovered", "videoLoaded", "imageError"]
+    stateManagementPattern: "useState"
+  
+# ===== DATA INTEGRATION ANALYSIS =====
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  connectionMethod: "Receives drill data as props from parent component"
+  
+  supabaseTables: []
+  realTimeSubscriptions: []
+  
+# ===== CODE ANALYSIS =====
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements: []
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+  imports:
+    reactComponents: ["Card", "CardContent", "CardHeader", "Button"]
+    hooks: ["useState", "useCallback"]
+    utilities: ["cn", "formatDuration"]
+    types: ["DrillCardProps", "Drill"]
+    externalLibraries: ["lucide-react"]
+    
+# ===== DEPENDENCIES ANALYSIS =====
+dependencies:
+  hooks: []
+  contexts: []
+  utilities:
+    - utilityName: "cn"
+      filePath: "src/lib/utils"
+      purpose: "CSS class name concatenation"
+    - utilityName: "formatDuration"
+      filePath: "src/lib/formatters"
+      purpose: "Format drill duration for display"
+      
+  externalLibraries:
+    - library: "lucide-react"
+      usage: "Icons for drill metadata display"
+      
+  childComponents: []
+
+# ===== SUPABASE TABLE DETAILS =====
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: []
+  rpcFunctions: []
+
+# ===== PROPS & INTERFACE ANALYSIS =====
+interfaceAnalysis:
+  props:
+    - propName: "drill"
+      type: "Drill"
+      required: true
+      purpose: "Drill data object containing all drill information"
+    - propName: "onAddDrill"
+      type: "(drill: Drill) => void"
+      required: true
+      purpose: "Callback function when drill is added to practice plan"
+    - propName: "isSelected"
+      type: "boolean"
+      required: false
+      purpose: "Visual indicator if drill is currently selected"
+      
+  events:
+    - eventName: "onAddDrill"
+      purpose: "Notify parent component when drill is selected"
+      dataFlow: "child -> parent"
+      
+  callbacks:
+    - callbackName: "handleAddDrill"
+      purpose: "Process drill addition and call parent callback"
+      parameters: ["drill: Drill"]
+
+# ===== MVP READINESS ASSESSMENT =====
+mvpReadiness:
+  isProductionReady: true
+  readinessScore: 85
+  
+  blockers: []
+      
+  improvements:
+    - improvement: "Add loading state for video thumbnails"
+      priority: "medium"
+      effort: "small"
+    - improvement: "Implement drill favoriting functionality"
+      priority: "low"
+      effort: "medium"
+      
+  priority: "high"
+  
+  mvpRequirements:
+    hasRealData: true
+    hasErrorHandling: true
+    isMobileResponsive: true
+    hasAccessibility: false
+    performsWell: true
+
+# ===== TESTING STATUS =====
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes:
+    unit: false
+    integration: false
+    e2e: false
+    
+  testFiles: []
+  
+  testingNeeds:
+    - testType: "unit"
+      priority: "high"
+      description: "Test drill rendering and callback functionality"
+    - testType: "integration"
+      priority: "medium"
+      description: "Test integration with practice planner parent component"
+
+# ===== DOCUMENTATION STATUS =====
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  documentationLocation: ""
+  
+  needsDocumentation:
+    - area: "props interface"
+      priority: "high"
+      description: "Document expected drill object structure"
+    - area: "usage examples"
+      priority: "medium"
+      description: "Show how to integrate with practice planner"
+      
+  hasTypeDefinitions: true
+  hasComments: false
+  hasExamples: false
+
+# ===== PERFORMANCE ANALYSIS =====
+performance:
+  hasPerformanceIssues: false
+  performanceIssues: []
+      
+  optimizationOpportunities:
+    - opportunity: "Memoize drill card rendering"
+      benefit: "Prevent unnecessary re-renders in drill lists"
+      effort: "small"
+      
+  renderingPattern: "dynamic"
+  reRenderTriggers: ["drill prop changes", "isSelected prop changes"]
+
+# ===== ACCESSIBILITY ANALYSIS =====
+accessibility:
+  hasAccessibilityFeatures: false
+  accessibilityFeatures: []
+      
+  accessibilityIssues:
+    - issue: "Missing ARIA labels for interactive elements"
+      severity: "medium"
+      solution: "Add aria-label attributes to buttons and interactive areas"
+    - issue: "No keyboard navigation support"
+      severity: "high"
+      solution: "Implement keyboard event handlers for drill selection"
+      
+  wcagCompliance: "none"
+
+# ===== SECURITY ANALYSIS =====
+security:
+  hasSecurityConsiderations: false
+  securityFeatures: []
+      
+  securityConcerns: []
+      
+  dataValidation: false
+  inputSanitization: false
+
+# ===== INTEGRATION POINTS =====
+integrationPoints:
+  parentComponents: ["DrillLibraryTabbed", "PracticePlanner"]
+  childComponents: []
+  siblingComponents: ["StrategyCard", "DrillLibrary"]
+  
+  externalIntegrations: []
+  apiEndpoints: []
+  eventHandlers: ["onClick", "onHover"]
+
+# ===== RECOMMENDATIONS =====
+recommendations:
+  immediate:
+    - recommendation: "Add accessibility features (ARIA labels, keyboard navigation)"
+      priority: "high"
+      effort: "small"
+    - recommendation: "Add unit tests for core functionality"
+      priority: "high"
+      effort: "medium"
+      
+  shortTerm:
+    - recommendation: "Implement drill favoriting feature"
+      priority: "medium"
+      effort: "medium"
+    - recommendation: "Add comprehensive documentation"
+      priority: "medium"
+      effort: "small"
+      
+  longTerm:
+    - recommendation: "Consider virtualization for large drill lists"
+      priority: "low"
+      effort: "large"
+
+# ===== ANALYSIS METADATA =====
+analysisMetadata:
+  analysisDate: "2025-01-15"
+  analysisTime: "15 minutes"
+  analyst: "sample-analyst"
+  reviewStatus: "pending"
+  confidence: "high"
+  
+  analysisNotes:
+    - "Component is well-structured and follows React best practices"
+    - "No direct database connections - data flows through props"
+    - "Ready for MVP with minor accessibility improvements"
+  followUpRequired: false
+  followUpItems: []
+  
+# ===== COMPONENT CLASSIFICATION =====
+classification:
+  componentType: "presentational"
+  reusability: "high"
+  businessCriticality: "important"
+  userFacing: true
+  
+  tags: ["drill", "practice-planning", "card-component", "interactive"]
+  keywords: ["drill", "practice", "planner", "card", "selection"]

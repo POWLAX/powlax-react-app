@@ -1,0 +1,113 @@
+# Direct Login Page Orchestration Contract
+contractId: "page-direct-login-20250113"
+
+pageInfo:
+  route: "/direct-login"
+  filePath: "src/app/direct-login/page.tsx"
+  pageType: "client"
+  category: "authentication"
+  dynamicSegments: []
+  
+renderingStrategy:
+  componentType: "Client Component"
+  dataFetching: "client-side"
+  streamingEnabled: false
+  suspenseBoundaries: []
+  errorBoundaries: []
+  
+dataOrchestration:
+  serverDataFetching: []
+  clientDataFetching:
+    - hook: "useAuth"
+      trigger: "On mount"
+      tables: ["users"]
+      realtime: false
+  propsFlow: []
+        
+componentComposition:
+  componentsUsed:
+    - name: "Button"
+      source: "@/components/ui/button"
+      props: { "disabled": "loading" }
+      conditionalRendering: "Always"
+    - name: "Card, CardContent, CardHeader, CardTitle"
+      source: "@/components/ui/card"
+      props: {}
+      conditionalRendering: "Always"
+  layoutUsed: "Root Layout only"
+  providerDependencies: ["SupabaseAuthProvider"]
+  
+routingLogic:
+  guards: []
+  navigation:
+    - triggers: ["Successful login", "Continue to Dashboard button"]
+      destinations: ["/dashboard"]
+      method: "window.location.href (hard redirect)"
+    - triggers: ["Continue to Dashboard (already logged in)"]
+      destinations: ["/dashboard"]
+      method: "router.push"
+  dynamicRouting: []
+  
+pageSpecificLogic:
+  businessLogic: "Mock authentication bypass for development, localStorage session management, dual auth state handling"
+  stateManagement: "useState for status and allowLogin override"
+  sideEffects: ["localStorage manipulation", "Hard page redirect", "Console error logging"]
+  formHandling: "None - single button action"
+  
+serverClientBoundary:
+  serverComponents: []
+  clientComponents: ["DirectLoginPage component", "All UI components"]
+  boundaryLocation: "Page level - entire page is client component"
+  dataSerializationPoints: []
+  
+performancePatterns:
+  prefetching: []
+  lazyLoading: []
+  codeSpliiting: []
+  optimizations: []
+  
+securityPatterns:
+  authentication: "Mock authentication for development"
+  authorization: "None - development tool"
+  dataValidation: "None - hardcoded user data"
+  csrfProtection: false
+  
+integrationPoints:
+  supabaseUsage:
+    directQueries: false
+    throughHooks: true
+    serverSideOnly: false
+  externalAPIs: []
+  webhooks: []
+  realtimeSubscriptions: []
+
+developmentAuthentication:
+  purpose: "Bypass magic link system for development testing"
+  mockUserData:
+    id: "523f2768-6404-439c-a429-f9eb6736aa17"
+    email: "patrick@powlax.com"
+    full_name: "Patrick Chapla"
+    display_name: "Patrick Chapla (Admin)"
+    role: "administrator"
+    roles: ["administrator", "parent", "club_director", "team_coach", "player"]
+  
+  sessionManagement:
+    storage: "localStorage"
+    keys: ["supabase_auth_user", "supabase_auth_session"]
+    persistence: "Until manually cleared"
+  
+  userStates:
+    - state: "Not authenticated"
+      display: "Login button"
+      actions: ["Direct login as patrick@powlax.com"]
+    - state: "Already authenticated"
+      display: "Logged in message with override option"
+      actions: ["Continue to dashboard", "Logout and re-login"]
+
+analysisNotes:
+  - "Development-only authentication bypass tool"
+  - "Creates realistic user with all 5 roles for testing"
+  - "Uses localStorage to persist mock session"
+  - "Hard redirect ensures auth context picks up new session"
+  - "Similar UX to login page for consistency"
+  - "Should not be used in production"

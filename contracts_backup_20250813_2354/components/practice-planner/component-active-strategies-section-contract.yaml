@@ -1,0 +1,107 @@
+# Practice Planner Component Contract: ActiveStrategiesSection
+contractId: "component-active-strategies-section-20250113"
+componentInfo:
+  name: "ActiveStrategiesSection"
+  filePath: "src/components/practice-planner/ActiveStrategiesSection.tsx"
+  category: "practice-planner"
+  parentPage: "Practice Planner (/teams/[teamId]/practiceplan)"
+  complexity: "complex"
+  
+functionalAnalysis:
+  purpose: "Organized display of selected strategies with game phase categorization and visual layout. Core component for strategy management in practice planning."
+  primaryFunction: "Strategy organization and visualization by game phases"
+  userInteractions: 
+    - "View strategies organized by game phase categories"
+    - "Expand/collapse the strategies section"
+    - "Remove individual strategies from practice plan"
+    - "Click strategies to view detailed content"
+    - "Visual game phase organization (With Ball, Defending Ball, Special Situations)"
+  businessLogic: "Intelligent strategy categorization using keyword matching, color-coded game phases, responsive column layout, strategy count tracking"
+  stateManagement: "Local state for section expansion, strategy categorization logic"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements: 
+    - "Game phase definitions and keywords (GAME_PHASES constant)"
+    - "Color scheme for game phases (border colors)"
+    - "Game phase categorization logic"
+  mockDataUsage: []
+  realDataPercentage: 90
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: []
+  externalLibraries: 
+    - "lucide-react (Plus, X, ChevronDown, ChevronRight icons)"
+    - "@/components/ui/button"
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: 
+    - "Categorizes strategies by game phase using keyword matching"
+    - "Groups strategies into column layout (left: With Ball, right: Defending Ball, bottom: Special)"
+    - "Applies color coding based on game phase classification"
+    
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: 
+    - "Could make game phase definitions configurable"
+    - "Could add strategy sorting within phases"
+    - "Could implement drag-and-drop reordering"
+    - "Could add strategy usage analytics"
+  priority: "high"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation: 
+    - "Game phase categorization logic"
+    - "Color coding system"
+    - "Layout structure explanation"
+    
+componentInteractions:
+  callsComponents: []
+  calledByComponents: 
+    - "Practice Planner Main Page"
+  sharedState: []
+  eventCommunication: 
+    - "onRemove callback when strategy removed"
+    - "onStrategyClick callback when strategy selected for viewing"
+  propsPassedTo: []
+  propsReceivedFrom: 
+    - "strategies array with selected strategies"
+    - "onRemove callback for strategy removal"
+    - "onStrategyClick callback for strategy interaction"
+    
+userJourneyContext:
+  userFlows: 
+    - "Strategy Review: View selected strategies → Understand game phase organization → Remove unneeded strategies"
+    - "Practice Planning: Add strategies → See visual organization → Ensure phase coverage"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["coach"]
+  featureArea: "practice"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "ActiveStrategiesSection"
+  reasonForDuplication: "N/A"
+  consolidationStrategy: "N/A"
+  supabaseIntegrationWinner: "N/A - presentation component only"

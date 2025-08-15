@@ -5,6 +5,7 @@ import { Filter, Plus, Video, Image, Beaker, ChevronDown, ChevronRight, Search, 
 import { useStrategies, getStrategiesByActualCategory, getStrategiesBySource, searchStrategies } from '@/hooks/useStrategies'
 import { useAuth } from '@/contexts/SupabaseAuthContext'
 import { useFavorites } from '@/hooks/useFavorites'
+import { toast } from 'sonner'
 import VideoModal from './modals/VideoModal'
 import LacrosseLabModal from './modals/LacrosseLabModal'
 import AddCustomStrategiesModal from './modals/AddCustomStrategiesModal'
@@ -132,6 +133,15 @@ export default function StrategiesTab({
 
   const handleStrategySelect = (strategy: Strategy) => {
     onSelectStrategy(strategy)
+    // Show confirmation toast on mobile
+    if (isMobile) {
+      const isRemoving = selectedStrategies.includes(strategy.id)
+      if (isRemoving) {
+        toast.success(`Removed "${strategy.strategy_name}" from practice`)
+      } else {
+        toast.success(`Added "${strategy.strategy_name}" to practice`)
+      }
+    }
   }
 
   const openVideoModal = (strategy: Strategy, e: React.MouseEvent) => {

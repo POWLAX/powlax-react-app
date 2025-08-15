@@ -1,0 +1,183 @@
+# DifficultyIndicator Component Contract
+
+contractId: "component-difficulty-indicator-20250113"
+componentInfo:
+  name: "DifficultyIndicator"
+  filePath: "/src/components/gamification/DifficultyIndicator.tsx"
+  category: "gamification"
+  parentPage: "Skills Academy, Practice Planner, Drill displays"
+  complexity: "simple"
+
+functionalAnalysis:
+  purpose: "Visual star-based difficulty rating system for drills and workouts with anti-gaming design principles"
+  primaryFunction: "Display 1-5 star difficulty ratings with color-coded visual feedback and multiple display variants"
+  userInteractions:
+    - "View star-based difficulty ratings (1-5 stars)"
+    - "Understand difficulty through color coding and labels"
+    - "Compare average difficulty across workout collections"
+  businessLogic: "Converts numeric difficulty scores to visual star displays with semantic labels and color themes"
+  stateManagement: "Pure functional component with no internal state (memo optimized)"
+
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements:
+    - "DIFFICULTY_LABELS (Beginner, Easy, Medium, Hard, Elite)"
+    - "DIFFICULTY_COLORS (green to red progression)"
+    - "Star count normalization (1-5 range)"
+  mockDataUsage: []
+  realDataPercentage: 100
+
+dependencies:
+  hooks:
+    - "memo (React optimization)"
+  contexts: []
+  utilities:
+    - "cn (utility for className concatenation)"
+  externalLibraries:
+    - "lucide-react (Star icon)"
+
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations:
+    - "Numeric score -> normalized 1-5 star display"
+    - "Difficulty level -> color theme mapping"
+    - "Average calculation for workout collections"
+
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Add custom difficulty scales (beyond 1-5)"
+    - "Implement half-star precision for averages"
+    - "Add accessibility labels for screen readers"
+    - "Connect to drill difficulty metadata from database"
+  priority: "low"
+
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+
+documentation:
+  hasDocumentation: true
+  documentationQuality: "good"
+  needsDocumentation:
+    - "Integration examples with drill/workout data"
+    - "Color scheme accessibility compliance"
+
+componentInteractions:
+  callsComponents: []
+  calledByComponents:
+    - "DrillCard"
+    - "WorkoutCard" 
+    - "PracticeTimeline"
+    - "Skills Academy components"
+  sharedState: []
+  eventCommunication: []
+  propsPassedTo: []
+  propsReceivedFrom:
+    - "score: number (1-5 difficulty rating)"
+    - "size: sm|md|lg (display size variant)"
+    - "showLabel: boolean (show text label)"
+    - "className: string (custom styling)"
+
+userJourneyContext:
+  userFlows:
+    - "Drill selection -> Difficulty assessment -> Training decisions"
+    - "Workout planning -> Difficulty balance -> Progressive training"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["player", "coach"]
+  featureArea: "skills"
+  journeyStage: "core-loop"
+
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "DifficultyIndicator"
+  reasonForDuplication: "N/A"
+  consolidationStrategy: "N/A"
+  supabaseIntegrationWinner: "DifficultyIndicator"
+
+gamificationSystemDetails:
+  difficultyScale:
+    1: "Beginner - Green theme - Foundation skills"
+    2: "Easy - Blue theme - Basic applications" 
+    3: "Medium - Yellow theme - Intermediate challenges"
+    4: "Hard - Orange theme - Advanced techniques"
+    5: "Elite - Red theme - Expert-level mastery"
+  antiGamingDesign:
+    - "Fixed 5-star maximum prevents difficulty inflation"
+    - "Color-coded themes provide immediate visual feedback"
+    - "Normalized scoring ensures consistent difficulty representation"
+  progressionIntegration:
+    - "Difficulty ratings inform adaptive training recommendations"
+    - "Average difficulty tracking for balanced workout design"
+    - "Progressive difficulty increases in structured programs"
+
+componentVariants:
+  DifficultyIndicator:
+    purpose: "Basic 5-star difficulty display"
+    features:
+      - "1-5 star visual rating"
+      - "Color-coded difficulty themes"
+      - "Size variants (sm/md/lg)"
+      - "Optional text labels"
+  
+  AverageDifficulty:
+    purpose: "Aggregated difficulty display for collections"
+    features:
+      - "Decimal precision averages (e.g., 3.7/5.0)"
+      - "Total drill count context"
+      - "Combined star + numeric display"
+  
+  DifficultyBadge:
+    purpose: "Compact badge-style difficulty indicator"
+    features:
+      - "Badge format with star icon"
+      - "Semantic label (Beginner, Hard, etc.)"
+      - "Color-coded background themes"
+  
+  DifficultyProgressBar:
+    purpose: "Progression bar for difficulty advancement"
+    features:
+      - "Current vs target difficulty visualization"
+      - "Gradient color progression"
+      - "Progression percentage display"
+
+visualDesignSystem:
+  colorPalette:
+    beginner: "#4CAF50 (Green - Safe, approachable)"
+    easy: "#2196F3 (Blue - Calm, building)"
+    medium: "#FF9800 (Yellow - Attention, moderate challenge)"
+    hard: "#FF5722 (Orange - Warning, significant challenge)"
+    elite: "#F44336 (Red - Alert, maximum difficulty)"
+  
+  iconSystem:
+    - "Filled stars for achieved difficulty level"
+    - "Empty stars for remaining difficulty scale"
+    - "Consistent star sizing across variants"
+  
+  accessibilityFeatures:
+    - "High contrast color combinations"
+    - "Semantic HTML structure"
+    - "Screen reader compatible labels"
+
+performanceOptimizations:
+  memoization:
+    - "React.memo wrapper prevents unnecessary re-renders"
+    - "Pure functional components with no side effects"
+    - "Optimized for frequent re-use across drill collections"
+  
+  rendering:
+    - "Minimal DOM elements per difficulty display"
+    - "CSS-only color theming without JavaScript"
+    - "Icon reuse through lucide-react optimization"

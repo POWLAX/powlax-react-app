@@ -1,0 +1,275 @@
+# Simplify Auth Context Contract
+# Phase 1: Clean up SupabaseAuthContext to ONLY check Supabase Auth
+
+contractId: "simplify-auth-context-001"
+type: FOCUSED_IMPLEMENTATION
+version: 1.0.0
+created: 2025-01-15
+priority: CRITICAL
+phase: 1 of 4
+
+# ===== CONTRACT OBJECTIVE =====
+objective:
+  goal: "Remove all competing auth systems from SupabaseAuthContext"
+  
+  currentState:
+    - "Context checks 3 auth sources: Supabase, localStorage mock, WordPress"
+    - "Complex loading logic causes infinite loops"
+    - "Conflicting auth methods create confusion"
+    
+  targetState:
+    - "Context ONLY checks Supabase Auth"
+    - "Clean, simple authentication flow"
+    - "No loading loops or conflicts"
+
+# ===== FILE MODIFICATIONS =====
+files:
+  primary:
+    path: "src/contexts/SupabaseAuthContext.tsx"
+    
+    toRemove:
+      - description: "WordPress authentication methods"
+        patterns:
+          - "signInWithWordPress"
+          - "wordpress JWT"
+          - "memberpress"
+          - "Any WordPress credential handling"
+          
+      - description: "localStorage mock authentication"
+        patterns:
+          - "localStorage.getItem('supabase_auth_user')"
+          - "localStorage.setItem('supabase_auth_user'"
+          - "Mock user from localStorage"
+          - "Fake session checks"
+          
+      - description: "Complex loading state management"
+        patterns:
+          - "Multiple loading state checks"
+          - "Nested loading conditions"
+          - "Redundant auth verifications"
+    
+    toKeep:
+      - "supabase.auth.getSession()"
+      - "supabase.auth.onAuthStateChange()"
+      - "Magic link methods"
+      - "Logout functionality"
+      - "Basic user state"
+    
+    toImplement:
+      simplifiedFlow: |
+        // 1. Single source of truth: Supabase Auth
+        const [user, setUser] = useState<User | null>(null)
+        const [loading, setLoading] = useState(true)
+        
+        // 2. Simple initialization
+        useEffect(() => {
+          // Check current session
+          supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session?.user) {
+              // Fetch user details from database
+              fetchUserDetails(session.user.id).then(userDetails => {
+                setUser(userDetails)
+                setLoading(false)
+              })
+            } else {
+              setUser(null)
+              setLoading(false)
+            }
+          })
+          
+          // Listen for auth changes
+          const { data: { subscription } } = supabase.auth.onAuthStateChange(
+            async (event, session) => {
+              if (session?.user) {
+                const userDetails = await fetchUserDetails(session.user.id)
+                setUser(userDetails)
+              } else {
+                setUser(null)
+              }
+              setLoading(false)
+            }
+          )
+          
+          return () => subscription.unsubscribe()
+        }, [])
+        
+        // 3. Clean methods
+        const signOut = async () => {
+          await supabase.auth.signOut()
+          setUser(null)
+        }
+        
+        // NO WordPress methods
+        // NO localStorage checks
+        // NO mock authentication
+
+  secondary:
+    - path: "src/hooks/useAuth.ts"
+      description: "Ensure hook uses simplified context"
+      changes:
+        - "Remove any WordPress references"
+        - "Remove localStorage checks"
+        - "Use only Supabase Auth from context"
+        
+    - path: "src/hooks/useRequireAuth.ts"
+      description: "Simplify auth requirement check"
+      changes:
+        - "Check only Supabase session"
+        - "Simple redirect logic"
+        - "No complex loading states"
+
+# ===== IMPLEMENTATION STEPS =====
+implementation:
+  step1:
+    action: "Analyze current SupabaseAuthContext.tsx"
+    tasks:
+      - "Identify all auth methods currently implemented"
+      - "Map dependencies on WordPress/localStorage"
+      - "Document current loading state logic"
+    validation: "List of all auth methods found"
+    
+  step2:
+    action: "Remove WordPress authentication"
+    tasks:
+      - "Delete signInWithWordPress method"
+      - "Remove WordPress JWT handling"
+      - "Delete MemberPress integration code"
+      - "Remove WordPress-related state variables"
+    validation: "No WordPress auth code remains"
+    
+  step3:
+    action: "Remove localStorage mock authentication"
+    tasks:
+      - "Delete all localStorage.getItem for auth"
+      - "Remove localStorage.setItem for auth"
+      - "Delete mock user creation logic"
+      - "Remove fake session handling"
+    validation: "No localStorage auth code remains"
+    
+  step4:
+    action: "Simplify loading state management"
+    tasks:
+      - "Single loading state variable"
+      - "Clear loading lifecycle: true → false"
+      - "Remove nested loading conditions"
+      - "Ensure loading completes on all paths"
+    validation: "Loading always resolves to false"
+    
+  step5:
+    action: "Implement clean Supabase-only flow"
+    tasks:
+      - "Single auth check on mount"
+      - "Auth state listener for changes"
+      - "Database user fetch for details"
+      - "Clean logout method"
+    validation: "Only Supabase Auth methods used"
+    
+  step6:
+    action: "Update dependent hooks"
+    tasks:
+      - "Update useAuth.ts"
+      - "Update useRequireAuth.ts"
+      - "Ensure hooks use simplified context"
+    validation: "Hooks work with new context"
+
+# ===== TESTING REQUIREMENTS =====
+testing:
+  unitTests:
+    - "Context provides user when authenticated"
+    - "Context provides null when not authenticated"
+    - "Loading starts true, becomes false"
+    - "Logout clears user state"
+    
+  integrationTests:
+    - "Pages using useAuth receive user data"
+    - "Protected routes work with new context"
+    - "No loading loops on any page"
+    - "Auth state changes propagate correctly"
+    
+  manualTests:
+    - description: "Test authenticated flow"
+      steps:
+        - "Login with magic link"
+        - "Verify user data loads"
+        - "Navigate protected routes"
+        - "Verify no loading issues"
+        
+    - description: "Test unauthenticated flow"
+      steps:
+        - "Access site without login"
+        - "Verify user is null"
+        - "No infinite loading"
+        - "Can access public pages"
+        
+    - description: "Test logout flow"
+      steps:
+        - "Login first"
+        - "Click logout"
+        - "Verify user cleared"
+        - "Redirected appropriately"
+
+# ===== VALIDATION CHECKLIST =====
+validation:
+  codeReview:
+    - "[ ] No WordPress auth methods remain"
+    - "[ ] No localStorage auth checks"
+    - "[ ] Only Supabase Auth used"
+    - "[ ] Single loading state management"
+    - "[ ] Clean error handling"
+    
+  functionality:
+    - "[ ] Login with magic link works"
+    - "[ ] User data loads correctly"
+    - "[ ] Logout clears session"
+    - "[ ] No loading loops"
+    - "[ ] Auth state changes work"
+    
+  performance:
+    - "[ ] Auth check < 2 seconds"
+    - "[ ] No redundant auth calls"
+    - "[ ] Efficient state updates"
+    - "[ ] Memory leaks prevented"
+
+# ===== COMMON PITFALLS =====
+pitfalls:
+  - pitfall: "Removing too much code"
+    solution: "Keep magic link methods and Supabase Auth core"
+    
+  - pitfall: "Breaking existing pages"
+    solution: "Test each change incrementally"
+    
+  - pitfall: "Creating new loading loops"
+    solution: "Ensure loading always resolves to false"
+    
+  - pitfall: "Losing user data"
+    solution: "Maintain database fetch for user details"
+
+# ===== SUCCESS CRITERIA =====
+successCriteria:
+  required:
+    - "SupabaseAuthContext uses ONLY Supabase Auth"
+    - "No WordPress methods remain"
+    - "No localStorage authentication"
+    - "Loading states resolve properly"
+    - "All pages load without auth loops"
+    
+  validation:
+    - "Run: npm run build (must succeed)"
+    - "Run: npm run typecheck (no errors)"
+    - "Test: Login flow works"
+    - "Test: Protected routes accessible when authenticated"
+    - "Test: No console errors"
+
+# ===== ROLLBACK PLAN =====
+rollback:
+  trigger: "If pages break or auth completely fails"
+  steps:
+    - "Git revert to previous commit"
+    - "Identify specific issue"
+    - "Make smaller incremental change"
+    - "Test thoroughly before proceeding"
+
+---
+
+# This focused contract ensures SupabaseAuthContext is simplified
+# to use ONLY Supabase Auth, removing all competing systems

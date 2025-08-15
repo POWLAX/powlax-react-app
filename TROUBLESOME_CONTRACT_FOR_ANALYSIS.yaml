@@ -1,0 +1,537 @@
+# Critical Fixes Implementation Contract
+# Addressing security vulnerabilities, middleware creation, and PlayerDashboard data integration
+
+contractId: "critical-fixes-implementation-001"
+type: CRITICAL_FIXES_IMPLEMENTATION
+version: 1.0.0
+created: 2025-01-15
+priority: CRITICAL
+branch: Claude-to-Claude-Sub-Agent-Work-Flow
+
+# ===== CONTRACT OVERVIEW =====
+intent:
+  goal: "Fix critical security vulnerabilities, implement route protection, and connect PlayerDashboard to real gamification data"
+  
+  scope:
+    - Re-enable authentication in (authenticated)/layout.tsx
+    - Create middleware.ts for server-side route protection
+    - Connect PlayerDashboard to real gamification tables
+    - Apply Supabase Permanence Pattern for data integrity
+    - Ensure all fixes follow established architectural patterns
+    
+  criticalContext:
+    - Authentication is currently DISABLED allowing unrestricted access
+    - No middleware.ts exists for route protection
+    - PlayerDashboard shows 100% mock data despite being highest-frequency touchpoint
+    - These issues block MVP release
+    
+  dependencies:
+    - SUPABASE_PERMANENCE_PATTERN.md for data integration
+    - Component analysis contracts for correct patterns
+    - Page orchestration contracts for proper data flow
+    - database-truth-sync-002.yaml for correct table names
+
+# ===== FIX 1: RE-ENABLE AUTHENTICATION =====
+fix1_authentication:
+  file: "src/app/(authenticated)/layout.tsx"
+  severity: CRITICAL
+  
+  currentState:
+    issue: "Authentication check is commented out"
+    code: |
+      // const { user, loading } = useRequireAuth()
+      // if (!loading && !user) {
+      //   return null
+      // }
+    risk: "All protected pages accessible without login"
+    
+  requiredFix:
+    description: "Re-enable authentication with proper loading states"
+    implementation: |
+      // 1. Uncomment and enhance the authentication check
+      const { user, loading } = useRequireAuth()
+      
+      // 2. Add proper loading state
+      if (loading) {
+        return (
+          <div className="flex items-center justify-center min-h-screen">
+            <Spinner /> {/* or Skeleton component */}
+          </div>
+        )
+      }
+      
+      // 3. Redirect unauthenticated users
+      if (!user) {
+        redirect('/auth/login')
+        return null
+      }
+      
+      // 4. Continue with authenticated content
+      return (
+        <SidebarProvider>
+          {/* existing layout content */}
+        </SidebarProvider>
+      )
+      
+  additionalChecks:
+    - Verify useRequireAuth hook returns proper user object
+    - Ensure redirect imports from 'next/navigation'
+    - Test with logged out user to confirm redirect
+    - Verify loading state displays correctly
+    
+  testingSteps:
+    - Clear all cookies/localStorage
+    - Navigate to /dashboard - should redirect to /auth/login
+    - Navigate to /teams - should redirect to /auth/login
+    - Login and verify access is granted
+    - Check browser console for errors
+
+# ===== FIX 2: CREATE MIDDLEWARE.TS =====
+fix2_middleware:
+  file: "src/middleware.ts" # CREATE NEW FILE
+  severity: CRITICAL
+  
+  purpose: "Server-side route protection before page loads"
+  
+  implementation: |
+    import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
+    import { NextResponse } from 'next/server'
+    import type { NextRequest } from 'next/server'
+    
+    export async function middleware(req: NextRequest) {
+      const res = NextResponse.next()
+      const supabase = createMiddlewareClient({ req, res })
+      
+      // Refresh session if expired
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      // HANDLE ROOT PATH - Redirect to dashboard or login
+      if (req.nextUrl.pathname === '/') {
+        const redirectUrl = req.nextUrl.clone()
+        if (session) {
+          redirectUrl.pathname = '/dashboard'
+        } else {
+          redirectUrl.pathname = '/auth/login'
+        }
+        return NextResponse.redirect(redirectUrl)
+      }
+      
+      // Define protected routes
+      const protectedRoutes = [
+        '/dashboard',
+        '/teams',
+        '/skills-academy',
+        '/admin',
+        '/resources',
+        '/strategies',
+        '/community',
+        '/gamification'
+      ]
+      
+      // DEVELOPMENT BYPASS - Allow direct-login for development
+      const isDevelopmentBypass = req.nextUrl.pathname === '/direct-login'
+      if (isDevelopmentBypass && process.env.NODE_ENV === 'development') {
+        return res // Allow through for development
+      }
+      
+      // Check if current path needs protection
+      const isProtectedRoute = protectedRoutes.some(route => 
+        req.nextUrl.pathname.startsWith(route)
+      )
+      
+      // Redirect to login if accessing protected route without session
+      if (isProtectedRoute && !session) {
+        const redirectUrl = req.nextUrl.clone()
+        redirectUrl.pathname = '/auth/login'
+        redirectUrl.searchParams.set('redirectTo', req.nextUrl.pathname)
+        return NextResponse.redirect(redirectUrl)
+      }
+      
+      // Admin route additional check - PRESERVES ROLE VIEWER FUNCTIONALITY
+      if (req.nextUrl.pathname.startsWith('/admin')) {
+        if (session?.user) {
+          // Fetch user role AND admin override from database
+          const { data: userData } = await supabase
+            .from('users')
+            .select('role, is_admin')
+            .eq('id', session.user.id)
+            .single()
+          
+          // Check for admin role OR admin override flag
+          // This preserves RoleViewer functionality
+          const isAdmin = userData?.role === 'administrator' || 
+                         userData?.is_admin === true
+          
+          // NOTE: Admin access is controlled by database role, not hardcoded emails
+          // This ensures proper security and maintainability
+          
+          if (!isAdmin) {
+            const redirectUrl = req.nextUrl.clone()
+            redirectUrl.pathname = '/dashboard'
+            return NextResponse.redirect(redirectUrl)
+          }
+        }
+      }
+      
+      return res
+    }
+    
+    // Configure which routes middleware runs on
+    export const config = {
+      matcher: [
+        /*
+         * Match all request paths except:
+         * - _next/static (static files)
+         * - _next/image (image optimization files)
+         * - favicon.ico (favicon file)
+         * - public folder
+         * - api routes
+         */
+        '/((?!_next/static|_next/image|favicon.ico|api|auth/login|auth/magic-link|register).*)',
+      ],
+    }
+    
+  configurationNotes:
+    - Middleware runs on Edge Runtime for performance
+    - Session refresh happens automatically
+    - Preserves original URL for post-login redirect
+    - Admin routes have additional role verification
+    - Excludes auth pages and public assets
+    - Root path (/) redirects to dashboard if logged in, login if not
+    - Preserves direct-login for development
+    - Maintains admin email whitelist for Role Viewer compatibility
+    
+  testingSteps:
+    - Deploy middleware and restart dev server
+    - Test unauthenticated access to protected routes
+    - Verify redirects preserve intended destination
+    - Test admin route with non-admin user
+    - Verify public pages remain accessible
+
+# ===== ADMIN FUNCTIONALITY PRESERVATION =====
+adminFunctionality:
+  roleViewer:
+    description: "Role Viewer functionality remains fully intact"
+    preserved:
+      - Admin can still switch between roles in dashboard
+      - RoleViewerSelector component continues to work
+      - ViewingRole context remains functional
+      - Admin override capabilities maintained
+      
+    howItWorks: |
+      // The middleware checks for admin access via:
+      1. role === 'administrator' (database role)
+      2. is_admin === true (override flag for Role Viewer)
+      
+      // Admin access is DATABASE-DRIVEN, not email-based
+      // Your email (Patrick@POWLAX.com) has admin access because:
+      // - Your user record has role = 'administrator'
+      // - NOT because of hardcoded email checks
+      
+      // In the app, Role Viewer still works:
+      - Admin accesses /admin/management
+      - Uses RoleViewerSelector to pick a role
+      - Views dashboard as that role
+      - Context propagates viewing role
+      - Components render based on viewing role
+      
+  directLogin:
+    description: "Development bypass preserved"
+    functionality:
+      - /direct-login remains accessible in development
+      - Allows quick testing without full auth flow
+      - Only works when NODE_ENV === 'development'
+      - Production builds will block this route
+      
+  adminAccess:
+    description: "Admin access is DATABASE-DRIVEN"
+    method: "Database role field, NOT hardcoded emails"
+    yourAccess:
+      email: "Patrick@POWLAX.com"
+      role: "administrator (in database)"
+      reason: "Your database record has role='administrator'"
+    note: "No hardcoded emails needed - proper database-driven security"
+    
+  noDisruption:
+    - Role switching continues to work
+    - Admin tools remain accessible
+    - Development workflows unchanged
+    - All existing admin features preserved
+
+# ===== FIX 3: PLAYERDASHBOARD GAMIFICATION =====
+fix3_playerDashboard:
+  file: "src/components/dashboards/PlayerDashboard.tsx"
+  severity: HIGH
+  
+  currentIssues:
+    - Returns 100% mock data
+    - No connection to gamification tables
+    - Hardcoded statistics and achievements
+    - Mock upcoming events
+    
+  requiredDataSources:
+    tables:
+      - user_points_wallets # Point balances
+      - points_transactions_powlax # Point history
+      - user_badges # Earned badges
+      - powlax_player_ranks # Rank progression
+      - skills_academy_user_progress # Workout progress
+      - skills_academy_workouts # Available workouts
+      - teams # Team membership
+      - team_members # Team details
+      
+  implementation:
+    step1_removeAllMockData:
+      description: "Remove all hardcoded mock data"
+      toRemove:
+        - mockStats object
+        - mockUpcomingEvents array
+        - mockRecentActivity array
+        - hardcoded welcome messages
+        
+    step2_createDataHooks:
+      description: "Create/use hooks for real data following Permanence Pattern"
+      hooks: |
+        // 1. Player stats hook
+        const usePlayerStats = (userId: string) => {
+          const [stats, setStats] = useState<PlayerStats | null>(null)
+          
+          useEffect(() => {
+            const fetchStats = async () => {
+              // Get points
+              const { data: pointsData } = await supabase
+                .from('user_points_wallets')
+                .select('*')
+                .eq('user_id', userId)
+                .single()
+              
+              // Get badges count
+              const { data: badgesData } = await supabase
+                .from('user_badges')
+                .select('count')
+                .eq('user_id', userId)
+              
+              // Get workout progress
+              const { data: progressData } = await supabase
+                .from('skills_academy_user_progress')
+                .select('*')
+                .eq('user_id', userId)
+              
+              // Get current rank
+              const totalPoints = pointsData?.total_points || 0
+              const { data: rankData } = await supabase
+                .from('powlax_player_ranks')
+                .select('*')
+                .lte('min_points', totalPoints)
+                .gte('max_points', totalPoints)
+                .single()
+              
+              setStats({
+                totalPoints,
+                currentRank: rankData?.name || 'Rookie',
+                badgesEarned: badgesData?.length || 0,
+                workoutsCompleted: progressData?.length || 0,
+                streakDays: calculateStreak(progressData), // Helper function
+                weeklyGoalProgress: calculateWeeklyProgress(progressData)
+              })
+            }
+            
+            fetchStats()
+          }, [userId])
+          
+          return stats
+        }
+        
+    step3_updateComponent:
+      description: "Replace mock data with real data hooks"
+      code: |
+        export function PlayerDashboard({ user }: PlayerDashboardProps) {
+          // Remove mock data
+          // const mockStats = { ... } DELETE THIS
+          
+          // Use real data hooks
+          const stats = usePlayerStats(user.id)
+          const recentActivity = useRecentActivity(user.id)
+          const upcomingEvents = useUpcomingEvents(user.id)
+          const teamInfo = useTeamInfo(user.id)
+          
+          // Loading states
+          if (!stats) {
+            return <DashboardSkeleton />
+          }
+          
+          return (
+            <div className="space-y-6">
+              {/* Welcome Section with real data */}
+              <WelcomeCard 
+                userName={user.user_metadata?.full_name || 'Player'}
+                teamName={teamInfo?.name}
+              />
+              
+              {/* Stats Grid with real data */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <StatCard
+                  title="Total Points"
+                  value={stats.totalPoints}
+                  icon={<Trophy />}
+                />
+                <StatCard
+                  title="Current Rank"
+                  value={stats.currentRank}
+                  icon={<Award />}
+                />
+                <StatCard
+                  title="Badges Earned"
+                  value={stats.badgesEarned}
+                  icon={<Shield />}
+                />
+                <StatCard
+                  title="Workout Streak"
+                  value={`${stats.streakDays} days`}
+                  icon={<Flame />}
+                />
+              </div>
+              
+              {/* Progress Section with real data */}
+              <ProgressCard
+                weeklyGoal={5}
+                currentProgress={stats.weeklyGoalProgress}
+              />
+              
+              {/* Recent Activity with real data */}
+              <RecentActivityCard activities={recentActivity} />
+            </div>
+          )
+        }
+        
+    step4_applyPermanencePattern:
+      description: "Ensure data persistence using Permanence Pattern"
+      requirements:
+        - Direct column mapping (no nested JSON)
+        - Proper type transformations
+        - Array handling for team associations
+        - Atomic operations for updates
+        - RLS compatibility checks
+        
+  testingRequirements:
+    - Verify all mock data is removed
+    - Confirm real data loads from Supabase
+    - Test with user who has points/badges
+    - Test with new user (empty state)
+    - Verify loading states display
+    - Check error handling for failed queries
+    - Ensure data updates in real-time
+
+# ===== EXECUTION STRATEGY =====
+executionStrategy:
+  sequence: "SEQUENTIAL - Security first, then features"
+  
+  phase1_security:
+    priority: IMMEDIATE
+    tasks:
+      - fix1_authentication # Re-enable auth in layout
+      - fix2_middleware # Create middleware.ts
+    validation:
+      - No unauthorized access to protected routes
+      - Proper redirects to login
+      - Admin routes protected by role
+    estimatedTime: "2 hours"
+    
+  phase2_playerDashboard:
+    priority: HIGH
+    tasks:
+      - Remove all mock data
+      - Implement data hooks
+      - Connect to real tables
+      - Apply Permanence Pattern
+    validation:
+      - Real gamification data displays
+      - Loading states work
+      - Error handling present
+    estimatedTime: "4 hours"
+    
+  phase3_testing:
+    priority: CRITICAL
+    tasks:
+      - Test authentication flow
+      - Verify middleware protection
+      - Validate PlayerDashboard data
+      - Check performance
+    estimatedTime: "2 hours"
+
+# ===== SUCCESS CRITERIA =====
+successCriteria:
+  security:
+    - [ ] Cannot access /dashboard without login
+    - [ ] Cannot access /teams without login  
+    - [ ] Cannot access /admin without admin role
+    - [ ] Login redirect preserves intended destination
+    - [ ] Session refresh works correctly
+    - [ ] Root path (/) redirects to dashboard when logged in
+    - [ ] Root path (/) redirects to login when logged out
+    - [ ] Direct-login works in development mode
+    - [ ] Role Viewer continues to function for admins
+    - [ ] Admin access controlled by database role (not hardcoded emails)
+    
+  playerDashboard:
+    - [ ] No mock data remains
+    - [ ] Points display from user_points_wallets
+    - [ ] Badges count from user_badges
+    - [ ] Rank from powlax_player_ranks
+    - [ ] Workout progress from skills_academy_user_progress
+    - [ ] Loading states display correctly
+    - [ ] Error states handle gracefully
+    
+  performance:
+    - [ ] Page loads within 2 seconds
+    - [ ] No waterfall loading patterns
+    - [ ] Middleware adds < 100ms latency
+
+# ===== QUALITY GATES =====
+qualityGates:
+  beforeMerge:
+    - All protected routes require authentication
+    - Middleware passes all test scenarios
+    - PlayerDashboard shows only real data
+    - No console errors or warnings
+    - All TypeScript types correct
+    
+  production:
+    - Security audit passed
+    - Performance benchmarks met
+    - Error tracking configured
+    - Monitoring alerts set up
+
+# ===== REFERENCES =====
+references:
+  patterns:
+    - path: ".claude/SUPABASE_PERMANENCE_PATTERN.md"
+      purpose: "Data persistence pattern for Supabase integration"
+      
+  contracts:
+    - path: "contracts/active/component-evaluation-master-contract.yaml"
+      purpose: "Component best practices and patterns"
+      
+    - path: "contracts/active/page-orchestration-analysis-contract.yaml"
+      purpose: "Page-level data flow patterns"
+      
+  database:
+    - path: "contracts/active/database-truth-sync-002.yaml"
+      purpose: "Correct table names and schemas"
+      
+  analysis:
+    - path: "COMPONENT_ANALYSIS_MASTER_REPORT.md"
+      purpose: "Component issues and recommendations"
+      
+    - path: "PAGE_ORCHESTRATION_MASTER_REPORT.md"
+      purpose: "Page architecture and security gaps"
+
+# ===== NOTES =====
+notes:
+  - Security fixes MUST be completed before any other work
+  - Middleware.ts is a new file that needs to be created
+  - PlayerDashboard is the most visited page - quality is critical
+  - Follow Permanence Pattern exactly for data integration
+  - Test thoroughly - these are production-critical fixes
+  - Consider adding rate limiting to middleware in future
+  - Monitor performance impact of middleware carefully

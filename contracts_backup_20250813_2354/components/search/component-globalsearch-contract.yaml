@@ -1,0 +1,127 @@
+contractId: "component-globalsearch-20250113"
+componentInfo:
+  name: "GlobalSearch"
+  filePath: "src/components/search/GlobalSearch.tsx"
+  category: "Global Search"
+  parentPage: "Universal (overlay modal)"
+  complexity: "moderate"
+  
+functionalAnalysis:
+  purpose: "Universal search overlay for finding drills, strategies, workouts across the platform"
+  primaryFunction: "Provide instant search with keyboard navigation and categorized results"
+  userInteractions:
+    - "Text input with real-time search"
+    - "Keyboard navigation (↑↓ arrows)"
+    - "Enter to select result"
+    - "ESC to close"
+    - "Click to select result"
+    - "Category-based result grouping"
+  businessLogic: "Debounced search, keyboard navigation, result categorization, and route handling"
+  stateManagement: "Search query state, results state, loading state, keyboard selection index"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements:
+    - "Mock search data with predefined drills, strategies, workouts"
+    - "Category definitions (drill, strategy, workout, concept)"
+    - "Hardcoded metadata (duration, difficulty, equipment)"
+    - "Static URL routing patterns"
+  mockDataUsage:
+    - "mockSearchData array with sample content"
+    - "Hardcoded drill examples (Ground Ball Pickup, 6v6 Settled Offense)"
+    - "Sample workout data (Stick Skills Daily Practice)"
+  realDataPercentage: 10
+  
+dependencies:
+  hooks:
+    - "useState"
+    - "useEffect"
+    - "useCallback"
+  contexts: []
+  utilities:
+    - "Link (Next.js)"
+  externalLibraries:
+    - "lucide-react"
+    
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations:
+    - "Search query to filtered results"
+    - "Category types to icon mapping"
+    - "Category types to color coding"
+    - "Result metadata to display format"
+    
+mvpReadiness:
+  isProductionReady: false
+  blockers:
+    - "No real data integration - all mock data"
+    - "Search API not implemented"
+    - "No connection to actual drill/strategy tables"
+  improvements:
+    - "Connect to powlax_drills and powlax_strategies tables"
+    - "Integrate with skills_academy_workouts"
+    - "Add search result ranking"
+    - "Implement search analytics"
+    - "Add recent searches"
+    - "Support for advanced search operators"
+  priority: "high"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation:
+    - "Search algorithm implementation"
+    - "Keyboard navigation patterns"
+    - "Result categorization system"
+    - "Integration requirements for real data"
+    
+componentInteractions:
+  callsComponents:
+    - "Link (Next.js)"
+  calledByComponents:
+    - "SearchTrigger"
+    - "Navigation components"
+  sharedState:
+    - "isOpen/onClose modal state"
+  eventCommunication:
+    - "isOpen: boolean prop"
+    - "onClose: () => void callback"
+  propsPassedTo:
+    - "isOpen: boolean"
+    - "onClose: () => void"
+  propsReceivedFrom:
+    - "SearchTrigger or other trigger components"
+    
+userJourneyContext:
+  userFlows:
+    - "User needs content -> Cmd+K/search trigger -> Type query -> Select result"
+    - "Quick navigation -> Search for known content -> Direct access"
+    - "Content discovery -> Browse search results -> Explore categories"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["coach", "player", "parent", "director", "admin"]
+  featureArea: "search"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: true
+  duplicateComponents:
+    - "ResourceFilter (search input and filtering)"
+    - "Practice planner search functionality"
+  primaryComponent: "GlobalSearch"
+  reasonForDuplication: "Global search vs. context-specific filtering needs"
+  consolidationStrategy: "Create shared search service with different UI interfaces"
+  supabaseIntegrationWinner: "None currently - all use mock/hardcoded data"

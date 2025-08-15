@@ -1,0 +1,113 @@
+# Component Contract: CoachDashboard
+contractId: "component-coachdashboard-20250113"
+componentInfo:
+  name: "CoachDashboard"
+  filePath: "src/components/dashboards/CoachDashboard.tsx"
+  category: "dashboard"
+  parentPage: "/dashboard (when user role is coach)"
+  complexity: "complex"
+  
+functionalAnalysis:
+  purpose: "Coach dashboard demonstrating permanence pattern for user favorites with team/club sharing capabilities"
+  primaryFunction: "Test and showcase permanence pattern for saving/updating user favorites with array-based sharing permissions"
+  userInteractions: 
+    - "Add drills and strategies to favorites"
+    - "Configure sharing options (team, club, assistant)"
+    - "Update sharing permissions on existing favorites"
+    - "Toggle pinned status on favorites"
+    - "Refresh data to test persistence"
+  businessLogic: "Implements dual state management pattern - boolean UI state transforms to array data state for database storage"
+  stateManagement: "Complex state with UI booleans and data arrays, plus integration with useDashboardFavorites hook"
+  
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "hook"
+  supabaseTables: ["user_favorites"]
+  tableUsage:
+    - tableName: "user_favorites"
+      operations: ["select", "insert", "update"]
+      purpose: "Store and retrieve user favorite drills/strategies with sharing permissions"
+      dataFlow: "UI state -> hook -> database arrays -> UI display"
+  
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements:
+    - "Mock team/club/assistant IDs for sharing arrays"
+    - "Hardcoded tags array for favorites"
+  mockDataUsage:
+    - "teamShareIds: [1, 2] (mock team IDs)"
+    - "clubShareIds: [10] (mock club ID)"
+    - "assistantShareIds: ['assistant-1'] (mock assistant)"
+  realDataPercentage: 85
+  
+dependencies:
+  hooks: ["useDashboardFavorites", "useDrills", "useStrategies"]
+  contexts: []
+  utilities: []
+  externalLibraries: ["lucide-react"]
+  
+supabaseTableDetails:
+  tablesUsed: ["user_favorites", "powlax_drills", "powlax_strategies"]
+  tableRelationships: 
+    - "user_favorites references drills/strategies by ID"
+    - "Visibility arrays store team/club IDs"
+  queryPatterns:
+    - "Insert favorites with array transformations"
+    - "Update favorites with sharing permission arrays"
+    - "Select favorites with related item data"
+  dataTransformations:
+    - "Boolean UI state to array data state"
+    - "Empty arrays when sharing is disabled"
+    - "Preserve existing IDs when updating"
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Replace mock team/club IDs with real data"
+    - "Add validation for sharing permissions"
+    - "Enhance error handling for failed operations"
+  priority: "high"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: true
+  documentationQuality: "good"
+  needsDocumentation: ["API integration details"]
+  
+componentInteractions:
+  callsComponents: ["Card components", "Button", "Checkbox", "Badge"]
+  calledByComponents: ["Main dashboard page when user role is coach"]
+  sharedState: ["Favorites data through useDashboardFavorites"]
+  eventCommunication: ["Favorite addition/update events"]
+  propsPassedTo: ["UI component props"]
+  propsReceivedFrom: ["None - standalone dashboard"]
+  
+userJourneyContext:
+  userFlows: ["Coach Login -> Dashboard -> Manage Favorites -> Share with Team", "Coach -> Add Drill to Favorites -> Configure Sharing"]
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["coach"]
+  featureArea: "practice"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "CoachDashboard"
+  reasonForDuplication: ""
+  consolidationStrategy: ""
+  supabaseIntegrationWinner: "CoachDashboard"
+
+notes:
+  - "Excellent example of permanence pattern implementation"
+  - "Real Supabase integration through custom hooks"
+  - "Demonstrates complex data transformations (boolean -> array)"
+  - "Has built-in persistence testing functionality"
+  - "Uses real powlax_drills and powlax_strategies tables"
+  - "Mock sharing IDs could be replaced with real team/club data"
+  - "Serves as template for other dashboard components"

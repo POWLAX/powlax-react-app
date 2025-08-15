@@ -8,9 +8,8 @@ export function useViewAsAuth() {
   const actualAuth = useAuth()
   const { viewingRole, isViewingAs } = useRoleViewer()
 
-  // Only allow viewing as different roles if user is an admin
-  const isAdmin = actualAuth.user?.roles?.includes('administrator') || 
-                  actualAuth.user?.roles?.includes('admin')
+  // Only allow viewing as different roles if user is an administrator
+  const isAdmin = actualAuth.user?.roles?.includes('administrator')
 
   if (isViewingAs && isAdmin && viewingRole) {
     // Return modified user object with viewing role

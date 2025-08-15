@@ -96,7 +96,7 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
       return created.toDateString() === today.toDateString()
     }).length || 0,
     totalDrills: stats.totalDrills,
-    activeSessions: Math.floor(Math.random() * 50) + 20, // Mock: Active session count
+    activeSessions: 35, // MOCK: Active session count
     systemMetrics: [
       { label: "Mock: System Uptime", value: 99.9, maxValue: 100, color: 'green' as const },
       { label: "Mock: Database Performance", value: 95, maxValue: 100, color: 'blue' as const },
@@ -105,7 +105,7 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
     recentActivity: [
       { user: "Mock: coach.smith@club.com", action: "Created practice plan", time: "5 min ago", status: "normal" },
       { user: "Mock: parent.johnson@email.com", action: "Registered child", time: "12 min ago", status: "normal" },
-      { user: "Mock: admin.wilson@powlax.com", action: "Updated drill library", time: "1 hour ago", status: "admin" },
+      { user: "Mock: admin.wilson@powlax.com", action: "Updated drill library", time: "1 hour ago", status: "administrator" },
       { user: "Mock: director.davis@elite.com", action: "Generated financial report", time: "2 hours ago", status: "normal" }
     ],
     systemHealth: [
@@ -419,9 +419,9 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">{activity.user}</span>
-                    {activity.status === 'admin' && (
+                    {activity.status === 'administrator' && (
                       <Badge variant="secondary" className="bg-red-100 text-red-800 text-xs">
-                        Admin
+                        Administrator
                       </Badge>
                     )}
                   </div>

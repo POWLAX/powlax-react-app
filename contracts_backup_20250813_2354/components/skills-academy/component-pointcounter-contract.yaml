@@ -1,0 +1,159 @@
+# PointCounter Component Contract
+# Critical gamification display component for Skills Academy workouts
+
+contractId: "component-pointcounter-20250113"
+componentInfo:
+  name: "PointCounter"
+  filePath: "src/components/skills-academy/PointCounter.tsx"
+  category: "Skills Academy"
+  parentPage: "Skills Academy Workout"
+  complexity: "moderate"
+  
+functionalAnalysis:
+  purpose: "Real-time point display component that shows earned points during workouts with animations and point type filtering"
+  primaryFunction: "Displays current workout points by type with visual animations and series-specific filtering"
+  userInteractions: 
+    - "View points earned in real-time"
+    - "See point animations when points change"
+    - "Touch interaction for mobile point details"
+    - "Visual feedback for point increases"
+  businessLogic: "Filters point types by workout series (attack_token, defense_dollar, etc.) and shows only relevant points plus academy_points"
+  stateManagement: "Uses React state for animations, point displays, touch interactions, and type filtering"
+  
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "hook"
+  supabaseTables: 
+    - "point_types_powlax"
+  tableUsage:
+    - tableName: "point_types_powlax"
+      operations: ["select"]
+      purpose: "Fetch point type definitions, icons, display names"
+      dataFlow: "usePointTypes hook → component state → filtered display based on series type"
+  
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements: 
+    - "Series-specific point type mapping (attack: academy_points + attack_token)"
+    - "Fallback icons and display names"
+  mockDataUsage: []
+  realDataPercentage: 85
+  
+dependencies:
+  hooks: 
+    - "usePointTypes"
+  contexts: []
+  utilities: []
+  externalLibraries: 
+    - "next/image"
+    - "lucide-react"
+  
+supabaseTableDetails:
+  tablesUsed:
+    - "point_types_powlax"
+  tableRelationships: 
+    - "point_types_powlax provides icons and display names for point display"
+  queryPatterns:
+    - "SELECT * FROM point_types_powlax ORDER BY id"
+  dataTransformations:
+    - "Maps point type data to PointDisplay interface"
+    - "Filters point types by series type (attack, defense, etc.)"
+    - "Removes duplicate Academy Point types"
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: 
+    - "Could integrate with real-time point transactions"
+    - "Could add sound effects for point animations"
+    - "Could optimize image loading for point icons"
+  priority: "critical"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: true
+  documentationQuality: "good"
+  needsDocumentation: 
+    - "Series-specific point mapping logic"
+    - "Animation timing and performance considerations"
+  
+componentInteractions:
+  callsComponents: []
+  calledByComponents: 
+    - "WorkoutPlayer (skills-academy/workout/[id]/page.tsx)"
+  sharedState: 
+    - "Receives points object from parent workout component"
+  eventCommunication: []
+  propsPassedTo: []
+  propsReceivedFrom: 
+    - "points: Record<string, number> from workout completion"
+    - "seriesType: string for filtering relevant point types"
+    - "animate: boolean for enabling animations"
+  
+userJourneyContext:
+  userFlows: 
+    - "WorkoutList → WorkoutPlayer → PointCounter (real-time display)"
+    - "Drill completion → Point award → PointCounter animation"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["player", "coach"]
+  featureArea: "skills"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: true
+  duplicateComponents: 
+    - "PointExplosion (animation-focused point display)"
+    - "StreakTracker (includes point statistics)"
+    - "Gamification dashboard point displays"
+  primaryComponent: "PointCounter"
+  reasonForDuplication: "Different contexts - PointCounter for real-time, PointExplosion for celebrations"
+  consolidationStrategy: "Keep PointCounter as primary real-time display, PointExplosion for special effects"
+  supabaseIntegrationWinner: "PointCounter (direct usePointTypes integration)"
+
+# Gamification Integration Analysis
+gamificationIntegration:
+  pointSystemIntegration:
+    directTables:
+      - "point_types_powlax: Provides point type definitions and icons"
+    indirectTables:
+      - "points_transactions_powlax: Could show real-time point awards"
+      - "user_points_wallets: Could display total accumulated points"
+    realTimeCapability: "Ready for real-time point transaction integration"
+    
+  workoutFlowPosition:
+    stage: "During workout execution"
+    triggerEvents: 
+      - "Drill completion"
+      - "Workout milestone reached"
+      - "Time-based point awards"
+    dataFlow: "Parent component calculates points → PointCounter displays → Animations trigger"
+    
+  businessRules:
+    - "All workouts award academy_points"
+    - "Series-specific points only awarded for matching series"
+    - "Wall ball workouts award rebound_reward points"
+    - "Point values filter out duplicate Academy Point types"
+    
+  enhancementOpportunities:
+    - "Real-time database point transaction display"
+    - "Streak multiplier integration"
+    - "Badge progress indicators"
+    - "Rank progress visualization"
+
+# Critical MVP Notes
+mvpNotes:
+  criticalForMVP: "Essential for workout feedback loop and user engagement"
+  integrationDependencies:
+    - "point_types_powlax table must be populated"
+    - "usePointTypes hook must be functional"
+    - "Parent workout component must calculate points correctly"
+  testingPriority: "High - point display accuracy is critical for user trust"
+  performanceConsiderations:
+    - "Animation performance on mobile devices"
+    - "Image loading optimization for point icons"
+    - "Re-render optimization when points change frequently"

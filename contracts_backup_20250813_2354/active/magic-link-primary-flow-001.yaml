@@ -1,0 +1,526 @@
+# Magic Link Primary Flow Contract
+# Phase 4: Ensure magic links are the primary production auth flow
+
+contractId: "magic-link-primary-flow-001"
+type: FOCUSED_IMPLEMENTATION
+version: 1.0.0
+created: 2025-01-15
+priority: HIGH
+phase: 4 of 4
+
+# ===== CONTRACT OBJECTIVE =====
+objective:
+  goal: "Make magic links the primary and polished authentication flow"
+  
+  currentState:
+    - "Magic link system exists but not emphasized"
+    - "Multiple auth paths confuse users"
+    - "Login page not optimized for magic links"
+    - "Error handling and feedback minimal"
+    
+  targetState:
+    - "Magic links are the clear primary auth method"
+    - "Excellent user experience with clear messaging"
+    - "Proper error handling and status feedback"
+    - "Fast, reliable email delivery"
+
+# ===== FILE MODIFICATIONS =====
+files:
+  primary:
+    path: "src/app/auth/login/page.tsx"
+    
+    currentIssues:
+      - "May still reference WordPress login"
+      - "Not optimized for magic link flow"
+      - "Unclear messaging about process"
+      
+    implementation: |
+      'use client'
+      
+      import { useState } from 'react'
+      import { useRouter, useSearchParams } from 'next/navigation'
+      import { supabase } from '@/lib/supabase'
+      import { Button } from '@/components/ui/button'
+      import { Input } from '@/components/ui/input'
+      import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+      import { Alert, AlertDescription } from '@/components/ui/alert'
+      import { Mail, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react'
+      
+      export default function LoginPage() {
+        const [email, setEmail] = useState('')
+        const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+        const [errorMessage, setErrorMessage] = useState('')
+        const router = useRouter()
+        const searchParams = useSearchParams()
+        const redirectTo = searchParams.get('redirectTo') || '/dashboard'
+        
+        const handleMagicLink = async (e: React.FormEvent) => {
+          e.preventDefault()
+          
+          // Validate email
+          if (!email || !email.includes('@')) {
+            setErrorMessage('Please enter a valid email address')
+            setStatus('error')
+            return
+          }
+          
+          setStatus('sending')
+          setErrorMessage('')
+          
+          try {
+            const { error } = await supabase.auth.signInWithOtp({
+              email: email.trim().toLowerCase(),
+              options: {
+                emailRedirectTo: `${window.location.origin}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
+                // Add metadata for better tracking
+                data: {
+                  login_method: 'magic_link',
+                  requested_at: new Date().toISOString()
+                }
+              }
+            })
+            
+            if (error) throw error
+            
+            setStatus('sent')
+            
+            // Store email for potential resend
+            sessionStorage.setItem('magic_link_email', email)
+            
+          } catch (error: any) {
+            console.error('Magic link error:', error)
+            setStatus('error')
+            
+            // User-friendly error messages
+            if (error.message?.includes('rate')) {
+              setErrorMessage('Too many login attempts. Please wait a few minutes and try again.')
+            } else if (error.message?.includes('invalid')) {
+              setErrorMessage('This email address appears to be invalid. Please check and try again.')
+            } else {
+              setErrorMessage('Unable to send magic link. Please try again or contact support.')
+            }
+          }
+        }
+        
+        const handleResend = async () => {
+          const storedEmail = sessionStorage.getItem('magic_link_email') || email
+          if (storedEmail) {
+            setEmail(storedEmail)
+            setStatus('idle')
+            // Trigger form submission
+            const form = document.getElementById('login-form') as HTMLFormElement
+            form?.requestSubmit()
+          }
+        }
+        
+        // Different UI states based on status
+        if (status === 'sent') {
+          return (
+            <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center px-4">
+              <Card className="w-full max-w-md">
+                <CardHeader className="text-center">
+                  <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                    <CheckCircle className="w-6 h-6 text-green-600" />
+                  </div>
+                  <CardTitle className="text-2xl font-bold">Check Your Email</CardTitle>
+                  <CardDescription className="mt-2">
+                    We've sent a magic link to <strong>{email}</strong>
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Alert>
+                    <Mail className="h-4 w-4" />
+                    <AlertDescription>
+                      Click the secure link in your email to instantly sign in. 
+                      The link expires in 1 hour for security.
+                    </AlertDescription>
+                  </Alert>
+                  
+                  <div className="bg-blue-50 rounded-lg p-4">
+                    <h3 className="text-sm font-semibold text-blue-900 mb-2">
+                      Didn't receive the email?
+                    </h3>
+                    <ul className="text-sm text-blue-700 space-y-1">
+                      <li>• Check your spam or promotions folder</li>
+                      <li>• Make sure {email} is correct</li>
+                      <li>• Wait a few moments - emails can take up to 60 seconds</li>
+                    </ul>
+                  </div>
+                  
+                  <div className="flex flex-col space-y-2">
+                    <Button
+                      onClick={handleResend}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      Resend Magic Link
+                    </Button>
+                    
+                    <Button
+                      onClick={() => setStatus('idle')}
+                      variant="ghost"
+                      className="w-full"
+                    >
+                      Try Different Email
+                    </Button>
+                  </div>
+                  
+                  <div className="text-center text-xs text-gray-500 mt-4">
+                    Having trouble? Contact support at support@powlax.com
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )
+        }
+        
+        return (
+          <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center px-4">
+            <Card className="w-full max-w-md">
+              <CardHeader className="text-center">
+                <CardTitle className="text-3xl font-bold">Welcome to POWLAX</CardTitle>
+                <CardDescription className="mt-2">
+                  Sign in with your email - no password needed
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form id="login-form" onSubmit={handleMagicLink} className="space-y-4">
+                  {/* Show redirect notice if applicable */}
+                  {redirectTo !== '/dashboard' && (
+                    <Alert>
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        Please sign in to access that page
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  
+                  {/* Error message */}
+                  {status === 'error' && errorMessage && (
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>{errorMessage}</AlertDescription>
+                    </Alert>
+                  )}
+                  
+                  <div className="space-y-2">
+                    <label htmlFor="email" className="text-sm font-medium text-gray-700">
+                      Email Address
+                    </label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="coach@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      autoComplete="email"
+                      autoFocus
+                      className="w-full"
+                      disabled={status === 'sending'}
+                    />
+                  </div>
+                  
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    size="lg"
+                    disabled={status === 'sending' || !email}
+                  >
+                    {status === 'sending' ? (
+                      <>
+                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        Sending Magic Link...
+                      </>
+                    ) : (
+                      <>
+                        Send Magic Link
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </>
+                    )}
+                  </Button>
+                  
+                  <div className="relative my-6">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-200" />
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="bg-white px-4 text-gray-500">Secure, passwordless sign in</span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-start space-x-3">
+                      <div className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center mt-0.5">
+                        <span className="text-xs font-semibold text-blue-600">1</span>
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        Enter your email address above
+                      </p>
+                    </div>
+                    
+                    <div className="flex items-start space-x-3">
+                      <div className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center mt-0.5">
+                        <span className="text-xs font-semibold text-blue-600">2</span>
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        We'll email you a secure sign-in link
+                      </p>
+                    </div>
+                    
+                    <div className="flex items-start space-x-3">
+                      <div className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center mt-0.5">
+                        <span className="text-xs font-semibold text-blue-600">3</span>
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        Click the link to instantly access your account
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Development mode notice */}
+                  {process.env.NODE_ENV === 'development' && (
+                    <div className="mt-4 p-2 bg-yellow-50 border border-yellow-200 rounded text-center">
+                      <p className="text-xs text-yellow-800">
+                        Dev Mode: <a href="/direct-login" className="underline">Quick Login →</a>
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )
+        }
+
+  secondary:
+    - path: "src/app/auth/callback/page.tsx"
+      description: "Handle magic link callback and redirect"
+      create: true
+      implementation: |
+        'use client'
+        
+        import { useEffect } from 'react'
+        import { useRouter, useSearchParams } from 'next/navigation'
+        import { supabase } from '@/lib/supabase'
+        
+        export default function AuthCallbackPage() {
+          const router = useRouter()
+          const searchParams = useSearchParams()
+          const redirectTo = searchParams.get('redirectTo') || '/dashboard'
+          
+          useEffect(() => {
+            // Supabase will handle the magic link token automatically
+            // We just need to check if user is authenticated and redirect
+            const checkUser = async () => {
+              const { data: { session } } = await supabase.auth.getSession()
+              
+              if (session) {
+                // Success! Redirect to intended destination
+                router.push(redirectTo)
+              } else {
+                // No session, something went wrong
+                router.push('/auth/login?error=invalid_link')
+              }
+            }
+            
+            checkUser()
+          }, [router, redirectTo])
+          
+          return (
+            <div className="min-h-screen flex items-center justify-center">
+              <div className="text-center">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <p className="mt-4 text-gray-600">Signing you in...</p>
+              </div>
+            </div>
+          )
+        }
+    
+    - path: "src/app/api/auth/magic-link/route.ts"
+      description: "Ensure magic link API is optimized"
+      modify: true
+      changes: |
+        // Ensure the API:
+        // 1. Validates email format
+        // 2. Checks if user exists in database
+        // 3. Creates user if from WordPress webhook
+        // 4. Sends professional email template
+        // 5. Handles rate limiting properly
+        // 6. Returns clear error messages
+
+# ===== IMPLEMENTATION STEPS =====
+implementation:
+  step1:
+    action: "Update login page UI"
+    tasks:
+      - "Remove any WordPress login references"
+      - "Create clean magic link focused design"
+      - "Add clear instructions and steps"
+      - "Implement proper form validation"
+    validation: "Login page is magic link focused"
+    
+  step2:
+    action: "Implement status states"
+    tasks:
+      - "idle state - show form"
+      - "sending state - show spinner"
+      - "sent state - show success message"
+      - "error state - show helpful errors"
+    validation: "All states render correctly"
+    
+  step3:
+    action: "Create callback page"
+    tasks:
+      - "Create /auth/callback route"
+      - "Handle magic link token"
+      - "Redirect to intended destination"
+      - "Handle errors gracefully"
+    validation: "Callback processes links correctly"
+    
+  step4:
+    action: "Add email resend functionality"
+    tasks:
+      - "Store email in sessionStorage"
+      - "Add resend button"
+      - "Handle rate limiting"
+      - "Show clear feedback"
+    validation: "Resend works without re-entering email"
+    
+  step5:
+    action: "Optimize email delivery"
+    tasks:
+      - "Review email service configuration"
+      - "Ensure proper email templates"
+      - "Add SPF/DKIM if needed"
+      - "Test delivery speed"
+    validation: "Emails arrive within 60 seconds"
+    
+  step6:
+    action: "Add development helper"
+    tasks:
+      - "Show direct-login link in dev mode"
+      - "Keep it subtle but accessible"
+      - "Ensure production hides it"
+    validation: "Dev helper visible only in development"
+    
+  step7:
+    action: "Update registration flow"
+    tasks:
+      - "Ensure new users get magic links"
+      - "WordPress webhooks trigger magic links"
+      - "Clear onboarding after first login"
+    validation: "New users can register and login"
+
+# ===== TESTING REQUIREMENTS =====
+testing:
+  userFlows:
+    - name: "First-time login"
+      steps:
+        - "Enter email on login page"
+        - "Click send magic link"
+        - "Check email"
+        - "Click link in email"
+        - "Land on dashboard"
+      expected: "Smooth authentication"
+      
+    - name: "Login with redirect"
+      steps:
+        - "Access /teams (protected)"
+        - "Redirected to login"
+        - "Complete magic link flow"
+        - "Land on /teams"
+      expected: "Return to intended page"
+      
+    - name: "Resend magic link"
+      steps:
+        - "Request magic link"
+        - "Click resend"
+        - "Check email again"
+      expected: "New link sent"
+      
+    - name: "Invalid email"
+      steps:
+        - "Enter invalid email"
+        - "Try to submit"
+      expected: "Clear error message"
+      
+    - name: "Expired link"
+      steps:
+        - "Click old magic link"
+        - "See error"
+        - "Redirected to login"
+      expected: "Helpful error message"
+      
+  performance:
+    - "Email delivery < 60 seconds"
+    - "Login page loads < 1 second"
+    - "Callback processes < 2 seconds"
+    - "No unnecessary API calls"
+
+# ===== VALIDATION CHECKLIST =====
+validation:
+  userInterface:
+    - "[ ] Login page is clean and focused"
+    - "[ ] Clear magic link instructions"
+    - "[ ] All status states work"
+    - "[ ] Error messages are helpful"
+    - "[ ] Success state is clear"
+    
+  functionality:
+    - "[ ] Magic links sent successfully"
+    - "[ ] Links authenticate users"
+    - "[ ] Redirects work properly"
+    - "[ ] Resend functionality works"
+    - "[ ] Rate limiting handled"
+    
+  emailDelivery:
+    - "[ ] Emails arrive quickly"
+    - "[ ] Templates look professional"
+    - "[ ] Links are secure"
+    - "[ ] Expiry time appropriate"
+    
+  development:
+    - "[ ] Direct-login link in dev"
+    - "[ ] Hidden in production"
+    - "[ ] Easy dev workflow"
+
+# ===== SUCCESS CRITERIA =====
+successCriteria:
+  required:
+    - "Magic links are primary auth method"
+    - "Excellent user experience"
+    - "Clear messaging throughout"
+    - "Fast email delivery"
+    - "Proper error handling"
+    
+  validation:
+    - "Test: Complete login flow"
+    - "Test: Resend functionality"
+    - "Test: Error scenarios"
+    - "Test: Redirect preservation"
+    - "Build: Production ready"
+
+# ===== USER EXPERIENCE GOALS =====
+userExperience:
+  principles:
+    - "Simple and secure"
+    - "No passwords to remember"
+    - "Clear instructions"
+    - "Fast and reliable"
+    
+  messaging:
+    - "Explain magic links clearly"
+    - "Set expectations (check email)"
+    - "Provide troubleshooting tips"
+    - "Offer support contact"
+    
+  design:
+    - "Clean, professional look"
+    - "Mobile-responsive"
+    - "Accessible (ARIA labels)"
+    - "Clear visual hierarchy"
+
+---
+
+# This contract ensures magic links become the polished,
+# primary authentication method for production use

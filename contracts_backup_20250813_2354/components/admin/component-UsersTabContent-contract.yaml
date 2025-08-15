@@ -1,0 +1,148 @@
+# Component Contract: UsersTabContent
+contractId: "component-UsersTabContent-20250113"
+componentInfo:
+  name: "UsersTabContent"
+  filePath: "/src/components/admin/management/UsersTabContent.tsx"
+  category: "admin"
+  parentPage: "admin management - users tab"
+  complexity: "complex"
+  
+functionalAnalysis:
+  purpose: "Main user management interface for administrators"
+  primaryFunction: "Display, search, filter, and manage all users with comprehensive editing capabilities"
+  userInteractions:
+    - "Search and filter users"
+    - "View user details and roles"
+    - "Edit individual users"
+    - "Generate magic links"
+    - "Export/import user data"
+    - "Bulk operations on multiple users"
+  businessLogic: "Comprehensive user management with search, filtering, editing, and bulk operations"
+  stateManagement: "Complex state for users list, filters, selections, modals, and operations"
+  
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "direct"
+  supabaseTables:
+    - "users"
+    - "team_members"
+    - "teams"
+    - "clubs"
+    - "membership_entitlements"
+    - "magic_links"
+  tableUsage:
+    - tableName: "users"
+      operations: ["select", "update"]
+      purpose: "Main user data management"
+      dataFlow: "Primary data source for user management"
+    - tableName: "team_members"
+      operations: ["select"]
+      purpose: "Team association filtering"
+      dataFlow: "Joins for team-based user filtering"
+    - tableName: "magic_links"
+      operations: ["insert"]
+      purpose: "Magic link generation"
+      dataFlow: "Creates authentication links for users"
+  
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements:
+    - "Role options for filtering"
+    - "User table column configuration"
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks:
+    - "useState, useEffect (React hooks)"
+    - "useMagicLinkManagement (custom hook)"
+  contexts: []
+  utilities:
+    - "supabase client"
+  externalLibraries:
+    - "sonner (toast notifications)"
+    - "lucide-react (icons)"
+  
+supabaseTableDetails:
+  tablesUsed:
+    - "users (core user management)"
+    - "team_members (user-team relationships)"
+    - "membership_entitlements (user capabilities)"
+    - "magic_links (authentication links)"
+  tableRelationships:
+    - "users -> team_members (one-to-many)"
+    - "users -> membership_entitlements (one-to-many)"
+    - "users -> magic_links (one-to-many)"
+  queryPatterns:
+    - "Paginated user queries with search and filters"
+    - "Complex joins for user details"
+    - "Role-based filtering with array operations"
+  dataTransformations:
+    - "User data aggregation from multiple tables"
+    - "Role and capability formatting for display"
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Add advanced search capabilities"
+    - "Implement user activity tracking"
+    - "Add user communication features"
+  priority: "high"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation:
+    - "User management workflows"
+    - "Role assignment procedures"
+    - "Magic link security considerations"
+  
+componentInteractions:
+  callsComponents:
+    - "Card (UI component)"
+    - "Table (UI component)"
+    - "Button (UI component)"
+    - "Input (UI component)"
+    - "Select (UI component)"
+    - "Badge (UI component)"
+    - "MembershipCapabilityDisplay"
+    - "DocumentationHelper"
+    - "CompleteUserEditor"
+    - "BulkOperationsPanel"
+    - "CSVImportPanel"
+    - "CSVExportPanel"
+  calledByComponents:
+    - "ManagementTabs"
+  sharedState: []
+  eventCommunication:
+    - "Modal open/close events"
+    - "User update callbacks"
+  propsPassedTo:
+    - "User data to sub-components"
+    - "Event handlers to modals"
+  propsReceivedFrom: []
+  
+userJourneyContext:
+  userFlows:
+    - "Admin -> Management -> Users -> Search/Filter -> Edit User -> Save"
+    - "Admin -> Users -> Generate Magic Link -> Send to User"
+    - "Admin -> Users -> Bulk Operations -> Execute"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["admin"]
+  featureArea: "admin"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "UsersTabContent"
+  reasonForDuplication: ""
+  consolidationStrategy: ""
+  supabaseIntegrationWinner: "UsersTabContent"

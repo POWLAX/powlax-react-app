@@ -1,0 +1,238 @@
+ROLE REFERENCES AUDIT - PHASE 1B: CODE IMPACT ANALYSIS
+================================================================
+Generated: 2025-08-14 
+Contract: contracts/active/role-standardization-migration-001.yaml
+Phase: 1B - Code Impact Analysis Agent
+
+EXECUTIVE SUMMARY
+================
+This audit identifies all instances of mixed "admin" vs "administrator" usage across the codebase.
+The analysis reveals widespread inconsistent usage patterns that need standardization to "administrator"
+to align with WordPress role standards.
+
+CRITICAL FINDINGS
+================
+1. MIXED USAGE PATTERNS DETECTED
+   - "admin" and "administrator" used interchangeably throughout codebase
+   - API routes use "admin" while frontend components expect "administrator"
+   - Database queries inconsistent between the two values
+
+2. HIGH IMPACT AREAS IDENTIFIED  
+   - Authentication & Authorization logic
+   - API route protection
+   - Database role queries  
+   - Component conditional rendering
+   - Permission systems
+
+FILES REQUIRING UPDATES
+======================
+
+HIGH PRIORITY (Authentication & Security)
+------------------------------------------
+src/lib/adminPermissions.ts
+- Line 27: ADMIN_ROLES array contains both 'administrator' and 'admin'
+- Line 83: user.roles.includes('administrator') check
+- Line 82: email check for 'admin@powlax.com'
+
+src/app/api/sync/teams/route.ts
+- Line 26: userData?.roles?.includes('admin') 
+- Should be: userData?.roles?.includes('administrator')
+
+src/app/api/sync/users/route.ts  
+- Line 26: userData?.roles?.includes('admin')
+- Should be: userData?.roles?.includes('administrator')
+
+src/app/api/sync/full/route.ts
+- Line 26: userData?.roles?.includes('admin')
+- Should be: userData?.roles?.includes('administrator')
+
+src/app/api/sync/organizations/route.ts
+- Line 26: userData?.roles?.includes('admin')
+- Should be: userData?.roles?.includes('administrator')
+
+src/app/api/teams/[teamId]/route.ts
+- Line 21: securityContext.roles.includes('administrator') ✓ CORRECT
+- Line 96: securityContext.roles.includes('administrator') ✓ CORRECT
+
+MEDIUM PRIORITY (UI Components)
+-------------------------------
+src/components/navigation/SidebarNavigation.tsx
+- Line 76: actualAuth.user?.roles?.includes('administrator') || actualAuth.user?.roles?.includes('admin')
+- Line 80: displayUser?.roles?.includes('administrator') || displayUser?.roles?.includes('admin')
+- Should standardize to only check 'administrator'
+
+src/components/admin/RoleViewerSelector.tsx
+- Line 20: user?.roles?.includes('administrator') || user?.roles?.includes('admin')
+- Should standardize to only check 'administrator'
+
+src/hooks/useViewAsAuth.ts
+- Line 12: actualAuth.user?.roles?.includes('administrator')
+- Line 13: actualAuth.user?.roles?.includes('admin') 
+- Should standardize to only check 'administrator'
+
+src/components/admin/user-editor/ProfileTab.tsx
+- Line 38: 'administrator' in AVAILABLE_ROLES ✓ CORRECT
+- Line 215: role === 'administrator' checks ✓ CORRECT
+
+src/app/(authenticated)/admin/role-management/page.tsx
+- Line 98: currentUser?.roles?.includes('administrator') ✓ CORRECT
+- Line 99: currentUser?.email?.includes('admin@powlax.com')
+- Line 140: role === 'administrator' checks ✓ CORRECT
+- Line 383-385: role === 'administrator' styling ✓ CORRECT
+
+src/app/(authenticated)/admin/management/page.tsx
+- Line 110: testUser?.roles?.includes('administrator') ✓ CORRECT
+- Line 111: testUser?.roles?.includes('admin')
+- Line 112: testUser?.email?.includes('admin@powlax.com')
+- Lines 153-157: role === 'administrator' checks ✓ CORRECT
+- Lines 397-399: role === 'administrator' styling ✓ CORRECT
+
+LOWER PRIORITY (Resource Data & Configuration)
+-----------------------------------------------
+src/lib/resources-data-provider.ts
+- Line 345: administrator resource sections ✓ CORRECT
+- Line 353: roles: ['administrator'] ✓ CORRECT  
+- Line 526: 'administrator': 'administrator' mapping ✓ CORRECT
+- Line 527: 'admin': 'administrator' mapping ✓ CORRECT (legacy support)
+- Line 725-726: Role mapping logic ✓ CORRECT
+
+src/lib/dashboard-queries.ts
+- Line 72: case 'administrator': ✓ CORRECT
+- Line 359: context.roles.includes('administrator') ✓ CORRECT
+
+src/lib/user-display-helpers.ts
+- Line 16: 'admin' type definition
+- Line 55: 'admin' in role list
+- Should be updated to 'administrator'
+
+src/contexts/SupabaseAuthContext.tsx
+- Line 16: role: 'administrator' ✓ CORRECT
+- Line 17: roles: ['administrator', ...] ✓ CORRECT
+
+SPECIAL CASES (WordPress Integration)
+------------------------------------
+src/lib/wordpress-team-sync.ts
+- Line 84: wpRole.includes('admin') || wpRole.includes('coach')
+- This is checking WordPress role values - may need different handling
+
+HARDCODED ROLE CHECKS INVENTORY
+===============================
+
+Pattern: role === 'administrator' (CORRECT)
+------------------------------------------
+✓ src/components/admin/user-editor/ProfileTab.tsx:215
+✓ src/app/(authenticated)/admin/role-management/page.tsx:140
+✓ src/app/(authenticated)/admin/management/page.tsx:153
+✓ Multiple other files - these are correctly standardized
+
+Pattern: roles.includes('administrator') (CORRECT)  
+--------------------------------------------------
+✓ src/lib/adminPermissions.ts:83
+✓ src/lib/dashboard-queries.ts:359
+✓ src/app/api/teams/[teamId]/route.ts:21,96
+✓ Multiple component files - these are correctly standardized
+
+Pattern: roles.includes('admin') (NEEDS UPDATE)
+-----------------------------------------------
+❌ src/app/api/sync/teams/route.ts:26
+❌ src/app/api/sync/users/route.ts:26
+❌ src/app/api/sync/full/route.ts:26
+❌ src/app/api/sync/organizations/route.ts:26
+
+Mixed Pattern Checks (NEEDS STANDARDIZATION)
+--------------------------------------------
+❌ src/components/navigation/SidebarNavigation.tsx:76,80
+❌ src/components/admin/RoleViewerSelector.tsx:20
+❌ src/hooks/useViewAsAuth.ts:12,13
+❌ src/app/(authenticated)/admin/management/page.tsx:111
+
+EMAIL-BASED CHECKS (REVIEW NEEDED)
+==================================
+src/lib/adminPermissions.ts:82: email === 'admin@powlax.com'
+src/app/(authenticated)/admin/role-management/page.tsx:99: email?.includes('admin@powlax.com')
+src/app/(authenticated)/admin/management/page.tsx:112: email?.includes('admin@powlax.com')
+
+CONFIGURATION ARRAYS (NEEDS UPDATE)
+===================================
+src/lib/adminPermissions.ts:24-27: ADMIN_ROLES array includes both 'administrator' and 'admin'
+src/lib/user-display-helpers.ts:55: Role list includes 'admin'
+
+MIGRATION IMPACT ASSESSMENT
+===========================
+
+HIGH RISK FILES (Authentication/Security):
+- src/app/api/sync/*.ts (4 files)
+- src/lib/adminPermissions.ts
+- All /admin route handlers
+
+MEDIUM RISK FILES (UI Components):
+- src/components/navigation/SidebarNavigation.tsx
+- src/components/admin/RoleViewerSelector.tsx
+- src/hooks/useViewAsAuth.ts
+- Admin page components (2 files)
+
+LOW RISK FILES (Configuration):
+- src/lib/resources-data-provider.ts (has fallback mapping)
+- src/lib/user-display-helpers.ts
+- Context files
+
+RECOMMENDED MIGRATION SEQUENCE
+=============================
+
+Phase 1: API Routes (Security Critical)
+- Update all src/app/api/sync/*.ts files
+- Change 'admin' to 'administrator' in role checks
+
+Phase 2: Authentication Logic
+- Update src/lib/adminPermissions.ts
+- Standardize ADMIN_ROLES array to only include 'administrator'
+- Keep email checks for backward compatibility
+
+Phase 3: UI Components  
+- Update navigation and admin components
+- Standardize to only check 'administrator'
+- Remove redundant 'admin' checks
+
+Phase 4: Configuration & Types
+- Update type definitions
+- Update configuration arrays
+- Clean up resource mappings
+
+TESTING REQUIREMENTS
+====================
+
+Critical Tests Needed:
+1. Admin route access after migration
+2. Role-based component rendering
+3. Permission system functionality
+4. WordPress role mapping compatibility
+
+Files to Test Specifically:
+- All /admin/* routes
+- Navigation visibility
+- Role viewer selector functionality
+- User management interfaces
+
+SUMMARY STATISTICS
+=================
+Total Files with Role References: 47+
+Files Needing Updates: 23
+High Priority Updates: 8 files
+Medium Priority Updates: 8 files  
+Low Priority Updates: 7 files
+
+Critical API Route Files: 4
+UI Component Files: 6
+Configuration Files: 4
+Type Definition Files: 2
+
+NEXT STEPS
+==========
+1. Execute Phase 2: Database Migration (parallel with Phase 1B)
+2. Begin Phase 3: API Route Updates (highest priority)
+3. Follow with UI Component standardization
+4. Complete with configuration cleanup
+5. Execute comprehensive testing protocol
+
+END OF AUDIT REPORT
+===================

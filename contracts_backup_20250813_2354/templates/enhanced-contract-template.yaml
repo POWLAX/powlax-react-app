@@ -1,0 +1,181 @@
+# Enhanced Contract Template with PRD Requirements
+# Keeps original contract format, ADDS PRD checklist
+
+contractTemplate:
+  type: ENHANCED_CONTRACT
+  version: 1.0.0
+  
+  # ===== ORIGINAL CONTRACT FORMAT (UNCHANGED) =====
+  parameters:
+    component: ""
+    currentIssue: ""
+    
+  intent:
+    goal: ""
+    scope: []
+    outOfScope: []
+    assumptions: []
+    risks: []
+    
+  deliverables:
+    code:
+      files: []
+      functions: []
+    tests:
+      unit: []
+      integration: []
+    documentation: []
+    
+  successCriteria:
+    functional: []
+    performance: []
+    quality: []
+    testing: []
+    
+  qualityGates:
+    buildMustPass: true
+    lintMaxErrors: 0
+    testCoverage: 80
+    mobileResponsive: true
+    performanceTarget: 3
+    
+  # ===== NO MOCK DATA POLICY =====
+  dataIntegrityPolicy:
+    noMockData: true  # CRITICAL: Production ready MVP requirement
+    requirements:
+      - NO hardcoded mock users, teams, or clubs in codebase
+      - NO fake WordPress associations or connections
+      - NO returning mock data from hooks or components
+      - ONLY real data from actual database tables
+      - IF testing needed, use "(MOCK)" prefix in actual database
+    rationale:
+      - Mock data creates false positives
+      - MVP requires real WordPress → Supabase → Frontend flow
+      - Debugging impossible with mixed real/fake data
+    
+  # ===== EXECUTION STRATEGY (For Big Projects) =====
+  executionStrategy:
+    type: sequential  # sequential (default) | parallel
+    
+    # If parallel execution (for big projects with 3+ independent sections)
+    parallelExecution:
+      enabled: false  # Set to true for parallel execution
+      agentCount: 1   # Number of parallel agents needed
+      
+      # MANDATORY for parallel execution
+      ultraThinkPlanning:
+        completed: false  # MUST be true before execution
+        duration: "5+ minutes"
+        commonErrorsEvaluated: false
+        fileCollisionRisksAssessed: false
+        
+      # Agent distribution (if parallel)
+      agentDistribution:
+        agent_1:
+          type: general-purpose
+          scope: ""
+          files: []
+          noTouch: []
+          deliverables: []
+          
+        agent_2:
+          type: general-purpose
+          scope: ""
+          files: []
+          noTouch: []
+          deliverables: []
+          
+      # Progress tracking for parallel execution
+      parallelProgress:
+        - agent: 1
+          task: ""
+          status: not_started
+          completedAt: ""
+          testsPass: false
+          
+        - agent: 2
+          task: ""
+          status: not_started
+          completedAt: ""
+          testsPass: false
+          
+      # Integration checklist (after all agents complete)
+      integrationChecklist:
+        - [ ] All agents completed their sections
+        - [ ] No file conflicts detected
+        - [ ] All individual agent tests pass
+        - [ ] Integrated code builds successfully
+        - [ ] Full Playwright test suite passes
+        - [ ] No regressions in existing functionality
+        - [ ] Common errors documented if found
+    
+  # ===== NEW: PRD REQUIREMENTS SECTION =====
+  prdRequirements:
+    description: "What MUST EXIST on this page/feature when complete"
+    
+    pageRequirements:
+      # Check these like a checklist - does the page have these?
+      mustHave:
+        - name: "Working Video Modal"
+          exists: false
+          tested: false
+          notes: "Opens, loads videos, closes properly"
+          
+        - name: "Working Strategy Modal"
+          exists: false
+          tested: false
+          notes: "Shows strategies, links work"
+          
+        - name: "Database Connection"
+          exists: false
+          tested: false
+          notes: "Real data, no mock fallbacks"
+          
+        - name: "Mobile Responsive"
+          exists: false
+          tested: false
+          notes: "Works at 375px viewport"
+          
+        - name: "Print Functionality"
+          exists: false
+          tested: false
+          notes: "Generates printable view"
+          
+        - name: "Error Handling"
+          exists: false
+          tested: false
+          notes: "Graceful failures, user feedback"
+          
+      niceToHave:
+        - name: "Offline Mode"
+          exists: false
+          priority: low
+          
+        - name: "Keyboard Shortcuts"
+          exists: false
+          priority: low
+          
+    verificationMethod:
+      manual:
+        - "Open page at http://localhost:3000/[page-url]"
+        - "Check each requirement exists"
+        - "Test each feature works"
+        - "Mark as exists: true when verified"
+        
+      automated:
+        - "Run Playwright tests"
+        - "Check test coverage"
+        - "Verify no console errors"
+        
+    completionCriteria:
+      - "All mustHave items marked exists: true"
+      - "All mustHave items marked tested: true"
+      - "Quality score >= 80"
+      - "No critical bugs"
+      
+  # ===== TRACKING =====
+  tracking:
+    lastChecked: ""
+    checkedBy: ""
+    completionPercentage: 0
+    blockers: []

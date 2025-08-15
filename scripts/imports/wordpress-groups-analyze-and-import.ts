@@ -1,8 +1,8 @@
 /**
  * WordPress BuddyBoss/BuddyPress Groups Analyzer and Importer
  *
- * Phase 1: Analyze and output CSV previews (organizations, teams, team_members, users)
- * Phase 2: Import into Supabase (organizations, teams, team_members, users)
+ * Phase 1: Analyze and output CSV previews (clubs, teams, team_members, users)
+ * Phase 2: Import into Supabase (clubs, teams, team_members, users)
  *
  * Notes:
  * - There are no existing parent/child relationships in WP; skip creating those.
@@ -81,7 +81,7 @@ type WpGroupMember = {
 }
 
 type AnalyzeResult = {
-  organizations: any[]
+  clubs: any[]
   teams: any[]
   users: any[]
   teamMembers: any[]
@@ -257,7 +257,7 @@ function toCsvRow(values: (string | number | null | undefined)[]) {
 
 async function analyze(): Promise<AnalyzeResult> {
   const groups = await fetchAllGroups()
-  const organizations: any[] = []
+  const clubs: any[] = []
   const teams: any[] = []
   const teamMembers: any[] = []
   const wpUserIds: number[] = []
@@ -290,7 +290,7 @@ async function analyze(): Promise<AnalyzeResult> {
       console.log(`[classify] id=${g.id} name="${g.name}" → type=${type || '(none)'} status=${(g as any).status}`)
     }
     if (type === 'club_os') {
-      organizations.push({
+      clubs.push({
         wp_group_id: g.id,
         name: g.name,
         status: g.status,
@@ -319,14 +319,14 @@ async function analyze(): Promise<AnalyzeResult> {
   }
 
   const users = await fetchUsersByIds(wpUserIds)
-  return { organizations, teams, users, teamMembers }
+  return { clubs, teams, users, teamMembers }
 }
 
 async function writeCsvPreviews(outDir: string, data: AnalyzeResult) {
   ensureDir(outDir)
-  fs.writeFileSync(path.join(outDir, 'organizations.csv'), [
+  fs.writeFileSync(path.join(outDir, 'clubs.csv'), [
     'wp_group_id,name,status,parent_id',
-    ...data.organizations.map((o) => toCsvRow([o.wp_group_id, o.name, o.status, o.parent_id]))
+    ...data.clubs.map((o) => toCsvRow([o.wp_group_id, o.name, o.status, o.parent_id]))
   ].join('\n'))
 
   fs.writeFileSync(path.join(outDir, 'teams.csv'), [
@@ -392,24 +392,24 @@ async function importData(data: AnalyzeResult) {
     }
   }
 
-  // Upsert organizations
-  for (const o of data.organizations) {
+  // Upsert clubs
+  for (const o of data.clubs) {
     const meta = { wp_group_id: o.wp_group_id }
     const { data: existing } = await supabase
-      .from('organizations')
+      .from('clubs')
       .select('id, metadata')
       .contains('metadata', { wp_group_id: o.wp_group_id })
       .maybeSingle()
 
     if (existing?.id) {
       const { error } = await supabase
-        .from('organizations')
+        .from('clubs')
         .update({ name: o.name, metadata: meta, updated_at: new Date().toISOString() as any })
         .eq('id', existing.id)
       if (!error) { updated++ ; orgIdByWp[o.wp_group_id] = existing.id }
     } else {
       const { data: ins, error } = await supabase
-        .from('organizations')
+        .from('clubs')
         .insert({ name: o.name, metadata: meta })
         .select('id')
         .single()
@@ -499,7 +499,7 @@ async function main() {
       await supabase
         .from('wp_sync_log')
         .update({ status: 'completed', metadata: { counts: {
-          organizations: result.organizations.length,
+          clubs: result.clubs.length,
           teams: result.teams.length,
           users: result.users.length,
           team_members: result.teamMembers.length

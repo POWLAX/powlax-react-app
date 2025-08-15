@@ -19,7 +19,7 @@ This guide contains standardized solutions for all common loading errors.
 ### 🔧 Common Loading Issues & Solutions
 
 #### Problem Pattern: Infinite Loading Spinners
-**Root Cause**: Authentication hooks (`useAuth`, `useRequireAuth`) getting stuck in loading states
+**Root Cause**: Complex hooks getting stuck in loading states
 
 **Solution Pattern**:
 ```tsx
@@ -38,7 +38,7 @@ export default function Page() {
 export default function Page() {
   const { user } = useAuth()
   
-  // Temporarily bypass auth check to fix loading issue
+  // Temporarily bypass complex checks to fix loading issue
   // if (!user) {
   //   return <LoadingSpinner />
   // }
@@ -66,8 +66,8 @@ useEffect(() => {
 }, [])
 ```
 
-#### Problem Pattern: Layout Authentication Blocking
-**Root Cause**: `useRequireAuth()` in authenticated layout causing all pages to show loading
+#### Problem Pattern: Layout Loading Blocking
+**Root Cause**: Complex hooks in layout causing all pages to show loading
 
 **Solution Pattern**:
 ```tsx
@@ -84,8 +84,8 @@ export default function AuthenticatedLayout({ children }) {
 
 // ✅ FIXED - Comment out auth check
 export default function AuthenticatedLayout({ children }) {
-  // Temporarily bypass auth check
-  // const { loading } = useRequireAuth()
+  // Temporarily bypass complex checks
+  // const { loading } = useComplexHook()
   // if (loading) {
   //   return <LoadingSpinner />
   // }
@@ -113,13 +113,13 @@ useEffect(() => {
 }, [])
 ```
 
-#### 3. Authentication Pattern
+#### 3. User Context Pattern
 ```tsx
-// Minimal auth implementation
+// Minimal user implementation
 export default function Page() {
   const { user } = useAuth()
   
-  // Don't block on auth - let page render
+  // Don't block on user - let page render
   return (
     <div>
       <h1>Page Content</h1>
@@ -133,11 +133,9 @@ export default function Page() {
 
 **🚨 CRITICAL: Reference `/contracts/active/database-truth-sync-002.yaml` for complete truth**
 
-#### 🔐 Core Authentication Tables (Supabase Auth)
-- **users** - Main user table (NOT user_profiles) with auth_user_id linking to Supabase Auth
-- **user_sessions** - Active session tracking with tokens, expiry, IP tracking  
-- **user_auth_status** - User authentication state
-- **magic_links** (10 records) - Magic link authentication tokens
+#### 👥 Core User Tables
+- **users** - Main user table (NOT user_profiles) with basic user information
+- **user_onboarding** - User onboarding flow tracking
 - **registration_links** (10 records) - Registration tokens
 - **registration_sessions** - Track registration progress (started → verified → completed)
 - **user_onboarding** - Step-by-step onboarding progress tracking

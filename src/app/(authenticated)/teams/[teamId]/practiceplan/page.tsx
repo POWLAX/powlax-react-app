@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import { Calendar, Clock, MapPin, Save, Printer, RefreshCw, FolderOpen, Plus, Target, Loader2 } from 'lucide-react'
-import DrillLibraryTabbed from '@/components/practice-planner/DrillLibraryTabbed'
+import SidebarLibrary from '@/components/practice-planner/SidebarLibrary'
 import StrategyCard from '@/components/practice-planner/StrategyCard'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import PracticeTimelineWithParallel from '@/components/practice-planner/PracticeTimelineWithParallel'
@@ -54,7 +54,6 @@ export default function PracticePlansPage() {
   const [showTemplateSelector, setShowTemplateSelector] = useState(false)
   const [showAddStrategiesModal, setShowAddStrategiesModal] = useState(false)
   const [showStrategiesListModal, setShowStrategiesListModal] = useState(false)
-  const [isRefreshing, setIsRefreshing] = useState(false)
   const [selectedStrategies, setSelectedStrategies] = useState<any[]>([])
   const [showStudyDrillModal, setShowStudyDrillModal] = useState(false)
   const [selectedDrill, setSelectedDrill] = useState<any>(null)
@@ -145,15 +144,18 @@ export default function PracticePlansPage() {
     const newSlot: PracticePlanTimeSlot = {
       id: `slot-${Date.now()}`,
       drills: [newDrill],
-      duration: newDrill.duration
+      duration: newDrill.duration_minutes || newDrill.duration || 0
     }
     
     setTimeSlots([...timeSlots, newSlot])
-    
-    // Close mobile drill library after adding drill
-    if (showDrillLibrary) {
-      setShowDrillLibrary(false)
-    }
+  }
+
+  const handleRemoveDrill = (drillId: string) => {
+    // Remove drill from timeline - find and remove the slot with this drill id
+    setTimeSlots(timeSlots.filter(slot => {
+      // Check if any drill in the slot has an id that starts with the drillId
+      return !slot.drills.some(drill => drill.id.startsWith(drillId))
+    }))
   }
 
   const handleSavePracticePlan = async (title: string, notes?: string) => {
@@ -225,20 +227,12 @@ export default function PracticePlansPage() {
     }
   }
 
-  const handleRefresh = async () => {
-    setIsRefreshing(true)
-    try {
-      await refreshDrills()
-      // Get updated drill count after refresh
-      setTimeout(() => {
-        const drillCount = supabaseDrills?.length || 0
-        toast.success(`Drill library refreshed! ${drillCount} drills loaded.`)
-        setIsRefreshing(false)
-      }, 500) // Small delay to ensure state update
-    } catch (error) {
-      toast.error('Failed to refresh drill library')
-      setIsRefreshing(false)
-    }
+  const handleReset = () => {
+    // Clear practice timeline and strategies
+    setTimeSlots([])
+    setSelectedStrategies([])
+    setPracticeNotes('')
+    toast.success('Practice plan reset')
   }
 
   const handleLoadTemplate = (template: any) => {
@@ -334,18 +328,11 @@ export default function PracticePlansPage() {
               <Printer className={`h-5 w-5 ${isPrinting ? 'animate-pulse' : ''}`} />
             </button>
             <button 
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className={`p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors ${
-                isRefreshing ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-              title={isRefreshing ? 'Refreshing...' : 'Refresh Drill Library'}
+              onClick={handleReset}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
+              title="Reset Practice Plan"
             >
-              {isRefreshing ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <RefreshCw className="h-5 w-5" />
-              )}
+              <RefreshCw className="h-5 w-5" />
             </button>
           </div>
         </div>
@@ -403,18 +390,11 @@ export default function PracticePlansPage() {
               <Printer className={`h-5 w-5 ${isPrinting ? 'animate-pulse' : ''}`} />
             </button>
             <button 
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className={`p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors ${
-                isRefreshing ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-              title={isRefreshing ? 'Refreshing...' : 'Refresh Drill Library'}
+              onClick={handleReset}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
+              title="Reset Practice Plan"
             >
-              {isRefreshing ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <RefreshCw className="h-5 w-5" />
-              )}
+              <RefreshCw className="h-5 w-5" />
             </button>
           </div>
         </div>
@@ -479,9 +459,9 @@ export default function PracticePlansPage() {
           </div>
         </div>
 
-        {/* Drill Library Sidebar - Desktop/Tablet */}
+        {/* Sidebar Library - Desktop/Tablet */}
         <div className="hidden md:block w-80 lg:w-96 border-l bg-white sticky top-0 h-screen overflow-y-auto">
-          <DrillLibraryTabbed 
+          <SidebarLibrary 
             onAddDrill={handleAddDrill}
             onSelectStrategy={handleSelectStrategy}
             selectedStrategies={selectedStrategies.map(s => s.id)}
@@ -504,8 +484,9 @@ export default function PracticePlansPage() {
                 ✕
               </button>
             </div>
-            <DrillLibraryTabbed 
+            <SidebarLibrary 
               onAddDrill={handleAddDrill}
+              onRemoveDrill={handleRemoveDrill}
               onSelectStrategy={handleSelectStrategy}
               selectedStrategies={selectedStrategies.map(s => s.id)}
               isMobile={true}

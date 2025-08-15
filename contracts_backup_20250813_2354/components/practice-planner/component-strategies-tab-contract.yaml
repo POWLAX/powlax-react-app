@@ -1,0 +1,183 @@
+# Practice Planner Component Contract: StrategiesTab
+contractId: "component-strategies-tab-20250115"
+componentInfo:
+  name: "StrategiesTab"
+  filePath: "src/components/practice-planner/StrategiesTab.tsx"
+  category: "practice-planner"
+  parentPage: "Practice Planner (/teams/[teamId]/practiceplan)"
+  complexity: "complex"
+  
+functionalAnalysis:
+  purpose: "Strategy browsing and selection interface within the Practice Planner's tabbed drill library. Allows coaches to browse, select, and manage strategies for practice planning."
+  primaryFunction: "Strategy discovery, selection, and management in practice context"
+  userInteractions: 
+    - "Browse strategies by game phase categories"
+    - "Search strategies by name or description"
+    - "Select/deselect strategies for practice plan"
+    - "View strategy details in study modal"
+    - "Add strategies to favorites"
+    - "Create custom strategies"
+    - "Save strategies to team playbook"
+    - "Filter strategies by categories"
+  businessLogic: "Strategy categorization by game phase, search functionality, favorite management, custom strategy creation, team playbook integration"
+  stateManagement: "Local state for search, expanded categories, modal visibility, selected strategy tracking"
+  
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "hook"
+  supabaseTables: 
+    - "powlax_strategies"
+    - "user_strategies"
+    - "user_favorites"
+    - "team_playbooks"
+  tableUsage:
+    - tableName: "powlax_strategies"
+      operations: ["select"]
+      purpose: "Load POWLAX official strategies"
+      dataFlow: "useStrategies hook → StrategiesTab → strategy display"
+    - tableName: "user_strategies"
+      operations: ["select", "insert", "update", "delete"]
+      purpose: "Manage user-created custom strategies"
+      dataFlow: "useStrategies hook → StrategiesTab → custom strategy management"
+    - tableName: "user_favorites"
+      operations: ["select", "insert", "delete"]
+      purpose: "Manage strategy favorites"
+      dataFlow: "useFavorites hook → StrategiesTab → favorite toggling"
+    - tableName: "team_playbooks"
+      operations: ["insert"]
+      purpose: "Save strategies to team playbook"
+      dataFlow: "SaveToPlaybookModal → useTeamPlaybook hook → database"
+    
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements: 
+    - "Default expanded categories (Favorite Strategies, Face Off, Face Offs)"
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks: 
+    - "useStrategies"
+    - "useAuth"
+    - "useFavorites"
+  contexts: 
+    - "SupabaseAuthContext"
+  utilities: 
+    - "sonner (toast notifications)"
+  externalLibraries: 
+    - "lucide-react (multiple icons)"
+    - "@/components/ui components"
+  
+supabaseTableDetails:
+  tablesUsed: 
+    - "powlax_strategies"
+    - "user_strategies"
+    - "user_favorites"
+    - "team_playbooks"
+  tableRelationships: 
+    - "user_strategies.user_id → users.id"
+    - "user_favorites.user_id → users.id"
+    - "user_favorites.item_id → strategies.id"
+    - "team_playbooks.team_id → teams.id"
+    - "team_playbooks.strategy_id → strategies.id"
+  queryPatterns: 
+    - "SELECT * FROM powlax_strategies ORDER BY strategy_categories"
+    - "SELECT * FROM user_strategies WHERE user_id = ?"
+    - "SELECT * FROM user_favorites WHERE item_type = 'strategy'"
+  dataTransformations: 
+    - "Groups strategies by game phase categories"
+    - "Filters strategies by search term"
+    - "Merges POWLAX and user strategies"
+    - "Processes favorite status for display"
+    
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: 
+    - "Could add strategy preview without modal"
+    - "Could implement strategy templates"
+    - "Could add collaborative strategy sharing"
+    - "Could implement strategy version history"
+  priority: "high"
+  
+implementationHistory:
+  - id: "BF-2025-01-15-002"
+    date: "2025-01-15"
+    type: "bug-fix"
+    description: "Fixed Team Select modal in SaveToPlaybookModal"
+    changes:
+      - "Updated useUserTeams hook query from team_teams!inner to teams:team_id"
+      - "Fixed data mapping to handle correct relationship structure"
+    validation:
+      - "User teams now load correctly in the modal"
+      - "Team selection dropdown populates with actual user teams"
+      
+  - id: "BF-2025-01-15-008"
+    date: "2025-01-15"
+    type: "bug-fix"
+    description: "Added confirmation toast for strategy selection on mobile"
+    changes:
+      - "Added sonner import for toast notifications"
+      - "Implemented conditional toast display for mobile strategy selection"
+      - "Shows success message for additions, info message for removals"
+    validation:
+      - "Mobile users receive feedback when strategies are added/removed"
+      - "Desktop behavior unchanged (no toast notifications)"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation: 
+    - "Strategy categorization system"
+    - "Search and filter logic"
+    - "Favorite management workflow"
+    - "Custom strategy creation process"
+    
+componentInteractions:
+  callsComponents: 
+    - "VideoModal"
+    - "LacrosseLabModal"
+    - "AddCustomStrategiesModal"
+    - "StudyStrategyModal"
+    - "FilterStrategiesModal"
+    - "SaveToPlaybookModal"
+    - "AdminToolbar"
+    - "AdminEditModal"
+  calledByComponents: 
+    - "DrillLibraryTabbed"
+  sharedState: []
+  eventCommunication: 
+    - "onSelectStrategy callback for strategy selection"
+    - "Modal state management for various strategy operations"
+  propsPassedTo: 
+    - "Modal components receive selected strategy data"
+  propsReceivedFrom: 
+    - "onSelectStrategy callback function"
+    - "selectedStrategies array of IDs"
+    - "isMobile boolean for responsive behavior"
+    - "user object for permissions"
+    
+userJourneyContext:
+  userFlows: 
+    - "Strategy Selection: Browse categories → Search/filter → Select strategies → Add to practice"
+    - "Strategy Study: Select strategy → Open study modal → View details → Add notes"
+    - "Custom Strategy: Click add → Create strategy → Save → Use in practice"
+    - "Team Playbook: Select strategy → Save to playbook → Share with team"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["coach"]
+  featureArea: "practice"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "StrategiesTab"
+  reasonForDuplication: "N/A"
+  consolidationStrategy: "N/A"
+  supabaseIntegrationWinner: "StrategiesTab (only implementation)"

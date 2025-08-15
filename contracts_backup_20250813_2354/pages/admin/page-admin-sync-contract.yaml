@@ -1,0 +1,175 @@
+# Page Contract: Admin Sync Page
+# Route: /admin/sync
+
+contractId: "page-admin-sync-20250113"
+pageInfo:
+  route: "/admin/sync"
+  filePath: "src/app/(authenticated)/admin/sync/page.tsx"
+  pageType: "client"
+  category: "admin"
+  dynamicSegments: []
+
+renderingStrategy:
+  componentType: "Client Component"
+  dataFetching: "client-side"
+  streamingEnabled: false
+  suspenseBoundaries: []
+  errorBoundaries: []
+
+dataOrchestration:
+  serverDataFetching: []
+  clientDataFetching:
+    - hook: "useAuth"
+      trigger: "On mount"
+      tables: []
+      realtime: false
+    - hook: "useEffect + fetchSyncStatus"
+      trigger: "On mount"
+      tables: []
+      realtime: false
+    - hook: "fetch API calls"
+      trigger: "User actions"
+      tables: []
+      realtime: false
+  propsFlow:
+    fromServer: {}
+    toClient: {}
+
+componentComposition:
+  componentsUsed:
+    - name: "Tabs"
+      source: "@/components/ui/tabs"
+      props: 
+        defaultValue: "manual"
+      conditionalRendering: "Always after loading"
+    - name: "Card components"
+      source: "@/components/ui/card"
+      props: "Standard card props"
+      conditionalRendering: "Always"
+    - name: "Table"
+      source: "@/components/ui/table"
+      props: "Sync history data"
+      conditionalRendering: "In history tab"
+    - name: "Button"
+      source: "@/components/ui/button"
+      props: "Sync operation triggers"
+      conditionalRendering: "Always"
+  layoutUsed: "(authenticated)/layout.tsx"
+  providerDependencies: ["SupabaseAuthContext"]
+
+routingLogic:
+  guards:
+    - type: "Authentication"
+      implementation: "Page-level loading check"
+      redirectTo: "Loading spinner"
+  navigation:
+    - triggers: ["Direct URL access", "Admin navigation"]
+      destinations: ["/admin/sync"]
+      method: "Direct navigation"
+  dynamicRouting: []
+
+pageSpecificLogic:
+  businessLogic: "WordPress data synchronization management with status monitoring and manual triggers"
+  stateManagement: "Complex state for sync status, results, errors, and loading states"
+  sideEffects: ["API calls to sync endpoints", "Status refreshing", "Error handling"]
+  formHandling: "None (button-based operations)"
+
+serverClientBoundary:
+  serverComponents: []
+  clientComponents: 
+    - "AdminSyncPage (root component)"
+    - "All UI and interaction components"
+  boundaryLocation: "Entire page is client-side"
+  dataSerializationPoints: []
+
+performancePatterns:
+  prefetching: []
+  lazyLoading: []
+  codeSpliitting: []
+  optimizations: 
+    - "Status refresh after sync operations"
+    - "Loading states during operations"
+
+securityPatterns:
+  authentication: "useAuth hook verification"
+  authorization: "Implicit admin access (no role checking on page)"
+  dataValidation: "API response validation"
+  csrfProtection: false
+
+integrationPoints:
+  supabaseUsage:
+    directQueries: false
+    throughHooks: true
+    serverSideOnly: false
+  externalAPIs: 
+    - "/api/sync/status - Sync status and history"
+    - "/api/sync/organizations - Organization sync"
+    - "/api/sync/teams - Team sync"
+    - "/api/sync/users - User sync"
+    - "/api/sync/full - Full synchronization"
+  webhooks: []
+  realtimeSubscriptions: []
+
+adminSpecificFeatures:
+  syncOperations:
+    types: ["organizations", "teams", "users", "full"]
+    method: "POST requests to API endpoints"
+    statusTracking: "Real-time operation status"
+    
+  dataManagement:
+    tables: ["Implicit through sync APIs"]
+    operations: ["CREATE", "UPDATE via sync"]
+    bulkOperations: true
+    realTimeUpdates: false
+    
+  monitoringFeatures:
+    currentCounts: "Organizations, teams, team memberships"
+    syncHistory: "Chronological list of sync operations"
+    errorTracking: "Error display and logging"
+    statusBadges: "Visual status indicators"
+    
+  uiPatterns:
+    tabNavigation: "Manual sync, history, and upload tabs"
+    statusCards: "Grid of current data counts"
+    operationButtons: "Individual and full sync triggers"
+    historyTable: "Detailed sync operation logs"
+    
+  wordPressSyncCoordination:
+    dataTypes: ["Organizations", "Teams", "User memberships"]
+    syncStrategies: ["Individual entity sync", "Full data sync"]
+    errorHandling: "Comprehensive error capture and display"
+    auditTrail: "Complete sync history with timestamps"
+
+apiIntegration:
+  endpoints:
+    status: 
+      url: "/api/sync/status"
+      method: "GET"
+      purpose: "Fetch current counts and sync history"
+    sync_operations:
+      urls: ["/api/sync/organizations", "/api/sync/teams", "/api/sync/users", "/api/sync/full"]
+      method: "POST"
+      purpose: "Trigger specific or full sync operations"
+      
+  errorHandling:
+    networkErrors: "Toast notifications"
+    apiErrors: "Error state display"
+    validationErrors: "Response validation"
+
+loadingStates:
+  authLoading: "Full page loading spinner"
+  syncOperations: "Button loading states with spinner icons"
+  statusFetching: "Implicit loading during data fetch"
+
+futureFeatures:
+  csvUpload: "Placeholder tab for CSV file upload functionality"
+  fileTypes: ["Teams-Export", "learndash_group_users data"]
+  implementation: "Coming soon"
+
+notes:
+  - "Comprehensive WordPress data synchronization interface"
+  - "Strong monitoring and audit capabilities"
+  - "No explicit admin role checking (relies on route protection)"
+  - "Good error handling and user feedback"
+  - "Extensible design for future CSV upload features"
+  - "Could benefit from real-time sync status updates"

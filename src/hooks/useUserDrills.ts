@@ -422,8 +422,8 @@ function mapDrillCategory(category: string | null): string {
   
   const lowerCategory = category.toLowerCase()
   
-  if (lowerCategory === 'admin') {
-    return 'admin'
+  if (lowerCategory === 'administrator') {
+    return 'administrator'
   } else if (lowerCategory.includes('skill')) {
     return 'skill'
   } else if (lowerCategory.includes('concept')) {

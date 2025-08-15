@@ -107,8 +107,7 @@ export default function ManagementPage() {
   }
 
   // Check permissions - only admin can manage roles
-  const isAdmin = testUser?.roles?.includes('administrator') || 
-                  testUser?.roles?.includes('admin') ||
+  const isAdmin = testUser?.roles?.includes('administrator') ||
                   testUser?.email?.includes('admin@powlax.com') ||
                   testUser?.email?.includes('patrick@powlax.com')
 

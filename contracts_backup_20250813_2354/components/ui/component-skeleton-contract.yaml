@@ -1,0 +1,114 @@
+# Component Contract: Skeleton UI Component
+
+contractId: "component-skeleton-20250113"
+componentInfo:
+  name: "Skeleton"
+  filePath: "src/components/ui/skeleton.tsx"
+  category: "ui-foundation"
+  parentPage: "multiple"
+  complexity: "simple"
+  
+functionalAnalysis:
+  purpose: "Loading state placeholder that maintains layout while data is being fetched"
+  primaryFunction: "Provides animated placeholders that match content shapes during loading states"
+  userInteractions: ["visual loading indication", "layout preservation"]
+  businessLogic: "Loading state management and user experience during data fetching"
+  stateManagement: "Stateless - size and shape determined by className props"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements: ["pulse animation", "rounded corners", "muted background color"]
+  mockDataUsage: []
+  realDataPercentage: 0
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: ["cn (className utility)"]
+  externalLibraries: []
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: []
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: ["Add preset variants for common shapes", "Add wave animation option", "Add color variants"]
+  priority: "medium"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation: ["usage patterns", "size variants", "animation behavior"]
+  
+componentInteractions:
+  callsComponents: []
+  calledByComponents: ["ALL data-loading components", "Dashboard widgets", "Team rosters", "Resource lists", "Practice plans"]
+  sharedState: ["Loading state from data fetching"]
+  eventCommunication: []
+  propsPassedTo: []
+  propsReceivedFrom: ["className for sizing from parent loading states"]
+  
+userJourneyContext:
+  userFlows: ["ALL data loading scenarios"]
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["all users during loading states"]
+  featureArea: "ui-foundation"
+  journeyStage: "all stages"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "Skeleton"
+  reasonForDuplication: "n/a"
+  consolidationStrategy: "n/a"
+  supabaseIntegrationWinner: "n/a"
+
+# Usage Analysis
+usagePatterns:
+  dataLoading: "Placeholder for any content being fetched from Supabase"
+  dashboards: "Widget loading states while data loads"
+  lists: "Team rosters, resource lists, drill libraries"
+  cards: "Practice cards, user cards while content loads"
+  mobileFriendly: true
+  
+loadingScenarios:
+  - "Initial page load data fetching"
+  - "User interaction triggered data loading"
+  - "Background data refresh"
+  - "Progressive data loading"
+  
+animation:
+  - "CSS pulse animation for breathing effect"
+  - "Smooth, non-distracting movement"
+  - "Accessible for users with motion sensitivity"
+  - "Consistent timing with other UI animations"
+  
+sizePatterns:
+  textSkeleton: "h-4 w-[250px] - for text content placeholders"
+  cardSkeleton: "h-32 w-full - for card-shaped content"
+  avatarSkeleton: "h-10 w-10 rounded-full - for circular profile images"
+  buttonSkeleton: "h-9 w-20 - for button placeholders"
+  
+integrationOpportunity: "Essential for all Supabase data loading states"
+criticalForUX: "Prevents layout shift and provides feedback during data fetching"
+bestPractices:
+  - "Match the approximate size of final content"
+  - "Use multiple skeletons for complex layouts"
+  - "Replace with actual content smoothly"
+  - "Provide consistent loading experience"

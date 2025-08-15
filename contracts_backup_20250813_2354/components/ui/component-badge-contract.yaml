@@ -1,0 +1,94 @@
+# Component Contract: Badge UI Component
+
+contractId: "component-badge-20250113"
+componentInfo:
+  name: "Badge"
+  filePath: "src/components/ui/badge.tsx"
+  category: "ui-foundation"
+  parentPage: "multiple"
+  complexity: "simple"
+  
+functionalAnalysis:
+  purpose: "Display status indicators, achievement markers, and categorical labels throughout the app"
+  primaryFunction: "Shows small, styled labels for status, categories, achievements, and metadata"
+  userInteractions: ["visual identification", "potential filtering trigger"]
+  businessLogic: "Visual categorization and status indication with color coding"
+  stateManagement: "Stateless - styling determined by variant prop"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements: ["variant styles", "size and padding", "color schemes"]
+  mockDataUsage: []
+  realDataPercentage: 0
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: ["cn (className utility)", "cva (class variance authority)"]
+  externalLibraries: ["class-variance-authority"]
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: []
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: ["Add size variants", "Add custom color support", "Add icon integration"]
+  priority: "low"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation: ["variant usage guidelines", "semantic meaning of colors", "accessibility considerations"]
+  
+componentInteractions:
+  callsComponents: []
+  calledByComponents: ["Team displays", "User roles", "Achievement systems", "Status indicators", "Gamification"]
+  sharedState: []
+  eventCommunication: []
+  propsPassedTo: []
+  propsReceivedFrom: ["variant, content from parent components"]
+  
+userJourneyContext:
+  userFlows: ["Team->Role Display", "Gamification->Achievement Display", "Admin->Status Indicators"]
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["player", "coach", "parent", "admin"]
+  featureArea: "gamification"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "Badge"
+  reasonForDuplication: "n/a"
+  consolidationStrategy: "n/a"
+  supabaseIntegrationWinner: "n/a"
+
+# Usage Analysis
+usagePatterns:
+  gamificationUse: "Achievement badges, rank indicators, point categories"
+  teamManagement: "Role badges (coach, player, parent), status indicators"
+  adminUse: "System status, user permissions, data validation states"
+  mobileFriendly: true
+  brandAlignment: "Follows POWLAX color scheme for primary/secondary variants"
+  potentialIntegration: "Could display data from user_badges, powlax_player_ranks tables"
+  semanticMeaning:
+    - default: "Primary information or neutral status"
+    - secondary: "Supporting information or inactive status"  
+    - destructive: "Errors, warnings, or critical information"
+    - outline: "Subtle categorization or secondary metadata"

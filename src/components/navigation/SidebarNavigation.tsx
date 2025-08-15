@@ -73,11 +73,11 @@ export default function SidebarNavigation() {
   const { isCollapsed, toggleSidebar } = useSidebar()
 
   // Check if actual user is admin (not viewing role)
-  const isActualAdmin = actualAuth.user?.roles?.includes('administrator') || actualAuth.user?.roles?.includes('admin')
+  const isActualAdmin = actualAuth.user?.roles?.includes('administrator')
   
   // For navigation display, use the viewing role if in view mode
   const displayUser = viewAsAuth.user
-  const isDisplayAdmin = displayUser?.roles?.includes('administrator') || displayUser?.roles?.includes('admin')
+  const isDisplayAdmin = displayUser?.roles?.includes('administrator')
 
   return (
     <aside className={`hidden md:flex md:flex-shrink-0 transition-all duration-300 ease-in-out ${

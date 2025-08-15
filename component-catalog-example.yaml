@@ -1,0 +1,305 @@
+contract:
+  id: component-catalog-page-001
+  title: "POWLAX Component Catalog & Documentation Page"
+  version: "1.0.0"
+  created: "2025-01-16"
+  type: "documentation-page-specification"
+  
+purpose: |
+  Create a comprehensive component catalog page that showcases all POWLAX components
+  with their intended functionality, props, usage examples, and live previews.
+  
+  This page will serve as:
+  1. Developer documentation for component usage
+  2. Design system reference
+  3. Component testing playground
+  4. Integration guide for new features
+
+page_specification:
+  page_name: "ComponentCatalog"
+  route: "/admin/component-catalog"
+  page_type: "client"
+  authentication_required: true
+  authorized_roles: ["admin", "developer"]
+  
+  functional_requirements:
+    primary_purpose: "Showcase all POWLAX components with live examples and documentation"
+    user_interactions:
+      - "Browse components by category (UI, Practice Planner, Skills Academy, etc.)"
+      - "View live component previews with different prop combinations"
+      - "Copy code examples for component usage"
+      - "Test component responsiveness across screen sizes"
+      - "Search components by name or functionality"
+    business_rules:
+      - "Only admin/developer roles can access"
+      - "Components should show real data when possible"
+      - "All examples must be functional, not mockups"
+    edge_cases:
+      - "Component fails to render → Show error boundary with details"
+      - "No components in category → Show empty state"
+      - "Search returns no results → Show helpful suggestions"
+
+  data_source_integration:
+    project_index_usage: |
+      The page will read PROJECT_INDEX.json to automatically discover and catalog:
+      - All 157 components with their file paths
+      - Component props interfaces
+      - Database tables used by each component
+      - Component relationships and dependencies
+      - Hook usage patterns
+    
+    automated_discovery:
+      component_analysis:
+        - "Extract component props from TypeScript interfaces"
+        - "Identify database dependencies from hooks"
+        - "Map component relationships from import patterns"
+        - "Categorize by directory structure (ui/, practice-planner/, etc.)"
+      
+      live_data_integration:
+        - "Use real database data for component previews"
+        - "Show actual drill cards with real drill data"
+        - "Display practice plans with actual strategies"
+        - "Demonstrate Skills Academy components with real workouts"
+
+  component_catalog_structure:
+    categories:
+      ui_components:
+        title: "UI Components (Shadcn/UI)"
+        description: "Base UI components used throughout the application"
+        components: 
+          - "Button, Card, Input, Dialog, Badge, etc."
+        data_source: "Static props + theme examples"
+      
+      practice_planner:
+        title: "Practice Planner Components"
+        description: "Components for creating and managing lacrosse practices"
+        components:
+          - "DrillCard, PracticeTimeline, DrillLibrary, etc."
+        data_source: "powlax_drills, powlax_strategies, practices tables"
+      
+      skills_academy:
+        title: "Skills Academy Components"
+        description: "Components for individual skill development"
+        components:
+          - "WorkoutCard, DrillPlayer, ProgressTracker, etc."
+        data_source: "skills_academy_* tables"
+      
+      teams:
+        title: "Team Management Components"
+        description: "Components for team organization and management"
+        components:
+          - "TeamCard, PlayerCard, TeamStats, etc."
+        data_source: "teams, team_members, users tables"
+      
+      dashboards:
+        title: "Dashboard Components"
+        description: "Role-specific dashboard components"
+        components:
+          - "StatCard, TaskCard, ActionCard, etc."
+        data_source: "Multiple tables based on role"
+
+  technical_architecture:
+    page_structure: |
+      /admin/component-catalog/page.tsx (main page)
+      ├── ComponentCatalogHeader.tsx (title, search, filters)
+      ├── ComponentCatalogSidebar.tsx (category navigation)
+      ├── ComponentCatalogMain.tsx (main content area)
+      │   ├── ComponentSection.tsx (category sections)
+      │   │   ├── ComponentCard.tsx (individual component showcase)
+      │   │   │   ├── ComponentPreview.tsx (live preview)
+      │   │   │   ├── ComponentProps.tsx (props documentation)
+      │   │   │   ├── ComponentCode.tsx (usage examples)
+      │   │   │   └── ComponentInfo.tsx (metadata, database usage)
+      │   │   └── ComponentPlayground.tsx (interactive testing)
+      │   └── ComponentSearch.tsx (search functionality)
+      └── ComponentCatalogFooter.tsx (stats, export options)
+    
+    state_management:
+      local_state:
+        - "selectedCategory: string"
+        - "searchQuery: string"
+        - "selectedComponent: string | null"
+        - "previewProps: Record<string, any>"
+      shared_state:
+        - "useAuth() for admin verification"
+      external_state:
+        - "useProjectIndex() for component discovery"
+        - "useComponentData() for live data"
+
+  database_integration:
+    primary_tables:
+      - table_name: "powlax_drills"
+        purpose: "Provide real drill data for Practice Planner component previews"
+        usage: "Sample data for DrillCard, DrillLibrary components"
+      
+      - table_name: "skills_academy_workouts"
+        purpose: "Provide real workout data for Skills Academy component previews"
+        usage: "Sample data for WorkoutCard, WorkoutPlayer components"
+      
+      - table_name: "teams"
+        purpose: "Provide real team data for Team Management component previews"
+        usage: "Sample data for TeamCard, TeamStats components"
+      
+      - table_name: "users"
+        purpose: "Provide real user data for user-related component previews"
+        usage: "Sample data for PlayerCard, UserAvatar components"
+
+  component_documentation_format:
+    component_card_structure: |
+      For each component, display:
+      
+      1. Component Preview
+         - Live rendered component with real data
+         - Multiple prop variations
+         - Responsive preview (mobile/desktop)
+      
+      2. Component Information
+         - File path and location
+         - Purpose and functionality
+         - Database tables used (if any)
+         - Hooks used
+         - Parent/child relationships
+      
+      3. Props Documentation
+         - TypeScript interface
+         - Required vs optional props
+         - Default values
+         - Prop descriptions
+      
+      4. Usage Examples
+         - Code snippets for common use cases
+         - Import statements
+         - Integration patterns
+      
+      5. Testing Information
+         - Test coverage percentage
+         - Example test scenarios
+         - Known issues or limitations
+
+  automated_content_generation:
+    project_index_integration: |
+      The page will automatically read PROJECT_INDEX.json to populate:
+      
+      ```typescript
+      // Read component information from PROJECT_INDEX.json
+      const componentData = projectIndex.components[componentPath]
+      
+      const componentInfo = {
+        name: componentData.exports[0],
+        path: componentData.path,
+        purpose: componentData.purpose,
+        props: componentData.props,
+        hooksUsed: componentData.hooks_used,
+        databaseTables: componentData.database_tables,
+        type: componentData.type // client/server/mixed
+      }
+      ```
+    
+    live_data_fetching: |
+      For components that use database data:
+      
+      ```typescript
+      // Fetch sample data based on component's database usage
+      const sampleData = await fetchSampleData(componentInfo.databaseTables)
+      
+      // Render component with real data
+      <ComponentPreview 
+        component={Component}
+        sampleProps={generatePropsFromData(sampleData)}
+      />
+      ```
+
+  search_and_filtering:
+    search_capabilities:
+      - "Search by component name"
+      - "Search by functionality/purpose"
+      - "Search by database table usage"
+      - "Search by props/interface"
+    
+    filter_options:
+      - "Filter by category"
+      - "Filter by component type (client/server)"
+      - "Filter by database dependency"
+      - "Filter by test coverage level"
+
+  quality_gates:
+    functionality:
+      - criteria: "All components render correctly with sample data"
+        validation: "Test each component preview loads without errors"
+      - criteria: "Search and filtering work accurately"
+        validation: "Test search returns expected results"
+      - criteria: "Code examples are syntactically correct"
+        validation: "Validate all code snippets compile"
+    
+    performance:
+      - criteria: "Page loads in < 3s with all components"
+        validation: "Performance audit with full component catalog"
+      - criteria: "Component previews render in < 500ms"
+        validation: "Individual component render time testing"
+    
+    data_accuracy:
+      - criteria: "Component information matches actual implementation"
+        validation: "Cross-reference with PROJECT_INDEX.json"
+      - criteria: "Props documentation is up-to-date"
+        validation: "TypeScript interface validation"
+
+success_criteria:
+  documentation_completeness:
+    - "All 157 components from PROJECT_INDEX.json are cataloged"
+    - "Each component has live preview with real data"
+    - "Props documentation is accurate and complete"
+    - "Usage examples are functional and helpful"
+  
+  developer_experience:
+    - "Developers can quickly find and understand component usage"
+    - "Copy-paste code examples work without modification"
+    - "Component relationships and dependencies are clear"
+    - "Search and filtering help locate specific components"
+  
+  maintenance_efficiency:
+    - "Catalog updates automatically when PROJECT_INDEX.json changes"
+    - "New components are automatically discovered and added"
+    - "Component changes are reflected in documentation"
+    - "Broken components are clearly identified"
+
+implementation_approach:
+  automated_discovery: |
+    1. Read PROJECT_INDEX.json on page load
+    2. Parse component information and categorize
+    3. Generate component cards dynamically
+    4. Fetch sample data for components with database dependencies
+    5. Render live previews with error boundaries
+  
+  manual_curation: |
+    1. Create curated examples for complex components
+    2. Add detailed usage documentation
+    3. Provide best practice guidance
+    4. Include integration patterns and tips
+  
+  continuous_updates: |
+    1. Watch PROJECT_INDEX.json for changes
+    2. Automatically refresh component information
+    3. Validate component previews still work
+    4. Update documentation when interfaces change
+
+expected_deliverables:
+  files_created:
+    - "src/app/(authenticated)/admin/component-catalog/page.tsx"
+    - "src/components/component-catalog/ComponentCatalogHeader.tsx"
+    - "src/components/component-catalog/ComponentCatalogSidebar.tsx"
+    - "src/components/component-catalog/ComponentCard.tsx"
+    - "src/components/component-catalog/ComponentPreview.tsx"
+    - "src/components/component-catalog/ComponentPlayground.tsx"
+    - "src/hooks/useProjectIndex.ts"
+    - "src/hooks/useComponentData.ts"
+    - "src/types/component-catalog.ts"
+
+notes: |
+  This component catalog page leverages the PROJECT_INDEX.json system to:
+  1. Automatically discover all components without manual maintenance
+  2. Provide live previews with real database data
+  3. Keep documentation synchronized with actual implementation
+  4. Enable rapid component discovery and usage understanding
+  
+  The page serves as both documentation and testing playground,
+  making it invaluable for development and onboarding.

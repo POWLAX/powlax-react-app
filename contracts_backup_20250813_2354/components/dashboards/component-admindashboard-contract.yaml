@@ -1,0 +1,108 @@
+# Component Contract: AdminDashboard
+contractId: "component-admindashboard-20250113"
+componentInfo:
+  name: "AdminDashboard"
+  filePath: "src/components/dashboards/AdminDashboard.tsx"
+  category: "dashboard"
+  parentPage: "/dashboard (when user role is admin)"
+  complexity: "complex"
+  
+functionalAnalysis:
+  purpose: "Administrative dashboard providing system oversight, user management capabilities, and children progress monitoring for admin users"
+  primaryFunction: "Display system metrics, admin tools, and children overview for admins who are also parents"
+  userInteractions: 
+    - "View system status and performance metrics"
+    - "Access administrative tools and reports"
+    - "Monitor children's progress (if admin is also a parent)"
+    - "Navigate to admin management functions"
+  businessLogic: "Combines system administration with parent functionality - displays mock system health data and real children data for Patrick"
+  stateManagement: "React useState for mock statistics and children data"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements:
+    - "Mock system statistics (uptime, users, drills count)"
+    - "Mock children data for Patrick (Alex and Sam Chapla)"
+    - "Mock system health components"
+    - "Mock activity log entries"
+    - "Static admin tool links"
+  mockDataUsage:
+    - "children state with (MOCK) labeled names"
+    - "stats object with hardcoded values"
+    - "mockData object with fake system metrics"
+  realDataPercentage: 15
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: ["supabase client (imported but not used)"]
+  externalLibraries: ["lucide-react", "next/link"]
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: []
+  
+mvpReadiness:
+  isProductionReady: false
+  blockers:
+    - "All system metrics are hardcoded mock data"
+    - "No real user management integration"
+    - "No real system health monitoring"
+    - "Children data is hardcoded mock"
+  improvements:
+    - "Connect to users table for real user counts"
+    - "Implement real system health monitoring"
+    - "Connect to parent_child_relationships table"
+    - "Add real admin activity logging"
+  priority: "medium"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation: ["Component purpose", "Mock vs real data explanation", "Admin features overview"]
+  
+componentInteractions:
+  callsComponents: ["StatCard", "ActionCard", "ProgressCard", "ScheduleCard"]
+  calledByComponents: ["Main dashboard page when user role is admin"]
+  sharedState: ["User object passed as prop"]
+  eventCommunication: []
+  propsPassedTo: ["Component-specific props to StatCard, ActionCard, etc."]
+  propsReceivedFrom: ["user prop from parent dashboard"]
+  
+userJourneyContext:
+  userFlows: ["Admin Login -> Dashboard -> System Management", "Admin/Parent -> Children Overview -> Progress Tracking"]
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["admin"]
+  featureArea: "admin"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "AdminDashboard"
+  reasonForDuplication: ""
+  consolidationStrategy: ""
+  supabaseIntegrationWinner: ""
+
+notes:
+  - "Currently displays mix of mock system data and hardcoded children data"
+  - "Patrick's children data is hardcoded with (MOCK) labels"
+  - "No real Supabase queries despite importing client"
+  - "Admin tools are placeholder links with no real functionality"
+  - "System health metrics are entirely fictional"
+  - "Could be enhanced with real user counts from users table"
+  - "Should connect to parent_child_relationships for real children data"

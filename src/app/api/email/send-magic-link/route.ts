@@ -26,10 +26,12 @@ export async function POST(request: NextRequest) {
     // Simulate email sending delay
     await new Promise(resolve => setTimeout(resolve, 1000))
 
-    // WordPress email integration would go here
+    // !IMPORTANT - NO WORDPRESS EMAIL INTEGRATION PLANNED!
+    // Self-contained email system (SendGrid) will be implemented here
     // Example structure:
     /*
-    const wordpressResponse = await fetch(`${process.env.WORDPRESS_API_URL}/wp-json/powlax/v1/send-email`, {
+    // !IMPORTANT - NO WORDPRESS API CALLS! Use SendGrid instead:
+    const emailResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

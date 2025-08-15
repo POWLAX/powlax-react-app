@@ -116,7 +116,7 @@ export function DirectorDashboard({ user }: DirectorDashboardProps) {
         name: team.name,
         coaches: coaches.map((c: any) => c.user.display_name || c.user.first_name).join(", ") || "TBD",
         players: players.length,
-        engagement: Math.floor(Math.random() * 30) + 70, // Mock: Engagement tracking
+        engagement: 85, // MOCK: Engagement tracking
         status: players.length > 15 ? "excellent" : players.length > 10 ? "good" : "needs-attention"
       }
     }) || [],

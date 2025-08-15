@@ -1,0 +1,155 @@
+# Page Contract: Admin Management Page
+# Route: /admin/management
+
+contractId: "page-admin-management-20250113"
+pageInfo:
+  route: "/admin/management"
+  filePath: "src/app/(authenticated)/admin/management/page.tsx"
+  pageType: "client"
+  category: "admin"
+  dynamicSegments: []
+
+renderingStrategy:
+  componentType: "Client Component"
+  dataFetching: "client-side"
+  streamingEnabled: false
+  suspenseBoundaries: []
+  errorBoundaries: []
+
+dataOrchestration:
+  serverDataFetching: []
+  clientDataFetching:
+    - hook: "useAuth"
+      trigger: "On mount"
+      tables: []
+      realtime: false
+    - hook: "useEffect + fetchUsers"
+      trigger: "On mount if isAdmin"
+      tables: ["users"]
+      realtime: false
+  propsFlow:
+    fromServer: {}
+    toClient:
+      roleManagementContent: "JSX content passed to ManagementTabs"
+
+componentComposition:
+  componentsUsed:
+    - name: "ManagementTabs"
+      source: "@/components/admin/management/ManagementTabs"
+      props: 
+        defaultTab: "roles"
+        children: "roleManagementContent"
+      conditionalRendering: "Always (after admin check)"
+    - name: "DocumentationHelper"
+      source: "@/components/admin/management/DocumentationHelper"
+      props:
+        feature: "roles"
+      conditionalRendering: "Always in admin view"
+    - name: "InlineDocumentation" 
+      source: "@/components/admin/management/DocumentationHelper"
+      props:
+        tableName: "users"
+        fields: "['roles[]']"
+        action: "Role-based access control"
+      conditionalRendering: "Always in admin view"
+  layoutUsed: "(authenticated)/layout.tsx"
+  providerDependencies: ["SupabaseAuthContext"]
+
+routingLogic:
+  guards:
+    - type: "Admin role"
+      implementation: "Page-level"
+      redirectTo: "Access denied card display"
+  navigation:
+    - triggers: ["Direct URL access", "Admin navigation"]
+      destinations: ["/admin/management"]
+      method: "Direct navigation"
+  dynamicRouting: []
+
+pageSpecificLogic:
+  businessLogic: "Comprehensive role management system with user listing, role statistics, and role modification capabilities"
+  stateManagement: "Multiple useState hooks for users list, role statistics, search/filter state, modal state"
+  sideEffects: ["Toast notifications", "Data refetching after role changes"]
+  formHandling: "Modal form for role changes with checkbox selection and reason field"
+
+serverClientBoundary:
+  serverComponents: []
+  clientComponents: 
+    - "ManagementPage (root component)"
+    - "All UI components"
+    - "ManagementTabs wrapper"
+  boundaryLocation: "Entire page is client-side"
+  dataSerializationPoints: []
+
+performancePatterns:
+  prefetching: []
+  lazyLoading: []
+  codeSpliiting: []
+  optimizations: 
+    - "Filtered user list computed on-demand"
+    - "Role statistics calculated client-side"
+
+securityPatterns:
+  authentication: "useAuth hook verification"
+  authorization: "Multi-level admin check (roles + email patterns)"
+  dataValidation: "Form validation for role changes"
+  csrfProtection: false
+
+integrationPoints:
+  supabaseUsage:
+    directQueries: true
+    throughHooks: true
+    serverSideOnly: false
+  externalAPIs: []
+  webhooks: []
+  realtimeSubscriptions: []
+
+adminSpecificFeatures:
+  permissionChecking:
+    method: "Multi-level verification"
+    criteria:
+      - "User roles include 'administrator' or 'admin'"
+      - "Email contains admin@powlax.com"
+      - "Email contains patrick@powlax.com"
+    fallback: "Access denied card with AlertCircle icon"
+  
+  dataManagement:
+    tables: ["users"]
+    operations: ["READ", "UPDATE"]
+    bulkOperations: false
+    realTimeUpdates: false
+    
+  roleManagementFeatures:
+    availableRoles: ["administrator", "club_director", "team_coach", "player", "parent"]
+    roleStatistics: "Real-time calculation of role distribution"
+    searchAndFilter: "Email/name search + role-based filtering"
+    roleModification: "Modal with checkbox selection and reason logging"
+    auditTrail: "Reason field for role changes"
+    
+  uiPatterns:
+    statistics: "Grid of 6 role statistic cards"
+    userTable: "Sortable table with role badges and actions"
+    modals: "Role editing modal with confirmation"
+    documentation: "Integrated help with DocumentationHelper component"
+
+testingPatterns:
+  mockDataHandling: "Test user object for development when no auth user"
+  errorHandling: "Toast notifications for all error states"
+  loadingStates: "Spinner during data fetching and role updates"
+
+technicalDebt:
+  issues:
+    - "Hardcoded admin email patterns"
+    - "Test user fallback in production code"
+    - "No pagination for large user lists"
+  improvements:
+    - "Move admin permission logic to centralized utility"
+    - "Add role-based permissions configuration"
+    - "Implement virtual scrolling for large datasets"
+
+notes:
+  - "Primary admin page that wraps role management in ManagementTabs"
+  - "Extensive role management capabilities with real-time statistics"
+  - "Strong security model with multiple admin verification layers"
+  - "Well-integrated with documentation system"
+  - "Could benefit from extraction of role management logic to custom hooks"

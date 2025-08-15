@@ -1,0 +1,219 @@
+# StreakCounter Component Contract
+
+contractId: "component-streak-counter-20250113"
+componentInfo:
+  name: "StreakCounter"
+  filePath: "/src/components/gamification/StreakCounter.tsx"
+  category: "gamification"
+  parentPage: "Dashboard, Skills Academy, Player Progress"
+  complexity: "moderate"
+
+functionalAnalysis:
+  purpose: "Daily streak tracking system with milestone celebrations and streak freeze mechanics to encourage consistent training"
+  primaryFunction: "Display current streak, progress to milestones, and streak maintenance features with anti-gaming foundations"
+  userInteractions:
+    - "View current daily streak count with flame icon"
+    - "Monitor progress toward streak milestones (7, 30, 100 days)"
+    - "Track streak freeze usage for missed days"
+    - "Celebrate milestone achievements with special displays"
+  businessLogic: "Tracks consecutive daily training sessions with milestone rewards and streak preservation mechanisms"
+  stateManagement: "Pure functional component receiving streak data as props"
+
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "context"
+  supabaseTables: []
+  tableUsage: []
+  note: "Expects streak data to be provided by parent components from user progress tracking"
+
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements:
+    - "Milestone thresholds (7, 30, 100 day achievements)"
+    - "Streak celebration titles and icons"
+    - "Color schemes for active/inactive streaks"
+  mockDataUsage: []
+  realDataPercentage: 95
+
+dependencies:
+  hooks: []
+  contexts: []
+  utilities:
+    - "cn (utility for className concatenation)"
+  externalLibraries:
+    - "lucide-react (Flame, Snowflake, Trophy, Calendar icons)"
+    - "Card, CardContent, Badge (UI components)"
+
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations:
+    - "Streak count -> visual flame intensity"
+    - "Milestone progress -> celebration animations"
+    - "Streak freeze count -> preservation indicators"
+
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Connect to actual user streak data from database"
+    - "Add streak history and statistics"
+    - "Implement streak freeze purchase/earning system"
+    - "Add social streak sharing features"
+  priority: "medium"
+
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+
+documentation:
+  hasDocumentation: true
+  documentationQuality: "good"
+  needsDocumentation:
+    - "Streak calculation methodology"
+    - "Milestone reward system integration"
+    - "Streak freeze earning mechanics"
+
+componentInteractions:
+  callsComponents: []
+  calledByComponents:
+    - "PlayerDashboard"
+    - "SkillsAcademyHub"
+    - "GamificationDashboard"
+  sharedState: []
+  eventCommunication: []
+  propsPassedTo: []
+  propsReceivedFrom:
+    - "currentStreak: number"
+    - "longestStreak: number"
+    - "streakTitle: string"
+    - "freezesRemaining?: number"
+    - "milestoneProgress?: object"
+    - "size?: sm|md|lg"
+
+userJourneyContext:
+  userFlows:
+    - "Daily login -> Streak counter update -> Motivation feedback"
+    - "Milestone approach -> Increased engagement -> Achievement celebration"
+    - "Streak break -> Freeze usage -> Streak preservation"
+  criticalForMVP: false
+  usageFrequency: "high"
+  primaryUserTypes: ["player"]
+  featureArea: "gamification"
+  journeyStage: "core-loop"
+
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "StreakCounter"
+  reasonForDuplication: "N/A"
+  consolidationStrategy: "N/A"
+  supabaseIntegrationWinner: "StreakCounter"
+
+gamificationSystemDetails:
+  streakMechanics:
+    dailyStreakTracking: "Consecutive days with training activity"
+    streakFreezeMechanic: "Limited uses to preserve streaks during absences"
+    milestoneRewards: "Special recognition at 7, 30, 100+ day intervals"
+  
+  antiGamingDesign:
+    - "Daily streak requirement prevents gaming through multiple sessions"
+    - "Streak freezes are limited resource requiring strategic use"
+    - "Milestone achievements require sustained commitment"
+  
+  motivationalPsychology:
+    - "Loss aversion: fear of breaking streak motivates consistency"
+    - "Milestone anticipation: visible progress toward achievements"
+    - "Social proof: longest streak displays for peer comparison"
+
+componentVariants:
+  StreakCounter:
+    purpose: "Main streak display with full features"
+    features:
+      - "Current streak with flame animation"
+      - "Milestone progress tracking"
+      - "Streak freeze indicators"
+      - "Size variants (sm/md/lg)"
+  
+  CompactStreak:
+    purpose: "Minimal badge-style streak indicator"
+    features:
+      - "Compact flame badge with day count"
+      - "Conditional display (hides if streak = 0)"
+      - "Orange theme for consistency"
+  
+  MilestoneCelebration:
+    purpose: "Special celebration overlay for achievements"
+    features:
+      - "Milestone-specific titles and icons"
+      - "Gradient backgrounds for special achievements"
+      - "New achievement badges"
+  
+  StreakStats:
+    purpose: "Analytics dashboard for streak history"
+    features:
+      - "Current/longest/consistency metrics"
+      - "Grid layout for stat comparison"
+      - "Progress visualization"
+
+milestoneSystem:
+  weeklyWarrior: 
+    threshold: 7
+    title: "Weekly Warrior!"
+    icon: "Calendar"
+    color: "blue-purple gradient"
+  
+  monthlyMaster:
+    threshold: 30
+    title: "Monthly Master!"
+    icon: "Trophy" 
+    color: "purple-pink gradient"
+  
+  centuryClub:
+    threshold: 100
+    title: "Century Club!"
+    icon: "Trophy"
+    color: "yellow-red gradient"
+
+visualDesignSystem:
+  activeStreak:
+    background: "Orange to red gradient"
+    textColor: "White"
+    flameIcon: "White flame with glow"
+    progressBar: "White with opacity"
+  
+  inactiveStreak:
+    background: "Gray theme"
+    textColor: "Gray-600"
+    flameIcon: "Gray flame"
+    progressBar: "Gray background"
+  
+  streakFreeze:
+    icon: "Snowflake"
+    text: "X freeze(s) left"
+    color: "White with opacity"
+
+performanceOptimizations:
+  renderingEfficiency:
+    - "Conditional rendering based on streak status"
+    - "Minimal DOM updates for streak changes"
+    - "CSS-only animations for flame effects"
+  
+  memoryManagement:
+    - "No internal state management"
+    - "Props-based rendering for predictability"
+    - "Lightweight icon usage from lucide-react"
+
+integrationRequirements:
+  dataProviders:
+    - "User activity tracking system"
+    - "Daily session completion detection"
+    - "Streak freeze inventory management"
+    - "Milestone achievement system"
+  
+  eventHandlers:
+    - "Daily activity completion -> streak increment"
+    - "Milestone reached -> celebration trigger"
+    - "Streak break -> freeze usage option"

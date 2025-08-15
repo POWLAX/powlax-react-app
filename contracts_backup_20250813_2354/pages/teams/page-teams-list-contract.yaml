@@ -1,0 +1,214 @@
+# Teams List Page Contract
+contractId: "page-teams-list-20250813"
+type: PAGE_ORCHESTRATION_CONTRACT
+version: 1.0.0
+created: 2025-08-13
+priority: HIGH
+
+# ===== PAGE INFO =====
+pageInfo:
+  route: "/teams"
+  filePath: "src/app/(authenticated)/teams/page.tsx"
+  pageType: "client"
+  category: "team"
+  dynamicSegments: []
+
+# ===== RENDERING STRATEGY =====
+renderingStrategy:
+  componentType: "Client Component"
+  dataFetching: "client-side"
+  streamingEnabled: false
+  suspenseBoundaries: []
+  errorBoundaries: []
+
+# ===== DATA ORCHESTRATION =====
+dataOrchestration:
+  serverDataFetching: []
+  
+  clientDataFetching:
+    - hook: "useTeams"
+      trigger: "On mount"
+      tables: ["teams", "clubs", "team_members"]
+      realtime: false
+    - hook: "useEffect + supabase direct query"
+      trigger: "After teams loaded"
+      tables: ["teams", "clubs", "team_members"]
+      realtime: false
+      purpose: "Fetch member counts with club names"
+      
+  propsFlow:
+    fromServer: {}
+    toClient: 
+      teams: "Array of team objects from useTeams"
+      teamsWithCounts: "Enhanced teams with member counts and club names"
+
+# ===== COMPONENT COMPOSITION =====
+componentComposition:
+  componentsUsed:
+    - name: "Card, CardContent, CardHeader, CardTitle"
+      source: "@/components/ui/card"
+      props: 
+        className: "hover:shadow-lg transition-shadow"
+      conditionalRendering: "Always"
+      
+    - name: "Button"
+      source: "@/components/ui/button"
+      props:
+        variant: "outline | default"
+        className: "w-full"
+      conditionalRendering: "Always"
+      
+    - name: "Users, ChevronRight, Plus, Activity, Loader2"
+      source: "lucide-react"
+      props: {}
+      conditionalRendering: "State-based (loading/error/success)"
+      
+  layoutUsed: "(authenticated) layout"
+  providerDependencies: 
+    - "SupabaseAuthContext (via useTeams)"
+
+# ===== ROUTING LOGIC =====
+routingLogic:
+  guards:
+    - type: "Auth"
+      implementation: "Layout-level"
+      redirectTo: "/auth/login"
+      
+  navigation:
+    - triggers: ["Team card click"]
+      destinations: ["/teams/{teamId}/dashboard"]
+      method: "Link component"
+    - triggers: ["Practice Planner quick action"]
+      destinations: ["/teams/no-team/practiceplan"]
+      method: "Link component"
+      
+  dynamicRouting: []
+
+# ===== PAGE SPECIFIC LOGIC =====
+pageSpecificLogic:
+  businessLogic: |
+    - Fetches user's teams via useTeams hook
+    - Enriches team data with member counts and club names
+    - Provides team grid with member counts and navigation
+    - Includes quick actions for no-team users
+    - Color-codes teams with rotating color scheme
+    
+  stateManagement: |
+    - teamsWithCounts: Enhanced team data with member counts
+    - loading: Combined loading state from hook and local fetching
+    - Team color assignment based on index modulo
+    
+  sideEffects: 
+    - "localStorage auto-save for practice plans"
+    - "Toast notifications for errors"
+    
+  formHandling: "None"
+
+# ===== SERVER/CLIENT BOUNDARY =====
+serverClientBoundary:
+  serverComponents: []
+  clientComponents: 
+    - "TeamsPage (root component)"
+    - "All UI components"
+  boundaryLocation: "Page level - entire page is client component"
+  dataSerializationPoints: []
+
+# ===== PERFORMANCE PATTERNS =====
+performancePatterns:
+  prefetching: []
+  lazyLoading: []
+  codeSplitting: []
+  optimizations: 
+    - "Hover animations with CSS transitions"
+    - "Conditional rendering based on loading states"
+
+# ===== SECURITY PATTERNS =====
+securityPatterns:
+  authentication: "Layout-level authentication required"
+  authorization: "Team membership verified via useTeams"
+  dataValidation: "Supabase type validation"
+  csrfProtection: false
+
+# ===== INTEGRATION POINTS =====
+integrationPoints:
+  supabaseUsage:
+    directQueries: true # Direct query for member counts
+    throughHooks: true # useTeams hook
+    serverSideOnly: false
+    
+  externalAPIs: []
+  webhooks: []
+  realtimeSubscriptions: []
+
+# ===== TEAM CONTEXT ORCHESTRATION =====
+teamContextOrchestration:
+  teamDiscovery: |
+    - Uses useTeams hook to fetch user's teams
+    - Filters teams based on user membership
+    - Enriches with club and member count data
+    
+  teamValidation: |
+    - Validates team membership through hook
+    - Shows only teams user has access to
+    - Handles empty state for users with no teams
+    
+  noTeamHandling: |
+    - Provides "no-team" quick actions
+    - Allows practice planner access without team context
+    - Shows appropriate empty state messaging
+
+# ===== ERROR HANDLING =====
+errorHandling:
+  loadingStates:
+    - "Combined loading from useTeams and local fetch"
+    - "Loading spinner with descriptive text"
+    
+  errorStates:
+    - "useTeams error handling"
+    - "Local fetch error handling"
+    - "Try again functionality"
+    
+  fallbackBehavior: |
+    - Shows error message with retry option
+    - Graceful degradation for missing data
+    - Empty state for no teams
+
+# ===== QUICK ACTIONS ORCHESTRATION =====
+quickActionsOrchestration:
+  practicePlanner:
+    route: "/teams/no-team/practiceplan"
+    purpose: "Allow practice planning without team context"
+    
+  teamManagement:
+    addPlayers: "Placeholder - not implemented"
+    teamStats: "Placeholder - not implemented" 
+    communication: "Placeholder - not implemented"
+
+# ===== DATA FLOW PATTERNS =====
+dataFlowPatterns:
+  teamsList: |
+    1. useTeams hook fetches user teams
+    2. useEffect triggers member count enrichment
+    3. Direct Supabase query adds counts and club names
+    4. State updated with enhanced team data
+    5. UI renders team grid with all data
+    
+  navigation: |
+    1. User clicks team card
+    2. Next.js Link navigates to team dashboard
+    3. teamId passed as route parameter
+    
+  errorRecovery: |
+    1. Hook or fetch error detected
+    2. Error state displayed with message
+    3. User can retry via button click
+    4. Full page reload as fallback
+
+# ===== NOTES =====
+notes: |
+  - Entry point for team management workflow
+  - Handles both team members and no-team users
+  - Provides rich team information display
+  - Uses efficient data fetching with member counts
+  - Responsive design with mobile considerations
+  - Color coding provides visual team distinction

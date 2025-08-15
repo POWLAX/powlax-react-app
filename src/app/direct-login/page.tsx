@@ -5,54 +5,49 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/SupabaseAuthContext'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Mail, Loader2, AlertCircle } from 'lucide-react'
 
 export default function DirectLoginPage() {
-  const [status, setStatus] = useState('Ready to login')
+  const [status, setStatus] = useState('Ready to send magic link')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [email, setEmail] = useState('patrick@powlax.com') // Pre-filled for testing
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const router = useRouter()
-  const { user, loading, logout } = useAuth()
+  const { user, loading, logout, login } = useAuth()
   const [allowLogin, setAllowLogin] = useState(false)
 
   const handleDirectLogin = async () => {
     try {
-      setStatus('Logging in as patrick@powlax.com...')
+      setIsSubmitting(true)
+      setStatus('Sending magic link to ' + email + '...')
+      setErrorMessage(null)
+      setSuccessMessage(null)
       
-      // Create a mock user session that matches the database user
-      // Patrick now has all 5 roles in the database
-      const mockUser = {
-        id: '523f2768-6404-439c-a429-f9eb6736aa17', // Actual ID from database
-        email: 'patrick@powlax.com',
-        full_name: 'Patrick Chapla',
-        display_name: 'Patrick Chapla (Admin)',
-        role: 'administrator', // Primary role
-        roles: ['administrator', 'parent', 'club_director', 'team_coach', 'player'], // All 5 roles
-        wordpress_id: null,
-        avatar_url: null
+      const success = await login(email)
+      
+      if (success) {
+        setStatus('Magic link sent successfully!')
+        setSuccessMessage('Check your email for the magic link to complete login.')
+      } else {
+        setStatus('Failed to send magic link')
+        setErrorMessage('Could not send magic link. Please try again.')
       }
-      
-      // Store in localStorage for the auth context to pick up
-      localStorage.setItem('supabase_auth_user', JSON.stringify(mockUser))
-      localStorage.setItem('supabase_auth_session', JSON.stringify({
-        access_token: 'mock-token',
-        user: mockUser
-      }))
-      
-      setStatus('Login successful! Redirecting...')
-      
-      // Force page reload to pick up the new auth state
-      setTimeout(() => {
-        window.location.href = '/dashboard'
-      }, 1000)
-      
     } catch (err) {
-      setStatus('Login failed')
+      setStatus('Error occurred')
+      setErrorMessage('An error occurred while sending the magic link.')
       console.error('Direct login error:', err)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   const handleLogoutAndRelogin = async () => {
     await logout()
     setAllowLogin(true)
-    setStatus('Ready to login')
+    setStatus('Ready to send magic link')
+    setSuccessMessage(null)
+    setErrorMessage(null)
   }
 
   useEffect(() => {
@@ -65,7 +60,7 @@ export default function DirectLoginPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">Direct Login</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">Quick Login (Testing)</CardTitle>
         </CardHeader>
         <CardContent>
           {/* Show logged-in status if user is already authenticated */}
@@ -96,23 +91,63 @@ export default function DirectLoginPage() {
             </div>
           ) : (
             <div className="space-y-4">
+              {successMessage && (
+                <div className="bg-green-50 border border-green-200 rounded-md p-3 flex items-start gap-2">
+                  <Mail className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-green-600">{successMessage}</p>
+                </div>
+              )}
+              
+              {errorMessage && (
+                <div className="bg-red-50 border border-red-200 rounded-md p-3 flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-red-600">{errorMessage}</p>
+                </div>
+              )}
+              
               <div className="mb-6">
                 <div className="text-lg text-blue-600 mb-2 text-center">
                   {status}
                 </div>
               </div>
               
+              <div className="space-y-2">
+                <label htmlFor="email" className="text-sm font-medium">
+                  Email Address
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                  placeholder="Enter email address"
+                  required
+                  disabled={isSubmitting}
+                />
+              </div>
+              
               <Button 
                 onClick={handleDirectLogin}
                 className="w-full"
-                disabled={loading}
+                disabled={loading || isSubmitting}
               >
-                Login as patrick@powlax.com
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending magic link...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="mr-2 h-4 w-4" />
+                    Send Magic Link to {email.split('@')[0]}
+                  </>
+                )}
               </Button>
               
               <div className="text-sm text-gray-600 text-center">
-                This bypasses the magic link system and logs you in directly 
-                to test the admin features.
+                This page is for testing purposes. It sends a real magic link 
+                to the specified email address using Supabase authentication.
               </div>
             </div>
           )}

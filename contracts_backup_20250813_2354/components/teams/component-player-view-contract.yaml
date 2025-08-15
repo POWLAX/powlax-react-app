@@ -1,0 +1,193 @@
+# Player View Component Contract
+contractId: "component-player-view-20250113"
+componentInfo:
+  name: "PlayerView"
+  filePath: "src/components/teams/dashboard/PlayerView.tsx"
+  category: "Team Management"
+  parentPage: "Team Dashboard (Player Role)"
+  complexity: "complex"
+
+functionalAnalysis:
+  purpose: "Age-appropriate player dashboard with personalized progress tracking and skill development"
+  primaryFunction: "Comprehensive player view with age-specific UI, real gamification integration, and learning paths"
+  userInteractions:
+    - "View personal stats and rank progression"
+    - "Track skills completion with age-appropriate display"
+    - "Continue Skills Academy courses"
+    - "Set and track personal goals"
+    - "View upcoming team events"
+    - "Access team playbook (player view)"
+    - "See team rankings and comparisons"
+  businessLogic: "Age-based UI adaptation (youth/middle/teen), real gamification integration via PlayerStatsCard"
+  stateManagement: "Props-based team and event data, age-appropriate content determination"
+
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "hybrid"
+  supabaseTables:
+    - "teams"
+    - "team_members"
+    - "All gamification tables (via PlayerStatsCard)"
+  tableUsage:
+    - tableName: "teams"
+      operations: ["select"]
+      purpose: "Team context and information"
+      dataFlow: "Team prop provides context for player view"
+    - tableName: "team_members"
+      operations: ["select"]
+      purpose: "Player role and position information"
+      dataFlow: "Player prop contains team membership details"
+    - tableName: "gamification tables"
+      operations: ["select"]
+      purpose: "Real player statistics via PlayerStatsCard component"
+      dataFlow: "PlayerStatsCard handles all real gamification data"
+
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements:
+    - "Mock skill progress data (skillProgress object)"
+    - "Personal goals array with hardcoded progress values"
+    - "Age-appropriate content configuration"
+    - "Skills Academy course data"
+    - "Team ranking information"
+  mockDataUsage:
+    - "Skills progress percentages (passing: 85, shooting: 72, etc.)"
+    - "Personal goals with titles and progress"
+    - "Team ranking leaderboard data"
+    - "Skills Academy course progress"
+  realDataPercentage: 60
+
+dependencies:
+  hooks:
+    - "useTeamDashboard (indirect via props)"
+  contexts: []
+  utilities: []
+  externalLibraries:
+    - "lucide-react - icons"
+  
+components:
+  - "PlayerStatsCard - full gamification integration"
+  - "TeamPlaybookSection - team strategy access"
+
+supabaseTableDetails:
+  tablesUsed:
+    - "teams"
+    - "team_members"
+    - "All PlayerStatsCard tables (indirect)"
+  tableRelationships:
+    - "team_members.team_id -> teams.id"
+    - "team_members.user_id -> users.id"
+  queryPatterns:
+    - "Player membership data for role display"
+    - "Team context for player experience"
+  dataTransformations:
+    - "Age group to UI adaptation mapping"
+    - "Jersey number and position display"
+    - "Event date/time formatting"
+
+mvpReadiness:
+  isProductionReady: false
+  blockers:
+    - "Skills progress data is hardcoded"
+    - "Personal goals system not implemented"
+    - "Skills Academy integration is mock data"
+    - "Team ranking system not connected to database"
+  improvements:
+    - "Connect skills progress to Skills Academy completion data"
+    - "Implement personal goal setting and tracking system"
+    - "Integrate real Skills Academy course progress"
+    - "Connect team rankings to actual user statistics"
+    - "Add personalized recommendations based on progress"
+  priority: "high"
+
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation:
+    - "Age-appropriate UI design principles"
+    - "PlayerStatsCard integration patterns"
+    - "Skills Academy integration requirements"
+
+componentInteractions:
+  callsComponents:
+    - "Card, CardContent, CardHeader, CardTitle (UI)"
+    - "Progress (UI)"
+    - "Badge (UI)"
+    - "Button (UI)"
+    - "Avatar, AvatarFallback (UI)"
+    - "Tabs, TabsContent, TabsList, TabsTrigger (UI)"
+    - "PlayerStatsCard - real gamification data"
+    - "TeamPlaybookSection - team strategy access"
+  calledByComponents:
+    - "Team Dashboard page (when user role is player)"
+  sharedState:
+    - "PlayerStatsCard integration for real stats"
+  eventCommunication: []
+  propsPassedTo:
+    - "PlayerStatsCard: userId, teamId, showEditProfile, playerName, teamName"
+    - "TeamPlaybookSection: teamId, teamName, isCoach=false"
+  propsReceivedFrom:
+    - "team: Team - team context"
+    - "player: UserTeamRole - player's team membership"
+    - "ageGroup: 'youth' | 'middle' | 'teen' - age-appropriate UI mode"
+    - "upcomingEvents: TeamEvent[] - team schedule"
+    - "teamStats: TeamStats - team-level statistics"
+    - "recentActivity: ActivityItem[] - team activity feed"
+
+userJourneyContext:
+  userFlows:
+    - "Player->Team Dashboard->View Progress"
+    - "Player->Team Dashboard->Continue Skills Academy"
+    - "Player->Team Dashboard->Check Team Ranking"
+    - "Player->Team Dashboard->View Next Event"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["player"]
+  featureArea: "teams"
+  journeyStage: "core-loop"
+
+duplicateFunctionality:
+  hasDuplicates: true
+  duplicateComponents:
+    - "PlayerStatsCard - real gamification data (integrated as child)"
+    - "TeamPlaybookSection - team strategy access (integrated as child)"
+    - "Skills Academy course display overlaps with main Skills Academy"
+  primaryComponent: "PlayerView"
+  reasonForDuplication: "Player-specific context and age-appropriate presentation"
+  consolidationStrategy: "Keep separate - unique player perspective and age adaptations"
+  supabaseIntegrationWinner: "PlayerStatsCard (for stats), Skills Academy main (for courses)"
+
+# Team Management Specific Analysis
+teamManagementContext:
+  roleBasedDisplay: true
+  supportedRoles: ["player"]
+  teamDataIntegration: "Hybrid - real gamification via PlayerStatsCard, mock skills/goals"
+  ageBasedAdaptation:
+    youth: "Do It Mode - simple visuals, badge emphasis, no detailed stats"
+    middle: "Coach It Mode - leadership focus, team impact, full gamification"
+    teen: "Own It Mode - performance analytics, mastery progress, ownership"
+  
+criticalPlayerFeatures:
+  realDataIntegration: "PlayerStatsCard provides actual points, ranks, badges"
+  ageAppropriateUI: "Different complexity levels based on age group"
+  skillsProgression: "Visual progress tracking with age-appropriate detail"
+  personalGoals: "Individual goal setting and tracking system"
+  teamConnection: "Rankings and peer comparison for motivation"
+  learningPath: "Skills Academy integration for continuous improvement"
+  
+dataGaps:
+  skillsProgressTracking: "Not connected to actual Skills Academy completion"
+  personalGoalSystem: "No database backing for goal setting/tracking"
+  teamRankingSystem: "Mock leaderboard data not from real statistics"
+  skillsAcademyIntegration: "Course progress is placeholder data"
+  
+ageBasedDesignPrinciples:
+  visualComplexity: "Decreases with younger age groups"
+  gamificationEmphasis: "Badges for youth, points/ranks for older players"
+  encouragementTone: "Age-appropriate motivational messaging"
+  statisticalDetail: "Simple for youth, analytical for teens"

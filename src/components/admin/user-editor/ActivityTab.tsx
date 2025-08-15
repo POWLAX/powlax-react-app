@@ -137,7 +137,7 @@ export default function ActivityTab({ userData, onFieldChange }: ActivityTabProp
       user_id: 'current_user',
       badge_id: badgeId,
       awarded_at: new Date().toISOString(),
-      awarded_by: 'admin',
+      awarded_by: 'administrator',
       is_active: true
     }
 

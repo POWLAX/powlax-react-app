@@ -1,0 +1,91 @@
+# Component Contract: ActionCard
+contractId: "component-actioncard-20250113"
+componentInfo:
+  name: "ActionCard"
+  filePath: "src/components/dashboards/ActionCard.tsx"
+  category: "dashboard-support"
+  parentPage: "Used by all dashboard components"
+  complexity: "simple"
+  
+functionalAnalysis:
+  purpose: "Reusable action card component for dashboard navigation and quick actions"
+  primaryFunction: "Display action item with icon, title, description, and navigation button in consistent card format"
+  userInteractions: 
+    - "Click to navigate to specified href"
+    - "Visual hover effects and interactions"
+  businessLogic: "Simple navigation component with configurable styling and disabled state"
+  stateManagement: "No state - pure presentation component"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements: []
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: []
+  externalLibraries: ["lucide-react", "next/link"]
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: []
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Add analytics tracking for action clicks"
+    - "Enhance accessibility features"
+  priority: "low"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation: ["Component props interface", "Usage examples"]
+  
+componentInteractions:
+  callsComponents: ["Card", "CardContent", "CardDescription", "CardHeader", "CardTitle", "Button"]
+  calledByComponents: ["AdminDashboard", "CoachDashboard", "PlayerDashboard", "DirectorDashboard", "PublicDashboard"]
+  sharedState: []
+  eventCommunication: []
+  propsPassedTo: ["Card and Button props"]
+  propsReceivedFrom: ["ActionCardProps: title, description, href, icon, color, buttonText, disabled"]
+  
+userJourneyContext:
+  userFlows: ["Dashboard -> Action Card -> Target Page"]
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["all"]
+  featureArea: "navigation"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "ActionCard"
+  reasonForDuplication: ""
+  consolidationStrategy: ""
+  supabaseIntegrationWinner: ""
+
+notes:
+  - "Well-designed reusable component"
+  - "Consistent styling with color variants"
+  - "Supports disabled state for incomplete features"
+  - "Clean prop interface with TypeScript"
+  - "Used across all dashboard types"
+  - "Good separation of concerns"

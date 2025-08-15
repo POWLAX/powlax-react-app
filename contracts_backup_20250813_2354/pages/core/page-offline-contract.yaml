@@ -1,0 +1,103 @@
+# Offline Page Orchestration Contract
+contractId: "page-offline-20250113"
+
+pageInfo:
+  route: "/offline"
+  filePath: "src/app/offline/page.tsx"
+  pageType: "client"
+  category: "utility"
+  dynamicSegments: []
+  
+renderingStrategy:
+  componentType: "Client Component"
+  dataFetching: "none"
+  streamingEnabled: false
+  suspenseBoundaries: []
+  errorBoundaries: []
+  
+dataOrchestration:
+  serverDataFetching: []
+  clientDataFetching: []
+  propsFlow: []
+        
+componentComposition:
+  componentsUsed:
+    - name: "WifiOff, RefreshCw, FileText, Clock"
+      source: "lucide-react"
+      props: {}
+      conditionalRendering: "Always"
+    - name: "Link"
+      source: "next/link"
+      props: { "href": "/dashboard" }
+      conditionalRendering: "Always"
+  layoutUsed: "Root Layout only"
+  providerDependencies: []
+  
+routingLogic:
+  guards: []
+  navigation:
+    - triggers: ["Go to Dashboard link"]
+      destinations: ["/dashboard"]
+      method: "Link component"
+    - triggers: ["Try Again button"]
+      destinations: ["Page reload"]
+      method: "window.location.reload()"
+  dynamicRouting: []
+  
+pageSpecificLogic:
+  businessLogic: "Offline state information display, available features listing"
+  stateManagement: "None - static display"
+  sideEffects: ["Page reload via window.location.reload()"]
+  formHandling: "None"
+  
+serverClientBoundary:
+  serverComponents: []
+  clientComponents: ["OfflinePage component"]
+  boundaryLocation: "Page level - entire page is client component"
+  dataSerializationPoints: []
+  
+performancePatterns:
+  prefetching: []
+  lazyLoading: []
+  codeSpliiting: []
+  optimizations: []
+  
+securityPatterns:
+  authentication: "None - utility page"
+  authorization: "None - public access"
+  dataValidation: "None"
+  csrfProtection: false
+  
+integrationPoints:
+  supabaseUsage:
+    directQueries: false
+    throughHooks: false
+    serverSideOnly: false
+  externalAPIs: []
+  webhooks: []
+  realtimeSubscriptions: []
+
+offlineFeatures:
+  availableOffline:
+    - "Previously loaded practice plans"
+    - "Practice plan templates"
+  
+  userActions:
+    - action: "Try Again"
+      purpose: "Reload page to check connectivity"
+      implementation: "window.location.reload()"
+    - action: "Go to Dashboard"
+      purpose: "Navigate to main application"
+      implementation: "Next.js Link component"
+  
+  userExperience:
+    messaging: "Friendly offline notification with helpful information"
+    visualDesign: "Clean layout with offline icon and feature list"
+    actionGuidance: "Clear next steps for user"
+
+analysisNotes:
+  - "Progressive Web App (PWA) offline page"
+  - "Informs users about available offline functionality"
+  - "Simple client component with no data dependencies"
+  - "Good UX design for offline scenarios"
+  - "Provides clear path back to online functionality"

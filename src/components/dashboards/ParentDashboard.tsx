@@ -174,25 +174,25 @@ export function ParentDashboard({ user }: ParentDashboardProps) {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="text-center">
                       <div className="text-2xl font-bold text-yellow-600">
-                        {child.wallet?.[0]?.balance || Math.floor(Math.random() * 5000) + 1000}
+                        {child.wallet?.[0]?.balance || 2500}
                       </div>
                       <p className="text-xs text-gray-600">{child.wallet?.[0]?.balance ? 'Total Points' : 'Mock: Total Points'}</p>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-orange-600">
-                        {Math.floor(Math.random() * 15) + 1}
+                        {8}
                       </div>
                       <p className="text-xs text-gray-600">Mock: Day Streak</p>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-purple-600">
-                        {child.badges?.length || Math.floor(Math.random() * 20) + 5}
+                        {child.badges?.length || 12}
                       </div>
                       <p className="text-xs text-gray-600">{child.badges?.length ? 'Badges' : 'Mock: Badges'}</p>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-green-600">
-                        {['Rookie', 'Starter', 'Varsity', 'All-Star'][Math.floor(Math.random() * 4)]}
+                        {'Starter'}
                       </div>
                       <p className="text-xs text-gray-600">Mock: Rank</p>
                     </div>
@@ -241,7 +241,7 @@ export function ParentDashboard({ user }: ParentDashboardProps) {
                       Mock: Practice Attendance
                     </div>
                     <div className="text-2xl font-semibold text-gray-500 italic">
-                      {Math.floor(Math.random() * 20) + 80}%
+                      {88}%
                     </div>
                     <p className="text-xs text-gray-500">Mock: This season</p>
                   </div>

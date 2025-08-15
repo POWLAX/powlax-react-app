@@ -1,0 +1,147 @@
+contractId: "component-authmodal-20250113"
+componentInfo:
+  name: "AuthModal"
+  filePath: "src/components/auth/AuthModal.tsx"
+  category: "Authentication"
+  parentPage: "Universal (triggered from any page)"
+  complexity: "complex"
+  
+functionalAnalysis:
+  purpose: "Modal authentication interface using magic link system with polling for session completion"
+  primaryFunction: "Handle user authentication via magic links with real-time session monitoring"
+  userInteractions:
+    - "Enter email address for magic link"
+    - "Submit magic link request"
+    - "Receive success/error feedback"
+    - "Automatic session polling and redirect"
+    - "Retry failed attempts"
+    - "Close modal at any stage"
+    - "ESC key to close"
+  businessLogic: "Magic link authentication flow with polling, state management, and error handling"
+  stateManagement: "Complex modal state machine (initial, loading, success, error) with email validation"
+  
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "direct"
+  supabaseTables:
+    - "magic_links"
+    - "users"
+    - "user_sessions"
+  tableUsage:
+    - tableName: "magic_links"
+      operations: ["insert"]
+      purpose: "Create magic link authentication tokens"
+      dataFlow: "Via /api/auth/magic-link API route"
+    - tableName: "users"
+      operations: ["insert", "select"]
+      purpose: "Create user accounts or authenticate existing users"
+      dataFlow: "Via API with create_if_not_exists flag"
+    - tableName: "user_sessions"
+      operations: ["insert", "select"]
+      purpose: "Track authenticated sessions for polling"
+      dataFlow: "Via /api/auth/check-session polling endpoint"
+      
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements:
+    - "Polling interval (2 seconds)"
+    - "Max polling attempts (150 = 5 minutes)"
+    - "POWLAX branding and logo"
+  mockDataUsage: []
+  realDataPercentage: 95
+  
+dependencies:
+  hooks:
+    - "useState"
+    - "useEffect"
+  contexts: []
+  utilities:
+    - "Image (Next.js)"
+  externalLibraries:
+    - "lucide-react"
+    - "@/components/ui/*"
+    
+supabaseTableDetails:
+  tablesUsed:
+    - "magic_links"
+    - "users"
+    - "user_sessions"
+  tableRelationships:
+    - "magic_links.user_id -> users.id"
+    - "user_sessions.user_id -> users.id"
+  queryPatterns:
+    - "Magic link creation with expiration"
+    - "User creation with email normalization"
+    - "Session polling for authentication completion"
+    - "Automatic session cleanup after success"
+  dataTransformations:
+    - "Email normalization (trim + toLowerCase)"
+    - "Error message standardization"
+    - "Success state with polling initiation"
+    
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Add rate limiting for magic link requests"
+    - "Implement exponential backoff for polling"
+    - "Add magic link expiration countdown"
+    - "Support for social authentication"
+    - "Remember me functionality"
+  priority: "critical"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation:
+    - "Magic link authentication flow"
+    - "Polling strategy and timing"
+    - "Error handling patterns"
+    - "Security considerations"
+    
+componentInteractions:
+  callsComponents:
+    - "Button (ui)"
+    - "Input (ui)"
+    - "Label (ui)"
+    - "Image (Next.js)"
+  calledByComponents:
+    - "Any component can trigger via modal state"
+    - "Navigation components"
+    - "Protected pages"
+  sharedState:
+    - "Modal open/close state from parent"
+  eventCommunication:
+    - "open: boolean prop"
+    - "onClose: () => void callback"
+    - "returnUrl?: string for post-auth redirect"
+  propsPassedTo:
+    - "open: boolean"
+    - "onClose: () => void"
+    - "returnUrl?: string"
+  propsReceivedFrom:
+    - "Parent components manage modal visibility"
+    
+userJourneyContext:
+  userFlows:
+    - "Anonymous user -> Login trigger -> Email entry -> Magic link -> Authentication"
+    - "Session expired -> Re-authentication -> Return to original page"
+    - "Registration flow -> Email -> Account creation -> Authentication"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["all users requiring authentication"]
+  featureArea: "authentication"
+  journeyStage: "onboarding"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "AuthModal"
+  reasonForDuplication: "Unique authentication modal functionality"
+  consolidationStrategy: "N/A"
+  supabaseIntegrationWinner: "AuthModal (comprehensive Supabase Auth integration)"

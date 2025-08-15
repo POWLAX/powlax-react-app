@@ -1,0 +1,92 @@
+# Component Contract: StatCard
+contractId: "component-statcard-20250113"
+componentInfo:
+  name: "StatCard"
+  filePath: "src/components/dashboards/StatCard.tsx"
+  category: "dashboard-support"
+  parentPage: "Used by all dashboard components"
+  complexity: "simple"
+  
+functionalAnalysis:
+  purpose: "Reusable statistics display card for dashboard metrics and KPIs"
+  primaryFunction: "Display numerical statistic with title, subtitle, icon, and optional trend information in consistent format"
+  userInteractions: 
+    - "Visual display only - no direct interaction"
+    - "Color-coded presentation based on metric type"
+  businessLogic: "Pure display component with trend calculation and color theming"
+  stateManagement: "No state - pure presentation component"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements: []
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: []
+  externalLibraries: ["lucide-react"]
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: []
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Add click-through analytics tracking"
+    - "Enhance trend visualization"
+    - "Add animation for value changes"
+  priority: "low"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation: ["Component props interface", "Color scheme usage", "Trend calculation"]
+  
+componentInteractions:
+  callsComponents: ["Card", "CardContent", "CardHeader", "CardTitle"]
+  calledByComponents: ["AdminDashboard", "PlayerDashboard", "DirectorDashboard"]
+  sharedState: []
+  eventCommunication: []
+  propsPassedTo: ["Card styling and content"]
+  propsReceivedFrom: ["StatCardProps: title, value, subtitle, icon, color, trend"]
+  
+userJourneyContext:
+  userFlows: ["Dashboard -> Metrics Overview"]
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["all"]
+  featureArea: "analytics"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "StatCard"
+  reasonForDuplication: ""
+  consolidationStrategy: ""
+  supabaseIntegrationWinner: ""
+
+notes:
+  - "Clean reusable metrics component"
+  - "Supports trend indicators with color coding"
+  - "Consistent color theming across dashboard types"
+  - "Well-typed interface with TypeScript"
+  - "Handles both numerical and string values"
+  - "Good foundation for dashboard analytics"

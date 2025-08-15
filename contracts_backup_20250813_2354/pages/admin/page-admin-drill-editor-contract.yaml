@@ -1,0 +1,127 @@
+# Page Contract: Admin Drill Editor Page
+# Route: /admin/drill-editor
+
+contractId: "page-admin-drill-editor-20250113"
+pageInfo:
+  route: "/admin/drill-editor"
+  filePath: "src/app/(authenticated)/admin/drill-editor/page.tsx"
+  pageType: "client"
+  category: "admin"
+  dynamicSegments: []
+
+renderingStrategy:
+  componentType: "Client Component"
+  dataFetching: "none"
+  streamingEnabled: false
+  suspenseBoundaries: []
+  errorBoundaries: []
+
+dataOrchestration:
+  serverDataFetching: []
+  clientDataFetching:
+    - hook: "useAuth"
+      trigger: "On mount"
+      tables: []
+      realtime: false
+  propsFlow:
+    fromServer: {}
+    toClient: {}
+
+componentComposition:
+  componentsUsed:
+    - name: "Loader2"
+      source: "lucide-react"
+      props: "Standard loading spinner props"
+      conditionalRendering: "While auth loading"
+  layoutUsed: "(authenticated)/layout.tsx"
+  providerDependencies: ["SupabaseAuthContext"]
+
+routingLogic:
+  guards:
+    - type: "Authentication"
+      implementation: "Page-level loading check"
+      redirectTo: "Loading spinner"
+  navigation:
+    - triggers: ["Direct URL access"]
+      destinations: ["/admin/drill-editor"]
+      method: "Direct navigation"
+  dynamicRouting: []
+
+pageSpecificLogic:
+  businessLogic: "Information-only page describing implemented admin editing system"
+  stateManagement: "None (static content)"
+  sideEffects: []
+  formHandling: "None"
+
+serverClientBoundary:
+  serverComponents: []
+  clientComponents: 
+    - "DrillEditorPage (root component)"
+    - "Loading spinner component"
+  boundaryLocation: "Entire page is client-side"
+  dataSerializationPoints: []
+
+performancePatterns:
+  prefetching: []
+  lazyLoading: []
+  codeSpliiting: []
+  optimizations: []
+
+securityPatterns:
+  authentication: "useAuth hook for loading state"
+  authorization: "None (informational page)"
+  dataValidation: "None"
+  csrfProtection: false
+
+integrationPoints:
+  supabaseUsage:
+    directQueries: false
+    throughHooks: false
+    serverSideOnly: false
+  externalAPIs: []
+  webhooks: []
+  realtimeSubscriptions: []
+
+adminSpecificFeatures:
+  purpose: "Documentation page for admin editing system"
+  implementationStatus: "Complete - references external components"
+  
+  describedComponents:
+    - "/lib/adminPermissions.ts - Permission checking system"
+    - "/hooks/useAdminEdit.ts - Database operations for CRUD"
+    - "/components/practice-planner/AdminToolbar.tsx - Edit buttons for cards"
+    - "/components/practice-planner/modals/AdminEditModal.tsx - Rich editing interface"
+    
+  describedFeatures:
+    - "Permission-gated admin access (admin emails and roles)"
+    - "Direct database updates to powlax_drills and powlax_strategies tables"
+    - "Rich text editing for descriptions with video URL preview"
+    - "Category dropdowns and age range sliders"
+    - "Complexity ratings and player count settings"
+    - "Delete confirmation dialogs with safety checks"
+    
+  integrationGuidance:
+    - "Admin toolbar components can be integrated into existing drill and strategy cards"
+    - "Requires proper user permission checks"
+    - "Uses AdminToolbarFloating component"
+
+pageStatus:
+  type: "Documentation/Information"
+  functionality: "Static content display"
+  actualEditing: "Implemented in separate components"
+  
+loadingStates:
+  authLoading: "Full page loading spinner with centered layout"
+  contentLoading: "None (static content)"
+
+uiPatterns:
+  layout: "Container with header and success card"
+  styling: "Green success theme with checkmarks and organized sections"
+  content: "Structured documentation with file paths and feature lists"
+
+notes:
+  - "This is not an actual drill editor interface"
+  - "Serves as documentation for the implemented admin editing system"
+  - "References external components that provide the actual editing functionality"
+  - "Could be enhanced to include actual drill/strategy editing interface"
+  - "Currently just displays implementation status and integration guide"

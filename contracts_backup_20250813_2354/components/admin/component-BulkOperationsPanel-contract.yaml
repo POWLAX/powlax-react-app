@@ -1,0 +1,125 @@
+# Component Contract: BulkOperationsPanel
+contractId: "component-BulkOperationsPanel-20250113"
+componentInfo:
+  name: "BulkOperationsPanel"
+  filePath: "/src/components/admin/BulkOperationsPanel.tsx"
+  category: "admin"
+  parentPage: "admin management - users tab"
+  complexity: "complex"
+  
+functionalAnalysis:
+  purpose: "Perform bulk operations on multiple users simultaneously"
+  primaryFunction: "Filter users and execute bulk role assignments, status changes, and other operations"
+  userInteractions:
+    - "Filter users by various criteria"
+    - "Select users for bulk operations"
+    - "Execute bulk role assignments"
+    - "Monitor operation progress"
+    - "View operation results and errors"
+  businessLogic: "Batch user management with filtering, validation, and progress tracking"
+  stateManagement: "Complex state for filters, selections, operations, and progress"
+  
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "hook"
+  supabaseTables:
+    - "users"
+    - "team_members"
+    - "clubs"
+  tableUsage:
+    - tableName: "users"
+      operations: ["select", "update"]
+      purpose: "Bulk user operations target"
+      dataFlow: "Queries and updates user data in batches"
+    - tableName: "team_members"
+      operations: ["select"]
+      purpose: "Team-based filtering"
+      dataFlow: "Filters users by team membership"
+  
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements:
+    - "Operation type definitions"
+    - "Filter criteria options"
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks:
+    - "useState, useEffect (React hooks)"
+    - "useBulkUserOperations (custom hook)"
+  contexts: []
+  utilities: []
+  externalLibraries:
+    - "sonner (toast notifications)"
+    - "lucide-react (icons)"
+  
+supabaseTableDetails:
+  tablesUsed:
+    - "users (bulk operation target)"
+    - "team_members (filtering criteria)"
+  tableRelationships:
+    - "users -> team_members (one-to-many)"
+  queryPatterns:
+    - "Filtered user queries with pagination"
+    - "Bulk update operations with transaction handling"
+    - "Progress tracking queries"
+  dataTransformations:
+    - "Batch processing of user updates"
+    - "Filter criteria to SQL WHERE clauses"
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Add operation scheduling"
+    - "Implement rollback functionality"
+    - "Add email notifications for bulk operations"
+  priority: "medium"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation:
+    - "Bulk operation types and safety measures"
+    - "Filter criteria specifications"
+    - "Performance considerations for large datasets"
+  
+componentInteractions:
+  callsComponents:
+    - "Card (UI component)"
+    - "Table (UI component)"
+    - "Button (UI component)"
+    - "Select (UI component)"
+    - "Checkbox (UI component)"
+    - "Progress (UI component)"
+  calledByComponents:
+    - "UsersTabContent"
+  sharedState: []
+  eventCommunication:
+    - "onImportCSV, onExportCSV callbacks"
+  propsPassedTo: []
+  propsReceivedFrom:
+    - "onImportCSV, onExportCSV callbacks from parent"
+  
+userJourneyContext:
+  userFlows:
+    - "Admin -> Users -> Bulk Operations -> Filter -> Select -> Execute"
+  criticalForMVP: false
+  usageFrequency: "low"
+  primaryUserTypes: ["admin"]
+  featureArea: "admin"
+  journeyStage: "advanced"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "BulkOperationsPanel"
+  reasonForDuplication: ""
+  consolidationStrategy: ""
+  supabaseIntegrationWinner: "BulkOperationsPanel"

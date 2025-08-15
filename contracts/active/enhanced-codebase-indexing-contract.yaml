@@ -1,0 +1,285 @@
+contract:
+  id: enhanced-codebase-indexing-002
+  title: "POWLAX Enhanced Codebase Indexing with Automated PROJECT_INDEX.json"
+  version: "2.0.0"
+  created: "2025-01-16"
+  type: "hybrid-automated-manual-indexing"
+  priority: high
+  
+purpose: |
+  Combine automated PROJECT_INDEX.json generation with detailed manual indexing contracts:
+  1. Automated technical indexing (files, imports, exports, database queries)
+  2. Manual functional indexing (purpose, status, relationships, business logic)
+  3. Cross-validation between automated and manual indexes
+  4. Living documentation that stays current with codebase changes
+
+automated_indexing:
+  tool: "PROJECT_INDEX.json"
+  generator: "scripts/project-indexer.ts"
+  frequency: "continuous (file watcher) + on-demand"
+  
+  capabilities:
+    - File structure mapping
+    - Import/export relationships
+    - Database table usage detection
+    - Component props extraction
+    - Hook dependencies analysis
+    - API endpoint documentation
+    - Type interface mapping
+    
+  limitations:
+    - Cannot determine business purpose
+    - Cannot assess quality or status
+    - Cannot understand user workflows
+    - Cannot identify deprecated patterns
+    - Cannot map business requirements to code
+
+manual_indexing:
+  contracts: "sub-agent parallel execution"
+  frequency: "quarterly or after major features"
+  
+  capabilities:
+    - Business purpose documentation
+    - Quality assessment and status
+    - User workflow mapping
+    - Architecture decision rationale
+    - Performance considerations
+    - Security implications
+
+hybrid_workflow:
+  phase_1_automated:
+    description: "Generate technical foundation"
+    commands:
+      - "npm run index:generate"
+      - "npm run index:watch" # Keep running during manual indexing
+    deliverables:
+      - "PROJECT_INDEX.json (technical structure)"
+    
+  phase_2_manual_enhancement:
+    description: "Add business context and quality assessment"
+    approach: "parallel sub-agents using automated index as foundation"
+    
+    sub_agent_tasks:
+      task_1_pages_business_indexing:
+        agent_type: "general-purpose"
+        description: "Enhance automated page index with business context"
+        input_data: "PROJECT_INDEX.json pages section"
+        scope:
+          - Read PROJECT_INDEX.json for technical page data
+          - Add business purpose and user workflows
+          - Assess current functionality and quality
+          - Document authentication and authorization patterns
+        deliverable: |
+          Create PAGES_BUSINESS_INDEX.md with:
+          - Route path (from PROJECT_INDEX.json)
+          - Technical details (from PROJECT_INDEX.json)
+          - Business purpose and user value
+          - User workflow and interaction patterns
+          - Current status and quality assessment
+          - Performance characteristics
+          - Security considerations
+          - Recommended improvements
+
+      task_2_components_architecture_indexing:
+        agent_type: "general-purpose"
+        description: "Enhance automated component index with architecture analysis"
+        input_data: "PROJECT_INDEX.json components section"
+        scope:
+          - Read PROJECT_INDEX.json for technical component data
+          - Analyze component architecture and design patterns
+          - Document reusability and maintainability
+          - Assess component quality and performance
+        deliverable: |
+          Create COMPONENTS_ARCHITECTURE_INDEX.md with:
+          - Component name and technical details (from PROJECT_INDEX.json)
+          - Architecture pattern used (container/presenter, compound, etc.)
+          - Reusability score and recommendations
+          - Performance characteristics
+          - Testing coverage and quality
+          - Refactoring opportunities
+          - Dependencies and coupling analysis
+
+      task_3_database_business_mapping:
+        agent_type: "general-purpose"
+        description: "Enhance automated database mapping with business context"
+        input_data: "PROJECT_INDEX.json database and usage patterns"
+        scope:
+          - Read PROJECT_INDEX.json for technical database usage
+          - Add business purpose for each table and relationship
+          - Document data flow and business processes
+          - Identify optimization opportunities
+        deliverable: |
+          Create DATABASE_BUSINESS_MAP.md with:
+          - Table usage patterns (from PROJECT_INDEX.json)
+          - Business purpose and data lifecycle
+          - Critical business processes using each table
+          - Data integrity and validation requirements
+          - Performance bottlenecks and optimization opportunities
+          - Security and privacy considerations
+          - Migration and evolution history
+
+      task_4_api_integration_analysis:
+        agent_type: "general-purpose"
+        description: "Enhance automated API index with integration analysis"
+        input_data: "PROJECT_INDEX.json api_routes section"
+        scope:
+          - Read PROJECT_INDEX.json for technical API data
+          - Document external integrations and dependencies
+          - Analyze security and performance implications
+          - Map API usage to business workflows
+        deliverable: |
+          Create API_INTEGRATION_INDEX.md with:
+          - Endpoint details (from PROJECT_INDEX.json)
+          - External service dependencies
+          - Security and authentication analysis
+          - Performance and rate limiting considerations
+          - Error handling and resilience patterns
+          - Business workflow integration
+          - Monitoring and observability needs
+
+      task_5_hooks_patterns_analysis:
+        agent_type: "general-purpose"
+        description: "Enhance automated hooks index with pattern analysis"
+        input_data: "PROJECT_INDEX.json hooks section"
+        scope:
+          - Read PROJECT_INDEX.json for technical hook data
+          - Analyze state management patterns
+          - Document reusability and performance
+          - Identify optimization opportunities
+        deliverable: |
+          Create HOOKS_PATTERNS_INDEX.md with:
+          - Hook technical details (from PROJECT_INDEX.json)
+          - State management pattern analysis
+          - Performance characteristics and optimization
+          - Reusability assessment and recommendations
+          - Testing strategies and coverage
+          - Common usage patterns and best practices
+
+  phase_3_cross_validation:
+    description: "Validate consistency between automated and manual indexes"
+    validation_checks:
+      - All items in PROJECT_INDEX.json have business context in manual indexes
+      - No orphaned business documentation without technical foundation
+      - Status assessments align with technical capabilities
+      - Database usage patterns match business requirements
+      - Performance claims align with technical implementation
+
+  phase_4_consolidation:
+    description: "Create unified master index"
+    deliverable: |
+      Create UNIFIED_MASTER_INDEX.md combining:
+      - Executive summary of codebase health
+      - Technical architecture overview (from PROJECT_INDEX.json)
+      - Business capability mapping (from manual indexes)
+      - Priority improvement recommendations
+      - Quick navigation to all sub-indexes
+
+output_format:
+  automated_location: "PROJECT_INDEX.json (root)"
+  manual_location: "docs/codebase-index/"
+  
+  files:
+    automated:
+      - PROJECT_INDEX.json (continuous updates)
+    manual:
+      - PAGES_BUSINESS_INDEX.md
+      - COMPONENTS_ARCHITECTURE_INDEX.md  
+      - DATABASE_BUSINESS_MAP.md
+      - API_INTEGRATION_INDEX.md
+      - HOOKS_PATTERNS_INDEX.md
+      - UNIFIED_MASTER_INDEX.md
+
+execution_commands:
+  automated_start:
+    - "npm run index:generate"
+    - "npm run index:watch &" # Background process
+    
+  manual_indexing:
+    parallel_deployment: |
+      ```javascript
+      // All sub-agents use PROJECT_INDEX.json as technical foundation
+      await Promise.all([
+        Task({
+          subagent_type: "general-purpose", 
+          description: "Pages business indexing",
+          prompt: `
+            1. Read PROJECT_INDEX.json pages section for technical data
+            2. Read contracts/active/enhanced-codebase-indexing-contract.yaml
+            3. Focus on: task_1_pages_business_indexing
+            4. For each page in PROJECT_INDEX.json, add business context
+            5. Create PAGES_BUSINESS_INDEX.md following template
+            
+            Key: Use automated technical data as foundation, add human insights
+          `
+        }),
+        // ... other tasks follow same pattern
+      ]);
+      ```
+
+validation_criteria:
+  automated_index:
+    - All source files are indexed
+    - Database table references are accurate
+    - Import/export relationships are complete
+    - File watcher is operational
+    
+  manual_indexes:
+    - Business purpose documented for all components/pages
+    - Quality assessments are realistic and actionable
+    - Cross-references between indexes are accurate
+    - Recommendations are prioritized and specific
+
+  integration:
+    - No technical items lack business context
+    - No business documentation lacks technical foundation
+    - Automated and manual data is consistent
+    - Updates to code trigger both automated and manual review
+
+benefits:
+  automated_benefits:
+    - Always current with code changes
+    - Comprehensive technical coverage
+    - Zero maintenance overhead
+    - Consistent format and structure
+    - Fast generation and updates
+    
+  manual_benefits:
+    - Business context and purpose
+    - Quality and status assessment
+    - Architecture decision rationale
+    - Performance and security analysis
+    - Strategic improvement guidance
+    
+  hybrid_benefits:
+    - Best of both approaches
+    - Cross-validation and consistency
+    - Scalable to large codebases
+    - Supports both development and business needs
+    - Foundation for architectural evolution
+
+maintenance:
+  automated:
+    frequency: "continuous via file watcher"
+    trigger: "file changes in src/, contracts/, docs/"
+    maintenance: "zero - fully automated"
+    
+  manual:
+    frequency: "quarterly or after major features"
+    trigger: "significant functionality changes"
+    maintenance: "contract-driven sub-agent execution"
+    
+  integration:
+    frequency: "after each manual indexing cycle"
+    validation: "cross-reference automated and manual indexes"
+    updates: "sync any inconsistencies found"
+
+notes: |
+  This hybrid approach provides:
+  1. Technical accuracy through automation
+  2. Business insight through manual analysis  
+  3. Continuous currency through file watching
+  4. Comprehensive coverage through parallel sub-agents
+  5. Cross-validation for consistency
+  
+  The automated PROJECT_INDEX.json serves as the technical foundation
+  that manual indexing contracts enhance with business context and quality assessment.

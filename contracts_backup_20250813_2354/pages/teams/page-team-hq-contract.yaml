@@ -1,0 +1,301 @@
+# Team HQ Page Contract
+contractId: "page-team-hq-20250813"
+type: PAGE_ORCHESTRATION_CONTRACT
+version: 1.0.0
+created: 2025-08-13
+priority: HIGH
+
+# ===== PAGE INFO =====
+pageInfo:
+  route: "/teams/[teamId]/hq"
+  filePath: "src/app/(authenticated)/teams/[teamId]/hq/page.tsx"
+  pageType: "client"
+  category: "team"
+  dynamicSegments: ["teamId"]
+
+# ===== RENDERING STRATEGY =====
+renderingStrategy:
+  componentType: "Client Component"
+  dataFetching: "client-side"
+  streamingEnabled: false
+  suspenseBoundaries: []
+  errorBoundaries: []
+
+# ===== DATA ORCHESTRATION =====
+dataOrchestration:
+  serverDataFetching: []
+  
+  clientDataFetching:
+    - hook: "useParams"
+      trigger: "On mount"
+      tables: []
+      realtime: false
+      purpose: "Extract teamId from route"
+      
+    - hook: "useTeam"
+      trigger: "On mount with teamId"
+      tables: ["teams", "team_members", "clubs"]
+      realtime: false
+      purpose: "Fetch team data and validate access"
+      
+  propsFlow:
+    fromServer: {}
+    toClient:
+      teamId: "Extracted from route params"
+      team: "Team data with subscription tier"
+      members: "Team members for statistics"
+
+# ===== COMPONENT COMPOSITION =====
+componentComposition:
+  componentsUsed:
+    - name: "Card, CardContent, CardDescription, CardHeader, CardTitle"
+      source: "@/components/ui/card"
+      props:
+        className: "h-full transition-all hover:shadow-lg"
+      conditionalRendering: "Always"
+      
+    - name: "Badge"
+      source: "@/components/ui/badge"
+      props:
+        variant: "Based on subscription tier"
+        className: "capitalize"
+      conditionalRendering: "Always"
+      
+    - name: "Button"
+      source: "@/components/ui/button"
+      props:
+        variant: "outline | ghost"
+        size: "sm"
+      conditionalRendering: "Always"
+      
+    - name: "Lucide Icons"
+      source: "lucide-react"
+      props: 
+        className: "h-8 w-8 text-blue-600 | text-gray-400"
+      conditionalRendering: "Based on feature availability"
+      
+  layoutUsed: "(authenticated) layout"
+  providerDependencies:
+    - "SupabaseAuthContext (via useTeam)"
+
+# ===== ROUTING LOGIC =====
+routingLogic:
+  guards:
+    - type: "Auth"
+      implementation: "Layout-level"
+      redirectTo: "/auth/login"
+    - type: "Team membership"
+      implementation: "Page-level via useTeam"
+      redirectTo: "/teams"
+      
+  navigation:
+    - triggers: ["Feature card click"]
+      destinations: [
+        "/teams/{teamId}/practiceplan",
+        "/teams/{teamId}/playbook", 
+        "/teams/{teamId}/roster",
+        "/teams/{teamId}/communications",
+        "/teams/{teamId}/skills-academy",
+        "/teams/{teamId}/analytics"
+      ]
+      method: "Link component with conditional navigation"
+    - triggers: ["Settings button"]
+      destinations: ["/teams/{teamId}/settings"]
+      method: "Link component"
+    - triggers: ["Back to Teams"]
+      destinations: ["/teams"]
+      method: "Link component"
+      
+  dynamicRouting:
+    - parameter: "teamId"
+      validation: "useTeam hook validates team exists and user is member"
+      fallback: "Error state with navigation back to teams"
+
+# ===== PAGE SPECIFIC LOGIC =====
+pageSpecificLogic:
+  businessLogic: |
+    - Team feature hub and navigation center
+    - Subscription tier-based feature availability
+    - Team statistics and overview display
+    - Feature access control based on subscription
+    - Quick stats dashboard for team overview
+    
+  stateManagement: |
+    - Team data from useTeam hook
+    - Feature availability calculation based on subscription tier
+    - Member count calculations (coaches vs players)
+    - Loading and error states
+    
+  sideEffects: []
+  formHandling: "None"
+
+# ===== SUBSCRIPTION TIER ORCHESTRATION =====
+subscriptionTierOrchestration:
+  tierLevels:
+    structure:
+      availableFeatures: ["Practice Planner", "Team Playbook", "Team Roster"]
+      restrictedFeatures: ["Team Communications", "Skills Academy", "Team Analytics"]
+      upgradeRequired: ["Leadership", "Activated"]
+      
+    leadership:
+      availableFeatures: ["Practice Planner", "Team Playbook", "Team Roster", "Team Communications", "Team Analytics"]
+      restrictedFeatures: ["Skills Academy"]
+      upgradeRequired: ["Activated"]
+      
+    activated:
+      availableFeatures: ["All features"]
+      restrictedFeatures: []
+      upgradeRequired: []
+      
+  featureGating: |
+    - Each feature section checks subscription tier
+    - Disabled features show upgrade badges
+    - Click prevention for unavailable features
+    - Visual distinction (opacity, cursor) for gated features
+
+# ===== FEATURE SECTIONS ORCHESTRATION =====
+featureSectionsOrchestration:
+  practiceePlanner:
+    always_available: true
+    route: "/teams/{teamId}/practiceplan"
+    icon: "Calendar"
+    
+  teamPlaybook:
+    always_available: true
+    route: "/teams/{teamId}/playbook"
+    icon: "BookOpen"
+    
+  teamRoster:
+    always_available: true
+    route: "/teams/{teamId}/roster"
+    icon: "Users"
+    
+  teamCommunications:
+    subscription_required: ["leadership", "activated"]
+    route: "/teams/{teamId}/communications"
+    icon: "MessageSquare"
+    badge_when_locked: "Leadership"
+    
+  skillsAcademy:
+    subscription_required: ["activated"]
+    route: "/teams/{teamId}/skills-academy"
+    icon: "Trophy"
+    badge_when_locked: "Activated"
+    
+  teamAnalytics:
+    subscription_required: ["leadership", "activated"]
+    route: "/teams/{teamId}/analytics"
+    icon: "BarChart3"
+    badge_when_locked: "Leadership"
+
+# ===== SERVER/CLIENT BOUNDARY =====
+serverClientBoundary:
+  serverComponents: []
+  clientComponents:
+    - "TeamHQPage (root component)"
+    - "All UI components"
+  boundaryLocation: "Page level - entire page is client component"
+  dataSerializationPoints: []
+
+# ===== PERFORMANCE PATTERNS =====
+performancePatterns:
+  prefetching: []
+  lazyLoading: []
+  codeSplitting: []
+  optimizations:
+    - "Hover animations with CSS transitions"
+    - "Conditional rendering based on subscription"
+    - "Memoized feature availability calculations"
+
+# ===== SECURITY PATTERNS =====
+securityPatterns:
+  authentication: "Layout-level authentication required"
+  authorization: |
+    - Team membership validation via useTeam hook
+    - Subscription-based feature access control
+    - Route protection for premium features
+  dataValidation: "Hook-level validation of team membership"
+  csrfProtection: false
+
+# ===== INTEGRATION POINTS =====
+integrationPoints:
+  supabaseUsage:
+    directQueries: false
+    throughHooks: true # useTeam hook only
+    serverSideOnly: false
+    
+  externalAPIs: []
+  webhooks: []
+  realtimeSubscriptions: []
+
+# ===== TEAM CONTEXT ORCHESTRATION =====
+teamContextOrchestration:
+  teamIdExtraction: |
+    - useParams extracts teamId from route
+    - Passes to useTeam hook for validation
+    
+  teamValidation: |
+    - useTeam validates team exists
+    - Validates user is team member
+    - Returns team data with subscription info
+    
+  teamDataDisplay: |
+    - Team name and details in header
+    - Subscription tier badge display
+    - Member count statistics
+    - Organization context display
+
+# ===== ERROR HANDLING =====
+errorHandling:
+  loadingStates:
+    - "Loading spinner during team data fetch"
+    - "Descriptive loading text"
+    
+  errorStates:
+    - "Team not found error handling"
+    - "Error message with navigation back to teams"
+    - "Graceful handling of useTeam errors"
+    
+  fallbackBehavior: |
+    - Shows error with "Back to Teams" navigation
+    - Handles missing team gracefully
+    - Fallback for missing subscription tier data
+
+# ===== QUICK STATS ORCHESTRATION =====
+quickStatsOrchestration:
+  coachCount:
+    calculation: "Filter members by head_coach and assistant_coach roles"
+    display: "Numeric count in stat card"
+    
+  playerCount:
+    calculation: "Filter members by player role"
+    display: "Numeric count in stat card"
+    
+  practicePlansCount:
+    current_value: "Hardcoded 0 (placeholder)"
+    future_integration: "Count from practices table"
+    
+  nextPractice:
+    current_value: "Hardcoded 'Not scheduled'"
+    future_integration: "Next event from calendar"
+
+# ===== UPGRADE CTA ORCHESTRATION =====
+upgradeCTAOrchestration:
+  display_condition: "team.subscription_tier === 'structure'"
+  features_highlighted: 
+    - "Team communications"
+    - "Team analytics" 
+    - "Full Skills Academy access"
+  call_to_action: "View Upgrade Options button"
+  visual_treatment: "Gradient background with blue theme"
+
+# ===== NOTES =====
+notes: |
+  - Central navigation hub for team features
+  - Subscription-based feature gating
+  - Visual hierarchy with feature availability
+  - Comprehensive team overview with statistics
+  - Mobile-responsive grid layout
+  - Clear upgrade path for premium features
+  - Integration ready for future features
+  - Consistent with POWLAX design system

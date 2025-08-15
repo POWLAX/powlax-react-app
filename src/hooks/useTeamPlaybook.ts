@@ -279,29 +279,35 @@ export function useUserTeams() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      // Get teams where user is a member
-      const { data, error } = await supabase
+      // Get team memberships for the user
+      const { data: memberships, error: membershipError } = await supabase
         .from('team_members')
-        .select(`
-          team_id,
-          team_teams!inner (
-            id,
-            name
-          )
-        `)
+        .select('team_id')
         .eq('user_id', user.id)
 
-      if (error) {
-        console.error('Error fetching user teams:', error)
+      if (membershipError) {
+        console.error('Error fetching team memberships:', membershipError)
         return
       }
 
-      const userTeams = (data || []).map((item: any) => ({
-        id: item.team_teams.id,
-        name: item.team_teams.name
-      }))
+      if (!memberships || memberships.length === 0) {
+        setTeams([])
+        return
+      }
 
-      setTeams(userTeams)
+      // Get the actual team details
+      const teamIds = memberships.map(m => m.team_id)
+      const { data: teamData, error: teamsError } = await supabase
+        .from('teams')
+        .select('id, name')
+        .in('id', teamIds)
+
+      if (teamsError) {
+        console.error('Error fetching teams:', teamsError)
+        return
+      }
+
+      setTeams(teamData || [])
     } catch (err) {
       console.error('Error fetching user teams:', err)
     } finally {

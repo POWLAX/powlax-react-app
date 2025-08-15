@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id)
       .single()
 
-    if (!userData?.roles?.includes('admin')) {
+    if (!userData?.roles?.includes('administrator')) {
       return NextResponse.json(
         { error: 'Forbidden - Admin access required' },
         { status: 403 }

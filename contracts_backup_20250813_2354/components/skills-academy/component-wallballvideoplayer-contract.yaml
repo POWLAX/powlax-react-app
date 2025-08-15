@@ -1,0 +1,64 @@
+# WallBallVideoPlayer Component Contract
+# Video player component for Wall Ball workout execution
+
+contractId: "component-wallballvideoplayer-20250113"
+componentInfo:
+  name: "WallBallVideoPlayer"
+  filePath: "src/components/skills-academy/WallBallVideoPlayer.tsx"
+  category: "Skills Academy - Wall Ball"
+  parentPage: "Wall Ball Workout Execution"
+  complexity: "complex"
+  
+functionalAnalysis:
+  purpose: "Vimeo-based video player for Wall Ball workouts with completion tracking and progress management"
+  primaryFunction: "Video playback with controls, progress tracking, and workout completion integration"
+  userInteractions: 
+    - "Play/pause video controls"
+    - "Progress tracking and seeking"
+    - "Fullscreen mode toggle"
+    - "Volume control and muting"
+    - "Workout completion marking"
+  businessLogic: "Video player state management with Vimeo API integration and workout completion tracking"
+  stateManagement: "Complex video player state including playback, progress, completion status"
+  
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "function"
+  supabaseTables: 
+    - "skills_academy_user_progress"
+  tableUsage:
+    - tableName: "skills_academy_user_progress"
+      operations: ["insert", "update"]
+      purpose: "Track workout completion via markWorkoutComplete function"
+      dataFlow: "Video completion → markWorkoutComplete → database update"
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: 
+    - "Full Vimeo Player API integration"
+    - "Point award integration on completion"
+    - "Social sharing of completed workouts"
+  priority: "critical"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "WallBallVideoPlayer"
+  reasonForDuplication: "N/A"
+  consolidationStrategy: "N/A"
+  supabaseIntegrationWinner: "N/A"
+
+# Video Integration Details
+videoIntegration:
+  vimeoIntegration:
+    - "Iframe-based video embedding"
+    - "Vimeo Player API for advanced controls"
+    - "Progress tracking and completion detection"
+    
+  workoutCompletion:
+    - "Automatic completion detection from video progress"
+    - "Manual completion marking option"
+    - "Database persistence via markWorkoutComplete"
+    
+  mvpCritical: "Essential for Wall Ball workout execution and completion tracking"

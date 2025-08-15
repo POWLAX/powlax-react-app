@@ -6,11 +6,11 @@
 
 ### Data Integrity Requirements:
 - ❌ **NO** hardcoded users, teams, or clubs in the codebase
-- ❌ **NO** fake WordPress associations or connections
+- ❌ **NO** fake external associations or connections
 - ❌ **NO** returning mock data from hooks or components
 - ✅ **ONLY** real data from actual database tables
 - ✅ **IF NEEDED**: Use "(MOCK)" prefix/suffix in actual Supabase tables
-- ✅ **REAL FLOW**: WordPress → Supabase → Frontend
+- ✅ **REAL FLOW**: Supabase → Frontend (self-contained system)
 
 ### Why This Matters:
 Mock data creates false positives that destroy production readiness. We need to see actual data flow to trust what's working.
@@ -136,7 +136,6 @@ POWLAX is a comprehensive lacrosse training ecosystem built on modern React/Next
 
 - **Frontend**: Next.js 15, React 19, Tailwind CSS 4
 - **Database**: Supabase (PostgreSQL)
-- **Authentication**: Supabase Auth with custom roles
 - **Storage**: Supabase Storage for media files
 - **Deployment**: Vercel (recommended)
 
@@ -172,13 +171,8 @@ The platform operates on a modern Supabase PostgreSQL database with 62 active ta
 - **family_members** - Family member relationships
 - **parent_child_relationships** - Parent-child user links
 
-#### 🔐 Authentication & User Management
-- **users** - Main user table (NOT `user_profiles`) with Supabase Auth integration
-- **user_sessions** - Active session tracking with tokens and expiry
-- **user_auth_status** - User authentication state management
-- **magic_links** (10 records) - Magic link authentication tokens
-- **registration_links** (10 records) - Registration token management
-- **registration_sessions** - Registration progress tracking
+#### 👥 User Management
+- **users** - Main user table with basic user information
 - **user_onboarding** - Step-by-step onboarding flow
 
 #### 🎮 Gamification System
@@ -274,11 +268,9 @@ users [individual user accounts]
 - **25 team members** with roster management
 - **Family account system** supporting parent-child relationships
 
-#### Authentication System (Live)
-- **Supabase Auth** integration with custom users table
-- **Magic link authentication** (10 active links)
-- **Registration system** with token-based onboarding
-- **Session management** with security tracking
+#### User System (Live)
+- **User management** with basic user profiles
+- **Onboarding system** for new users
 
 ### 🔄 Systems in Development
 
@@ -328,7 +320,6 @@ npm run dev
 ## 🏗️ Current Implementation Status
 
 ### ✅ Completed Features (MVP Practice Planner)
-- **Authentication System**: Login page with Supabase Auth integration
 - **Navigation**: Mobile-first bottom navigation + desktop sidebar
 - **Practice Planner Core**:
   - Practice schedule with date/time/field selection
@@ -366,9 +357,8 @@ npm run dev
 - `/src/lib/supabase-server.ts` - Server-side database operations
 - `/src/types/database.ts` - TypeScript definitions for all 62 tables
 
-#### Authentication System
-- `/src/contexts/SupabaseAuthContext.tsx` - Auth context provider
-- `/src/lib/auth-helpers.ts` - Authentication utilities
+#### User System
+- `/src/contexts/SupabaseAuthContext.tsx` - User context provider
 
 ### 📊 Database Verification Scripts
 - `/scripts/check-actual-tables.ts` - Verify all 62 tables exist

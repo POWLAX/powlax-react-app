@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ChevronLeft, ChevronRight, ExternalLink, Beaker, Loader2 } from 'lucide-react'
+import FullscreenDiagramModal from './FullscreenDiagramModal'
 
 interface LacrosseLabModalProps {
   isOpen: boolean
@@ -74,6 +75,7 @@ export const hasLabUrls = (drill: {
 export default function LacrosseLabModal({ isOpen, onClose, drill }: LacrosseLabModalProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
+  const [showFullscreen, setShowFullscreen] = useState(false)
   
   // Collect all Lacrosse Lab URLs
   const labUrls: string[] = []
@@ -151,9 +153,9 @@ export default function LacrosseLabModal({ isOpen, onClose, drill }: LacrosseLab
     setCurrentIndex(index)
   }
 
-  const handleOpenInNewTab = () => {
+  const handleOpenFullscreen = () => {
     if (labUrls[currentIndex]) {
-      window.open(labUrls[currentIndex], '_blank', 'noopener,noreferrer')
+      setShowFullscreen(true)
     }
   }
 
@@ -298,13 +300,22 @@ export default function LacrosseLabModal({ isOpen, onClose, drill }: LacrosseLab
             <div className="text-sm text-gray-600">
               <p>Use arrow keys or click dots to navigate between diagrams</p>
             </div>
-            <Button onClick={handleOpenInNewTab} variant="outline" size="sm" className="bg-gray-100 hover:bg-gray-200 text-[#003366] border-gray-300">
+            <Button onClick={handleOpenFullscreen} variant="outline" size="sm" className="bg-gray-100 hover:bg-gray-200 text-[#003366] border-gray-300">
               <ExternalLink className="h-4 w-4 mr-2" />
-              Open in Lab Editor
+              View Fullscreen
             </Button>
           </div>
         </div>
       </DialogContent>
+
+      {/* Fullscreen Modal */}
+      <FullscreenDiagramModal
+        isOpen={showFullscreen}
+        onClose={() => setShowFullscreen(false)}
+        labUrls={labUrls}
+        currentIndex={currentIndex}
+        drill={drill}
+      />
     </Dialog>
   )
 }

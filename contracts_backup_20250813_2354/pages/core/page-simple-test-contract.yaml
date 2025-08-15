@@ -1,0 +1,80 @@
+# Simple Test Page Orchestration Contract
+contractId: "page-simple-test-20250113"
+
+pageInfo:
+  route: "/simple-test"
+  filePath: "src/app/simple-test/page.tsx"
+  pageType: "server"
+  category: "utility"
+  dynamicSegments: []
+  
+renderingStrategy:
+  componentType: "Server Component"
+  dataFetching: "none"
+  streamingEnabled: false
+  suspenseBoundaries: []
+  errorBoundaries: []
+  
+dataOrchestration:
+  serverDataFetching: []
+  clientDataFetching: []
+  propsFlow: []
+        
+componentComposition:
+  componentsUsed: []
+  layoutUsed: "Root Layout only"
+  providerDependencies: []
+  
+routingLogic:
+  guards: []
+  navigation: []
+  dynamicRouting: []
+  
+pageSpecificLogic:
+  businessLogic: "Basic routing test"
+  stateManagement: "None"
+  sideEffects: []
+  formHandling: "None"
+  
+serverClientBoundary:
+  serverComponents: ["SimpleTest component itself"]
+  clientComponents: []
+  boundaryLocation: "No boundary - pure server component"
+  dataSerializationPoints: []
+  
+performancePatterns:
+  prefetching: []
+  lazyLoading: []
+  codeSpliitting: []
+  optimizations: []
+  
+securityPatterns:
+  authentication: "None - test page"
+  authorization: "None - public access"
+  dataValidation: "None"
+  csrfProtection: false
+  
+integrationPoints:
+  supabaseUsage:
+    directQueries: false
+    throughHooks: false
+    serverSideOnly: false
+  externalAPIs: []
+  webhooks: []
+  realtimeSubscriptions: []
+
+testingPurpose:
+  functionality: "Basic Next.js routing verification"
+  use_cases:
+    - "Verify app router configuration"
+    - "Test server component rendering"
+    - "Confirm basic page routing works"
+  
+  simplicity: "Minimal implementation for debugging"
+
+analysisNotes:
+  - "Simplest possible page for testing routing"
+  - "Pure server component with static content"
+  - "Useful for debugging Next.js configuration issues"
+  - "No dependencies or complex logic"
+  - "Development/testing utility page"

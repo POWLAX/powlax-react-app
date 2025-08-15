@@ -11,6 +11,7 @@ interface Drill {
   id: string
   name: string
   duration: number
+  duration_minutes?: number
   notes?: string
   videoUrl?: string
   labUrl?: string
@@ -119,7 +120,7 @@ export default function PracticeTimelineWithParallel({
     newTimeSlots[slotIndex].drills[drillIndex] = updatedDrill
     // Update slot duration to max of all parallel drills
     newTimeSlots[slotIndex].duration = Math.max(
-      ...newTimeSlots[slotIndex].drills.map(d => d.duration)
+      ...newTimeSlots[slotIndex].drills.map(d => d.duration_minutes || d.duration || 0)
     )
     setTimeSlots(newTimeSlots)
   }
@@ -134,7 +135,7 @@ export default function PracticeTimelineWithParallel({
       newTimeSlots[slotIndex].drills.splice(drillIndex, 1)
       // Update slot duration
       newTimeSlots[slotIndex].duration = Math.max(
-        ...newTimeSlots[slotIndex].drills.map(d => d.duration)
+        ...newTimeSlots[slotIndex].drills.map(d => d.duration_minutes || d.duration || 0)
       )
     }
     setTimeSlots(newTimeSlots)
@@ -156,7 +157,7 @@ export default function PracticeTimelineWithParallel({
     newTimeSlots[slotIndex].drills.push(drill)
     // Update slot duration to max of all parallel drills
     newTimeSlots[slotIndex].duration = Math.max(
-      ...newTimeSlots[slotIndex].drills.map(d => d.duration)
+      ...newTimeSlots[slotIndex].drills.map(d => d.duration_minutes || d.duration || 0)
     )
     setTimeSlots(newTimeSlots)
     setShowParallelPicker(null)

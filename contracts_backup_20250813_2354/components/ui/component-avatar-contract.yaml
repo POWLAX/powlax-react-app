@@ -1,0 +1,90 @@
+# Component Contract: Avatar UI Component
+
+contractId: "component-avatar-20250113"
+componentInfo:
+  name: "Avatar"
+  filePath: "src/components/ui/avatar.tsx"
+  category: "ui-foundation"
+  parentPage: "multiple"
+  complexity: "simple"
+  
+functionalAnalysis:
+  purpose: "Display user profile images with fallback support for team/player identification"
+  primaryFunction: "Shows circular user images with automatic fallback to initials or default image"
+  userInteractions: ["visual identification", "potential click for profile access"]
+  businessLogic: "Image loading with fallback hierarchy (image -> fallback content -> default)"
+  stateManagement: "Radix primitive handles image load states internally"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements: ["default sizing (40x40px)", "circular shape", "overflow handling"]
+  mockDataUsage: []
+  realDataPercentage: 0
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: ["cn (className utility)"]
+  externalLibraries: ["@radix-ui/react-avatar"]
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: []
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: ["Add size variants (sm, md, lg)", "Add status indicators (online/offline)", "Add team role badges"]
+  priority: "medium"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation: ["size variants", "fallback patterns", "integration with user profiles"]
+  
+componentInteractions:
+  callsComponents: []
+  calledByComponents: ["Team roster displays", "User profile cards", "Comment/activity feeds", "Navigation headers"]
+  sharedState: []
+  eventCommunication: []
+  propsPassedTo: []
+  propsReceivedFrom: ["image src, fallback content from parent"]
+  
+userJourneyContext:
+  userFlows: ["Team->Roster->Player Identification", "Dashboard->User Recognition", "Comments->Author Identification"]
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["player", "coach", "parent"]
+  featureArea: "team-management"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "Avatar"
+  reasonForDuplication: "n/a"
+  consolidationStrategy: "n/a"
+  supabaseIntegrationWinner: "n/a"
+
+# Usage Analysis
+usagePatterns:
+  teamIdentification: "Primary use in team rosters and member lists"
+  userRecognition: "Profile identification across the application"
+  socialFeatures: "Comments, activity feeds, and interaction tracking"
+  mobileFriendly: true
+  accessibility: "Proper alt text support for screen readers"
+  dataSource: "Could integrate with users table for profile images"
+  potentialTables: ["users (for profile images)", "teams (for team logos)"]

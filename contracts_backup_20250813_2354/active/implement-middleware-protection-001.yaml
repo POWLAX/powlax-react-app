@@ -1,0 +1,357 @@
+# Implement Middleware Protection Contract
+# Phase 2: Create middleware.ts for server-side route protection
+
+contractId: "implement-middleware-protection-001"
+type: FOCUSED_IMPLEMENTATION
+version: 1.0.0
+created: 2025-01-15
+priority: CRITICAL
+phase: 2 of 4
+
+# ===== CONTRACT OBJECTIVE =====
+objective:
+  goal: "Create middleware.ts for server-side route protection"
+  
+  currentState:
+    - "No middleware.ts file exists"
+    - "Route protection only client-side"
+    - "Vulnerable to direct URL access"
+    
+  targetState:
+    - "Middleware protects all authenticated routes"
+    - "Server-side session validation"
+    - "Proper redirects for unauthenticated users"
+    - "Development bypass for direct-login"
+
+# ===== FILE CREATION =====
+files:
+  create:
+    path: "src/middleware.ts"
+    
+    implementation: |
+      import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
+      import { NextResponse } from 'next/server'
+      import type { NextRequest } from 'next/server'
+      
+      export async function middleware(req: NextRequest) {
+        const res = NextResponse.next()
+        const supabase = createMiddlewareClient({ req, res })
+        
+        // Refresh session if expired
+        const { data: { session } } = await supabase.auth.getSession()
+        
+        // HANDLE ROOT PATH - Redirect based on auth status
+        if (req.nextUrl.pathname === '/') {
+          const redirectUrl = req.nextUrl.clone()
+          if (session) {
+            redirectUrl.pathname = '/dashboard'
+          } else {
+            redirectUrl.pathname = '/auth/login'
+          }
+          return NextResponse.redirect(redirectUrl)
+        }
+        
+        // DEVELOPMENT BYPASS - Keep direct-login accessible
+        // This is intentional for development workflow
+        const isDevelopmentBypass = req.nextUrl.pathname === '/direct-login'
+        if (isDevelopmentBypass && process.env.NODE_ENV === 'development') {
+          // Allow direct-login in development only
+          return res
+        }
+        
+        // Define protected routes
+        const protectedRoutes = [
+          '/dashboard',
+          '/teams',
+          '/skills-academy',
+          '/academy',
+          '/admin',
+          '/resources',
+          '/strategies',
+          '/community',
+          '/gamification',
+          '/practice-planner',
+          '/wall-ball'
+        ]
+        
+        // Check if current path needs protection
+        const isProtectedRoute = protectedRoutes.some(route => 
+          req.nextUrl.pathname.startsWith(route)
+        )
+        
+        // Redirect to login if accessing protected route without session
+        if (isProtectedRoute && !session) {
+          const redirectUrl = req.nextUrl.clone()
+          redirectUrl.pathname = '/auth/login'
+          // Preserve intended destination for post-login redirect
+          redirectUrl.searchParams.set('redirectTo', req.nextUrl.pathname)
+          return NextResponse.redirect(redirectUrl)
+        }
+        
+        // ADMIN ROUTE PROTECTION - Database role check
+        if (req.nextUrl.pathname.startsWith('/admin')) {
+          if (session?.user) {
+            // Fetch user role from database (not hardcoded)
+            const { data: userData } = await supabase
+              .from('users')
+              .select('role, is_admin')
+              .eq('auth_user_id', session.user.id)
+              .single()
+            
+            // Check for admin role OR admin override flag
+            // This preserves RoleViewer functionality
+            const isAdmin = userData?.role === 'administrator' || 
+                           userData?.is_admin === true
+            
+            if (!isAdmin) {
+              // Redirect non-admins to dashboard
+              const redirectUrl = req.nextUrl.clone()
+              redirectUrl.pathname = '/dashboard'
+              return NextResponse.redirect(redirectUrl)
+            }
+          }
+        }
+        
+        return res
+      }
+      
+      // Configure which routes middleware runs on
+      export const config = {
+        matcher: [
+          /*
+           * Match all request paths except:
+           * - _next/static (static files)
+           * - _next/image (image optimization files)
+           * - favicon.ico (favicon file)
+           * - public folder
+           * - api routes (handled separately)
+           * - auth pages (login, magic-link, register)
+           */
+          '/((?!_next/static|_next/image|favicon.ico|api|auth/login|auth/magic-link|register).*)',
+        ],
+      }
+
+  modify:
+    - path: "src/app/(authenticated)/layout.tsx"
+      description: "Re-enable authentication check now that middleware handles it"
+      changes: |
+        // UNCOMMENT the authentication check
+        // Middleware now handles initial protection, this adds client-side check
+        
+        const { user, loading } = useRequireAuth()
+        
+        // Add proper loading state
+        if (loading) {
+          return (
+            <div className="flex items-center justify-center min-h-screen">
+              <LoadingSpinner />
+            </div>
+          )
+        }
+        
+        // Middleware handles redirect, but double-check client-side
+        if (!user) {
+          return null // Middleware will redirect
+        }
+        
+        // Continue with authenticated content
+        return (
+          <SidebarProvider>
+            {/* existing layout */}
+          </SidebarProvider>
+        )
+
+# ===== IMPLEMENTATION STEPS =====
+implementation:
+  step1:
+    action: "Create middleware.ts file"
+    location: "src/middleware.ts"
+    tasks:
+      - "Create new file with proper TypeScript setup"
+      - "Import Supabase middleware client"
+      - "Set up basic middleware function"
+    validation: "File exists and TypeScript compiles"
+    
+  step2:
+    action: "Implement session checking"
+    tasks:
+      - "Get Supabase session from request"
+      - "Refresh expired sessions automatically"
+      - "Handle session errors gracefully"
+    validation: "Session check works without errors"
+    
+  step3:
+    action: "Add root path handling"
+    tasks:
+      - "Redirect / to /dashboard if authenticated"
+      - "Redirect / to /auth/login if not authenticated"
+      - "Ensure smooth user experience"
+    validation: "Root path redirects correctly"
+    
+  step4:
+    action: "Implement protected routes"
+    tasks:
+      - "Define list of protected routes"
+      - "Check authentication for protected paths"
+      - "Redirect to login with return URL"
+      - "Preserve query parameters"
+    validation: "Protected routes require auth"
+    
+  step5:
+    action: "Add development bypass"
+    tasks:
+      - "Allow /direct-login in development"
+      - "Check NODE_ENV === 'development'"
+      - "Ensure bypass ONLY works in dev"
+      - "Add security comment explaining purpose"
+    validation: "Direct-login accessible in dev only"
+    
+  step6:
+    action: "Implement admin protection"
+    tasks:
+      - "Check database for user role"
+      - "Support both role and is_admin flag"
+      - "Redirect non-admins to dashboard"
+      - "Preserve RoleViewer functionality"
+    validation: "Admin routes protected by database role"
+    
+  step7:
+    action: "Configure matcher"
+    tasks:
+      - "Exclude static files"
+      - "Exclude API routes"
+      - "Exclude auth pages"
+      - "Include all other routes"
+    validation: "Middleware runs on correct paths"
+    
+  step8:
+    action: "Re-enable layout authentication"
+    tasks:
+      - "Uncomment auth check in layout.tsx"
+      - "Add loading state handling"
+      - "Ensure no loading loops"
+      - "Test with middleware active"
+    validation: "Layout auth works with middleware"
+
+# ===== TESTING REQUIREMENTS =====
+testing:
+  scenarios:
+    - name: "Unauthenticated access"
+      test: "Access /dashboard without login"
+      expected: "Redirected to /auth/login?redirectTo=/dashboard"
+      
+    - name: "Authenticated access"
+      test: "Access /dashboard with valid session"
+      expected: "Dashboard loads successfully"
+      
+    - name: "Root path authenticated"
+      test: "Access / while logged in"
+      expected: "Redirected to /dashboard"
+      
+    - name: "Root path unauthenticated"
+      test: "Access / while logged out"
+      expected: "Redirected to /auth/login"
+      
+    - name: "Direct-login development"
+      test: "Access /direct-login in dev mode"
+      expected: "Page loads without redirect"
+      
+    - name: "Direct-login production"
+      test: "Access /direct-login in production"
+      expected: "Redirected to login (protected)"
+      
+    - name: "Admin route with admin role"
+      test: "Access /admin as administrator"
+      expected: "Admin page loads"
+      
+    - name: "Admin route without admin role"
+      test: "Access /admin as regular user"
+      expected: "Redirected to /dashboard"
+      
+    - name: "Public pages"
+      test: "Access /auth/login while logged out"
+      expected: "Login page loads (not protected)"
+      
+    - name: "API routes"
+      test: "Call /api/auth/magic-link"
+      expected: "API responds (middleware doesn't block)"
+
+# ===== VALIDATION CHECKLIST =====
+validation:
+  middleware:
+    - "[ ] Middleware.ts file created"
+    - "[ ] TypeScript compiles without errors"
+    - "[ ] Supabase session checking works"
+    - "[ ] Protected routes require auth"
+    - "[ ] Development bypass works"
+    
+  routing:
+    - "[ ] Root path redirects correctly"
+    - "[ ] Protected routes redirect when unauthenticated"
+    - "[ ] Public pages remain accessible"
+    - "[ ] API routes not blocked"
+    - "[ ] Admin routes check database role"
+    
+  development:
+    - "[ ] Direct-login accessible in dev"
+    - "[ ] Direct-login blocked in production"
+    - "[ ] NODE_ENV check implemented"
+    - "[ ] Security comment added"
+    
+  performance:
+    - "[ ] Middleware adds < 100ms latency"
+    - "[ ] Session refresh works smoothly"
+    - "[ ] No duplicate auth checks"
+    - "[ ] Efficient database queries"
+
+# ===== COMMON PITFALLS =====
+pitfalls:
+  - pitfall: "Middleware blocks API routes"
+    solution: "Exclude /api from matcher pattern"
+    
+  - pitfall: "Infinite redirect loops"
+    solution: "Exclude auth pages from protection"
+    
+  - pitfall: "Direct-login accessible in production"
+    solution: "Always check NODE_ENV === 'development'"
+    
+  - pitfall: "Session not refreshing"
+    solution: "Use createMiddlewareClient properly"
+    
+  - pitfall: "Admin check too slow"
+    solution: "Cache role or use edge function"
+
+# ===== SUCCESS CRITERIA =====
+successCriteria:
+  required:
+    - "Middleware.ts created and functioning"
+    - "All protected routes require authentication"
+    - "Direct-login works in development only"
+    - "Admin routes check database roles"
+    - "No loading loops or errors"
+    
+  validation:
+    - "Test: Unauthenticated users redirected"
+    - "Test: Authenticated users access protected routes"
+    - "Test: Direct-login development bypass works"
+    - "Test: Admin protection works"
+    - "Build: npm run build succeeds"
+
+# ===== SECURITY NOTES =====
+security:
+  critical:
+    - "Direct-login MUST be development-only"
+    - "Never hardcode admin emails"
+    - "Always check database for roles"
+    - "Session validation on every request"
+    
+  implementation:
+    - "NODE_ENV check prevents production bypass"
+    - "Database roles control admin access"
+    - "Middleware runs before page render"
+    - "Server-side validation cannot be bypassed"
+
+---
+
+# This focused contract creates proper middleware protection
+# while preserving the direct-login development workflow

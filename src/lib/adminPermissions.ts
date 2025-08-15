@@ -23,8 +23,8 @@ const ADMIN_EMAILS = [
 
 const ADMIN_ROLES = [
   'administrator',
-  'super_admin',
-  'admin'
+  'super_admin'
+  // Note: 'admin' removed as it's no longer a valid user account role
 ]
 
 /**
@@ -74,14 +74,14 @@ export function canDeleteDrillsAndStrategies(user: AdminUser | null): boolean {
 /**
  * Get admin permission level for user
  */
-export function getAdminPermissionLevel(user: AdminUser | null): 'none' | 'edit' | 'admin' {
+export function getAdminPermissionLevel(user: AdminUser | null): 'none' | 'edit' | 'administrator' {
   if (!user) return 'none'
   
   if (canEditDrillsAndStrategies(user)) {
     // Check if super admin
     if (user.email === 'admin@powlax.com' || 
         (user.roles && user.roles.includes('administrator'))) {
-      return 'admin'
+      return 'administrator'
     }
     return 'edit'
   }

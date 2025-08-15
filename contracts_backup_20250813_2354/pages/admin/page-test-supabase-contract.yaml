@@ -1,0 +1,160 @@
+# Page Contract: Test Supabase Page
+# Route: /test-supabase
+
+contractId: "page-test-supabase-20250113"
+pageInfo:
+  route: "/test-supabase"
+  filePath: "src/app/(authenticated)/test-supabase/page.tsx"
+  pageType: "client"
+  category: "debug"
+  dynamicSegments: []
+
+renderingStrategy:
+  componentType: "Client Component"
+  dataFetching: "client-side"
+  streamingEnabled: false
+  suspenseBoundaries: []
+  errorBoundaries: []
+
+dataOrchestration:
+  serverDataFetching: []
+  clientDataFetching:
+    - hook: "useAuth"
+      trigger: "On mount"
+      tables: []
+      realtime: false
+    - hook: "useEffect + testConnection"
+      trigger: "On mount"
+      tables: ["powlax_drills"]
+      realtime: false
+  propsFlow:
+    fromServer: {}
+    toClient: {}
+
+componentComposition:
+  componentsUsed:
+    - name: "Loader2"
+      source: "lucide-react"
+      props: "Loading spinner props"
+      conditionalRendering: "While auth loading"
+  layoutUsed: "(authenticated)/layout.tsx"
+  providerDependencies: ["SupabaseAuthContext"]
+
+routingLogic:
+  guards:
+    - type: "Authentication"
+      implementation: "Page-level loading check"
+      redirectTo: "Loading spinner"
+  navigation:
+    - triggers: ["Direct URL access"]
+      destinations: ["/test-supabase"]
+      method: "Direct navigation"
+  dynamicRouting: []
+
+pageSpecificLogic:
+  businessLogic: "Supabase connection and database testing interface"
+  stateManagement: "State for connection status, drill count, tables, and errors"
+  sideEffects: ["Supabase auth checks", "Database queries", "Table validation"]
+  formHandling: "None"
+
+serverClientBoundary:
+  serverComponents: []
+  clientComponents: 
+    - "TestSupabasePage (root component)"
+    - "Status display components"
+  boundaryLocation: "Entire page is client-side"
+  dataSerializationPoints: []
+
+performancePatterns:
+  prefetching: []
+  lazyLoading: []
+  codeSpliitting: []
+  optimizations: []
+
+securityPatterns:
+  authentication: "useAuth hook verification"
+  authorization: "None (debug page)"
+  dataValidation: "Error handling for database operations"
+  csrfProtection: false
+
+integrationPoints:
+  supabaseUsage:
+    directQueries: true
+    throughHooks: true
+    serverSideOnly: false
+  externalAPIs: []
+  webhooks: []
+  realtimeSubscriptions: []
+
+debugSpecificFeatures:
+  connectionTesting:
+    authSession: "Tests Supabase auth session validity"
+    basicConnection: "Verifies Supabase client connectivity"
+    
+  databaseTesting:
+    tableAccess: "Tests access to powlax_drills table"
+    alternativeTableNames: "Tests legacy table names (staging_wp_drills, Drills, DRILLS)"
+    dataQueries: "Count and sample data retrieval"
+    
+  dataValidation:
+    drillCount: "Counts total drills in database"
+    sampleData: "Retrieves and displays sample drill record"
+    fieldInspection: "Checks for name/title fields in drill records"
+    
+  errorDiagnosis:
+    sessionErrors: "Identifies auth session issues"
+    tableErrors: "Diagnoses table access problems"
+    queryErrors: "Captures and displays query failures"
+    
+  configurationDisplay:
+    supabaseUrl: "Shows configured Supabase URL"
+    anonKey: "Shows truncated anonymous key"
+    environment: "Displays environment configuration"
+
+testingSequence:
+  steps:
+    1: "Basic connection test via auth session"
+    2: "Table existence verification"
+    3: "Alternative table name testing"
+    4: "Record count retrieval"
+    5: "Sample data fetching"
+    
+  fallbackTesting:
+    tableNames: ["staging_wp_drills", "Drills", "DRILLS"]
+    purpose: "Test legacy or alternative table structures"
+    reporting: "Documents which tables are accessible"
+
+uiPatterns:
+  layout: "Sectioned cards for different test results"
+  statusDisplay: "Color-coded success/error indicators"
+  dataVisualization: "Structured display of connection and query results"
+  configDisplay: "Environment variable exposure (truncated for security)"
+
+loadingStates:
+  authLoading: "Full page loading spinner"
+  testingPhase: "Implicit during test execution"
+
+errorHandling:
+  sessionErrors: "Auth session failure detection"
+  tableAccessErrors: "RLS and permission error capture"
+  queryErrors: "SQL execution error handling"
+  unexpectedErrors: "General exception handling"
+
+diagnosticCapabilities:
+  connectivityIssues: "Network and configuration problems"
+  permissionIssues: "RLS and access control problems"
+  dataIssues: "Missing tables or data structure problems"
+  configurationIssues: "Environment and client setup problems"
+
+securityConsiderations:
+  configExposure: "Partial exposure of Supabase configuration"
+  debugAccess: "No access restrictions (should be protected)"
+  dataAccess: "Direct database query capabilities"
+
+notes:
+  - "Essential tool for diagnosing Supabase connectivity issues"
+  - "Tests both auth and database functionality"
+  - "Helpful for validating table structures and data access"
+  - "Should be restricted in production environments"
+  - "Good for troubleshooting RLS and permission issues"
+  - "Provides comprehensive database configuration diagnostics"

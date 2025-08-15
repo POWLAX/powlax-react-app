@@ -1,0 +1,247 @@
+# Authentication Cleanup Coordination Contract
+# Orchestrates simplified authentication using general-purpose agents only
+# Following CLAUDE.md mandate: NO specialized controllers, only focused contracts
+
+contractId: "auth-cleanup-coordination-001"
+type: COORDINATION_CONTRACT
+version: 1.0.0
+created: 2025-01-15
+priority: CRITICAL
+approach: "Sequential execution using general-purpose agents with focused contracts"
+
+# ===== ARCHITECTURAL DECISION =====
+architecturalDecision:
+  goal: "Single authentication system: Supabase Auth with magic links"
+  
+  principles:
+    - "Supabase Auth is the ONLY authentication system"
+    - "WordPress provides user data reference only (no auth)"
+    - "Magic links are primary production authentication"
+    - "Direct-login becomes proper dev tool with REAL Supabase sessions"
+    
+  currentProblems:
+    - "SupabaseAuthContext checks 3 competing auth sources"
+    - "No middleware.ts for route protection"
+    - "Direct-login uses fake localStorage (should use real Supabase)"
+    - "Loading loops from conflicting auth checks"
+
+# ===== EXECUTION SEQUENCE =====
+executionSequence:
+  overview: "4 focused contracts executed sequentially by general-purpose agents"
+  
+  phase1:
+    contract: "simplify-auth-context-001.yaml"
+    description: "Clean up SupabaseAuthContext to ONLY check Supabase Auth"
+    duration: "2 hours"
+    agent:
+      type: "general-purpose"
+      prompt: |
+        Follow the simplify-auth-context-001.yaml contract to:
+        1. Remove WordPress auth methods from SupabaseAuthContext
+        2. Remove localStorage mock auth checks
+        3. Simplify to only check Supabase Auth sessions
+        4. Fix loading state management
+        Test that context only uses Supabase Auth.
+    validation:
+      - "No WordPress JWT methods remain"
+      - "No localStorage auth checks"
+      - "Only supabase.auth methods used"
+      - "Loading states resolve properly"
+      
+  phase2:
+    contract: "implement-middleware-protection-001.yaml"
+    description: "Create middleware.ts for server-side route protection"
+    duration: "2 hours"
+    agent:
+      type: "general-purpose"
+      prompt: |
+        Follow the implement-middleware-protection-001.yaml contract to:
+        1. Create src/middleware.ts file
+        2. Implement Supabase session checking
+        3. Add protected route patterns
+        4. Include development bypass for direct-login
+        5. Add admin role checking from database
+        Test all protected routes redirect when unauthenticated.
+    validation:
+      - "Middleware.ts created and working"
+      - "Protected routes require authentication"
+      - "Direct-login bypassed in development"
+      - "Admin routes check database role"
+      
+  phase3:
+    contract: "fix-direct-login-real-auth-001.yaml"
+    description: "Convert direct-login to use REAL Supabase Auth sessions"
+    duration: "1.5 hours"
+    agent:
+      type: "general-purpose"
+      prompt: |
+        Follow the fix-direct-login-real-auth-001.yaml contract to:
+        1. Remove mock localStorage authentication
+        2. Implement real Supabase session creation for dev
+        3. Use service role key to create actual session
+        4. Ensure development-only access
+        Test that direct-login creates real Supabase sessions.
+    validation:
+      - "No more localStorage mock auth"
+      - "Real Supabase session created"
+      - "User can access protected routes after direct-login"
+      - "Only works in development environment"
+      
+  phase4:
+    contract: "magic-link-primary-flow-001.yaml"
+    description: "Ensure magic links are the primary production auth flow"
+    duration: "1.5 hours"
+    agent:
+      type: "general-purpose"
+      prompt: |
+        Follow the magic-link-primary-flow-001.yaml contract to:
+        1. Update login page to use magic links as primary
+        2. Ensure magic link API is working properly
+        3. Add proper error handling and user feedback
+        4. Update registration to use magic links
+        Test complete magic link flow from request to authentication.
+    validation:
+      - "Login page requests magic links"
+      - "Magic link emails sent successfully"
+      - "Clicking link authenticates user"
+      - "Proper error messages displayed"
+
+# ===== COORDINATION PROTOCOL =====
+coordinationProtocol:
+  rules:
+    - "Each phase must complete before next phase starts"
+    - "If a phase fails, stop and report the issue"
+    - "No parallel execution - strictly sequential"
+    - "Each agent works independently on their contract"
+    
+  communication:
+    - "Agent reports completion with validation results"
+    - "Next agent only starts after successful validation"
+    - "Any blockers immediately reported to user"
+    
+  rollback:
+    - "Git commit after each successful phase"
+    - "Can rollback to previous phase if needed"
+    - "Each contract is atomic and reversible"
+
+# ===== SUCCESS CRITERIA =====
+successCriteria:
+  authentication:
+    - "[ ] Only Supabase Auth exists in codebase"
+    - "[ ] No WordPress auth methods remain"
+    - "[ ] No mock localStorage authentication"
+    - "[ ] Direct-login uses real Supabase sessions"
+    
+  protection:
+    - "[ ] Middleware protects all authenticated routes"
+    - "[ ] Unauthenticated users redirected to login"
+    - "[ ] Admin routes check database roles"
+    - "[ ] Development bypass works for direct-login"
+    
+  userExperience:
+    - "[ ] No loading loops on any page"
+    - "[ ] Magic links work end-to-end"
+    - "[ ] Clear error messages for failures"
+    - "[ ] Fast authentication checks (<2 seconds)"
+    
+  development:
+    - "[ ] Direct-login provides quick dev access"
+    - "[ ] Real sessions for testing"
+    - "[ ] Admin features testable"
+    - "[ ] No production security risks"
+
+# ===== TESTING CHECKLIST =====
+testingChecklist:
+  beforeStart:
+    - "Backup current auth implementation"
+    - "Document current auth flow"
+    - "Test current magic link system"
+    
+  afterPhase1:
+    - "SupabaseAuthContext only uses Supabase Auth"
+    - "No WordPress or localStorage checks"
+    - "Loading states work properly"
+    
+  afterPhase2:
+    - "Cannot access /dashboard without auth"
+    - "Cannot access /teams without auth"
+    - "Direct-login still accessible in dev"
+    
+  afterPhase3:
+    - "Direct-login creates real sessions"
+    - "Can access protected routes after direct-login"
+    - "Sessions persist across page refreshes"
+    
+  afterPhase4:
+    - "Magic link flow works completely"
+    - "Users receive emails quickly"
+    - "Authentication successful via links"
+    
+  final:
+    - "All protected routes secured"
+    - "No loading loops anywhere"
+    - "Both dev and production auth work"
+    - "Performance meets requirements"
+
+# ===== RISK MITIGATION =====
+risks:
+  - risk: "Users locked out during transition"
+    mitigation: "Test each phase thoroughly before proceeding"
+    rollback: "Git commits allow reverting to working state"
+    
+  - risk: "Direct-login security concern"
+    mitigation: "Ensure NODE_ENV check prevents production use"
+    validation: "Test production build blocks direct-login"
+    
+  - risk: "Magic link delivery issues"
+    mitigation: "Verify email service before phase 4"
+    fallback: "Keep direct-login as backup for dev"
+
+# ===== USAGE INSTRUCTIONS =====
+usage:
+  forClaude: |
+    To execute this coordination contract:
+    1. Deploy general-purpose agent with phase1 contract
+    2. Wait for completion and validation
+    3. Deploy general-purpose agent with phase2 contract
+    4. Continue sequentially through all phases
+    5. Run final validation checklist
+    
+  exampleDeployment: |
+    // Phase 1
+    Task({
+      subagent_type: "general-purpose",
+      description: "Simplify auth context",
+      prompt: "Follow simplify-auth-context-001.yaml to remove competing auth systems from SupabaseAuthContext..."
+    })
+    
+    // After Phase 1 completes successfully, Phase 2
+    Task({
+      subagent_type: "general-purpose",
+      description: "Create middleware",
+      prompt: "Follow implement-middleware-protection-001.yaml to create middleware.ts..."
+    })
+    
+    // Continue for phases 3 and 4...
+
+# ===== COMPLETION =====
+completion:
+  definition: "All 4 phases complete with validation passed"
+  
+  deliverables:
+    - "Simplified SupabaseAuthContext (Supabase Auth only)"
+    - "Working middleware.ts with route protection"
+    - "Direct-login using real Supabase sessions"
+    - "Magic links as primary auth flow"
+    
+  verification:
+    - "Run test suite for all auth flows"
+    - "Manual testing of critical paths"
+    - "Performance benchmarks met"
+    - "No console errors or warnings"
+
+---
+
+# This coordination contract ensures clean, sequential execution
+# using only general-purpose agents with focused contracts,
+# following CLAUDE.md guidelines for reliable implementation.

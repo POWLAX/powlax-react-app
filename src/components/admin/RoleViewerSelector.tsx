@@ -17,7 +17,7 @@ export function RoleViewerSelector() {
   }, [])
 
   // Only show for administrators
-  const isAdmin = user?.roles?.includes('administrator') || user?.roles?.includes('admin')
+  const isAdmin = user?.roles?.includes('administrator')
   
   // SECURITY: Only show role switcher for actual administrators
   // Removed development mode bypass for security
@@ -89,7 +89,7 @@ export function RoleViewerSelector() {
             
             return (
               <Button
-                key={role.value || 'admin'}
+                key={role.value || 'administrator'}
                 variant="ghost"
                 size="sm"
                 onClick={() => setViewingRole(role.value)}

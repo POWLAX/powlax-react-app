@@ -1,0 +1,341 @@
+# Academy Page Contract
+contractId: "page-academy-20250113"
+type: PAGE_ORCHESTRATION_ANALYSIS
+version: 1.0.0
+created: 2025-01-13
+priority: MEDIUM
+parentContract: "page-orchestration-analysis-001"
+
+# ===== PAGE INFORMATION =====
+pageInfo:
+  route: "/academy"
+  filePath: "src/app/(authenticated)/academy/page.tsx"
+  pageType: "client"
+  category: "academy"
+  dynamicSegments: []
+
+# ===== RENDERING STRATEGY =====
+renderingStrategy:
+  componentType: "Client Component"
+  dataFetching: "client-side"
+  streamingEnabled: false
+  suspenseBoundaries: []
+  errorBoundaries: []
+
+# ===== DATA ORCHESTRATION =====
+dataOrchestration:
+  serverDataFetching: []
+  
+  clientDataFetching:
+    - hook: "useAuth"
+      trigger: "On mount (currently bypassed)"
+      tables: ["auth.users"]
+      realtime: false
+      
+    - hook: "useWorkoutAssignments"
+      trigger: "On mount"
+      tables: ["workout_assignments"]
+      realtime: false
+      
+  propsFlow:
+    fromServer: {}
+    toClient: {}
+    
+  mockData:
+    - "mockPlayerProgress: User progress and achievements"
+    - "skillCategories: Static skill category definitions"
+
+# ===== COMPONENT COMPOSITION =====
+componentComposition:
+  componentsUsed:
+    - name: "Card Components"
+      source: "@/components/ui/card"
+      props: "Various card configurations"
+      conditionalRendering: "Always"
+      
+    - name: "Button"
+      source: "@/components/ui/button"
+      props: "Various button configurations"
+      conditionalRendering: "Always"
+      
+    - name: "Progress"
+      source: "@/components/ui/progress"
+      props: "Progress values"
+      conditionalRendering: "Always"
+      
+    - name: "Checkbox"
+      source: "@/components/ui/checkbox"
+      props: "Assignment options"
+      conditionalRendering: "When showAssignmentTest"
+      
+  layoutUsed: "Authenticated Layout"
+  providerDependencies: 
+    - "SupabaseAuthContext"
+
+# ===== ROUTING LOGIC =====
+routingLogic:
+  guards:
+    - type: "Auth"
+      implementation: "Layout-level (useAuth check bypassed)"
+      redirectTo: "/auth/login"
+      note: "Auth check temporarily bypassed"
+      
+  navigation:
+    - triggers: ["Quick action buttons", "Skill category buttons"]
+      destinations: 
+        - "/skills-academy/workouts"
+        - "/skills-academy?category={id}"
+      method: "Link component"
+      
+  dynamicRouting:
+    - parameter: "category"
+      validation: "Category ID in query params"
+      fallback: "Default category view"
+
+# ===== PAGE-SPECIFIC LOGIC =====
+pageSpecificLogic:
+  businessLogic: "Academy overview with workout assignment testing and skill category navigation"
+  stateManagement: "Local state for assignment testing and UI control"
+  sideEffects:
+    - "Workout assignment creation for testing"
+    - "Console logging for assignment verification"
+  formHandling: "Assignment creation form"
+
+# ===== SERVER/CLIENT BOUNDARY =====
+serverClientBoundary:
+  serverComponents: []
+  clientComponents: 
+    - "Main academy page component"
+    - "All UI components"
+  boundaryLocation: "Entire page is client-side"
+  dataSerializationPoints: []
+
+# ===== PERFORMANCE PATTERNS =====
+performancePatterns:
+  prefetching: []
+  lazyLoading: []
+  codeSpliiting: []
+  optimizations:
+    - "Static skill categories"
+    - "Mock data prevents API calls"
+    - "Conditional rendering of assignment test"
+
+# ===== SECURITY PATTERNS =====
+securityPatterns:
+  authentication: "Layout-level enforcement (with bypass)"
+  authorization: "Authenticated layout wrapper"
+  dataValidation: "Assignment data validation"
+  csrfProtection: false
+
+# ===== INTEGRATION POINTS =====
+integrationPoints:
+  supabaseUsage:
+    directQueries: false
+    throughHooks: true
+    serverSideOnly: false
+    
+  externalAPIs: []
+  webhooks: []
+  realtimeSubscriptions: []
+
+# ===== SKILLS ACADEMY SPECIFIC ANALYSIS =====
+skillsAcademySpecificAnalysis:
+  workoutDataLoading: "Mock data for demonstration"
+  gamificationSetup: "Mock progress and achievement data"
+  pointSystemInitialization: "Mock XP and level system"
+  videoStreamingConfiguration: "N/A"
+  
+  workoutAssignmentOrchestration:
+    purpose: "Test permanence pattern for workout assignments"
+    features:
+      - "Array-based assignments to players, teams, groups"
+      - "Tag-based categorization"
+      - "Assignment persistence verification"
+      
+    testingFlow:
+      1: "Select assignment targets (checkboxes)"
+      2: "Create test assignment with mock IDs"
+      3: "Verify persistence with page refresh"
+      4: "Display active assignments"
+
+# ===== ARCHITECTURAL PATTERNS =====
+architecturalPatterns:
+  pattern: "Academy Overview Dashboard with Assignment Testing"
+  description: "Overview page combining mock academy dashboard with workout assignment permanence testing"
+  
+  benefits:
+    - "Comprehensive academy overview"
+    - "Assignment system validation"
+    - "Skill category navigation"
+    - "Progress visualization"
+    
+  tradeoffs:
+    - "Heavy use of mock data"
+    - "Mixed demo/test functionality"
+    - "Auth checking bypassed"
+
+# ===== STATE MANAGEMENT ANALYSIS =====
+stateManagement:
+  assignmentTestState:
+    - "assignToPlayers: boolean"
+    - "assignToTeams: boolean"  
+    - "assignToGroups: boolean"
+    - "playerIds: string[] (mock)"
+    - "teamIds: number[] (mock)"
+    - "groupIds: string[] (mock)"
+    - "showAssignmentTest: boolean"
+    
+  hookState:
+    - "assignments from useWorkoutAssignments"
+    - "user from useAuth (bypassed)"
+    
+  computedState:
+    - "progressPercentage: (xp / nextLevelXp) * 100"
+
+# ===== WORKOUT ASSIGNMENT TESTING =====
+workoutAssignmentTesting:
+  purpose: "Validate permanence pattern for workout assignments"
+  testData:
+    workoutId: "workout-test-1"
+    playerIds: ["player-1", "player-2"]
+    teamIds: [1, 2]
+    groupIds: ["group-a"]
+    tags: ["test", "academy"]
+    notes: "Testing permanence pattern"
+    
+  verificationProcess:
+    1: "Create assignment with selected options"
+    2: "Log assignment creation"
+    3: "Display active assignments"
+    4: "Verify persistence after page refresh"
+
+# ===== SKILL CATEGORIES SYSTEM =====
+skillCategoriesSystem:
+  categories:
+    - id: "attack"
+      name: "Attack Skills"
+      description: "Shooting, dodging, and offensive techniques"
+      icon: "Target"
+      color: "bg-red-500"
+      
+    - id: "defense"
+      name: "Defense Skills" 
+      description: "Checking, positioning, and defensive strategies"
+      icon: "GraduationCap"
+      color: "bg-blue-500"
+      
+    - id: "midfield"
+      name: "Midfield Skills"
+      description: "Transition play and two-way skills"
+      icon: "Zap"
+      color: "bg-green-500"
+      
+    - id: "fundamentals"
+      name: "Fundamentals"
+      description: "Stick skills, footwork, and basic techniques"
+      icon: "BookOpen"
+      color: "bg-purple-500"
+      
+  progressTracking:
+    fields: ["progress", "workoutsCount", "estimatedTime"]
+    visualization: "Progress bar with percentage"
+
+# ===== MOCK DATA STRUCTURES =====
+mockDataStructures:
+  playerProgress:
+    fields: ["level", "xp", "nextLevelXp", "totalWorkoutsCompleted", "streakDays", "favoriteCategory"]
+    achievements: ["name", "icon", "earned"]
+    
+  skillCategories:
+    fields: ["id", "name", "description", "icon", "color", "progress", "workoutsCount", "estimatedTime"]
+
+# ===== PERMANENCE PATTERN IMPLEMENTATION =====
+permanencePatternImplementation:
+  hook: "useWorkoutAssignments"
+  methods:
+    - "createAssignment()"
+    - "updateAssignment()"
+  
+  dataStructure:
+    assignmentFields:
+      - "workout_id"
+      - "assigned_players: string[]"
+      - "assigned_teams: number[]"
+      - "assigned_groups: string[]"
+      - "tags: string[]"
+      - "notes: string"
+      
+  verification:
+    - "Console logging for assignment creation"
+    - "Active assignments display"
+    - "Persistence check on page refresh"
+
+# ===== RESPONSIVE DESIGN =====
+responsiveDesign:
+  layout: "Grid-based with responsive breakpoints"
+  breakpoints: "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+  cards: "Responsive card layouts with mobile optimization"
+
+# ===== DEPENDENCIES =====
+dependencies:
+  serverDependencies: []
+  clientDependencies:
+    - "@/hooks/useWorkoutAssignments"
+    - "@/contexts/SupabaseAuthContext"
+    - "@/components/ui/card"
+    - "@/components/ui/button"
+    - "@/components/ui/badge"
+    - "@/components/ui/progress"
+    - "@/components/ui/checkbox"
+    - "lucide-react"
+    - "next/link"
+  criticalPath:
+    - "useWorkoutAssignments hook initialization"
+
+# ===== AUTH BYPASS ANALYSIS =====
+authBypassAnalysis:
+  reason: "Fix loading issue during development"
+  implementation: "Commented out auth loading check"
+  security: "Relies on authenticated layout protection"
+  impact: "Page loads without auth verification"
+  recommended: "Re-enable auth check after fixing root cause"
+
+# ===== POTENTIAL IMPROVEMENTS =====
+potentialImprovements:
+  - "Re-enable proper auth checking"
+  - "Replace mock data with real user progress"
+  - "Implement real skill category tracking"
+  - "Add workout recommendation system"
+  - "Implement achievement system"
+  - "Add social features (friends, leaderboards)"
+  - "Create personalized learning paths"
+
+# ===== INTEGRATION WITH COMPONENT CONTRACTS =====
+linkedComponentContracts:
+  - "hook-workout-assignments"
+  - "component-supabase-auth-context"
+  - "component-ui-card"
+  - "component-ui-progress"
+
+# ===== QUALITY ASSESSMENT =====
+qualityAssessment:
+  strengths:
+    - "Comprehensive assignment testing"
+    - "Good visual organization"
+    - "Responsive design"
+    - "Clear navigation paths"
+    
+  weaknesses:
+    - "Heavy reliance on mock data"
+    - "Auth checking bypassed"
+    - "Mixed demo/production code"
+    - "No real progress tracking"
+
+# ===== NOTES =====
+notes:
+  - "Hybrid demo/test page for academy features"
+  - "Workout assignment permanence pattern testing"
+  - "Auth loading check bypassed - needs investigation"
+  - "Mock data used throughout for demonstration"
+  - "Separate from /skills-academy main hub"
+  - "Good for testing assignment array functionality"

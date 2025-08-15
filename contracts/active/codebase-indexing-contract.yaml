@@ -1,0 +1,301 @@
+contract:
+  id: codebase-indexing-001
+  title: "POWLAX Codebase Complete Indexing Contract"
+  version: "1.0.0"
+  created: "2025-01-14"
+  type: "multi-agent-parallel-execution"
+  priority: high
+  
+purpose: |
+  Deploy multiple general-purpose sub-agents in parallel to create a comprehensive index of:
+  1. All pages in the application with their routes and functionality
+  2. All components with their purpose and location
+  3. Database tables used by each page/component
+  4. Data flow patterns and integrations
+  
+  This will provide a complete map of the codebase for future development and debugging.
+
+critical_requirements:
+  - Use ONLY general-purpose sub-agents
+  - DYNAMICALLY discover actual Supabase tables (62 expected)
+  - Analyze components to find database usage patterns
+  - Include shadcn/ui components analysis
+  - No mock data references
+  - Parallel execution for efficiency
+  - Standardized output format
+
+sub_agent_tasks:
+  task_1_pages_indexing:
+    agent_type: "general-purpose"
+    description: "Index all Next.js pages"
+    scope:
+      - src/app directory structure
+      - Route patterns and dynamic segments
+      - Page components and their imports
+      - API routes and their endpoints
+    deliverable: |
+      Create PAGES_INDEX.md with:
+      - Route path
+      - File location
+      - Purpose/functionality
+      - Database tables used
+      - Key components imported
+      - Authentication requirements
+      - Current status (working/needs-work/deprecated)
+
+  task_2_components_indexing:
+    agent_type: "general-purpose"
+    description: "Index all React components including shadcn/ui"
+    scope:
+      - src/components directory (ALL subdirectories)
+      - src/components/ui directory (21 shadcn components)
+      - Component hierarchy and relationships
+      - Props and state management
+      - Database hooks and queries
+      - UI component dependencies
+    deliverable: |
+      Create COMPONENTS_INDEX.md with:
+      - Component name and location
+      - Purpose and functionality
+      - Parent/child relationships
+      - Database tables accessed
+      - Hooks used (especially data hooks)
+      - Props interface
+      - Current status
+
+  task_3_hooks_and_contexts:
+    agent_type: "general-purpose"
+    description: "Index all hooks and contexts"
+    scope:
+      - src/hooks directory
+      - src/contexts directory
+      - Custom hooks with database queries
+      - State management patterns
+    deliverable: |
+      Create HOOKS_CONTEXTS_INDEX.md with:
+      - Hook/context name
+      - File location
+      - Purpose
+      - Database tables queried
+      - Supabase queries used
+      - Return values
+      - Usage examples from codebase
+
+  task_4_database_usage_mapping:
+    agent_type: "general-purpose"
+    description: "DISCOVER and map actual database table usage"
+    scope:
+      - FIRST: Query Supabase to get actual table list (62 expected)
+      - All Supabase queries in codebase
+      - RPC function calls
+      - Table relationships
+      - Data flow patterns
+    deliverable: |
+      Create DATABASE_USAGE_MAP.md with:
+      - DISCOVERED table names (query Supabase directly)
+      - Files that query each table
+      - Query types (select/insert/update/delete)
+      - RPC functions using each table
+      - Relationships between tables
+      - Current record counts
+      - Table schemas and column info
+
+  task_5_api_routes_indexing:
+    agent_type: "general-purpose"
+    description: "Index all API routes"
+    scope:
+      - src/app/api directory
+      - Route handlers
+      - Server actions
+      - External API integrations
+    deliverable: |
+      Create API_ROUTES_INDEX.md with:
+      - Route path
+      - HTTP methods supported
+      - Purpose
+      - Database tables accessed
+      - Authentication requirements
+      - Request/response format
+      - External services called
+
+output_format:
+  location: "docs/codebase-index/"
+  files:
+    - PAGES_INDEX.md
+    - COMPONENTS_INDEX.md
+    - HOOKS_CONTEXTS_INDEX.md
+    - DATABASE_USAGE_MAP.md
+    - API_ROUTES_INDEX.md
+    - MASTER_INDEX.md (consolidated summary)
+  
+  template_structure: |
+    # [Index Type] - POWLAX Codebase Index
+    **Generated:** [Date]
+    **Contract:** codebase-indexing-001
+    
+    ## Summary Statistics
+    - Total [items] indexed: X
+    - Database tables referenced: Y
+    - Working/Active: Z
+    - Needs attention: W
+    
+    ## Detailed Index
+    
+    ### [Category/Section]
+    
+    #### [Item Name]
+    - **Location:** `path/to/file`
+    - **Purpose:** Brief description
+    - **Database Tables:** 
+      - `table_name` - usage pattern
+    - **Status:** ✅ Working | ⚠️ Needs Work | ❌ Deprecated
+    - **Notes:** Any important observations
+
+execution_instructions:
+  parallel_deployment: |
+    ```javascript
+    // Deploy all 5 sub-agents in parallel for maximum efficiency
+    await Promise.all([
+      Task({
+        subagent_type: "general-purpose",
+        description: "Index all pages",
+        prompt: `
+          Read contract: contracts/active/codebase-indexing-contract.yaml
+          Focus on: task_1_pages_indexing
+          
+          1. Scan src/app directory for all page.tsx and route.ts files
+          2. Analyze each page for database queries and table usage
+          3. Check against database-truth-sync-002.yaml for correct table names
+          4. Create PAGES_INDEX.md following the template format
+          
+          Important:
+          - Use Grep and Glob tools to find all pages efficiently
+          - Check for supabase.from() calls to identify table usage
+          - Note authentication requirements (middleware checks)
+          - Mark status based on actual functionality
+        `
+      }),
+      
+      Task({
+        subagent_type: "general-purpose",
+        description: "Index all components",
+        prompt: `
+          Read contract: contracts/active/codebase-indexing-contract.yaml
+          Focus on: task_2_components_indexing
+          
+          1. Scan src/components directory recursively (ALL subdirectories)
+          2. Include src/components/ui directory (21 shadcn components)
+          3. Identify component purpose and database interactions
+          4. Map component relationships and dependencies
+          5. Create COMPONENTS_INDEX.md following the template
+          
+          Important:
+          - Group components by feature area (admin, ui, dashboards, etc.)
+          - Note which hooks they use for data
+          - Identify table dependencies through hooks
+          - Document shadcn/ui component usage patterns
+        `
+      }),
+      
+      Task({
+        subagent_type: "general-purpose",
+        description: "Index hooks and contexts",
+        prompt: `
+          Read contract: contracts/active/codebase-indexing-contract.yaml
+          Focus on: task_3_hooks_and_contexts
+          
+          1. Scan src/hooks and src/contexts directories
+          2. Analyze each hook for Supabase queries
+          3. Document return values and usage patterns
+          4. Create HOOKS_CONTEXTS_INDEX.md
+          
+          Important:
+          - Focus on data fetching hooks
+          - Note RPC function usage
+          - Find usage examples in components
+        `
+      }),
+      
+      Task({
+        subagent_type: "general-purpose",
+        description: "Map database usage",
+        prompt: `
+          Read contract: contracts/active/codebase-indexing-contract.yaml
+          Focus on: task_4_database_usage_mapping
+          
+          1. FIRST: Run 'npx tsx scripts/get-supabase-tables.ts' to get actual tables
+          2. Search codebase for each discovered table usage
+          3. Map query patterns and relationships
+          4. Create DATABASE_USAGE_MAP.md
+          
+          Important:
+          - Use ACTUAL tables from Supabase (62 expected)
+          - Use Grep to find all supabase.from('[table]') calls
+          - Note RPC functions and their table dependencies
+          - Include table schemas and record counts
+        `
+      }),
+      
+      Task({
+        subagent_type: "general-purpose",
+        description: "Index API routes",
+        prompt: `
+          Read contract: contracts/active/codebase-indexing-contract.yaml
+          Focus on: task_5_api_routes_indexing
+          
+          1. Scan src/app/api directory for route handlers
+          2. Document endpoints and their database operations
+          3. Note authentication and external integrations
+          4. Create API_ROUTES_INDEX.md
+          
+          Important:
+          - Check for server actions in addition to routes
+          - Note WordPress API integrations
+          - Document request/response formats
+        `
+      })
+    ]);
+    ```
+
+  consolidation_task: |
+    After parallel tasks complete, deploy final agent:
+    
+    ```javascript
+    Task({
+      subagent_type: "general-purpose",
+      description: "Consolidate indexes",
+      prompt: `
+        Read all generated index files in docs/codebase-index/
+        Create MASTER_INDEX.md that:
+        1. Summarizes key findings
+        2. Lists all database tables and their usage frequency
+        3. Identifies orphaned code (unused components/pages)
+        4. Highlights areas needing attention
+        5. Provides quick navigation to other indexes
+        
+        Include cross-references between indexes for easy navigation.
+      `
+    })
+    ```
+
+validation_criteria:
+  - All 62 actual Supabase tables are discovered and documented
+  - No references to non-existent tables
+  - Every page and component is indexed (including shadcn/ui)
+  - Cross-references are accurate
+  - Status indicators match actual functionality
+  - Database connections are verified against live Supabase
+
+benefits:
+  - Complete visibility into codebase structure
+  - Easy identification of database dependencies
+  - Quick location of components and their usage
+  - Foundation for refactoring decisions
+  - Onboarding documentation for new developers
+
+notes: |
+  - This contract enables parallel execution for efficiency
+  - Each sub-agent works independently on their scope
+  - Final consolidation creates unified view
+  - Updates should be run periodically as codebase evolves
+  - Indexes serve as living documentation

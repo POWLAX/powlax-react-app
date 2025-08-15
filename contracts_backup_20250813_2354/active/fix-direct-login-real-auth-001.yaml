@@ -1,0 +1,483 @@
+# Fix Direct Login Real Auth Contract
+# Phase 3: Convert direct-login to use REAL Supabase Auth sessions
+
+contractId: "fix-direct-login-real-auth-001"
+type: FOCUSED_IMPLEMENTATION
+version: 1.0.0
+created: 2025-01-15
+priority: HIGH
+phase: 3 of 4
+
+# ===== CONTRACT OBJECTIVE =====
+objective:
+  goal: "Convert direct-login from mock localStorage to REAL Supabase Auth"
+  
+  currentState:
+    - "Uses fake localStorage authentication"
+    - "Creates mock user object without real session"
+    - "Bypasses Supabase Auth entirely"
+    - "Causes auth system confusion"
+    
+  targetState:
+    - "Creates REAL Supabase Auth sessions"
+    - "Uses service role key in development"
+    - "Proper session that works with protected routes"
+    - "Development-only tool for quick testing"
+
+# ===== UNDERSTANDING =====
+context:
+  purpose: "Direct-login is a DEVELOPMENT TOOL for quick testing"
+  
+  whyKeepIt:
+    - "Speeds up development workflow"
+    - "Allows testing without email access"
+    - "Quick way to test admin features"
+    - "Bypasses magic link wait time"
+    
+  whyFixIt:
+    - "Current mock auth conflicts with real auth"
+    - "localStorage fake sessions cause confusion"
+    - "Should create real sessions for accurate testing"
+    - "Need to test with actual auth flow"
+
+# ===== FILE MODIFICATIONS =====
+files:
+  primary:
+    path: "src/app/direct-login/page.tsx"
+    
+    toRemove:
+      - description: "Mock localStorage authentication"
+        code: |
+          // DELETE ALL OF THIS
+          const mockUser = {
+            id: '523f2768-6404-439c-a429-f9eb6736aa17',
+            email: 'patrick@powlax.com',
+            // ... rest of mock object
+          }
+          
+          localStorage.setItem('supabase_auth_user', JSON.stringify(mockUser))
+          localStorage.setItem('supabase_auth_session', JSON.stringify({
+            access_token: 'mock-token',
+            user: mockUser
+          }))
+    
+    toImplement:
+      newApproach: |
+        'use client'
+        
+        import { useEffect, useState } from 'react'
+        import { useRouter } from 'next/navigation'
+        import { useAuth } from '@/contexts/SupabaseAuthContext'
+        import { supabase } from '@/lib/supabase'
+        import { Button } from '@/components/ui/button'
+        import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+        
+        export default function DirectLoginPage() {
+          const [status, setStatus] = useState('Ready to login')
+          const [isLoading, setIsLoading] = useState(false)
+          const router = useRouter()
+          const { user, loading } = useAuth()
+          
+          // Only allow in development
+          useEffect(() => {
+            if (process.env.NODE_ENV === 'production') {
+              router.push('/auth/login')
+            }
+          }, [router])
+          
+          const handleDirectLogin = async () => {
+            try {
+              setIsLoading(true)
+              setStatus('Creating development session...')
+              
+              // Method 1: Use Admin API to create session (requires service role key)
+              if (process.env.NEXT_PUBLIC_DEV_MODE === 'true') {
+                // Create a magic link programmatically for patrick@powlax.com
+                const { data: magicLinkData, error: linkError } = await fetch('/api/auth/dev-session', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ 
+                    email: 'patrick@powlax.com',
+                    // This endpoint would use service role key server-side
+                  })
+                }).then(res => res.json())
+                
+                if (linkError) {
+                  throw new Error('Failed to create dev session')
+                }
+                
+                // The API would return a session token or auto-login
+                setStatus('Session created! Redirecting...')
+                
+                // Give Supabase time to recognize the new session
+                setTimeout(() => {
+                  router.push('/dashboard')
+                }, 1000)
+              } else {
+                // Method 2: Fallback - trigger magic link automatically
+                setStatus('Sending magic link to patrick@powlax.com...')
+                
+                const { error } = await supabase.auth.signInWithOtp({
+                  email: 'patrick@powlax.com',
+                  options: {
+                    emailRedirectTo: `${window.location.origin}/dashboard`
+                  }
+                })
+                
+                if (error) {
+                  throw error
+                }
+                
+                setStatus('Magic link sent! Check email for instant login.')
+                // In dev, we could auto-read the magic link from database
+                // and auto-navigate to it for true one-click login
+              }
+              
+            } catch (err) {
+              setStatus('Login failed - check console')
+              console.error('Direct login error:', err)
+            } finally {
+              setIsLoading(false)
+            }
+          }
+          
+          const handleLogout = async () => {
+            await supabase.auth.signOut()
+            setStatus('Logged out - ready to login again')
+          }
+          
+          // If already logged in, show different UI
+          if (!loading && user) {
+            return (
+              <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+                <Card className="w-full max-w-md">
+                  <CardHeader>
+                    <CardTitle className="text-2xl font-bold text-center">
+                      Development Quick Access
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="bg-green-50 border border-green-200 rounded-md p-4">
+                      <p className="text-sm text-green-900 font-medium">
+                        ✓ Logged in as: {user.email}
+                      </p>
+                      <p className="text-xs text-green-700 mt-1">
+                        Real Supabase session active
+                      </p>
+                    </div>
+                    
+                    <Button
+                      onClick={() => router.push('/dashboard')}
+                      className="w-full"
+                    >
+                      Go to Dashboard
+                    </Button>
+                    
+                    <Button
+                      onClick={handleLogout}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      Logout & Test Again
+                    </Button>
+                    
+                    <div className="text-xs text-gray-500 text-center">
+                      This is a development-only tool using real Supabase Auth
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )
+          }
+          
+          return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+              <Card className="w-full max-w-md">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-bold text-center">
+                    Development Quick Login
+                  </CardTitle>
+                  {process.env.NODE_ENV === 'development' && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-md p-2 mt-2">
+                      <p className="text-xs text-yellow-800 text-center">
+                        ⚠️ Development Mode Only
+                      </p>
+                    </div>
+                  )}
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-lg text-blue-600 text-center">
+                    {status}
+                  </div>
+                  
+                  <Button 
+                    onClick={handleDirectLogin}
+                    disabled={isLoading}
+                    className="w-full"
+                  >
+                    {isLoading ? 'Creating session...' : 'Quick Login as patrick@powlax.com'}
+                  </Button>
+                  
+                  <div className="text-sm text-gray-600 text-center">
+                    Creates a real Supabase Auth session for development testing.
+                    No mock data or localStorage hacks.
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )
+        }
+
+  secondary:
+    - path: "src/app/api/auth/dev-session/route.ts"
+      description: "Create API endpoint for development session creation"
+      create: true
+      implementation: |
+        import { NextRequest, NextResponse } from 'next/server'
+        import { createClient } from '@supabase/supabase-js'
+        
+        // This endpoint ONLY works in development
+        export async function POST(request: NextRequest) {
+          // Security: Only allow in development
+          if (process.env.NODE_ENV === 'production') {
+            return NextResponse.json(
+              { error: 'Not available in production' },
+              { status: 403 }
+            )
+          }
+          
+          try {
+            const { email } = await request.json()
+            
+            // Validate it's the allowed dev email
+            if (email !== 'patrick@powlax.com') {
+              return NextResponse.json(
+                { error: 'Invalid development email' },
+                { status: 400 }
+              )
+            }
+            
+            // Use service role key for admin operations (dev only)
+            const supabaseAdmin = createClient(
+              process.env.NEXT_PUBLIC_SUPABASE_URL!,
+              process.env.SUPABASE_SERVICE_ROLE_KEY!, // Service role key
+              {
+                auth: {
+                  autoRefreshToken: false,
+                  persistSession: false
+                }
+              }
+            )
+            
+            // Option 1: Generate a magic link programmatically
+            const { data, error } = await supabaseAdmin.auth.admin.generateLink({
+              type: 'magiclink',
+              email: 'patrick@powlax.com',
+              options: {
+                redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`
+              }
+            })
+            
+            if (error) throw error
+            
+            // Option 2: Create a session directly (more instant)
+            // const { data: user } = await supabaseAdmin.auth.admin.getUserByEmail('patrick@powlax.com')
+            // if (user) {
+            //   const { data: session } = await supabaseAdmin.auth.admin.createSession({
+            //     userId: user.id
+            //   })
+            //   return NextResponse.json({ session })
+            // }
+            
+            return NextResponse.json({ 
+              success: true,
+              magicLink: data.properties.action_link // Return link for auto-navigation
+            })
+            
+          } catch (error) {
+            console.error('Dev session error:', error)
+            return NextResponse.json(
+              { error: 'Failed to create development session' },
+              { status: 500 }
+            )
+          }
+        }
+
+# ===== IMPLEMENTATION STEPS =====
+implementation:
+  step1:
+    action: "Remove mock localStorage authentication"
+    tasks:
+      - "Delete all localStorage.setItem for auth"
+      - "Remove mock user object creation"
+      - "Delete fake session generation"
+      - "Remove window.location.href redirect"
+    validation: "No localStorage auth code remains"
+    
+  step2:
+    action: "Add production environment check"
+    tasks:
+      - "Check NODE_ENV on component mount"
+      - "Redirect to /auth/login if production"
+      - "Show warning badge in development"
+      - "Prevent any production usage"
+    validation: "Page blocked in production"
+    
+  step3:
+    action: "Create dev session API endpoint"
+    tasks:
+      - "Create /api/auth/dev-session/route.ts"
+      - "Use service role key (dev only)"
+      - "Generate real magic link or session"
+      - "Return actionable response"
+    validation: "API creates real sessions"
+    
+  step4:
+    action: "Implement real Supabase login"
+    tasks:
+      - "Call dev session API"
+      - "Or trigger magic link automatically"
+      - "Handle real session creation"
+      - "Use actual Supabase Auth flow"
+    validation: "Real session created"
+    
+  step5:
+    action: "Update UI for real auth"
+    tasks:
+      - "Show logged-in state properly"
+      - "Display real user email"
+      - "Add logout functionality"
+      - "Remove mock data references"
+    validation: "UI reflects real auth state"
+    
+  step6:
+    action: "Add development helpers"
+    tasks:
+      - "Auto-fetch magic link in dev"
+      - "One-click session creation"
+      - "Quick logout and re-login"
+      - "Clear status messages"
+    validation: "Developer experience improved"
+
+# ===== TESTING REQUIREMENTS =====
+testing:
+  developmentMode:
+    - name: "Quick login creates real session"
+      steps:
+        - "Click quick login button"
+        - "Wait for session creation"
+        - "Verify redirected to dashboard"
+        - "Check Supabase Auth has session"
+      expected: "Real session exists"
+      
+    - name: "Can access protected routes"
+      steps:
+        - "Use direct-login"
+        - "Navigate to /teams"
+        - "Navigate to /admin"
+      expected: "All protected routes accessible"
+      
+    - name: "Logout clears session"
+      steps:
+        - "Login via direct-login"
+        - "Click logout"
+        - "Try accessing /dashboard"
+      expected: "Redirected to login"
+      
+  productionMode:
+    - name: "Page blocked in production"
+      steps:
+        - "Build for production"
+        - "Access /direct-login"
+      expected: "Redirected to /auth/login"
+      
+    - name: "API blocked in production"
+      steps:
+        - "Call /api/auth/dev-session"
+      expected: "403 Forbidden response"
+      
+  integration:
+    - name: "Works with middleware"
+      steps:
+        - "Login via direct-login"
+        - "Refresh page"
+        - "Session persists"
+      expected: "Still authenticated"
+      
+    - name: "Works with auth context"
+      steps:
+        - "Login via direct-login"
+        - "Check useAuth hook"
+      expected: "Returns real user data"
+
+# ===== VALIDATION CHECKLIST =====
+validation:
+  security:
+    - "[ ] No localStorage authentication"
+    - "[ ] Production environment check"
+    - "[ ] Service role key not exposed"
+    - "[ ] Only works in development"
+    
+  functionality:
+    - "[ ] Creates real Supabase sessions"
+    - "[ ] Sessions work with protected routes"
+    - "[ ] Logout clears real session"
+    - "[ ] Integrates with auth context"
+    
+  developerExperience:
+    - "[ ] One-click login works"
+    - "[ ] Clear status messages"
+    - "[ ] Fast session creation"
+    - "[ ] Easy logout and re-login"
+
+# ===== COMMON PITFALLS =====
+pitfalls:
+  - pitfall: "Service role key exposed to client"
+    solution: "Keep it server-side in API route only"
+    
+  - pitfall: "Works in production"
+    solution: "Multiple environment checks"
+    
+  - pitfall: "Session doesn't persist"
+    solution: "Use proper Supabase Auth methods"
+    
+  - pitfall: "Conflicts with magic links"
+    solution: "Use same auth system, just automated"
+
+# ===== SUCCESS CRITERIA =====
+successCriteria:
+  required:
+    - "No localStorage mock authentication"
+    - "Creates real Supabase Auth sessions"
+    - "Only works in development environment"
+    - "Integrates with existing auth system"
+    - "Developer workflow improved"
+    
+  validation:
+    - "Test: Real session created"
+    - "Test: Protected routes accessible"
+    - "Test: Production build blocks access"
+    - "Test: Logout works properly"
+    - "Build: TypeScript compiles"
+
+# ===== NOTES =====
+notes:
+  rationale: |
+    Direct-login is a valuable development tool that should be fixed, not removed.
+    By using real Supabase Auth sessions instead of mock localStorage, we:
+    - Eliminate auth system conflicts
+    - Test with real authentication flow
+    - Maintain quick development access
+    - Ensure production security
+    
+  alternatives: |
+    If service role key approach is too complex, alternatives include:
+    1. Auto-trigger magic link and show link in console
+    2. Use Supabase Auth emulator in development
+    3. Create development-only auth provider
+    4. Use Supabase CLI for local auth
+
+---
+
+# This contract converts direct-login to a proper development tool
+# using real Supabase Auth instead of mock localStorage

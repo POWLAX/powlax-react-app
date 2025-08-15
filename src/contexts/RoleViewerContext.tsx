@@ -21,7 +21,7 @@ export function RoleViewerProvider({ children }: { children: ReactNode }) {
 
   // Available roles for the dropdown
   const availableRoles = [
-    { value: null, label: 'Admin (Actual Role)' },
+    { value: null, label: 'Administrator (Actual Role)' },
     { value: 'player' as ViewableRole, label: 'Player' },
     { value: 'team_coach' as ViewableRole, label: 'Coach' },
     { value: 'parent' as ViewableRole, label: 'Parent' },

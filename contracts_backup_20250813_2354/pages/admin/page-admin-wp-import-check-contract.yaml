@@ -1,0 +1,164 @@
+# Page Contract: Admin WordPress Import Check Page
+# Route: /admin/wp-import-check
+
+contractId: "page-admin-wp-import-check-20250113"
+pageInfo:
+  route: "/admin/wp-import-check"
+  filePath: "src/app/(authenticated)/admin/wp-import-check/page.tsx"
+  pageType: "client"
+  category: "admin"
+  dynamicSegments: []
+
+renderingStrategy:
+  componentType: "Client Component"
+  dataFetching: "client-side"
+  streamingEnabled: false
+  suspenseBoundaries: []
+  errorBoundaries: []
+
+dataOrchestration:
+  serverDataFetching: []
+  clientDataFetching:
+    - hook: "useAuth"
+      trigger: "On mount"
+      tables: []
+      realtime: false
+    - hook: "useEffect + fetch"
+      trigger: "On mount"
+      tables: ["organizations", "teams", "team_members", "users"]
+      realtime: false
+  propsFlow:
+    fromServer: {}
+    toClient: {}
+
+componentComposition:
+  componentsUsed:
+    - name: "Loader2"
+      source: "lucide-react"
+      props: "Loading spinner props"
+      conditionalRendering: "While auth loading"
+    - name: "Stat component"
+      source: "Local component"
+      props: "label, value"
+      conditionalRendering: "Always in dashboard"
+  layoutUsed: "(authenticated)/layout.tsx"
+  providerDependencies: ["SupabaseAuthContext"]
+
+routingLogic:
+  guards:
+    - type: "Authentication"
+      implementation: "Page-level loading check"
+      redirectTo: "Loading spinner"
+  navigation:
+    - triggers: ["Direct URL access", "Admin navigation"]
+      destinations: ["/admin/wp-import-check"]
+      method: "Direct navigation"
+  dynamicRouting: []
+
+pageSpecificLogic:
+  businessLogic: "WordPress import data verification and organizational structure display"
+  stateManagement: "State for organizations, teams, members, loading, and error states"
+  sideEffects: ["API call to wp-import-check endpoint"]
+  formHandling: "None"
+
+serverClientBoundary:
+  serverComponents: []
+  clientComponents: 
+    - "WPImportCheckPage (root component)"
+    - "Stat component"
+    - "Data display components"
+  boundaryLocation: "Entire page is client-side"
+  dataSerializationPoints: []
+
+performancePatterns:
+  prefetching: []
+  lazyLoading: []
+  codeSpliitting: []
+  optimizations: 
+    - "Data transformation client-side"
+    - "Grouped data display"
+
+securityPatterns:
+  authentication: "useAuth hook verification"
+  authorization: "Implicit admin access (no explicit role checking)"
+  dataValidation: "Response validation and error handling"
+  csrfProtection: false
+
+integrationPoints:
+  supabaseUsage:
+    directQueries: false
+    throughHooks: true
+    serverSideOnly: false
+  externalAPIs: 
+    - "/api/admin/wp-import-check - Data verification endpoint"
+  webhooks: []
+  realtimeSubscriptions: []
+
+adminSpecificFeatures:
+  dataVerification:
+    purpose: "Verify WordPress import data integrity"
+    dataTypes: ["Organizations", "Teams", "Team members", "User relationships"]
+    
+  organizationalDisplay:
+    structure: "Hierarchical org -> teams -> members view"
+    grouping: "Teams grouped by club_id when available"
+    memberDetails: "Role, name, email display"
+    
+  dataManagement:
+    tables: ["organizations", "teams", "team_members", "users"]
+    operations: ["READ only"]
+    bulkOperations: false
+    realTimeUpdates: false
+    
+  monitoringFeatures:
+    dashboard: "Summary statistics grid"
+    orgView: "Detailed organizational breakdown"
+    teamView: "All teams with member listings"
+    membershipTracking: "Complete user-team relationships"
+
+apiIntegration:
+  endpoint: "/api/admin/wp-import-check"
+  method: "GET"
+  purpose: "Fetch imported WordPress data for verification"
+  caching: "no-store"
+  
+  dataTransformation:
+    userJoining: "Members joined with user details by user_id"
+    teamGrouping: "Teams grouped by club_id or 'all'"
+    memberGrouping: "Members grouped by team_id"
+
+dataStructures:
+  types:
+    Org: "{ id: string; name: string }"
+    Team: "{ id: string; name: string; club_id?: string | null }"
+    MemberRow: "{ team_id: string; user_id: string; role: string; user?: UserDetails }"
+    
+  relationships:
+    orgToTeams: "club_id foreign key relationship"
+    teamToMembers: "team_id foreign key relationship"
+    memberToUser: "user_id foreign key relationship"
+
+uiPatterns:
+  layout: "Sectioned display with dashboard, club view, and team view"
+  styling: "Grid layouts with bordered cards"
+  dataDisplay: "Hierarchical nested structure"
+  emptyStates: "Friendly messages for missing data"
+
+loadingStates:
+  authLoading: "Full page loading spinner"
+  dataLoading: "Simple 'Loading…' text"
+  errorStates: "Red error text display"
+
+debuggingFeatures:
+  dataInspection: "Complete data structure visibility"
+  relationshipVerification: "Visual confirmation of data relationships"
+  membershipValidation: "Role and user detail verification"
+  organizationalIntegrity: "Club-team-member hierarchy validation"
+
+notes:
+  - "Read-only verification interface for WordPress import data"
+  - "Provides comprehensive view of organizational structure"
+  - "No explicit admin role checking (relies on route protection)"
+  - "Good for debugging import issues and verifying data integrity"
+  - "Could be enhanced with data export capabilities"
+  - "Useful for confirming WordPress sync operations worked correctly"

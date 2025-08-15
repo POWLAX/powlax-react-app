@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { useSupabase } from '@/hooks/useSupabase'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
 
 // Using practices table for events (team_events table doesn't exist)
 export interface TeamEvent {
@@ -45,7 +45,7 @@ export interface ActivityItem {
 }
 
 export function useTeamDashboard(teamId: string) {
-  const { user } = useSupabase()
+  const { user } = useAuth()
   const [upcomingEvents, setUpcomingEvents] = useState<TeamEvent[]>([])
   const [teamStats, setTeamStats] = useState<TeamStats | null>(null)
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([])

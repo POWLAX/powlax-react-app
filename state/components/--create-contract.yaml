@@ -1,0 +1,58 @@
+metadata:
+  name: '--create-contract'
+  type: client
+  featureArea: '--create-contract'
+  version: 1.0.0
+  lastModified: '2025-08-14T21:41:10.743Z'
+  status: draft
+functionality:
+  purpose: ''
+  userInteractions: []
+  businessRules: []
+  edgeCases: []
+technical:
+  filePath: ''
+  propsInterface: ''
+  stateManagement:
+    localState: []
+    sharedState: []
+    externalState: []
+  dependencies: []
+  exports: []
+database:
+  primaryTables: []
+  relationships: []
+relationships:
+  parentComponents: []
+  childComponents: []
+  siblingComponents: []
+quality:
+  currentScore: 0
+  breakdown:
+    functionality: 0
+    performance: 0
+    mobile: 0
+    accessibility: 0
+  lastTestResults:
+    unitTests:
+      created: 0
+      passing: 0
+    integrationTests:
+      created: 0
+      passing: 0
+    e2eTests:
+      created: 0
+      passing: 0
+    coverage: 0
+  performanceMetrics:
+    loadTime: 0
+    renderTime: 0
+    memoryUsage: 0
+contracts:
+  active:
+    - id: component---create-contract-1755207670739
+      type: component-specification
+      createdAt: '2025-08-14T21:41:10.744Z'
+      status: active
+  completed: []
+issues: []

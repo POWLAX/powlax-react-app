@@ -1,0 +1,404 @@
+# Team Practice Plan Page Contract
+contractId: "page-team-practiceplan-20250813"
+type: PAGE_ORCHESTRATION_CONTRACT
+version: 1.0.0
+created: 2025-08-13
+priority: CRITICAL
+
+# ===== PAGE INFO =====
+pageInfo:
+  route: "/teams/[teamId]/practiceplan"
+  filePath: "src/app/(authenticated)/teams/[teamId]/practiceplan/page.tsx"
+  pageType: "client"
+  category: "team"
+  dynamicSegments: ["teamId"]
+
+# ===== RENDERING STRATEGY =====
+renderingStrategy:
+  componentType: "Client Component"
+  dataFetching: "client-side"
+  streamingEnabled: false
+  suspenseBoundaries: []
+  errorBoundaries: 
+    - "error.tsx - Practice planner specific error boundary"
+  loadingUI: "loading.tsx - Detailed skeleton loading"
+
+# ===== DATA ORCHESTRATION =====
+dataOrchestration:
+  serverDataFetching: []
+  
+  clientDataFetching:
+    - hook: "useParams"
+      trigger: "On mount"
+      tables: []
+      realtime: false
+      purpose: "Extract teamId (handles 'no-team' case)"
+      
+    - hook: "useAuth"
+      trigger: "On mount"
+      tables: ["users"]
+      realtime: false
+      purpose: "Get current user context"
+      
+    - hook: "usePracticePlans"
+      trigger: "On mount with teamId"
+      tables: ["practices"]
+      realtime: false
+      purpose: "Load and save practice plans"
+      
+    - hook: "useDrills"
+      trigger: "On mount"
+      tables: ["powlax_drills", "user_drills"]
+      realtime: false
+      purpose: "Load drill library"
+      
+    - hook: "useStrategies"
+      trigger: "On mount"
+      tables: ["powlax_strategies", "user_strategies"]
+      realtime: false
+      purpose: "Load strategy library"
+      
+    - hook: "usePrint"
+      trigger: "On demand"
+      tables: []
+      realtime: false
+      purpose: "Handle practice plan printing"
+      
+  propsFlow:
+    fromServer: {}
+    toClient:
+      teamId: "Route parameter (undefined for 'no-team')"
+      user: "Current authenticated user"
+      plans: "Saved practice plans array"
+      drills: "Available drills from libraries"
+      strategies: "Available strategies"
+      practiceData: "Current practice plan state"
+
+# ===== COMPONENT COMPOSITION =====
+componentComposition:
+  componentsUsed:
+    - name: "DrillLibraryTabbed"
+      source: "@/components/practice-planner/DrillLibraryTabbed"
+      props:
+        onAddDrill: "Handler function"
+        onSelectStrategy: "Handler function"
+        selectedStrategies: "Array of selected strategy IDs"
+        isMobile: "Boolean for responsive behavior"
+        user: "Current user object"
+      conditionalRendering: "Always (sidebar on desktop, modal on mobile)"
+      
+    - name: "PracticeTimelineWithParallel"
+      source: "@/components/practice-planner/PracticeTimelineWithParallel"
+      props:
+        drills: "Time slots array"
+        setDrills: "State setter"
+        startTime: "Practice start time"
+        setupTime: "Setup duration"
+        onStudyDrill: "Drill study modal handler"
+        totalDuration: "Total practice duration"
+        usedDuration: "Currently used time"
+      conditionalRendering: "Always"
+      
+    - name: "PracticeScheduleCard"
+      source: "@/components/practice-planner/PracticeScheduleCard"
+      props: "All practice metadata (date, time, duration, field, notes)"
+      conditionalRendering: "Always"
+      
+    - name: "ActiveStrategiesSection"
+      source: "@/components/practice-planner/ActiveStrategiesSection"
+      props:
+        strategies: "Selected strategies array"
+        onRemove: "Remove strategy handler"
+        onStrategyClick: "Strategy study handler"
+      conditionalRendering: "When strategies selected"
+      
+    - name: "Modal Components"
+      source: "@/components/practice-planner/modals/*"
+      props: "Various modal-specific props"
+      conditionalRendering: "Based on modal state"
+      
+  layoutUsed: "(authenticated) layout"
+  providerDependencies:
+    - "SupabaseAuthContext"
+
+# ===== ROUTING LOGIC =====
+routingLogic:
+  guards:
+    - type: "Auth"
+      implementation: "Layout-level"
+      redirectTo: "/auth/login"
+      
+  navigation:
+    - triggers: ["Modal navigation"]
+      destinations: ["Various practice planner modals"]
+      method: "State-based modal rendering"
+      
+  dynamicRouting:
+    - parameter: "teamId"
+      validation: "Handles both valid teamId and 'no-team' special case"
+      fallback: "Continues with undefined teamId for standalone use"
+
+# ===== PAGE SPECIFIC LOGIC =====
+pageSpecificLogic:
+  businessLogic: |
+    - Complete practice planning workflow orchestration
+    - Team vs no-team context handling
+    - Auto-save functionality with localStorage
+    - Print workflow management
+    - Drill and strategy library integration
+    - Template-based practice creation
+    - Complex state management for practice building
+    
+  stateManagement: |
+    - Practice metadata (date, time, duration, field, notes)
+    - Time slots array with drill sequences
+    - Selected strategies for practice focus
+    - Modal visibility states (8+ modals)
+    - Auto-save coordination with 3-second debouncing
+    - Loading states across multiple data sources
+    
+  sideEffects:
+    - "Auto-save to localStorage every 3 seconds"
+    - "Restore practice data on page load"
+    - "Toast notifications for user feedback"
+    - "Print functionality with mobile optimization"
+    
+  formHandling: |
+    - Practice metadata form (date, time, duration, field)
+    - Drill sequence building and modification
+    - Strategy selection and management
+    - Notes and setup instructions
+
+# ===== NO-TEAM HANDLING ORCHESTRATION =====
+noTeamHandling:
+  routePattern: "/teams/no-team/practiceplan"
+  teamIdHandling: |
+    - Detects 'no-team' string in params.teamId
+    - Sets teamId to undefined for hooks
+    - Allows practice planning without team context
+    - LocalStorage key uses 'no-team' identifier
+    
+  functionalityImpact: |
+    - Practice planning works fully without team
+    - Saving to database requires team context
+    - Templates and drills work independently
+    - Auto-save uses team-specific localStorage keys
+    
+  userExperience: |
+    - Seamless practice planning for individual coaches
+    - Full feature access without team membership
+    - Can save and load practice plans locally
+    - Export/print functionality available
+
+# ===== AUTO-SAVE ORCHESTRATION =====
+autoSaveOrchestration:
+  trigger: "useEffect with 3-second debounce"
+  dataIncluded:
+    - "Practice metadata (date, time, duration, field)"
+    - "Setup configuration and notes"
+    - "Complete time slots array"
+    - "Selected strategies array"
+    
+  storageStrategy: |
+    - localStorage with team-specific keys
+    - JSON serialization of practice state
+    - Error handling for quota exceeded
+    - Silent failure with console warnings
+    
+  restoration: |
+    - Loads saved data on component mount
+    - Handles malformed data gracefully
+    - Shows success toast on restoration
+    - Maintains state consistency
+
+# ===== MODAL ORCHESTRATION =====
+modalOrchestration:
+  modalTypes:
+    - "SavePracticeModal - Save to database"
+    - "LoadPracticeModal - Load saved practices"
+    - "PracticeTemplateSelector - Load templates"
+    - "AddCustomStrategiesModal - Create strategies"
+    - "StrategiesListModal - Browse strategies"
+    - "StudyDrillModal - Drill details and modification"
+    - "StudyStrategyModal - Strategy details"
+    - "Print Preview Modal - Desktop print preview"
+    
+  stateManagement: |
+    - Individual boolean state for each modal
+    - Shared data passing between modals and main component
+    - Modal-specific loading and error states
+    
+  dataFlow: |
+    - Modals receive practice data as props
+    - Modals trigger parent state updates via callbacks
+    - Complex drill and strategy selection workflows
+
+# ===== RESPONSIVE ORCHESTRATION =====
+responsiveOrchestration:
+  desktopLayout: |
+    - Split layout: main content + sidebar drill library
+    - Sticky sidebar with full height
+    - Toolbar in header with all actions
+    - Print preview modal for larger screens
+    
+  mobileLayout: |
+    - Single column layout with floating add button
+    - Drill library as full-screen modal
+    - Condensed toolbar with essential actions
+    - Direct print without preview
+    - Bottom-positioned action buttons
+    
+  breakpoints: |
+    - md: 768px - Sidebar visibility toggle
+    - lg: 1024px - Sidebar width expansion
+    - Mobile-first responsive design
+
+# ===== SERVER/CLIENT BOUNDARY =====
+serverClientBoundary:
+  serverComponents: []
+  clientComponents:
+    - "PracticePlansPage (root component)"
+    - "All practice planner components"
+    - "All modal components"
+  boundaryLocation: "Page level - entire page is client component"
+  dataSerializationPoints: []
+
+# ===== PERFORMANCE PATTERNS =====
+performancePatterns:
+  prefetching: []
+  lazyLoading: []
+  codeSplitting: []
+  optimizations:
+    - "3-second debounced auto-save"
+    - "Conditional modal rendering"
+    - "Memoized drill calculations"
+    - "Efficient time slot management"
+
+# ===== SECURITY PATTERNS =====
+securityPatterns:
+  authentication: "Layout-level authentication required"
+  authorization: |
+    - Team membership not required (no-team support)
+    - Drill library access based on user permissions
+    - Strategy creation requires authentication
+  dataValidation: "Hook-level validation for all operations"
+  csrfProtection: false
+
+# ===== INTEGRATION POINTS =====
+integrationPoints:
+  supabaseUsage:
+    directQueries: false
+    throughHooks: true # All data via specialized hooks
+    serverSideOnly: false
+    
+  externalAPIs: []
+  webhooks: []
+  realtimeSubscriptions: []
+
+# ===== TEAM CONTEXT ORCHESTRATION =====
+teamContextOrchestration:
+  teamIdExtraction: |
+    - useParams extracts teamId from route
+    - Special handling for 'no-team' case
+    - Passes teamId (or undefined) to hooks
+    
+  teamValidation: |
+    - No strict team validation required
+    - Supports both team and no-team workflows
+    - Team context enhances but doesn't block functionality
+    
+  teamDataUsage: |
+    - Team ID used for practice plan saving
+    - Team context for localStorage keys
+    - Team-specific drill and strategy sharing
+
+# ===== ERROR HANDLING =====
+errorHandling:
+  loadingStates:
+    - "Comprehensive loading.tsx with skeleton UI"
+    - "Individual hook loading states"
+    - "Modal-specific loading indicators"
+    
+  errorStates:
+    - "Dedicated error.tsx error boundary"
+    - "Toast notifications for operation failures"
+    - "Graceful degradation for missing data"
+    
+  fallbackBehavior: |
+    - Error boundary with retry functionality
+    - Navigation fallback to teams page
+    - Local state preservation during errors
+    - Development-only error details
+
+# ===== PRINT WORKFLOW ORCHESTRATION =====
+printWorkflowOrchestration:
+  printTrigger: |
+    - Validates practice has drills before printing
+    - Mobile: Direct print without preview
+    - Desktop: Shows print preview modal
+    
+  printContent: |
+    - Comprehensive PrintablePracticePlan component
+    - Includes all practice metadata and drill sequences
+    - Optimized for standard letter-size printing
+    - Mobile printing instructions and tips
+    
+  printOptimization: |
+    - Separate print CSS considerations
+    - Mobile-specific print guidance
+    - Print button state management during printing
+
+# ===== DRILL LIBRARY INTEGRATION =====
+drillLibraryIntegration:
+  drillSources:
+    - "powlax_drills - Official POWLAX drill library"
+    - "user_drills - User-created custom drills"
+    
+  drillAddition: |
+    - Drill selection creates unique time slot
+    - Drill modification preserves timeline position
+    - Drag and drop timeline management
+    
+  drillStudy: |
+    - Modal-based drill examination
+    - In-place drill modification
+    - Drill note and duration adjustment
+
+# ===== IMPLEMENTATION HISTORY =====
+implementationHistory:
+  - id: "BF-2025-01-15-003"
+    date: "2025-01-15"
+    type: "bug-fix"
+    description: "Fixed Add to Plan modal to add all selected drills"
+    changes:
+      - "Enhanced unique ID generation with timestamp + random string"
+      - "Fixed state update to use functional setState pattern"
+      - "Ensures all selected drills add correctly instead of just one"
+    validation:
+      - "Multiple drill selection now works properly"
+      - "Each drill gets unique ID preventing conflicts"
+      
+  - id: "BF-2025-01-15-005"
+    date: "2025-01-15"
+    type: "bug-fix"
+    description: "Fixed reset button to clear practice plan"
+    changes:
+      - "Changed from refreshDrills to handleResetPractice function"
+      - "Added confirmation dialog before clearing"
+      - "Clears timeSlots, strategies, notes, and localStorage"
+    validation:
+      - "Reset button now properly clears practice plan"
+      - "Confirmation prevents accidental data loss"
+      - "LocalStorage cleaned up properly"
+
+# ===== NOTES =====
+notes: |
+  - Most complex page in the application
+  - Handles both team and no-team workflows
+  - Comprehensive practice planning functionality
+  - Advanced auto-save and restoration
+  - Mobile-optimized responsive design
+  - Extensive modal workflow management
+  - Integration with multiple data sources
+  - Professional print output capabilities
+  - Error boundary and loading state coverage

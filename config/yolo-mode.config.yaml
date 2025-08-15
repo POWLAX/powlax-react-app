@@ -1,6 +1,9 @@
-# 🚀 YOLO Mode Configuration
-# Autonomous operation settings for Master Controller and sub-agents
+# 🚀 YOLO Mode Configuration  
+# Autonomous operation settings for general-purpose sub-agents
 # When enabled, agents operate without constant permission requests
+# 
+# 🚨 NOTE: DO NOT USE specialized controllers (powlax-master-controller, BMad, etc.)
+# ONLY use general-purpose sub-agents with focused contracts
 
 enabled: true
 version: 1.0.0

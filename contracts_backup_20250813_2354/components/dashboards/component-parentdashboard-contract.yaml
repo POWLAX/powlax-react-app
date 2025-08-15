@@ -1,0 +1,141 @@
+# Component Contract: ParentDashboard
+contractId: "component-parentdashboard-20250113"
+componentInfo:
+  name: "ParentDashboard"
+  filePath: "src/components/dashboards/ParentDashboard.tsx"
+  category: "dashboard"
+  parentPage: "/dashboard (when user role is parent)"
+  complexity: "complex"
+  
+functionalAnalysis:
+  purpose: "Parent dashboard for monitoring children's lacrosse progress, gamification achievements, and team activities"
+  primaryFunction: "Display children linked to parent account with detailed progress tracking, gamification stats, and team information"
+  userInteractions: 
+    - "View children's progress and achievements"
+    - "Navigate to child-specific detail pages"
+    - "Access team information for each child"
+    - "View gamification progress (points, badges, ranks)"
+    - "Check Skills Academy completion status"
+  businessLogic: "Fetches real parent-child relationships from database, displays comprehensive child progress with mix of real and mock data"
+  stateManagement: "React useState with useEffect for data fetching, loading states"
+  
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "direct"
+  supabaseTables: ["parent_child_relationships", "users", "user_points_wallets", "user_badges", "skills_academy_user_progress", "team_members", "teams", "clubs"]
+  tableUsage:
+    - tableName: "parent_child_relationships"
+      operations: ["select"]
+      purpose: "Find children linked to parent user"
+      dataFlow: "parent_id -> child relationships -> child user data"
+    - tableName: "users"
+      operations: ["select"]
+      purpose: "Get child user details and profile information"
+      dataFlow: "child_id -> user profile data"
+    - tableName: "user_points_wallets"
+      operations: ["select"]
+      purpose: "Display child's point balance"
+      dataFlow: "child user -> wallet balance"
+    - tableName: "user_badges"
+      operations: ["select"]
+      purpose: "Show child's earned badges"
+      dataFlow: "child user -> badge achievements"
+    - tableName: "skills_academy_user_progress"
+      operations: ["select"]
+      purpose: "Track child's Skills Academy completion"
+      dataFlow: "child user -> workout completions"
+    - tableName: "team_members"
+      operations: ["select"]
+      purpose: "Get child's team assignments"
+      dataFlow: "child user -> team membership -> team details"
+  
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements:
+    - "Patrick's user ID for parent relationship queries"
+    - "Mock engagement metrics and practice attendance"
+    - "Some gamification displays when real data unavailable"
+  mockDataUsage:
+    - "Mock practice attendance percentages"
+    - "Mock engagement tracking"
+    - "Fallback mock badges when no real badges exist"
+    - "Mock rank assignments"
+  realDataPercentage: 70
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: ["supabase client"]
+  externalLibraries: ["lucide-react", "next/link"]
+  
+supabaseTableDetails:
+  tablesUsed: ["parent_child_relationships", "users", "user_points_wallets", "user_badges", "skills_academy_user_progress", "team_members", "teams", "clubs"]
+  tableRelationships: 
+    - "parent_child_relationships.child_id -> users.id"
+    - "users.id -> user_points_wallets.user_id"
+    - "users.id -> user_badges.user_id"
+    - "users.id -> skills_academy_user_progress.user_id"
+    - "users.id -> team_members.user_id"
+    - "team_members.team_id -> teams.id"
+    - "teams.club_id -> clubs.id"
+  queryPatterns:
+    - "Complex join query with nested selects"
+    - "Parent-child relationship traversal"
+    - "Multi-table data aggregation"
+  dataTransformations:
+    - "Relationship mapping to child objects"
+    - "Wallet balance extraction"
+    - "Progress completion calculations"
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Add real practice attendance tracking"
+    - "Implement real engagement metrics"
+    - "Add more detailed progress analytics"
+    - "Enhance error handling for missing data"
+  priority: "high"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation: ["Parent-child relationship setup", "Data flow explanation", "Gamification integration"]
+  
+componentInteractions:
+  callsComponents: ["Card components", "Button", "Badge", "Progress"]
+  calledByComponents: ["Main dashboard page when user role is parent"]
+  sharedState: ["User object passed as prop"]
+  eventCommunication: []
+  propsPassedTo: ["Child data to various UI components"]
+  propsReceivedFrom: ["user prop from parent dashboard"]
+  
+userJourneyContext:
+  userFlows: ["Parent Login -> Dashboard -> Child Progress", "Parent -> Team Information -> Practice Schedule", "Parent -> Child Achievements -> Skills Academy"]
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["parent"]
+  featureArea: "teams"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "ParentDashboard"
+  reasonForDuplication: ""
+  consolidationStrategy: ""
+  supabaseIntegrationWinner: "ParentDashboard"
+
+notes:
+  - "Excellent real database integration with complex joins"
+  - "Uses actual parent_child_relationships table"
+  - "Hardcoded Patrick's ID for testing (should be dynamic)"
+  - "Good mix of real and fallback mock data"
+  - "Comprehensive child progress tracking"
+  - "Strong foundation for parent user experience"
+  - "Could be template for other complex dashboard integrations"

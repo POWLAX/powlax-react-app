@@ -84,7 +84,7 @@
 
 ### **How to Check:**
 ```typescript
-// Master Controller checks this file
+// General-purpose sub-agent checks this file
 async function checkContractApproval(taskDescription: string) {
   const approvedContracts = await loadApprovedContracts();
   

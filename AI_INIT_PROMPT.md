@@ -7,13 +7,15 @@ I'm working on the POWLAX React/Next.js codebase. Before we begin:
 
 1. Please read and acknowledge the AI_FRAMEWORK_ERROR_PREVENTION.md file in the root directory
 2. Review CLAUDE.md for project conventions
-3. Note these critical rules:
+3. Run `npm run fresh` to get complete project context via PROJECT_INDEX.json
+4. Note these critical rules:
    - Always run `npm run lint` before and after changes
    - Use &apos; for apostrophes in JSX, never raw quotes
    - Check if files exist before creating new ones
    - Import all lucide-react icons that you use
    - Never use 'any' type in TypeScript
    - Only server components can be async
+   - Use port 3002 for this branch: `npm run dev -- -p 3002`
 
 Please confirm you've understood these guidelines before we proceed.
 ```

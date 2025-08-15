@@ -22,7 +22,7 @@
 ### **Before Starting ANY Work:**
 
 ```typescript
-// Master Controller MUST verify
+// General-purpose sub-agent MUST verify
 async function verifyContract(task: string, contract: Contract): boolean {
   
   // 1. Check task matches contract scope

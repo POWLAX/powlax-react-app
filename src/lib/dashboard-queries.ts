@@ -110,7 +110,7 @@ async function fetchAdminDashboard(userId: string): Promise<DashboardData> {
   ]);
 
   return {
-    user: { id: userId, role: 'admin' },
+    user: { id: userId, role: 'administrator' },
     metrics: {
       totalOrganizations: clubs.data?.length || 0,
       totalUsers: users.count || 0,

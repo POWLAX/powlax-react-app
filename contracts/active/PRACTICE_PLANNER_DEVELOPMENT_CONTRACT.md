@@ -4,7 +4,7 @@
 - **Created**: January 16, 2025
 - **Status**: ACTIVE
 - **Priority**: CRITICAL
-- **Master Controller**: powlax-master-controller
+- **Implementation**: General-purpose sub-agents
 
 ## Executive Summary
 
@@ -14,8 +14,8 @@ This contract defines the complete implementation of the POWLAX Practice Planner
 
 ### All Agents Must:
 1. **Read and Reference**: `docs/development/POWLAX_PAGE_ERROR_PREVENTION_GUIDE.md` before ANY page modifications
-2. **Follow BMad Understanding**: Use BMad agents for understanding what the app should be (UI, text, functionality)
-3. **Implement via POWLAX Controllers**: Use POWLAX sub-agents for technical implementation
+2. **Use General-Purpose Sub-Agents ONLY**: Never use specialized controllers or master controller systems
+3. **Follow Simple Implementation**: Use focused, single-purpose general-purpose agents with specific contracts
 4. **Test Against Error Guide**: Verify no known issues from error prevention guide before delivery
 5. **Update Error Guide**: Document any new error patterns discovered during development
 

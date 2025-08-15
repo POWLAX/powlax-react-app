@@ -1,0 +1,153 @@
+# Team Playbook Component Contract: SaveToPlaybookModal
+contractId: "component-save-to-playbook-modal-20250115"
+componentInfo:
+  name: "SaveToPlaybookModal"
+  filePath: "src/components/team-playbook/SaveToPlaybookModal.tsx"
+  category: "team-playbook"
+  parentPage: "Multiple (Practice Planner, Strategies Page)"
+  complexity: "moderate"
+  
+functionalAnalysis:
+  purpose: "Modal dialog for saving strategies to team playbooks. Allows coaches to save strategies with custom names and team-specific notes."
+  primaryFunction: "Strategy persistence to team playbook with customization"
+  userInteractions: 
+    - "Select team from dropdown"
+    - "Optionally customize strategy name"
+    - "Add team-specific notes"
+    - "Save strategy to team playbook"
+    - "Cancel without saving"
+  businessLogic: "Team selection validation, strategy metadata customization, team playbook persistence"
+  stateManagement: "Local state for selected team, custom name, team notes, saving status, error handling"
+  
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "hook"
+  supabaseTables: 
+    - "team_playbooks"
+    - "team_members"
+    - "teams"
+  tableUsage:
+    - tableName: "team_playbooks"
+      operations: ["insert"]
+      purpose: "Save strategy to team playbook"
+      dataFlow: "Modal form → useTeamPlaybook hook → database"
+    - tableName: "team_members"
+      operations: ["select"]
+      purpose: "Get user's teams for dropdown"
+      dataFlow: "useUserTeams hook → Modal dropdown → team selection"
+    - tableName: "teams"
+      operations: ["select"]
+      purpose: "Team information for display"
+      dataFlow: "Join with team_members → Modal dropdown"
+    
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements: []
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks: 
+    - "useUserTeams"
+    - "useTeamPlaybook"
+  contexts: []
+  utilities: []
+  externalLibraries: 
+    - "@/components/ui/dialog"
+    - "@/components/ui/button"
+    - "@/components/ui/input"
+    - "@/components/ui/textarea"
+    - "@/components/ui/select"
+    - "@/components/ui/label"
+    - "@/components/ui/badge"
+    - "lucide-react (BookOpen, Users, Plus, AlertCircle icons)"
+  
+supabaseTableDetails:
+  tablesUsed: 
+    - "team_playbooks"
+    - "team_members"
+    - "teams"
+  tableRelationships: 
+    - "team_playbooks.team_id → teams.id"
+    - "team_playbooks.strategy_id → strategies.id"
+    - "team_playbooks.added_by → users.id"
+    - "team_members.team_id → teams.id"
+    - "team_members.user_id → users.id"
+  queryPatterns: 
+    - "SELECT teams.* FROM team_members JOIN teams WHERE user_id = ?"
+    - "INSERT INTO team_playbooks (team_id, strategy_id, custom_name, team_notes) VALUES (?, ?, ?, ?)"
+  dataTransformations: 
+    - "Maps team member relationships to team list"
+    - "Formats strategy data for playbook storage"
+    - "Handles optional custom naming and notes"
+    
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: 
+    - "Could add team role validation"
+    - "Could implement bulk strategy saving"
+    - "Could add strategy conflict detection"
+    - "Could implement playbook categories"
+  priority: "high"
+  
+implementationHistory:
+  - id: "BF-2025-01-15-002"
+    date: "2025-01-15"
+    type: "bug-fix"
+    description: "Fixed Team Select to show user's teams"
+    changes:
+      - "Updated useUserTeams hook to use correct table relationship"
+      - "Fixed query from team_teams!inner to teams:team_id"
+      - "Corrected data mapping to handle proper structure"
+    validation:
+      - "Team dropdown now populates with user's actual teams"
+      - "Team selection works correctly for saving strategies"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation: 
+    - "Team selection workflow"
+    - "Custom naming conventions"
+    - "Team notes best practices"
+    
+componentInteractions:
+  callsComponents: []
+  calledByComponents: 
+    - "StrategiesTab"
+    - "StudyStrategyModal"
+    - "Any component with strategy save functionality"
+  sharedState: []
+  eventCommunication: 
+    - "onSuccess callback after successful save"
+    - "onClose callback for modal dismissal"
+  propsPassedTo: []
+  propsReceivedFrom: 
+    - "isOpen modal visibility flag"
+    - "strategy object with metadata"
+    - "onClose callback function"
+    - "onSuccess optional callback"
+    
+userJourneyContext:
+  userFlows: 
+    - "Strategy Curation: Find strategy → Save to playbook → Customize for team → Share"
+    - "Team Building: Browse strategies → Save best ones → Add team context → Build playbook"
+  criticalForMVP: true
+  usageFrequency: "medium"
+  primaryUserTypes: ["coach"]
+  featureArea: "teams"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "SaveToPlaybookModal"
+  reasonForDuplication: "N/A"
+  consolidationStrategy: "N/A"
+  supabaseIntegrationWinner: "SaveToPlaybookModal (only implementation)"

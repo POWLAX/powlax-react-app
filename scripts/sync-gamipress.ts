@@ -163,7 +163,7 @@ class GamiPressSyncService {
       try {
         // Find the corresponding Supabase user
         const { data: supabaseUser } = await this.supabase
-          .from('user_profiles')
+          .from('users')
           .select('id')
           .eq('wordpress_id', user.id)
           .single()
@@ -241,7 +241,7 @@ class GamiPressSyncService {
       try {
         // Find the corresponding Supabase user
         const { data: supabaseUser } = await this.supabase
-          .from('user_profiles')
+          .from('users')
           .select('id')
           .eq('wordpress_id', user.id)
           .single()
@@ -308,7 +308,7 @@ class GamiPressSyncService {
       try {
         // Find the corresponding Supabase user
         const { data: supabaseUser } = await this.supabase
-          .from('user_profiles')
+          .from('users')
           .select('id')
           .eq('wordpress_id', user.id)
           .single()

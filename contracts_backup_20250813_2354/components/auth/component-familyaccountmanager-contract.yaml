@@ -1,0 +1,157 @@
+contractId: "component-familyaccountmanager-20250113"
+componentInfo:
+  name: "FamilyAccountManager"
+  filePath: "src/components/auth/FamilyAccountManager.tsx"
+  category: "Family Management"
+  parentPage: "Admin/Profile management"
+  complexity: "complex"
+  
+functionalAnalysis:
+  purpose: "Comprehensive family account management with profile switching and member administration"
+  primaryFunction: "Manage family accounts, switch between member profiles, and handle family-wide settings"
+  userInteractions:
+    - "View family account overview"
+    - "Switch between family member profiles"
+    - "Add child accounts to family"
+    - "Manage emergency contact information"
+    - "Configure family-wide settings"
+    - "Create new family accounts"
+    - "View member roles and permissions"
+  businessLogic: "Family account hierarchies, profile switching, permission management, and cross-profile data sharing"
+  stateManagement: "Complex family state with active profile tracking, member management, and settings persistence"
+  
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "direct"
+  supabaseTables:
+    - "family_accounts"
+    - "family_members"
+    - "parent_child_relationships"
+    - "users"
+  tableUsage:
+    - tableName: "family_accounts"
+      operations: ["select", "insert", "update"]
+      purpose: "Manage family account metadata and settings"
+      dataFlow: "Via /api/auth/family/account API routes"
+    - tableName: "family_members"
+      operations: ["select", "insert", "update"]
+      purpose: "Track family member relationships and roles"
+      dataFlow: "Via family management API endpoints"
+    - tableName: "parent_child_relationships"
+      operations: ["select", "insert"]
+      purpose: "Define parent-child relationships for permission inheritance"
+      dataFlow: "Via /api/auth/family/add-child endpoint"
+    - tableName: "users"
+      operations: ["select", "update"]
+      purpose: "Manage individual user profiles within family context"
+      dataFlow: "Via profile switching and user management"
+      
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements:
+    - "Family role types (primary_parent, secondary_parent, child, guardian)"
+    - "Account types (parent, child, individual)"
+    - "Default family settings (shared calendar, combined stats, notifications)"
+  mockDataUsage: []
+  realDataPercentage: 85
+  
+dependencies:
+  hooks:
+    - "useAuth"
+    - "useState"
+    - "useEffect"
+    - "useFamilyAccount (custom hook included)"
+  contexts:
+    - "SupabaseAuthContext"
+  utilities: []
+  externalLibraries:
+    - "lucide-react"
+    - "@/components/ui/*"
+    
+supabaseTableDetails:
+  tablesUsed:
+    - "family_accounts"
+    - "family_members"
+    - "parent_child_relationships"
+    - "users"
+  tableRelationships:
+    - "family_accounts.primary_parent_id -> users.id"
+    - "family_members.family_account_id -> family_accounts.id"
+    - "family_members.user_id -> users.id"
+    - "parent_child_relationships.parent_id -> users.id"
+    - "parent_child_relationships.child_id -> users.id"
+  queryPatterns:
+    - "Family account loading with member details"
+    - "Profile switching with permission validation"
+    - "Child account creation with relationship establishment"
+    - "Family-wide settings management"
+  dataTransformations:
+    - "Role hierarchy to permission mapping"
+    - "Family member display formatting"
+    - "Age group categorization"
+    - "Emergency contact data structuring"
+    
+mvpReadiness:
+  isProductionReady: false
+  blockers:
+    - "API endpoints not fully implemented (/api/auth/family/*)"
+    - "Profile switching functionality incomplete"
+    - "Child account creation flow needs implementation"
+  improvements:
+    - "Add family invitation system"
+    - "Implement family-wide analytics"
+    - "Add parental controls"
+    - "Support for multiple guardian roles"
+  priority: "medium"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation:
+    - "Family account hierarchy model"
+    - "Profile switching security model"
+    - "Permission inheritance patterns"
+    - "API integration requirements"
+    
+componentInteractions:
+  callsComponents:
+    - "Card, CardContent, CardDescription, CardHeader, CardTitle (ui)"
+    - "Button (ui)"
+    - "Badge (ui)"
+  calledByComponents:
+    - "Admin management pages"
+    - "User profile settings"
+    - "Account management flows"
+  sharedState:
+    - "useAuth context for current user"
+    - "useFamilyAccount hook for family-specific state"
+  eventCommunication:
+    - "Profile switch events"
+    - "Family member addition events"
+    - "Settings change events"
+  propsPassedTo: []
+  propsReceivedFrom: []
+  
+userJourneyContext:
+  userFlows:
+    - "Parent setup -> Create family account -> Add children -> Manage profiles"
+    - "Parent login -> Switch to child profile -> Access child's data"
+    - "Family settings -> Configure sharing -> Update permissions"
+  criticalForMVP: false
+  usageFrequency: "medium"
+  primaryUserTypes: ["parent", "guardian"]
+  featureArea: "authentication"
+  journeyStage: "advanced"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "FamilyAccountManager"
+  reasonForDuplication: "Unique family management functionality"
+  consolidationStrategy: "N/A"
+  supabaseIntegrationWinner: "FamilyAccountManager (advanced family data integration)"

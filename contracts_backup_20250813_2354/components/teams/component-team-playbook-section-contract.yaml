@@ -1,0 +1,106 @@
+# Team Playbook Section Component Contract
+contractId: "component-team-playbook-section-20250113"
+componentInfo:
+  name: "TeamPlaybookSection"
+  filePath: "src/components/teams/dashboard/TeamPlaybookSection.tsx"
+  category: "Team Management"
+  parentPage: "Team Dashboard, Player View"
+  complexity: "complex"
+
+functionalAnalysis:
+  purpose: "Team-specific strategy playbook with game phase organization and strategy management"
+  primaryFunction: "Display and manage team strategies organized by game phases with role-based access"
+  userInteractions:
+    - "Browse team strategies by game phase"
+    - "Study individual strategies in modal"
+    - "Add/remove strategies from team playbook (coaches)"
+    - "View strategy details and instructions"
+    - "Navigate between different game phases"
+  businessLogic: "Strategy organization by game phases, role-based strategy management, team playbook persistence"
+  stateManagement: "Hook-based team playbook data with local modal state"
+
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "hook"
+  supabaseTables:
+    - "powlax_strategies"
+    - "user_strategies"
+    - "teams"
+  tableUsage:
+    - tableName: "powlax_strategies"
+      operations: ["select"]
+      purpose: "Source strategies for team playbook"
+      dataFlow: "useTeamPlaybook hook -> strategy selection and filtering"
+    - tableName: "user_strategies"
+      operations: ["select"]
+      purpose: "Custom team strategies"
+      dataFlow: "Team-specific strategy filtering via team_share arrays"
+    - tableName: "teams"
+      operations: ["select"]
+      purpose: "Team context for playbook management"
+      dataFlow: "Team ID for playbook association"
+
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements:
+    - "Game phases array (GAME_PHASES constant)"
+    - "Phase-based strategy grouping logic"
+  mockDataUsage: []
+  realDataPercentage: 85
+
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Add strategy video integration"
+    - "Add strategy execution tracking"
+    - "Add custom strategy creation in-component"
+    - "Add strategy sharing between teams"
+  priority: "high"
+
+componentInteractions:
+  callsComponents:
+    - "Card, CardContent, CardHeader, CardTitle (UI)"
+    - "Button (UI)"
+    - "Badge (UI)"
+    - "ScrollArea (UI)"
+    - "StudyStrategyModal - strategy detail viewing"
+  calledByComponents:
+    - "Team Dashboard page"
+    - "PlayerView component"
+  sharedState:
+    - "useTeamPlaybook hook state"
+  propsReceivedFrom:
+    - "teamId: string - team identifier"
+    - "teamName?: string - team display name"
+    - "isCoach: boolean - role-based feature access"
+    - "className?: string - styling override"
+
+userJourneyContext:
+  userFlows:
+    - "Coach->Team Dashboard->Manage Team Playbook"
+    - "Player->Team Dashboard->Study Team Strategies"
+    - "Coach->Team Dashboard->Add Strategy to Playbook"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["coach", "player"]
+  featureArea: "teams"
+  journeyStage: "core-loop"
+
+teamManagementContext:
+  roleBasedDisplay: true
+  supportedRoles: ["coach", "player"]
+  strategyManagement: "Team-specific strategy collection with game phase organization"
+  gamePhaseOrganization: "11 predefined game phases for strategy categorization"
+  coachingFeatures: "Add/remove strategies, manage team playbook content"
+  playerFeatures: "Study team strategies, access game phase tactics"
+
+duplicateFunctionality:
+  hasDuplicates: true
+  duplicateComponents:
+    - "Practice Planner strategy components - overlapping strategy display"
+    - "StudyStrategyModal - shared strategy viewing"
+  primaryComponent: "TeamPlaybookSection"
+  reasonForDuplication: "Team-specific vs general strategy management contexts"
+  consolidationStrategy: "Keep separate - team playbook vs practice planning have different workflows"
+  supabaseIntegrationWinner: "Both use same strategy tables effectively"

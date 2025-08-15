@@ -189,7 +189,7 @@ function mapDrillCategory(category: string): string {
   } else if (lowerCategory.includes('team') || lowerCategory.includes('concept')) {
     return 'concept'
   } else if (lowerCategory.includes('admin') || lowerCategory.includes('warm')) {
-    return 'admin'
+    return 'administrator'
   }
   
   return 'skill'

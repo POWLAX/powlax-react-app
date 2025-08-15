@@ -1,0 +1,273 @@
+contract:
+  id: new-page-creation-example-001
+  title: "Complete New Page Creation Contract"
+  version: "1.0.0"
+  created: "2025-01-16"
+  type: "full-page-specification"
+  
+purpose: |
+  Example contract for creating a complete new page from scratch.
+  This demonstrates how the contract system handles:
+  1. Page structure and routing
+  2. Component requirements and relationships
+  3. Database integration and queries
+  4. Authentication and authorization
+  5. Mobile responsiveness and accessibility
+  6. Testing and quality gates
+
+page_specification:
+  page_name: "TeamLeaderboard"
+  route: "/teams/[teamId]/leaderboard"
+  page_type: "client"
+  authentication_required: true
+  authorized_roles: ["coach", "player", "parent"]
+  
+  functional_requirements:
+    primary_purpose: "Display real-time team rankings and player statistics"
+    user_interactions:
+      - "Coach can view detailed team analytics"
+      - "Players can see their rank and progress"
+      - "Parents can view their children's standings"
+    business_rules:
+      - "Only show data for user's authorized team"
+      - "Hide sensitive data from players/parents"
+      - "Update rankings in real-time"
+    edge_cases:
+      - "No data available → Show friendly empty state"
+      - "Network error → Show cached data with warning"
+      - "Unauthorized access → Redirect to appropriate dashboard"
+
+  technical_architecture:
+    page_structure: |
+      /teams/[teamId]/leaderboard/page.tsx (main page)
+      ├── LeaderboardHeader.tsx (title, filters, actions)
+      ├── LeaderboardTable.tsx (main data display)
+      │   ├── PlayerRankCard.tsx (individual player row)
+      │   └── StatsColumn.tsx (statistics display)
+      ├── LeaderboardFilters.tsx (time period, category filters)
+      └── LeaderboardActions.tsx (export, share functionality)
+    
+    state_management:
+      local_state:
+        - "selectedTimePeriod: string"
+        - "sortColumn: string"
+        - "filterCategory: string"
+      shared_state:
+        - "useAuth() for user role"
+        - "useTeam(teamId) for team data"
+      external_state:
+        - "useLeaderboard(teamId, filters)"
+        - "useRealTimeUpdates(teamId)"
+
+  database_integration:
+    primary_tables:
+      - table_name: "teams"
+        usage_pattern: "SELECT"
+        purpose: "Validate user access to team data"
+        queries:
+          - description: "Get team information and verify access"
+            query_type: "SELECT"
+            columns: ["id", "name", "club_id"]
+            performance_requirements: "< 200ms"
+      
+      - table_name: "team_members"
+        usage_pattern: "SELECT"
+        purpose: "Get team roster and player information"
+        queries:
+          - description: "Fetch team members with user details"
+            query_type: "SELECT"
+            columns: ["user_id", "role", "joined_at"]
+            joins: ["users(id, display_name, first_name, last_name)"]
+            performance_requirements: "< 300ms"
+      
+      - table_name: "user_points_wallets"
+        usage_pattern: "SELECT"
+        purpose: "Get player point totals for ranking"
+        queries:
+          - description: "Fetch point balances for leaderboard"
+            query_type: "SELECT"
+            columns: ["user_id", "points_balance", "updated_at"]
+            performance_requirements: "< 500ms"
+      
+      - table_name: "skills_academy_user_progress"
+        usage_pattern: "SELECT"
+        purpose: "Get workout completion statistics"
+        queries:
+          - description: "Fetch completion stats for ranking"
+            query_type: "SELECT"
+            columns: ["user_id", "workouts_completed", "total_points"]
+            performance_requirements: "< 400ms"
+
+    relationships:
+      - from_table: "teams"
+        to_table: "team_members"
+        relationship_type: "one_to_many"
+        component_usage: "LeaderboardTable fetches team roster"
+      
+      - from_table: "team_members"
+        to_table: "users"
+        relationship_type: "foreign_key"
+        component_usage: "PlayerRankCard displays user information"
+
+  component_specifications:
+    LeaderboardHeader:
+      props:
+        - "teamName: string"
+        - "totalPlayers: number"
+        - "onFilterChange: (filters: FilterOptions) => void"
+      purpose: "Display page title and filter controls"
+      database_access: "none"
+    
+    LeaderboardTable:
+      props:
+        - "players: PlayerRanking[]"
+        - "currentUser: User"
+        - "sortBy: string"
+        - "onSort: (column: string) => void"
+      purpose: "Main data table with player rankings"
+      database_access: "read-only via props"
+    
+    PlayerRankCard:
+      props:
+        - "player: PlayerRanking"
+        - "rank: number"
+        - "isCurrentUser: boolean"
+        - "showSensitiveData: boolean"
+      purpose: "Individual player row with stats"
+      database_access: "none"
+
+  authorization_matrix:
+    coach:
+      can_view: ["all_team_data", "detailed_statistics", "export_options"]
+      can_edit: ["leaderboard_settings", "point_adjustments"]
+      restrictions: ["only_own_team_data"]
+    
+    player:
+      can_view: ["own_ranking", "team_leaderboard", "public_statistics"]
+      can_edit: []
+      restrictions: ["no_sensitive_data", "no_export_options"]
+    
+    parent:
+      can_view: ["children_ranking", "team_leaderboard", "basic_statistics"]
+      can_edit: []
+      restrictions: ["only_children_data", "no_detailed_analytics"]
+
+  performance_requirements:
+    load_time: "< 2000ms initial load"
+    update_time: "< 500ms filter changes"
+    real_time_updates: "< 30s for new data"
+    mobile_performance: "Smooth scrolling on 375px+ screens"
+    caching_strategy: "5-minute cache for leaderboard data"
+
+  mobile_responsiveness:
+    breakpoints:
+      - "375px+: Stack columns, simplified stats"
+      - "768px+: Full table layout"
+      - "1024px+: Side-by-side filters"
+    touch_targets: "Minimum 44px for all interactive elements"
+    accessibility: "Screen reader compatible, keyboard navigation"
+
+  quality_gates:
+    functionality:
+      - criteria: "All user roles see appropriate data"
+        validation: "Test with different role accounts"
+      - criteria: "Real-time updates work correctly"
+        validation: "Update data in database, verify UI updates"
+      - criteria: "Filters and sorting function properly"
+        validation: "Test all filter combinations"
+    
+    performance:
+      - criteria: "Page loads in < 2s"
+        validation: "Lighthouse performance audit"
+      - criteria: "Database queries optimized"
+        validation: "Query execution time < 500ms"
+    
+    security:
+      - criteria: "Users only see authorized team data"
+        validation: "Test cross-team access attempts"
+      - criteria: "Sensitive data hidden from players/parents"
+        validation: "Role-based data visibility tests"
+    
+    testing:
+      - criteria: "Unit tests for all components"
+        validation: "Jest test coverage > 85%"
+      - criteria: "Integration tests for database queries"
+        validation: "Supabase query tests passing"
+      - criteria: "E2E tests for user workflows"
+        validation: "Playwright tests for all roles"
+
+success_criteria:
+  functional_completeness:
+    - "All authorized users can access their team leaderboard"
+    - "Data displays correctly for different user roles"
+    - "Real-time updates work without page refresh"
+    - "Filters and sorting provide expected results"
+  
+  technical_completeness:
+    - "Page follows POWLAX architectural patterns"
+    - "Database queries use correct table names and RLS"
+    - "Component props are properly typed"
+    - "Error handling covers all edge cases"
+  
+  integration_completeness:
+    - "Page integrates with existing navigation"
+    - "Authentication and authorization work correctly"
+    - "Mobile responsive design functions properly"
+    - "Performance requirements are met"
+
+sub_agent_instructions:
+  preparation:
+    - "Read PROJECT_INDEX.json for existing component patterns"
+    - "Review authorization matrix in security-architecture.md"
+    - "Check existing leaderboard/ranking components"
+    - "Verify database table names and columns"
+  
+  implementation:
+    - "Create page structure following Next.js App Router patterns"
+    - "Implement role-based data filtering at query level"
+    - "Use existing POWLAX component patterns and styling"
+    - "Add proper TypeScript interfaces for all data"
+  
+  testing:
+    - "Write unit tests for all components"
+    - "Create integration tests for database queries"
+    - "Add E2E tests for each user role workflow"
+    - "Test mobile responsiveness on multiple screen sizes"
+  
+  validation:
+    - "Verify all quality gates pass"
+    - "Test authorization with different user roles"
+    - "Confirm performance requirements are met"
+    - "Validate accessibility compliance"
+
+expected_deliverables:
+  files_created:
+    - "src/app/(authenticated)/teams/[teamId]/leaderboard/page.tsx"
+    - "src/components/leaderboard/LeaderboardHeader.tsx"
+    - "src/components/leaderboard/LeaderboardTable.tsx"
+    - "src/components/leaderboard/PlayerRankCard.tsx"
+    - "src/components/leaderboard/LeaderboardFilters.tsx"
+    - "src/hooks/useLeaderboard.ts"
+    - "src/types/leaderboard.ts"
+  
+  tests_created:
+    - "src/components/leaderboard/__tests__/LeaderboardTable.test.tsx"
+    - "src/hooks/__tests__/useLeaderboard.test.ts"
+    - "tests/e2e/team-leaderboard.spec.ts"
+  
+  documentation_updated:
+    - "Component state tracking in state management system"
+    - "Database query documentation"
+    - "User role testing scenarios"
+
+notes: |
+  This contract demonstrates the complete page creation workflow:
+  1. Detailed functional and technical specifications
+  2. Database integration with exact table/column requirements
+  3. Component architecture with clear relationships
+  4. Role-based authorization requirements
+  5. Performance and quality gates
+  6. Comprehensive testing requirements
+  
+  Sub-agents receive complete context from PROJECT_INDEX.json plus
+  this detailed specification to build production-ready pages.

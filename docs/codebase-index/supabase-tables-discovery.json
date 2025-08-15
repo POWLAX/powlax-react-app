@@ -1,0 +1,227 @@
+{
+  "discovery_date": "2025-01-14T23:53:00.000Z",
+  "total_tables": 33,
+  "tables": [
+    {
+      "table_name": "clubs",
+      "record_count": 1,
+      "schema": "public"
+    },
+    {
+      "table_name": "family_accounts",
+      "record_count": 1,
+      "schema": "public"
+    },
+    {
+      "table_name": "family_members",
+      "record_count": 2,
+      "schema": "public"
+    },
+    {
+      "table_name": "magic_links",
+      "record_count": 50,
+      "schema": "public"
+    },
+    {
+      "table_name": "parent_child_relationships",
+      "record_count": 1,
+      "schema": "public"
+    },
+    {
+      "table_name": "playbook_drills",
+      "record_count": 0,
+      "schema": "public"
+    },
+    {
+      "table_name": "playbook_strategies",
+      "record_count": 0,
+      "schema": "public"
+    },
+    {
+      "table_name": "powlax_badges",
+      "record_count": 0,
+      "schema": "public"
+    },
+    {
+      "table_name": "powlax_drills",
+      "record_count": 135,
+      "schema": "public"
+    },
+    {
+      "table_name": "powlax_images",
+      "record_count": 4,
+      "schema": "public"
+    },
+    {
+      "table_name": "powlax_player_ranks",
+      "record_count": 10,
+      "schema": "public"
+    },
+    {
+      "table_name": "powlax_points_currencies",
+      "record_count": 7,
+      "schema": "public"
+    },
+    {
+      "table_name": "powlax_strategies",
+      "record_count": 220,
+      "schema": "public"
+    },
+    {
+      "table_name": "practice_drills",
+      "record_count": 32,
+      "schema": "public"
+    },
+    {
+      "table_name": "practices",
+      "record_count": 38,
+      "schema": "public"
+    },
+    {
+      "table_name": "registration_links",
+      "record_count": 10,
+      "schema": "public"
+    },
+    {
+      "table_name": "registration_sessions",
+      "record_count": 0,
+      "schema": "public"
+    },
+    {
+      "table_name": "skills_academy_drills",
+      "record_count": 167,
+      "schema": "public"
+    },
+    {
+      "table_name": "skills_academy_series",
+      "record_count": 49,
+      "schema": "public"
+    },
+    {
+      "table_name": "skills_academy_user_progress",
+      "record_count": 5,
+      "schema": "public"
+    },
+    {
+      "table_name": "skills_academy_workouts",
+      "record_count": 166,
+      "schema": "public"
+    },
+    {
+      "table_name": "team_members",
+      "record_count": 12,
+      "schema": "public"
+    },
+    {
+      "table_name": "team_playbooks",
+      "record_count": 0,
+      "schema": "public"
+    },
+    {
+      "table_name": "teams",
+      "record_count": 4,
+      "schema": "public"
+    },
+    {
+      "table_name": "user_auth_status",
+      "record_count": 21,
+      "schema": "public"
+    },
+    {
+      "table_name": "user_badges",
+      "record_count": 3,
+      "schema": "public"
+    },
+    {
+      "table_name": "user_drills",
+      "record_count": 0,
+      "schema": "public"
+    },
+    {
+      "table_name": "user_points_balance_powlax",
+      "record_count": 0,
+      "schema": "public"
+    },
+    {
+      "table_name": "user_rank_progress",
+      "record_count": 0,
+      "schema": "public"
+    },
+    {
+      "table_name": "user_sessions",
+      "record_count": 2,
+      "schema": "public"
+    },
+    {
+      "table_name": "user_strategies",
+      "record_count": 0,
+      "schema": "public"
+    },
+    {
+      "table_name": "users",
+      "record_count": 21,
+      "schema": "public"
+    },
+    {
+      "table_name": "wall_ball_drill_library",
+      "record_count": 48,
+      "schema": "public"
+    }
+  ],
+  "summary": {
+    "skills_academy": 4,
+    "practice_planning": 8,
+    "team_management": 3,
+    "user_auth": 8,
+    "gamification": 5
+  },
+  "categories": {
+    "Skills Academy": [
+      "skills_academy_drills",
+      "skills_academy_series", 
+      "skills_academy_workouts",
+      "skills_academy_user_progress",
+      "wall_ball_drill_library"
+    ],
+    "Practice Planning": [
+      "powlax_drills",
+      "powlax_strategies", 
+      "practices",
+      "practice_drills",
+      "powlax_images",
+      "user_drills",
+      "user_strategies"
+    ],
+    "Team Management": [
+      "clubs",
+      "teams",
+      "team_members",
+      "team_playbooks"
+    ],
+    "User & Auth": [
+      "users",
+      "user_sessions",
+      "user_auth_status",
+      "magic_links",
+      "registration_links",
+      "registration_sessions"
+    ],
+    "Family Management": [
+      "family_accounts",
+      "family_members",
+      "parent_child_relationships"
+    ],
+    "Gamification": [
+      "powlax_points_currencies",
+      "user_points_balance_powlax",
+      "powlax_badges",
+      "user_badges",
+      "powlax_player_ranks",
+      "user_rank_progress"
+    ],
+    "Playbooks": [
+      "playbook_drills",
+      "playbook_strategies"
+    ]
+  }
+}

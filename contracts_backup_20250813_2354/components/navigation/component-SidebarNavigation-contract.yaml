@@ -1,0 +1,122 @@
+# Component Contract: SidebarNavigation
+contractId: "component-SidebarNavigation-20250113"
+componentInfo:
+  name: "SidebarNavigation"
+  filePath: "/src/components/navigation/SidebarNavigation.tsx"
+  category: "navigation"
+  parentPage: "authenticated layout (desktop)"
+  complexity: "complex"
+  
+functionalAnalysis:
+  purpose: "Desktop sidebar navigation with admin features and role-based display"
+  primaryFunction: "Primary navigation for desktop users with role-based menu items and admin tools"
+  userInteractions:
+    - "Navigate between main application areas"
+    - "Collapse/expand sidebar for screen space"
+    - "Access admin tools (if administrator)"
+    - "View user profile information"
+    - "Search functionality integration"
+    - "Theme toggle and logout"
+  businessLogic: "Role-based navigation with view-as-role support and admin section"
+  stateManagement: "Sidebar collapse state and user session management"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "context"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements:
+    - "Navigation items configuration"
+    - "Admin navigation items"
+    - "Logo image paths"
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks:
+    - "usePathname (Next.js navigation)"
+    - "useAuth (authentication context)"
+    - "useRoleViewer (role viewing context)"
+    - "useViewAsAuth (view-as authentication)"
+    - "useSidebar (sidebar context)"
+  contexts:
+    - "SupabaseAuthContext"
+    - "RoleViewerContext"
+    - "SidebarContext"
+  utilities: []
+  externalLibraries:
+    - "next/link (navigation)"
+    - "next/image (optimized images)"
+    - "lucide-react (icons)"
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations:
+    - "Distinguishes actual user roles from viewing roles"
+    - "Displays appropriate user information based on viewing mode"
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Add notification indicators"
+    - "Improve keyboard navigation"
+    - "Add drag-and-drop navigation reordering"
+  priority: "high"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "poor"
+  needsDocumentation:
+    - "Role-based navigation logic"
+    - "Admin section permissions"
+    - "View-as-role behavior"
+  
+componentInteractions:
+  callsComponents:
+    - "Link (Next.js navigation)"
+    - "Image (Next.js optimized images)"
+    - "Button (UI component)"
+    - "Badge (UI component)"
+    - "SearchTrigger"
+    - "ThemeToggle"
+  calledByComponents:
+    - "AuthenticatedLayout"
+  sharedState:
+    - "SupabaseAuthContext (user authentication)"
+    - "RoleViewerContext (viewing role state)"
+    - "SidebarContext (collapse state)"
+  eventCommunication:
+    - "Logout action to authentication context"
+  propsPassedTo: []
+  propsReceivedFrom: []
+  
+userJourneyContext:
+  userFlows:
+    - "Desktop User -> Sidebar Nav -> Select Page -> Navigate"
+    - "Admin -> Admin Section -> Management Tools"
+    - "Role Viewer -> Admin Tools -> View As Other Role"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["player", "coach", "parent", "admin", "club_director"]
+  featureArea: "navigation"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: true
+  duplicateComponents:
+    - "BottomNavigation (mobile equivalent)"
+  primaryComponent: "SidebarNavigation"
+  reasonForDuplication: "Responsive design - desktop vs mobile navigation"
+  consolidationStrategy: "Keep separate for optimal desktop/mobile UX"
+  supabaseIntegrationWinner: "N/A"

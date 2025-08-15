@@ -1,0 +1,26 @@
+column_name,data_type,is_nullable,column_default
+id,uuid,NO,uuid_generate_v4()
+wp_user_id,bigint,YES,null
+email,character varying,NO,null
+display_name,character varying,YES,null
+role,character varying,YES,null
+club_id,uuid,YES,null
+created_at,timestamp with time zone,YES,now()
+updated_at,timestamp with time zone,YES,now()
+metadata,jsonb,YES,'{}'::jsonb
+roles,ARRAY,YES,'{}'::text[]
+wordpress_id,bigint,YES,null
+auth_user_id,uuid,YES,null
+first_name,text,YES,null
+last_name,text,YES,null
+phone,text,YES,null
+date_of_birth,date,YES,null
+emergency_contact,jsonb,YES,null
+player_position,text,YES,null
+graduation_year,integer,YES,null
+profile_image_url,text,YES,null
+account_type,text,YES,'individual'::text
+age_group,text,YES,null
+privacy_settings,jsonb,YES,"'{""stats_visible"": true, ""profile_visible"": true}'::jsonb"
+notification_preferences,jsonb,YES,"'{""sms"": false, ""push"": true, ""email"": true}'::jsonb"
+name_display_settings,jsonb,YES,"'{""coach_view"": ""real_name"", ""leaderboard"": ""display_name"", ""team_roster"": ""real_name"", ""gamification"": ""display_name"", ""public_display"": ""display_name""}'::jsonb"

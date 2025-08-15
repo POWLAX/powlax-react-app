@@ -1,0 +1,107 @@
+# Practice Planner Component Contract: StrategyCard
+contractId: "component-strategy-card-20250113"
+componentInfo:
+  name: "StrategyCard"
+  filePath: "src/components/practice-planner/StrategyCard.tsx"
+  category: "practice-planner"
+  parentPage: "Practice Planner (/teams/[teamId]/practiceplan)"
+  complexity: "moderate"
+  
+functionalAnalysis:
+  purpose: "Display component for selected strategies with media access and removal functionality. Shows strategy information in both mobile and desktop layouts."
+  primaryFunction: "Strategy visualization and media access"
+  userInteractions: 
+    - "View strategy name and game phase"
+    - "Remove strategy from practice plan"
+    - "Access strategy video content via VideoModal"
+    - "Access strategy Lab content via LacrosseLabModal"
+    - "View strategy thumbnails (when available)"
+  businessLogic: "Handles responsive layout switching, media content detection, modal triggering for strategy content consumption"
+  stateManagement: "Local state for modal visibility (video, lab content)"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements: []
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: []
+  externalLibraries: 
+    - "lucide-react (icons)"
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: 
+    - "Parses JSON strategy data (lacrosse_lab_links, thumbnail_urls)"
+    - "Responsive layout adaptation (mobile vs desktop)"
+    
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: 
+    - "Could add strategy notes editing"
+    - "Could add strategy sharing functionality"
+    - "Could implement strategy usage tracking"
+  priority: "high"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation: 
+    - "Strategy data structure requirements"
+    - "Media content handling logic"
+    - "Mobile vs desktop layout differences"
+    
+componentInteractions:
+  callsComponents: 
+    - "VideoModal"
+    - "LacrosseLabModal"
+  calledByComponents: 
+    - "ActiveStrategiesSection"
+    - "Strategy selection components"
+  sharedState: []
+  eventCommunication: 
+    - "onRemove callback when strategy removed"
+  propsPassedTo: 
+    - "Strategy data to modal components"
+  propsReceivedFrom: 
+    - "strategy object with metadata"
+    - "gamePhase string for display"
+    - "onRemove callback for removal"
+    - "isMobile flag for layout"
+    
+userJourneyContext:
+  userFlows: 
+    - "Strategy Review: View selected strategies → Access video/lab content → Remove if not needed"
+    - "Content Access: Click video icon → Watch strategy video → Return to planning"
+  criticalForMVP: true
+  usageFrequency: "medium"
+  primaryUserTypes: ["coach"]
+  featureArea: "practice"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: true
+  duplicateComponents: 
+    - "ActiveStrategyCard (in ActiveStrategiesSection)"
+    - "Strategy display in StrategiesTab"
+  primaryComponent: "StrategyCard"
+  reasonForDuplication: "Different contexts - individual display vs list display"
+  consolidationStrategy: "StrategyCard should handle all strategy display contexts with props"
+  supabaseIntegrationWinner: "N/A - presentation component only"

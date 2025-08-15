@@ -45,11 +45,11 @@ export class EmailService {
    */
   async sendMagicLink(email: string, token: string): Promise<boolean> {
     if (!this.isConfigured) {
-      console.warn('SendGrid not configured, magic link URL:', `${this.baseUrl}/auth/magic-link?token=${token}`)
+      console.warn('SendGrid not configured, magic link URL:', `${this.baseUrl}/api/auth/magic-link?token=${token}`)
       return false
     }
 
-    const magicLinkUrl = `${this.baseUrl}/auth/magic-link?token=${token}`
+    const magicLinkUrl = `${this.baseUrl}/api/auth/magic-link?token=${token}`
     
     const html = this.getMagicLinkTemplate(magicLinkUrl)
     const text = `Click here to log in to POWLAX: ${magicLinkUrl}\n\nThis link expires in 1 hour.`

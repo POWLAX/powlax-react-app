@@ -1,0 +1,411 @@
+# Authentication Architecture Cleanup Contract
+# Implements Supabase Auth-Only System with Magic Links per Architectural Decision
+
+contractTemplate:
+  type: AUTHENTICATION_ARCHITECTURE_CLEANUP
+  version: 1.0.0
+  priority: CRITICAL
+  
+  # Contract defines WHAT MUST EXIST for proper authentication
+  approach: "Remove competing auth systems, implement Supabase Auth-only with magic links"
+  
+  parameters:
+    system: "Authentication Architecture"
+    currentIssue: "3 competing authentication systems causing loading loops and user lockout"
+    architecturalDecision: "Supabase Auth-only with WordPress as reference for user creation"
+    
+  # SUB-AGENT COORDINATION SYSTEM
+  subAgents:
+    primary:
+      name: "Authentication Architect"
+      role: "Lead implementation and coordinate sub-agents"
+      responsibilities:
+        - "Orchestrate authentication cleanup across all systems"
+        - "Ensure architectural consistency"
+        - "Validate final implementation"
+        
+    secondary:
+      - name: "Context Cleaner"
+        role: "Remove competing auth systems from contexts and hooks"
+        focus: ["src/contexts/", "src/hooks/"]
+        
+      - name: "API Specialist" 
+        role: "Clean up authentication API endpoints"
+        focus: ["src/app/api/auth/", "src/lib/"]
+        
+      - name: "Middleware Engineer"
+        role: "Implement proper route protection"
+        focus: ["src/middleware.ts", "src/app/(authenticated)/"]
+        
+      - name: "Component Updater"
+        role: "Update components to use unified auth system"
+        focus: ["src/components/", "src/app/"]
+
+  # ARCHITECTURAL REQUIREMENTS CHECKLIST
+  requirements:
+    
+    # Core Authentication Requirements
+    authentication:
+      - name: "Single Auth System"
+        description: "ONLY Supabase Auth exists, all others removed"
+        testable: "No WordPress JWT, no direct-login mock, no competing contexts"
+        status: NOT_IMPLEMENTED
+        priority: CRITICAL
+        
+      - name: "Magic Link Authentication"
+        description: "Users authenticate via magic links only"
+        testable: "Login page requests magic link, email sent, login works"
+        status: PARTIAL  # Exists but not primary flow
+        priority: HIGH
+        
+      - name: "WordPress Reference Only"
+        description: "WordPress data used for user creation, not authentication"
+        testable: "WordPress webhooks create users, magic links handle auth"
+        status: PARTIAL  # Architecture correct, implementation mixed
+        priority: HIGH
+
+    # System Cleanup Requirements  
+    cleanup:
+      - name: "Remove WordPress Auth Context"
+        description: "No WordPress login methods in SupabaseAuthContext"
+        testable: "No JWT methods, no WordPress credential handling"
+        status: NOT_IMPLEMENTED
+        files: ["src/contexts/SupabaseAuthContext.tsx"]
+        
+      - name: "Remove Direct Login System"
+        description: "No mock localStorage authentication bypass"
+        testable: "Direct login page removed or converted to magic links"
+        status: NOT_IMPLEMENTED
+        files: ["src/app/direct-login/", "src/contexts/SupabaseAuthContext.tsx"]
+        
+      - name: "Simplify Middleware"
+        description: "Middleware checks only Supabase Auth sessions"
+        testable: "Single auth source, no competing session checks"
+        status: NOT_IMPLEMENTED
+        files: ["src/middleware.ts"]
+
+    # User Experience Requirements
+    userFlow:
+      - name: "Unified Login Experience"
+        description: "All login flows use magic links"
+        testable: "Login page → email → magic link → authenticated"
+        status: NOT_IMPLEMENTED
+        priority: HIGH
+        
+      - name: "No Loading Loops"
+        description: "Authentication never causes infinite loading states"
+        testable: "All protected pages load without auth blocking"
+        status: NOT_IMPLEMENTED
+        priority: CRITICAL
+        
+      - name: "Clear Error Messages"
+        description: "Auth failures show helpful messages"
+        testable: "Failed magic link shows clear next steps"
+        status: PARTIAL
+
+    # Data Integration Requirements
+    dataFlow:
+      - name: "WordPress User Creation"
+        description: "WordPress webhooks create users with magic links"
+        testable: "MemberPress purchase → user created → magic link sent"
+        status: WORKING  # Already implemented correctly
+        
+      - name: "Supabase Session Management"
+        description: "Sessions stored in user_sessions table"
+        testable: "Magic link creates session record"
+        status: WORKING  # Already implemented
+        
+      - name: "User Profile Linking"
+        description: "users.auth_user_id links to Supabase Auth"
+        testable: "User record linked to auth.users on creation"
+        status: WORKING  # Already implemented
+
+# IMPLEMENTATION PLAN WITH SUB-AGENTS
+
+implementation:
+  
+  # Phase 1: System Analysis and Preparation (Context Cleaner + Primary)
+  phase1:
+    name: "Authentication System Audit"
+    duration: "1 hour"
+    agents: ["Authentication Architect", "Context Cleaner"]
+    
+    tasks:
+      - name: "Map All Auth Systems"
+        description: "Document every authentication method in codebase"
+        deliverables:
+          - "List of all auth-related files"
+          - "Inventory of authentication methods"
+          - "Dependency map between auth systems"
+        
+      - name: "Identify Removal Targets"
+        description: "Mark systems for removal vs preservation"
+        deliverables:
+          - "Files to delete completely"
+          - "Files to modify (remove auth methods)"
+          - "Files to preserve (magic link system)"
+
+  # Phase 2: Remove Competing Systems (Context Cleaner + API Specialist)
+  phase2:
+    name: "Authentication System Removal"
+    duration: "2 hours"
+    agents: ["Context Cleaner", "API Specialist"]
+    
+    tasks:
+      - name: "Clean SupabaseAuthContext"
+        agent: "Context Cleaner"
+        description: "Remove WordPress auth methods, simplify loading logic"
+        files:
+          - "src/contexts/SupabaseAuthContext.tsx"
+        deliverables:
+          - "Simplified auth context with only Supabase Auth"
+          - "Removed WordPress login/JWT methods"
+          - "Fixed loading state management"
+          
+      - name: "Remove Direct Login System"
+        agent: "Context Cleaner"
+        description: "Delete or convert direct-login to magic links"
+        files:
+          - "src/app/direct-login/"
+        deliverables:
+          - "Direct login page removed or converted"
+          - "localStorage mock auth removed from context"
+          
+      - name: "Clean Authentication APIs"
+        agent: "API Specialist"
+        description: "Remove unused auth endpoints, keep magic links"
+        files:
+          - "src/app/api/auth/"
+          - "src/lib/wordpress-auth.ts"
+        deliverables:
+          - "Only magic link endpoints remain"
+          - "WordPress auth lib updated (user creation only)"
+
+  # Phase 3: Implement Unified System (Middleware Engineer + API Specialist)
+  phase3:
+    name: "Unified Authentication Implementation"
+    duration: "2 hours"
+    agents: ["Middleware Engineer", "API Specialist"]
+    
+    tasks:
+      - name: "Simplify Middleware"
+        agent: "Middleware Engineer"
+        description: "Check only Supabase Auth sessions"
+        files:
+          - "src/middleware.ts"
+        deliverables:
+          - "Single session check method"
+          - "Proper redirect logic"
+          - "No competing auth source checks"
+          
+      - name: "Update Protected Layout"
+        agent: "Middleware Engineer"
+        description: "Fix authenticated layout loading issues"
+        files:
+          - "src/app/(authenticated)/layout.tsx"
+        deliverables:
+          - "No infinite loading states"
+          - "Proper auth check without blocking"
+          
+      - name: "Enhance Magic Link System"
+        agent: "API Specialist"
+        description: "Make magic links the primary auth method"
+        files:
+          - "src/app/api/auth/magic-link/route.ts"
+          - "src/lib/email-service.ts"
+        deliverables:
+          - "Improved magic link generation"
+          - "Better email templates"
+          - "Error handling and user feedback"
+
+  # Phase 4: Update User Interface (Component Updater)
+  phase4:
+    name: "User Interface Updates"
+    duration: "1.5 hours"
+    agents: ["Component Updater"]
+    
+    tasks:
+      - name: "Update Login Page"
+        description: "Convert to magic link request only"
+        files:
+          - "src/app/auth/login/page.tsx"
+        deliverables:
+          - "Email input and magic link request"
+          - "Clear messaging about magic links"
+          - "Loading and success states"
+          
+      - name: "Update Navigation Components"
+        description: "Remove auth complexity from navigation"
+        files:
+          - "src/components/navigation/"
+        deliverables:
+          - "Simplified auth state handling"
+          - "Clear login/logout actions"
+          
+      - name: "Fix Auth-Dependent Components"
+        description: "Update components that depend on auth state"
+        files:
+          - "src/components/auth/"
+          - "src/hooks/useRequireAuth.ts"
+        deliverables:
+          - "Components work with unified auth"
+          - "No loading state conflicts"
+
+  # Phase 5: Testing and Validation (All Agents)
+  phase5:
+    name: "End-to-End Authentication Testing"
+    duration: "1 hour"
+    agents: ["Authentication Architect", "All Sub-Agents"]
+    
+    tasks:
+      - name: "Test Magic Link Flow"
+        description: "Complete authentication flow validation"
+        testCases:
+          - "Request magic link → email sent → click link → authenticated"
+          - "Access protected page → redirected to login → magic link → back to page"
+          - "Logout → session cleared → requires new magic link"
+          
+      - name: "Test WordPress Integration"
+        description: "Verify WordPress creates users correctly"
+        testCases:
+          - "MemberPress purchase → user created → magic link sent"
+          - "User data synced from WordPress → accessible in app"
+          
+      - name: "Performance Testing"
+        description: "Ensure no loading loops or performance issues"
+        testCases:
+          - "All protected pages load without infinite spinners"
+          - "Authentication check completes within 2 seconds"
+          - "Magic link email arrives within 1 minute"
+
+# SUCCESS CRITERIA
+
+successCriteria:
+  
+  # Critical Success Factors
+  critical:
+    - name: "Single Authentication System"
+      description: "Only Supabase Auth exists in codebase"
+      validation: "Code review shows no WordPress JWT or direct-login auth"
+      
+    - name: "No Loading Loops"
+      description: "All pages load without authentication blocking"
+      validation: "Manual testing of all protected routes"
+      
+    - name: "Magic Link Authentication Works"
+      description: "Users can authenticate via magic links end-to-end"
+      validation: "Complete magic link flow test passes"
+
+  # Quality Gates
+  qualityGates:
+    buildMustPass: true
+    lintMaxErrors: 0
+    testCoverage: 70
+    authFlowTesting: true
+    performanceTarget: 3  # seconds for auth check
+    
+  # Post-Implementation Validation
+  validation:
+    functional:
+      - "Magic link authentication flow works end-to-end"
+      - "WordPress webhook user creation works"
+      - "Protected routes accessible after authentication"
+      - "Logout clears session properly"
+      
+    performance:
+      - "Authentication check completes < 2 seconds"
+      - "No infinite loading states on any page"
+      - "Magic link email delivery < 60 seconds"
+      
+    security:
+      - "No hardcoded authentication bypasses"
+      - "Sessions properly secured and managed"
+      - "Magic links expire appropriately"
+
+# RISK MITIGATION
+
+risks:
+  - name: "User Lockout During Transition"
+    probability: MEDIUM
+    impact: HIGH
+    mitigation: "Test with development users first, have rollback plan"
+    
+  - name: "Magic Link Email Delivery Issues"
+    probability: LOW
+    impact: MEDIUM
+    mitigation: "Verify email service configuration, provide debug URLs in dev"
+    
+  - name: "WordPress Integration Breaks"
+    probability: LOW
+    impact: HIGH
+    mitigation: "Preserve WordPress webhook system, only remove auth components"
+
+# COORDINATION PROTOCOL
+
+coordination:
+  communication:
+    - "Each agent reports completion of their phase before next phase starts"
+    - "Primary agent validates all changes before proceeding"
+    - "Any blocking issues escalated to primary agent immediately"
+    
+  handoffs:
+    - "Context Cleaner → API Specialist: Auth method inventory"
+    - "API Specialist → Middleware Engineer: Session handling requirements"
+    - "Middleware Engineer → Component Updater: Auth state requirements"
+    - "All Agents → Primary: Final validation and testing"
+    
+  deliverables:
+    - "Each agent commits their changes with clear commit messages"
+    - "Primary agent reviews all code before final integration"
+    - "Full system test performed before contract completion"
+
+# COMPLETION CHECKLIST
+
+completion:
+  codeChanges:
+    - "[ ] SupabaseAuthContext simplified (WordPress auth removed)"
+    - "[ ] Direct login system removed or converted"
+    - "[ ] Middleware simplified to single auth check"
+    - "[ ] Login page converted to magic link only"
+    - "[ ] All authentication APIs cleaned up"
+    - "[ ] Navigation components updated"
+    - "[ ] Protected layout fixed (no loading loops)"
+    
+  testing:
+    - "[ ] Magic link flow tested end-to-end"
+    - "[ ] WordPress user creation tested"
+    - "[ ] All protected pages load without issues"
+    - "[ ] Performance requirements met"
+    
+  documentation:
+    - "[ ] Authentication architecture documented"
+    - "[ ] Magic link setup instructions updated"
+    - "[ ] Troubleshooting guide created"
+
+# CONTRACT COMPLETION
+
+contractCompletion:
+  definition: "Authentication system uses ONLY Supabase Auth with magic links, all competing systems removed, no loading loops exist"
+  
+  verification:
+    - "Code review confirms single authentication system"
+    - "Manual testing shows all pages load properly"
+    - "Magic link authentication works end-to-end"
+    - "WordPress integration preserved for user creation only"
+    
+  signoff:
+    primary: "Authentication Architect confirms all requirements met"
+    secondary: "All sub-agents confirm their deliverables complete"
+    user: "User confirms login experience works as expected"
+
+---
+
+# IMMEDIATE NEXT STEPS
+
+1. **Authentication Architect**: Begin Phase 1 system audit
+2. **Context Cleaner**: Prepare to clean SupabaseAuthContext.tsx
+3. **API Specialist**: Review magic link implementation status
+4. **Middleware Engineer**: Analyze current middleware auth logic
+5. **Component Updater**: Inventory auth-dependent components
+
+This contract ensures your authentication system becomes the clean, single-source Supabase Auth with magic links system as originally intended, with proper sub-agent coordination to handle the complex cleanup required.

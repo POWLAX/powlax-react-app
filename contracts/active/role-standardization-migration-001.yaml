@@ -1,0 +1,373 @@
+---
+contract_id: role-standardization-migration-001
+title: User Role Standardization - Admin to Administrator Migration
+version: 2.0.0
+created_date: 2025-01-14
+updated_date: 2025-01-14
+priority: HIGH
+status: PENDING_APPROVAL
+
+# CONTRACT OVERVIEW
+# Standardize user role values from legacy "admin" to WordPress-aligned "administrator"
+# This resolves the mismatch between database values and code expectations
+# IMPORTANTLY: This aligns with WordPress which uses "administrator" as the role value
+
+## CRITICAL FINDINGS FROM INVESTIGATION
+
+### Database Analysis
+- **public.users table**: Contains role column with "admin" value for Patrick
+- **auth.users table**: Supabase auth schema, linked via foreign key
+- **Current inconsistency**: Database has "admin", code expects "administrator"
+
+### WordPress Role Alignment (VERIFIED)
+- **WordPress uses "administrator"** as the actual role value (confirmed via screenshot)
+- Migration to "administrator" ALIGNS with WordPress standards
+- If WordPress integration is ever restored, roles will match perfectly
+- Current "admin" value was likely a mistaken abbreviation during initial setup
+
+### Impact Scope
+- 1 database record needs updating (Patrick's user)
+- 18 files reference role checks
+- Most code already expects "administrator"
+- Some files have mixed usage needing standardization
+
+## IMPLEMENTATION PHASES
+
+### PHASE 1: Pre-Migration Analysis (PARALLEL AGENTS)
+**Sub-Agent 1A: Database Analysis Agent**
+```yaml
+task: Analyze current database state and create backups
+responsibilities:
+  - Query current role values in public.users
+  - Document all unique role values
+  - Create timestamped backup of users table
+  - Generate rollback script
+  - Verify WordPress role alignment
+outputs:
+  - scripts/backup/users-table-backup-[timestamp].sql
+  - scripts/backup/role-migration-rollback.sql
+  - scripts/analysis/current-roles-report.txt
+```
+
+**Sub-Agent 1B: Code Impact Analysis Agent**
+```yaml
+task: Find all role references in codebase
+parallel_with: 1A
+responsibilities:
+  - Search for all "admin" string literals
+  - Search for all "administrator" references
+  - Identify mixed usage patterns
+  - Create comprehensive file list
+  - Check for hardcoded role checks
+outputs:
+  - scripts/analysis/role-references-audit.txt
+  - List of all files needing updates
+```
+
+**Sub-Agent 1C: Type System Analysis Agent**
+```yaml
+task: Analyze TypeScript types and interfaces
+parallel_with: 1A, 1B
+responsibilities:
+  - Find all role type definitions
+  - Check enum values
+  - Identify interface definitions
+  - Document type constraints
+outputs:
+  - List of type files needing updates
+  - Any role enum definitions found
+```
+
+### PHASE 2: Database Migration (SINGLE AGENT)
+**Sub-Agent 2: Database Migration Executor**
+```yaml
+task: Execute database role migration
+depends_on: Phase 1 completion
+responsibilities:
+  - Verify backup exists from Phase 1
+  - Update Patrick's role from "admin" to "administrator"
+  - Verify WordPress alignment (administrator = WordPress standard)
+  - Test authentication still works
+  - Confirm no other users affected
+migration_script: |
+  -- First verify current state
+  SELECT id, email, role, full_name 
+  FROM public.users 
+  WHERE role = 'admin';
+  
+  -- Update role value to match WordPress standard
+  UPDATE public.users 
+  SET role = 'administrator' 
+  WHERE email = 'patrick@powlax.com' AND role = 'admin';
+  
+  -- Verify the update and WordPress alignment
+  SELECT id, email, role, full_name,
+         CASE WHEN role = 'administrator' 
+              THEN '✅ Matches WordPress' 
+              ELSE '❌ Does not match WordPress' 
+         END as wordpress_alignment
+  FROM public.users 
+  WHERE email = 'patrick@powlax.com';
+validation:
+  - Only 1 record updated
+  - Role = "administrator" (matching WordPress)
+  - User can authenticate
+  - No RLS policies broken
+```
+
+### PHASE 3: Core System Updates (PARALLEL AGENTS)
+**Sub-Agent 3A: Authentication System Agent**
+```yaml
+task: Update core auth files
+depends_on: Phase 2 completion
+responsibilities:
+  - Update src/contexts/SupabaseAuthContext.tsx
+  - Update src/hooks/useAuth.ts (if exists)
+  - Update src/lib/auth-helpers.ts (if exists)
+  - Ensure isAdmin checks use "administrator"
+changes:
+  - Replace role === "admin" with role === "administrator"
+  - Update any role?.includes("admin") logic
+  - Standardize role checking functions
+```
+
+**Sub-Agent 3B: Type System Agent**
+```yaml
+task: Update TypeScript types
+depends_on: Phase 2 completion
+parallel_with: 3A
+responsibilities:
+  - Update src/types/database.types.ts
+  - Update any role enums
+  - Fix type definitions
+  - Ensure "administrator" in type unions
+changes:
+  - Remove "admin" from type definitions
+  - Add/ensure "administrator" in types
+  - Update UserRole type if exists
+```
+
+**Sub-Agent 3C: Middleware Agent**
+```yaml
+task: Update middleware and guards
+depends_on: Phase 2 completion
+parallel_with: 3A, 3B
+responsibilities:
+  - Update src/middleware.ts (if exists)
+  - Update route guards
+  - Fix role validation logic
+changes:
+  - Standardize to "administrator" checks
+  - Update any role-based redirects
+```
+
+### PHASE 4: Component Updates (PARALLEL AGENTS)
+**Sub-Agent 4A: Layout Components Agent**
+```yaml
+task: Update layout components
+depends_on: Phase 3 completion
+responsibilities:
+  - src/components/layout/DashboardLayout.tsx
+  - src/components/layout/Sidebar.tsx
+  - src/components/layout/Navigation.tsx (if exists)
+changes:
+  - Update all role checks to "administrator"
+  - Fix conditional rendering based on roles
+```
+
+**Sub-Agent 4B: Dashboard Components Agent**
+```yaml
+task: Update dashboard components
+depends_on: Phase 3 completion
+parallel_with: 4A
+responsibilities:
+  - src/components/dashboard/DashboardContent.tsx
+  - src/components/admin/* (all admin components)
+  - src/components/teams/TeamDashboard.tsx
+  - src/components/teams/TeamCreationWizard.tsx
+changes:
+  - Standardize role === "administrator"
+  - Update permission checks
+```
+
+**Sub-Agent 4C: Feature Components Agent**
+```yaml
+task: Update feature-specific components
+depends_on: Phase 3 completion
+parallel_with: 4A, 4B
+responsibilities:
+  - Search for any remaining "admin" strings in components
+  - Update user management components
+  - Fix resource management components
+changes:
+  - Replace all remaining "admin" role checks
+  - Ensure consistency across features
+```
+
+### PHASE 5: Hooks and Pages (PARALLEL AGENTS)
+**Sub-Agent 5A: Hooks Agent**
+```yaml
+task: Update all hooks with role logic
+depends_on: Phase 4 completion
+responsibilities:
+  - src/hooks/useTeamManagement.ts
+  - src/hooks/useDashboardData.ts
+  - src/hooks/useTeamDashboard.ts
+  - Any other hooks with role checks
+changes:
+  - Update to "administrator" checks
+  - Fix permission logic
+```
+
+**Sub-Agent 5B: Pages Agent**
+```yaml
+task: Update all pages with role checks
+depends_on: Phase 4 completion
+parallel_with: 5A
+responsibilities:
+  - src/app/(authenticated)/admin/**/page.tsx
+  - src/app/(authenticated)/dashboard/page.tsx
+  - Any other pages with role validation
+changes:
+  - Standardize to "administrator"
+  - Update access control logic
+```
+
+### PHASE 6: Validation and Testing (SEQUENTIAL AGENTS)
+**Sub-Agent 6A: Build Validation Agent**
+```yaml
+task: Verify build and type checking
+depends_on: Phase 5 completion
+commands:
+  - npm run lint
+  - npm run typecheck
+  - npm run build
+validation:
+  - No TypeScript errors
+  - No lint errors
+  - Build succeeds
+```
+
+**Sub-Agent 6B: Functional Testing Agent**
+```yaml
+task: Test admin functionality
+depends_on: 6A success
+test_checklist:
+  - [ ] Patrick can log in
+  - [ ] Admin dashboard loads
+  - [ ] Team management accessible
+  - [ ] User management works
+  - [ ] Resources management functions
+  - [ ] All admin routes accessible
+  - [ ] Role shows as "administrator" in UI
+  - [ ] WordPress role would match if reconnected
+```
+
+**Sub-Agent 6C: Final Verification Agent**
+```yaml
+task: Final system verification
+depends_on: 6B success
+responsibilities:
+  - Verify database has "administrator" value
+  - Confirm no "admin" strings remain (except comments)
+  - Check all admin features work
+  - Document WordPress alignment confirmed
+  - Create success report
+```
+
+## ROLLBACK PLAN
+
+If issues occur:
+1. Run rollback SQL script from Phase 1
+2. Revert git changes
+3. Clear Next.js cache
+4. Restart dev server
+
+## SUCCESS CRITERIA
+
+- [ ] Database value updated from "admin" to "administrator"
+- [ ] All 18 files updated to use "administrator" consistently
+- [ ] Patrick can access all admin features
+- [ ] No TypeScript errors
+- [ ] Build succeeds
+- [ ] All tests pass
+
+## RISK ASSESSMENT
+
+**Low Risk:**
+- Only affects 1 database record
+- Most code already expects "administrator"
+- Simple string replacement in most files
+
+**Mitigations:**
+- Comprehensive backup before changes
+- Phased approach allows testing between phases
+- Rollback plan ready
+
+## EXECUTION NOTES
+
+1. **Use ONLY general-purpose sub-agents** with this contract
+2. **Execute phases sequentially** - don't parallelize
+3. **Test after each phase** before proceeding
+4. **Keep dev server running** on port 3000
+5. **Document any unexpected findings**
+
+## MULTI-AGENT DEPLOYMENT STRATEGY
+
+### Parallel Execution Groups
+```javascript
+// PHASE 1: Run 3 analysis agents in parallel
+await Promise.all([
+  Task({ subagent_type: "general-purpose", description: "Database Analysis", prompt: "..." }),
+  Task({ subagent_type: "general-purpose", description: "Code Impact Analysis", prompt: "..." }),
+  Task({ subagent_type: "general-purpose", description: "Type System Analysis", prompt: "..." })
+])
+
+// PHASE 2: Single migration agent (critical operation)
+Task({ subagent_type: "general-purpose", description: "Database Migration", prompt: "..." })
+
+// PHASE 3: Run 3 core update agents in parallel
+await Promise.all([
+  Task({ subagent_type: "general-purpose", description: "Auth System Update", prompt: "..." }),
+  Task({ subagent_type: "general-purpose", description: "Type System Update", prompt: "..." }),
+  Task({ subagent_type: "general-purpose", description: "Middleware Update", prompt: "..." })
+])
+
+// PHASE 4: Run 3 component agents in parallel
+await Promise.all([
+  Task({ subagent_type: "general-purpose", description: "Layout Components", prompt: "..." }),
+  Task({ subagent_type: "general-purpose", description: "Dashboard Components", prompt: "..." }),
+  Task({ subagent_type: "general-purpose", description: "Feature Components", prompt: "..." })
+])
+
+// PHASE 5: Run 2 final update agents in parallel
+await Promise.all([
+  Task({ subagent_type: "general-purpose", description: "Hooks Update", prompt: "..." }),
+  Task({ subagent_type: "general-purpose", description: "Pages Update", prompt: "..." })
+])
+
+// PHASE 6: Sequential validation agents
+Task({ subagent_type: "general-purpose", description: "Build Validation", prompt: "..." })
+Task({ subagent_type: "general-purpose", description: "Functional Testing", prompt: "..." })
+Task({ subagent_type: "general-purpose", description: "Final Verification", prompt: "..." })
+```
+
+### WordPress Alignment Verification
+**CRITICAL**: The migration to "administrator" aligns with WordPress standards
+- WordPress uses "administrator" (lowercase) as the role value
+- This ensures future WordPress integration compatibility
+- Current "admin" was likely an incorrect abbreviation
+
+### Execution Benefits of Multi-Agent Approach
+1. **Parallel Analysis**: Phase 1 agents work simultaneously for faster analysis
+2. **Isolated Migration**: Phase 2 runs alone to ensure database safety
+3. **Concurrent Updates**: Phases 3-5 use parallel agents for speed
+4. **Sequential Validation**: Phase 6 ensures proper testing order
+5. **Better Accuracy**: Specialized focus for each agent reduces errors
+
+---
+# END OF CONTRACT
+# WordPress alignment verified ✅
+# Multi-agent approach configured for optimal accuracy
+# Approval required before execution
+# Expected completion time: 15-20 minutes with parallel execution

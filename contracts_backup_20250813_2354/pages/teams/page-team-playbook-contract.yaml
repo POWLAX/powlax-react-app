@@ -1,0 +1,265 @@
+# Team Playbook Page Contract
+contractId: "page-team-playbook-20250813"
+type: PAGE_ORCHESTRATION_CONTRACT
+version: 1.0.0
+created: 2025-08-13
+priority: HIGH
+
+# ===== PAGE INFO =====
+pageInfo:
+  route: "/teams/[teamId]/playbook"
+  filePath: "src/app/(authenticated)/teams/[teamId]/playbook/page.tsx"
+  pageType: "client"
+  category: "team"
+  dynamicSegments: ["teamId"]
+
+# ===== RENDERING STRATEGY =====
+renderingStrategy:
+  componentType: "Client Component"
+  dataFetching: "client-side"
+  streamingEnabled: false
+  suspenseBoundaries: []
+  errorBoundaries: []
+
+# ===== DATA ORCHESTRATION =====
+dataOrchestration:
+  serverDataFetching: []
+  
+  clientDataFetching:
+    - hook: "useParams"
+      trigger: "On mount"
+      tables: []
+      realtime: false
+      purpose: "Extract teamId from route"
+      
+    - hook: "useRouter"
+      trigger: "On mount"
+      tables: []
+      realtime: false
+      purpose: "Navigation control"
+      
+    - hook: "supabase direct query"
+      trigger: "On mount with teamId"
+      tables: ["team_teams"] # Note: Incorrect table name in code
+      realtime: false
+      purpose: "Fetch team basic information"
+      
+  propsFlow:
+    fromServer: {}
+    toClient:
+      teamId: "Extracted from route params"
+      team: "Basic team data (id, name)"
+
+# ===== COMPONENT COMPOSITION =====
+componentComposition:
+  componentsUsed:
+    - name: "TeamPlaybook"
+      source: "@/components/team-playbook/TeamPlaybook"
+      props:
+        teamId: "Route parameter"
+        teamName: "Team name from fetched data"
+        onAddStrategy: "Navigation handler to practice plans"
+      conditionalRendering: "When team data loaded successfully"
+      
+    - name: "Button"
+      source: "@/components/ui/button"
+      props:
+        variant: "ghost | outline"
+        size: "sm"
+      conditionalRendering: "Always (navigation and error states)"
+      
+    - name: "ArrowLeft"
+      source: "lucide-react"
+      props:
+        className: "h-4 w-4"
+      conditionalRendering: "Always (back navigation)"
+      
+  layoutUsed: "(authenticated) layout"
+  providerDependencies: []
+
+# ===== ROUTING LOGIC =====
+routingLogic:
+  guards:
+    - type: "Auth"
+      implementation: "Layout-level"
+      redirectTo: "/auth/login"
+      
+  navigation:
+    - triggers: ["Back button"]
+      destinations: ["/teams/{teamId}/dashboard"]
+      method: "router.push"
+    - triggers: ["Go Back button (error states)"]
+      destinations: ["Previous page"]
+      method: "router.back"
+    - triggers: ["Add strategy action"]
+      destinations: ["/teams/{teamId}/practice-plans"]
+      method: "router.push"
+      
+  dynamicRouting:
+    - parameter: "teamId"
+      validation: "Direct Supabase query validation"
+      fallback: "Error state with navigation options"
+
+# ===== PAGE SPECIFIC LOGIC =====
+pageSpecificLogic:
+  businessLogic: |
+    - Team playbook management and viewing
+    - Team context validation and loading
+    - Navigation between team dashboard and playbook
+    - Strategy addition workflow initiation
+    - Error handling for team access
+    
+  stateManagement: |
+    - team: Team basic data (id, name)
+    - loading: Data fetching state
+    - error: Error message string
+    - Component-level state management only
+    
+  sideEffects: []
+  formHandling: "None"
+
+# ===== DATABASE INTEGRATION ISSUE =====
+databaseIntegrationIssue:
+  problem: |
+    - Code references 'team_teams' table which doesn't exist
+    - Should reference 'teams' table per database truth
+    - This will cause runtime errors
+    
+  correctImplementation: |
+    - Should query 'teams' table
+    - Should include team membership validation
+    - Should use useTeam hook for consistency
+    
+  impact: |
+    - Page will fail to load team data
+    - Error states will show for all users
+    - Playbook functionality will be broken
+
+# ===== SERVER/CLIENT BOUNDARY =====
+serverClientBoundary:
+  serverComponents: []
+  clientComponents:
+    - "TeamPlaybookPage (root component)"
+    - "TeamPlaybook component"
+    - "All UI components"
+  boundaryLocation: "Page level - entire page is client component"
+  dataSerializationPoints: []
+
+# ===== PERFORMANCE PATTERNS =====
+performancePatterns:
+  prefetching: []
+  lazyLoading: []
+  codeSplitting: []
+  optimizations:
+    - "Conditional component rendering based on loading state"
+    - "Early error handling to prevent unnecessary renders"
+
+# ===== SECURITY PATTERNS =====
+securityPatterns:
+  authentication: "Layout-level authentication required"
+  authorization: |
+    - Minimal team validation via direct query
+    - Should implement proper team membership validation
+    - Missing role-based access control
+  dataValidation: "Basic Supabase query validation"
+  csrfProtection: false
+
+# ===== INTEGRATION POINTS =====
+integrationPoints:
+  supabaseUsage:
+    directQueries: true # Direct query for team data (problematic)
+    throughHooks: false # Should use useTeam hook
+    serverSideOnly: false
+    
+  externalAPIs: []
+  webhooks: []
+  realtimeSubscriptions: []
+
+# ===== TEAM CONTEXT ORCHESTRATION =====
+teamContextOrchestration:
+  teamIdExtraction: |
+    - useParams extracts teamId from route
+    - Passes to direct Supabase query
+    
+  teamValidation: |
+    - Direct query to non-existent 'team_teams' table
+    - Missing team membership validation
+    - Should use useTeam hook for proper validation
+    
+  teamDataPropagation: |
+    - Basic team data (id, name) passed to TeamPlaybook
+    - Missing comprehensive team context
+    - Should include membership and permission data
+
+# ===== ERROR HANDLING =====
+errorHandling:
+  loadingStates:
+    - "Loading spinner with descriptive text"
+    - "Full-screen loading overlay"
+    
+  errorStates:
+    - "Team not found error handling"
+    - "Generic error display with navigation options"
+    - "Go back functionality for errors"
+    
+  fallbackBehavior: |
+    - Shows error message with back navigation
+    - Router.back() for error recovery
+    - No team data fallback handling
+
+# ===== NAVIGATION ORCHESTRATION =====
+navigationOrchestration:
+  backNavigation: |
+    - Breadcrumb-style back to dashboard
+    - Clear navigation hierarchy
+    - ArrowLeft icon for visual cue
+    
+  forwardNavigation: |
+    - Add strategy button triggers navigation to practice plans
+    - Integration with practice planning workflow
+    - Cross-feature navigation pattern
+    
+  navigationHeader: |
+    - Team name display
+    - "Team Playbook" context label
+    - Consistent header pattern with other team pages
+
+# ===== PLAYBOOK INTEGRATION =====
+playbookIntegration:
+  componentDelegation: |
+    - Main functionality delegated to TeamPlaybook component
+    - Page acts as router and data provider
+    - Minimal page-level business logic
+    
+  dataRequirements: |
+    - TeamPlaybook needs teamId and teamName
+    - onAddStrategy callback for workflow integration
+    - Full height allocation for playbook content
+    
+  layoutIntegration: |
+    - Full viewport height usage
+    - Header navigation integration
+    - Responsive container sizing
+
+# ===== IMPROVEMENTS NEEDED =====
+improvementsNeeded:
+  criticalFixes:
+    - "Fix table name from 'team_teams' to 'teams'"
+    - "Implement proper team membership validation"
+    - "Use useTeam hook for consistency"
+    
+  enhancementOpportunities:
+    - "Add loading and error boundaries"
+    - "Implement proper authorization checks"
+    - "Add team context validation"
+    - "Include role-based access control"
+
+# ===== NOTES =====
+notes: |
+  - Simple page wrapper around TeamPlaybook component
+  - Contains critical database table name error
+  - Missing proper team membership validation
+  - Needs alignment with other team pages
+  - Good navigation patterns and error handling structure
+  - Integration ready for playbook functionality
+  - Requires database integration fixes for functionality

@@ -1,0 +1,85 @@
+# TrackCards Component Contract
+# Position-based training track selection component
+
+contractId: "component-trackcards-20250113"
+componentInfo:
+  name: "TrackCards"
+  filePath: "src/components/skills-academy/TrackCards.tsx"
+  category: "Skills Academy"
+  parentPage: "Skills Academy Hub"
+  complexity: "moderate"
+  
+functionalAnalysis:
+  purpose: "Displays position-based training tracks (Attack, Defense, Midfield, etc.) for user selection"
+  primaryFunction: "Grid of training track cards with position-specific theming and navigation"
+  userInteractions: 
+    - "Select training track based on position"
+    - "View track descriptions and specializations"
+    - "Navigate to track-specific workouts"
+  businessLogic: "Hardcoded training tracks with position-specific point systems and series types"
+  stateManagement: "Stateless component with click handlers"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements: 
+    - "Training track definitions (solid_start, attack, defense, midfield, goalie)"
+    - "Track descriptions and icons"
+    - "Color theming for each position"
+  mockDataUsage: 
+    - "Static tracks array with position data"
+  realDataPercentage: 0
+  
+mvpReadiness:
+  isProductionReady: false
+  blockers: 
+    - "Hardcoded track data instead of database-driven"
+    - "No integration with actual workout series"
+    - "Navigation leads to placeholder routes"
+  improvements: 
+    - "Integrate with skills_academy_series table"
+    - "Dynamic track loading based on available content"
+    - "User progress indicators per track"
+  priority: "medium"
+  
+userJourneyContext:
+  userFlows: 
+    - "Skills Academy Hub → Track Selection → Track-specific workouts"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["player", "coach"]
+  featureArea: "skills"
+  journeyStage: "onboarding"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "TrackCards"
+  reasonForDuplication: "N/A"
+  consolidationStrategy: "N/A"
+  supabaseIntegrationWinner: "N/A"
+
+# Track System Analysis
+trackSystem:
+  positionTracks:
+    solid_start: "Essential skills development"
+    attack: "Offensive skills and tactics"  
+    defense: "Defensive positioning and techniques"
+    midfield: "Transition play and versatility"
+    goalie: "Goalkeeper-specific training"
+    
+  pointIntegration:
+    solid_start: "academy_points only"
+    attack: "academy_points + attack_token"
+    defense: "academy_points + defense_dollar"
+    midfield: "academy_points + midfield_medal"
+    goalie: "academy_points + rebound_reward"
+    
+  databaseIntegration:
+    needed: "Connect to skills_academy_series for real track data"
+    impact: "Critical for accurate content representation"

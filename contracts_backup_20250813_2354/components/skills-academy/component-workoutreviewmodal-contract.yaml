@@ -1,0 +1,174 @@
+# WorkoutReviewModal Component Contract
+# Post-workout review and summary modal for Skills Academy
+
+contractId: "component-workoutreviewmodal-20250113"
+componentInfo:
+  name: "WorkoutReviewModal"
+  filePath: "src/components/skills-academy/WorkoutReviewModal.tsx"
+  category: "Skills Academy"
+  parentPage: "Skills Academy Workout"
+  complexity: "complex"
+  
+functionalAnalysis:
+  purpose: "Post-workout modal that displays detailed performance review, drill-by-drill breakdown, and timing analysis"
+  primaryFunction: "Comprehensive workout summary with drill navigation, timing analysis, and performance feedback"
+  userInteractions: 
+    - "Navigate between completed drills using chevron buttons"
+    - "Review drill timing (actual vs required)"
+    - "View total points earned and workout statistics"
+    - "Close modal to return to workout list"
+  businessLogic: "Aggregates drill completion data, timing metrics, and point calculations for comprehensive review"
+  stateManagement: "Complex state for drill navigation, timing calculations, and modal visibility"
+  
+dataIntegration:
+  hasSupabaseConnection: false
+  connectionType: "none"
+  supabaseTables: []
+  tableUsage: []
+  
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements: 
+    - "Time formatting logic"
+    - "UI layout and styling"
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: []
+  externalLibraries: 
+    - "lucide-react (icons)"
+    - "@/components/ui/* (Dialog, Card, Button, etc.)"
+  
+supabaseTableDetails:
+  tablesUsed: []
+  tableRelationships: []
+  queryPatterns: []
+  dataTransformations: 
+    - "Formats workout timing data for display"
+    - "Calculates completion percentages and performance metrics"
+    - "Aggregates drill-level data into workout summary"
+  
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements: 
+    - "Could save workout reviews to database"
+    - "Could add performance trending over time"
+    - "Could integrate with badge progress tracking"
+    - "Could add drill rating/feedback system"
+  priority: "high"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: true
+  documentationQuality: "good"
+  needsDocumentation: 
+    - "Data flow from workout session to review modal"
+    - "Timing calculation methodology"
+  
+componentInteractions:
+  callsComponents: []
+  calledByComponents: 
+    - "WorkoutPlayer (after workout completion)"
+  sharedState: []
+  eventCommunication: 
+    - "onClose callback to parent"
+  propsPassedTo: []
+  propsReceivedFrom: 
+    - "isOpen: boolean (modal visibility)"
+    - "onClose: () => void (close handler)"
+    - "workout: any (workout data)"
+    - "drills: any[] (drill definitions)"
+    - "drillTimes: Record<number, DrillTime> (timing data)"
+    - "totalPoints: number (points earned)"
+    - "totalTime: number (total workout time)"
+    - "completedDrills: Set<number> (completion tracking)"
+    - "isWallBallWorkout: boolean (special handling)"
+  
+userJourneyContext:
+  userFlows: 
+    - "Workout completion → WorkoutReviewModal → Return to workout list"
+    - "Workout completion → Review performance → Plan next workout"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["player", "coach"]
+  featureArea: "skills"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "WorkoutReviewModal"
+  reasonForDuplication: "N/A"
+  consolidationStrategy: "N/A"
+  supabaseIntegrationWinner: "N/A"
+
+# Workout Review Data Flow
+workoutReviewFlow:
+  dataInputs:
+    - "Workout metadata (name, description, estimated duration)"
+    - "Drill completion times and performance"
+    - "Point awards by type and drill"
+    - "Total workout statistics"
+    
+  reviewComponents:
+    - "Drill-by-drill breakdown with timing analysis"
+    - "Performance vs expectations (actual vs required time)"
+    - "Point summary by type"
+    - "Overall workout completion statistics"
+    
+  userValueProposition:
+    - "Performance feedback and improvement insights"
+    - "Motivation through achievement summary"
+    - "Progress tracking over time"
+
+# Database Integration Opportunities
+databaseIntegrationOpportunities:
+  immediate:
+    - table: "skills_academy_user_progress"
+      purpose: "Save workout completion and performance data"
+      data: "workout_id, completion_time, points_earned, drill_performance"
+      
+    - table: "points_transactions_powlax"
+      purpose: "Record point awards from workout"
+      data: "user_id, points_earned, point_type, workout_context"
+      
+  enhancement:
+    - table: "workout_reviews"
+      purpose: "Store user ratings and feedback on workouts"
+      data: "workout_id, user_rating, feedback_text, completion_date"
+      
+    - table: "drill_performance_metrics"
+      purpose: "Track drill-level performance over time"
+      data: "drill_id, completion_time, accuracy_score, user_notes"
+
+# Critical Workflow Position
+workflowPosition:
+  stage: "Post-workout completion"
+  importance: "Critical feedback loop for user engagement"
+  dataRequirements:
+    - "Complete workout session data"
+    - "Drill timing and completion status"
+    - "Point calculations and awards"
+    
+  nextSteps:
+    - "Return to workout browser"
+    - "Navigate to next recommended workout"
+    - "Share achievements/progress"
+
+# MVP Assessment
+mvpAssessment:
+  essentialForMVP: true
+  reasoning: "Critical for completing the workout feedback loop and user engagement"
+  dependencies:
+    - "Accurate workout session tracking"
+    - "Proper drill timing measurement"
+    - "Point calculation system"
+  implementationPriority: "High - required for complete workout experience"

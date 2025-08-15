@@ -159,7 +159,7 @@ The Practice Planner relies on **13 database tables** across different functiona
 **Key Fields:**
 - `id` - UUID primary key
 - `email` - User email
-- `role` - User role (admin, coach, player, parent)
+- `role` - User role (administrator, coach, player, parent)
 - `first_name` / `last_name` - User name
 
 **Used By:**

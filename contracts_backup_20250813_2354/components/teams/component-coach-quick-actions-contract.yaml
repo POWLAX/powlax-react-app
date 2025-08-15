@@ -1,0 +1,162 @@
+# Coach Quick Actions Component Contract
+contractId: "component-coach-quick-actions-20250113"
+componentInfo:
+  name: "CoachQuickActions"
+  filePath: "src/components/teams/dashboard/CoachQuickActions.tsx"
+  category: "Team Management"
+  parentPage: "Team Dashboard"
+  complexity: "moderate"
+
+functionalAnalysis:
+  purpose: "Coach-specific action center for practice management, team communication, and quick administrative tasks"
+  primaryFunction: "Centralized coach dashboard with practice start, announcements, attendance, and team management"
+  userInteractions:
+    - "Start today's practice session"
+    - "Send team announcements with priority levels"
+    - "Take quick attendance in modal"
+    - "Access team playbook"
+    - "Schedule events and manage calendar"
+    - "Take practice photos"
+  businessLogic: "Event-driven UI based on upcoming practice schedule, announcement sending with priority"
+  stateManagement: "Local state for modals and form inputs, hook integration for team announcements"
+
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "hook"
+  supabaseTables:
+    - "practices"
+  tableUsage:
+    - tableName: "practices"
+      operations: ["select"]
+      purpose: "Display upcoming events and enable practice-specific actions"
+      dataFlow: "upcomingEvents prop from useTeamDashboard hook -> practice schedule display"
+
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements:
+    - "Mock player names in attendance modal: ['Mike Johnson', 'Sarah Wilson', 'Tom Davis', 'Emma Brown']"
+    - "Static navigation URLs for practice live mode and playbook"
+    - "Hardcoded action grid layout and features"
+  mockDataUsage:
+    - "Mock player list for attendance taking"
+    - "Static practice/team management URLs"
+  realDataPercentage: 75
+
+dependencies:
+  hooks:
+    - "useTeamDashboard - team announcements and event data"
+  contexts: []
+  utilities: []
+  externalLibraries:
+    - "lucide-react - icons"
+
+supabaseTableDetails:
+  tablesUsed:
+    - "practices"
+  tableRelationships:
+    - "practices.team_id -> teams.id"
+  queryPatterns:
+    - "Upcoming events filtering by team and date"
+    - "Practice schedule integration"
+  dataTransformations:
+    - "Event date comparison for 'today' detection"
+    - "Practice time display formatting"
+    - "Event type badge styling"
+
+mvpReadiness:
+  isProductionReady: false
+  blockers:
+    - "Mock attendance taking not connected to database"
+    - "Practice live mode navigation not implemented"
+    - "Photo taking functionality placeholder"
+  improvements:
+    - "Connect attendance to real team members"
+    - "Implement practice live mode functionality"
+    - "Add photo upload and storage system"
+    - "Connect event scheduling to calendar system"
+    - "Add bulk communication features"
+  priority: "high"
+
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation:
+    - "Practice live mode workflow"
+    - "Announcement system integration"
+    - "Photo management system"
+
+componentInteractions:
+  callsComponents:
+    - "Button (UI)"
+    - "Card, CardContent, CardHeader, CardTitle (UI)"
+    - "Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger (UI)"
+    - "Input (UI)"
+    - "Textarea (UI)"
+    - "Badge (UI)"
+  calledByComponents:
+    - "Team Dashboard page"
+  sharedState:
+    - "useTeamDashboard hook state"
+  eventCommunication:
+    - "sendAnnouncement function calls"
+  propsPassedTo: []
+  propsReceivedFrom:
+    - "team: Team - team context"
+    - "upcomingEvents: TeamEvent[] - practice schedule"
+
+userJourneyContext:
+  userFlows:
+    - "Coach->Team Dashboard->Start Practice"
+    - "Coach->Team Dashboard->Send Announcement"
+    - "Coach->Team Dashboard->Take Attendance"
+    - "Coach->Team Dashboard->Access Playbook"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["coach"]
+  featureArea: "teams"
+  journeyStage: "core-loop"
+
+duplicateFunctionality:
+  hasDuplicates: true
+  duplicateComponents:
+    - "TeamRoster - attendance taking overlap"
+  primaryComponent: "CoachQuickActions"
+  reasonForDuplication: "Different contexts - quick attendance vs full roster management"
+  consolidationStrategy: "Keep both - quick actions for immediate needs, roster for comprehensive management"
+  supabaseIntegrationWinner: "TeamRoster (more comprehensive member data)"
+
+# Team Management Specific Analysis
+teamManagementContext:
+  roleBasedDisplay: true
+  supportedRoles: ["head_coach", "assistant_coach"]
+  teamDataIntegration: "Indirect via team prop and practices table integration"
+  practiceManagement:
+    - "Start practice button based on today's schedule"
+    - "Practice live mode navigation"
+    - "Quick attendance taking"
+  communicationFeatures:
+    - "Team announcement system with priority levels"
+    - "Direct team messaging"
+  
+criticalCoachFeatures:
+  practiceControl: "Start/manage today's practice session"
+  quickCommunication: "Send announcements with title and priority"
+  fieldAccessibility: "Large touch targets optimized for field use"
+  eventIntegration: "Next event preview with time and location"
+  teamPlaybookAccess: "Direct navigation to team strategies"
+  
+dataGaps:
+  attendanceStorage: "Quick attendance not persisted to database"
+  practiceTracking: "Practice live mode not implemented"
+  photoManagement: "Photo taking placeholder without storage"
+  eventScheduling: "Schedule event action not connected to calendar system"
+  
+mobileOptimization:
+  touchTargets: "h-20 minimum height for field use"
+  largeButtons: "Primary practice start button prominently sized"
+  quickAccess: "Essential coach functions in 2x2 grid layout"

@@ -1,0 +1,164 @@
+contractId: "component-resourcedetailmodal-20250113"
+componentInfo:
+  name: "ResourceDetailModal"
+  filePath: "src/components/resources/ResourceDetailModal.tsx"
+  category: "Resource Modal"
+  parentPage: "/resources"
+  complexity: "complex"
+  
+functionalAnalysis:
+  purpose: "Full-featured modal for viewing resource details, sharing, and interaction management"
+  primaryFunction: "Display comprehensive resource information with tabbed interface and sharing capabilities"
+  userInteractions:
+    - "View resource overview with metadata"
+    - "Watch videos or preview PDFs"
+    - "Rate resources (1-5 stars)"
+    - "Add to favorites with sharing options"
+    - "Share with teams/users (permanence pattern)"
+    - "Add notes and custom tags"
+    - "Create collections"
+    - "Download resources"
+    - "Copy share links"
+  businessLogic: "Implements permanence pattern for sharing, manages complex state transitions, handles media playback"
+  stateManagement: "Complex local state for tabs, media playback, sharing options, form data"
+  
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "hook"
+  supabaseTables:
+    - "user_resource_interactions"
+    - "resource_collections"
+    - "team_members"
+    - "powlax_resources"
+  tableUsage:
+    - tableName: "user_resource_interactions"
+      operations: ["select", "insert", "update"]
+      purpose: "Manage favorites, ratings, sharing, notes with permanence pattern"
+      dataFlow: "Via useResourceFavorites hook with array-based sharing"
+    - tableName: "resource_collections"
+      operations: ["insert"]
+      purpose: "Create new collections for resource organization"
+      dataFlow: "Via createCollection hook function"
+    - tableName: "team_members"
+      operations: ["select"]
+      purpose: "Get user's teams for sharing options"
+      dataFlow: "Via useResourceFavorites hook team loading"
+    - tableName: "powlax_resources"
+      operations: ["update"]
+      purpose: "Track views and downloads"
+      dataFlow: "Via trackView and download tracking"
+      
+codeAnalysis:
+  isHardcoded: false
+  hardcodedElements: []
+  mockDataUsage: []
+  realDataPercentage: 100
+  
+dependencies:
+  hooks:
+    - "useResourceFavorites"
+    - "useAuth"
+    - "useState"
+    - "useEffect"
+  contexts:
+    - "SupabaseAuthContext"
+  utilities:
+    - "toast (sonner)"
+  externalLibraries:
+    - "lucide-react"
+    - "@/components/ui/*"
+    
+supabaseTableDetails:
+  tablesUsed:
+    - "user_resource_interactions"
+    - "resource_collections"
+    - "team_members"
+    - "powlax_resources"
+  tableRelationships:
+    - "user_resource_interactions.user_id -> users.id"
+    - "user_resource_interactions.resource_id -> powlax_resources.id"
+    - "user_resource_interactions.shared_with_teams -> teams.id[]"
+    - "user_resource_interactions.shared_with_users -> users.id[]"
+    - "resource_collections.user_id -> users.id"
+    - "team_members.user_id -> users.id"
+    - "team_members.team_id -> teams.id"
+  queryPatterns:
+    - "Permanence pattern: UI checkboxes -> database arrays"
+    - "Complex favorite toggle with sharing options"
+    - "View tracking with automatic state updates"
+    - "Collection creation with team/user sharing"
+  dataTransformations:
+    - "Boolean UI state to array database storage"
+    - "Duration seconds to MM:SS display"
+    - "File size bytes to MB conversion"
+    - "Resource type to appropriate tab visibility"
+    
+mvpReadiness:
+  isProductionReady: true
+  blockers: []
+  improvements:
+    - "Could add PDF preview functionality"
+    - "Could implement video chaptering"
+    - "Could add collaborative notes"
+    - "Could implement advanced sharing permissions"
+  priority: "high"
+  
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+  
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation:
+    - "Permanence pattern implementation"
+    - "Complex state management patterns"
+    - "Sharing system architecture"
+    - "Media handling capabilities"
+    
+componentInteractions:
+  callsComponents:
+    - "Dialog, DialogContent, DialogHeader, DialogTitle (ui)"
+    - "Tabs, TabsContent, TabsList, TabsTrigger (ui)"
+    - "Button (ui)"
+    - "Badge (ui)"
+    - "Checkbox (ui)"
+    - "Card, CardContent (ui)"
+    - "ScrollArea (ui)"
+  calledByComponents:
+    - "Resources page"
+    - "ResourceCard component"
+  sharedState:
+    - "useResourceFavorites complex state"
+    - "useAuth user context"
+  eventCommunication:
+    - "isOpen/onClose modal control"
+    - "resource prop for data display"
+  propsPassedTo:
+    - "isOpen: boolean"
+    - "onClose: () => void"
+    - "resource: Resource | null"
+    - "relatedResources: Resource[]"
+  propsReceivedFrom:
+    - "Parent passes resource object and modal state"
+    
+userJourneyContext:
+  userFlows:
+    - "Resource discovery -> Card click -> Modal details -> Actions"
+    - "Resource sharing -> Team selection -> Permission setting -> Save"
+    - "Collection management -> Create collection -> Organize resources"
+    - "Media consumption -> Video playback -> Progress tracking"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["coach", "player", "parent", "director", "admin"]
+  featureArea: "resources"
+  journeyStage: "core-loop"
+  
+duplicateFunctionality:
+  hasDuplicates: false
+  duplicateComponents: []
+  primaryComponent: "ResourceDetailModal"
+  reasonForDuplication: "Unique complex modal functionality"
+  consolidationStrategy: "N/A"
+  supabaseIntegrationWinner: "ResourceDetailModal (sophisticated permanence pattern implementation)"

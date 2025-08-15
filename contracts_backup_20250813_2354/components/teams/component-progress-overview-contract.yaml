@@ -1,0 +1,89 @@
+# Progress Overview Component Contract
+contractId: "component-progress-overview-20250113"
+componentInfo:
+  name: "ProgressOverview"
+  filePath: "src/components/teams/dashboard/ProgressOverview.tsx"
+  category: "Team Management"
+  parentPage: "Team Dashboard"
+  complexity: "moderate"
+
+functionalAnalysis:
+  purpose: "Team-wide progress analytics with skills mastery and milestone tracking"
+  primaryFunction: "Aggregate and display team progress metrics from individual player statistics"
+  userInteractions:
+    - "View team-wide progress statistics"
+    - "Track skills mastery across team"
+    - "Monitor practice attendance rates"
+    - "View top performers and achievements"
+    - "Check upcoming team milestones"
+  businessLogic: "Team statistics aggregation, progress calculation, milestone tracking"
+  stateManagement: "Props-based team statistics with calculated derived metrics"
+
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "direct"
+  supabaseTables:
+    - "teams"
+    - "team_members"
+  tableUsage:
+    - tableName: "teams"
+      operations: ["select"]
+      purpose: "Team context for progress display"
+      dataFlow: "Team prop provides team information"
+    - tableName: "team_members"
+      operations: ["select"]
+      purpose: "Player filtering for team statistics"
+      dataFlow: "Members prop filtered for player roles"
+
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements:
+    - "Skills mastery calculations (all set to 0)"
+    - "Team chemistry metric (hardcoded to 0)"
+    - "Recent improvement calculations (placeholder)"
+  mockDataUsage:
+    - "Skills progress data not connected to Skills Academy"
+    - "Team chemistry not calculated from real data"
+  realDataPercentage: 40
+
+mvpReadiness:
+  isProductionReady: false
+  blockers:
+    - "Skills mastery not connected to Skills Academy data"
+    - "Team chemistry has no data source"
+    - "Historical data needed for improvement calculations"
+  improvements:
+    - "Connect to skills_academy_user_progress for real skills data"
+    - "Implement team chemistry calculation algorithm"
+    - "Add historical tracking for trend analysis"
+    - "Add player drill completion aggregation"
+  priority: "medium"
+
+componentInteractions:
+  callsComponents:
+    - "Card, CardContent, CardHeader, CardTitle (UI)"
+    - "Progress (UI)"
+    - "Badge (UI)"
+    - "Button (UI)"
+  calledByComponents:
+    - "Team Dashboard page"
+  propsReceivedFrom:
+    - "team: Team - team context"
+    - "members: UserTeamRole[] - team members"
+    - "stats: TeamStats | null - team statistics"
+
+userJourneyContext:
+  userFlows:
+    - "Coach->Team Dashboard->Review Team Progress"
+    - "Coach->Team Dashboard->Identify Improvement Areas"
+  criticalForMVP: false
+  usageFrequency: "medium"
+  primaryUserTypes: ["coach"]
+  featureArea: "teams"
+  journeyStage: "core-loop"
+
+teamManagementContext:
+  roleBasedDisplay: false
+  progressTracking: "Team-wide metrics aggregation from individual progress"
+  skillsIntegration: "Needs connection to Skills Academy completion data"
+  milestoneTracking: "Practice count and skills completion milestones"

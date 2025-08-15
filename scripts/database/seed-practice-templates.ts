@@ -45,7 +45,7 @@ async function seedTemplates() {
   
   // Check if templates already exist
   const { data: existing, error: checkError } = await supabase
-    .from('practice_templates')
+    .from('practices')
     .select('id')
     .eq('is_official', true)
     .limit(1)
@@ -61,7 +61,7 @@ async function seedTemplates() {
   console.log(`📝 Inserting ${templatesToInsert.length} practice templates...`)
   
   const { data, error } = await supabase
-    .from('practice_templates')
+    .from('practices')
     .insert(templatesToInsert)
     .select()
   

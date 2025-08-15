@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
-import { useSupabase } from '@/hooks/useSupabase'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
 
 export interface PracticeTemplate {
   id: string
@@ -26,7 +26,7 @@ export interface PracticeTemplate {
 }
 
 export function usePracticeTemplates() {
-  const { user } = useSupabase()
+  const { user } = useAuth()
   const [templates, setTemplates] = useState<PracticeTemplate[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

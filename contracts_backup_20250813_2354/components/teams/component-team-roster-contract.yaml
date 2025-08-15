@@ -1,0 +1,177 @@
+# Team Roster Component Contract
+contractId: "component-team-roster-20250113"
+componentInfo:
+  name: "TeamRoster"
+  filePath: "src/components/teams/dashboard/TeamRoster.tsx"
+  category: "Team Management"
+  parentPage: "Team Dashboard"
+  complexity: "complex"
+
+functionalAnalysis:
+  purpose: "Comprehensive team roster management with attendance taking, member search, and role-based views"
+  primaryFunction: "Display and manage team members with attendance tracking and member addition capabilities"
+  userInteractions:
+    - "Search and filter team members by name/email/role"
+    - "Take attendance for upcoming events"
+    - "Add new team members via invitation modal"
+    - "Contact team members via phone/email"
+    - "View player statistics and badges"
+    - "Switch between player/coach/parent tabs"
+  businessLogic: "Role-based member grouping, attendance state management, search/filter logic"
+  stateManagement: "Complex local state for search, filters, attendance mode, and attendance records"
+
+dataIntegration:
+  hasSupabaseConnection: true
+  connectionType: "direct"
+  supabaseTables:
+    - "team_members"
+    - "teams"
+    - "users"
+  tableUsage:
+    - tableName: "team_members"
+      operations: ["select"]
+      purpose: "Display team roster with roles and member information"
+      dataFlow: "Members prop contains team_members records with user relationships"
+    - tableName: "teams"
+      operations: ["select"]
+      purpose: "Team context for roster display"
+      dataFlow: "Team prop provides team information for context"
+    - tableName: "users"
+      operations: ["select"]
+      purpose: "Member profile information and contact details"
+      dataFlow: "User data joined through team_members.user_id relationship"
+
+codeAnalysis:
+  isHardcoded: true
+  hardcodedElements:
+    - "Player statistics (attendance_rate, skills_completed, recent_badges)"
+    - "Mock attendance data structure"
+    - "Hardcoded test players in attendance modal"
+  mockDataUsage:
+    - "PlayerStats interface with placeholder data"
+    - "Mock players in attendance taking modal: ['Mike Johnson', 'Sarah Wilson', 'Tom Davis', 'Emma Brown']"
+    - "Zero values for attendance rates and skills completion"
+  realDataPercentage: 70
+
+dependencies:
+  hooks: []
+  contexts: []
+  utilities: []
+  externalLibraries:
+    - "lucide-react - extensive icon usage"
+
+supabaseTableDetails:
+  tablesUsed:
+    - "team_members"
+    - "teams"
+    - "users"
+  tableRelationships:
+    - "team_members.team_id -> teams.id"
+    - "team_members.user_id -> users.id"
+  queryPatterns:
+    - "Team members with user profile joins"
+    - "Role-based filtering and grouping"
+    - "Search across user name and email fields"
+  dataTransformations:
+    - "Member role grouping (players, coaches, parents)"
+    - "Search term filtering across user fields"
+    - "Jersey number and position display from team_members"
+
+mvpReadiness:
+  isProductionReady: false
+  blockers:
+    - "Attendance system not connected to database"
+    - "Player statistics are mock data"
+    - "Member invitation system not implemented"
+  improvements:
+    - "Connect attendance to actual attendance tracking table"
+    - "Integrate real player statistics from gamification system"
+    - "Implement member invitation workflow"
+    - "Add bulk member import functionality"
+    - "Connect phone/email actions to communication system"
+  priority: "high"
+
+testingStatus:
+  hasTests: false
+  testCoverage: 0
+  testTypes: []
+
+documentation:
+  hasDocumentation: false
+  documentationQuality: "none"
+  needsDocumentation:
+    - "Attendance tracking system integration"
+    - "Member invitation workflow"
+    - "Player statistics integration with gamification"
+
+componentInteractions:
+  callsComponents:
+    - "Card, CardContent, CardHeader, CardTitle (UI)"
+    - "Badge (UI)"
+    - "Button (UI)"
+    - "Input (UI)"
+    - "Avatar, AvatarFallback (UI)"
+    - "Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger (UI)"
+    - "Select, SelectContent, SelectItem, SelectTrigger, SelectValue (UI)"
+    - "Tabs, TabsContent, TabsList, TabsTrigger (UI)"
+  calledByComponents:
+    - "Team Dashboard page"
+  sharedState:
+    - "Attendance state management"
+    - "Search and filter state"
+  eventCommunication: []
+  propsPassedTo: []
+  propsReceivedFrom:
+    - "team: Team - team context"
+    - "members: UserTeamRole[] - all team members"
+    - "canTakeAttendance: boolean - permission flag"
+    - "upcomingEvent?: TeamEvent - next event for attendance"
+
+userJourneyContext:
+  userFlows:
+    - "Coach->Team Dashboard->Take Attendance"
+    - "Coach->Team Dashboard->Add Team Member"
+    - "Coach->Team Dashboard->Contact Player"
+    - "Parent->Team Dashboard->View Team Roster"
+  criticalForMVP: true
+  usageFrequency: "high"
+  primaryUserTypes: ["coach", "parent"]
+  featureArea: "teams"
+  journeyStage: "core-loop"
+
+duplicateFunctionality:
+  hasDuplicates: true
+  duplicateComponents:
+    - "PlayerStatsCard - overlaps with player statistics display"
+  primaryComponent: "TeamRoster"
+  reasonForDuplication: "PlayerStatsCard provides detailed stats, TeamRoster provides summary stats"
+  consolidationStrategy: "Keep both - different detail levels for different contexts"
+  supabaseIntegrationWinner: "PlayerStatsCard (full gamification integration)"
+
+# Team Management Specific Analysis
+teamManagementContext:
+  roleBasedDisplay: true
+  supportedRoles: ["player", "head_coach", "assistant_coach", "parent"]
+  teamDataIntegration: "Direct via team_members table with user relationships"
+  attendanceSystem:
+    - "Live attendance taking for events"
+    - "Multiple attendance states (present, absent, excused, late)"
+    - "Event-based attendance context"
+  memberManagement:
+    - "Role-based member filtering"
+    - "Search across name and email"
+    - "Member invitation modal"
+  
+criticalTeamFeatures:
+  rosterDisplay: "Tabbed view separating players, coaches, parents"
+  attendanceTracking: "Real-time attendance taking with status indicators"
+  memberSearch: "Search and filter across all member fields"
+  roleBasedAccess: "Attendance taking restricted by permissions"
+  memberInvitation: "Add new members with role selection"
+  contactIntegration: "Direct phone/email contact buttons"
+  
+dataGaps:
+  attendanceStorage: "No attendance table connection - data not persisted"
+  playerStats: "Mock statistics instead of gamification integration"
+  invitationWorkflow: "Member invitation not connected to registration system"
+  communicationActions: "Phone/email buttons not connected to communication system"

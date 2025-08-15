@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, memo } from 'react'
+import { useState } from 'react'
 import { 
   Play,
   Trash2,
@@ -50,7 +50,7 @@ interface DrillCardProps {
   onStudyDrill?: (drill: any) => void
 }
 
-const DrillCard = memo(function DrillCard({
+const DrillCard = function DrillCard({
   drill,
   startTime,
   index,
@@ -354,6 +354,6 @@ const DrillCard = memo(function DrillCard({
       </div>
     </div>
   )
-})
+}
 
 export default DrillCard

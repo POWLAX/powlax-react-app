@@ -1,6 +1,8 @@
 // DATABASE TYPE DEFINITIONS - MATCHES ACTUAL SUPABASE TABLES
 // 🚨 CRITICAL: These types match the ACTUAL database schema as verified in the database truth contract
 
+import { UserAccountRole, TeamMemberRole, ClubMemberRole } from './database.types'
+
 // ============================================================================
 // DRILL TYPES (powlax_drills table - ACTIVE)
 // ============================================================================
@@ -107,11 +109,14 @@ export interface UserStrategy {
 // ============================================================================
 // USER TYPES (users table - ACTIVE, NOT user_profiles)
 // ============================================================================
+
+// Re-export role types for convenience
+export type UserRole = UserAccountRole
 export interface DatabaseUser {
   id: string // UUID
   email: string
   display_name: string
-  role: string
+  role: UserAccountRole // Standardized user account roles
   roles: string[] // Often empty array
   wp_user_id: number | null
   avatar_url: string | null
@@ -337,7 +342,7 @@ export interface DatabaseTeamMember {
   id: string // UUID
   team_id: string // References teams table
   user_id: string // References users table
-  role: 'head_coach' | 'assistant_coach' | 'player' | 'parent' | 'admin'
+  role: TeamMemberRole
   jersey_number: string | null
   position: string | null
   status: 'active' | 'inactive' | 'pending'

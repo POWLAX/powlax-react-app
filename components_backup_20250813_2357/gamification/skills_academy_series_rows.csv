@@ -1,0 +1,50 @@
+id,series_name,series_slug,series_type,series_code,description,skill_focus,position_focus,difficulty_level,color_scheme,display_order,is_featured,is_active,is_premium,created_at,updated_at
+1,Picking Up and Passing,solid-start-1,solid_start,SS1,Foundation skills for picking up ground balls and passing,,all,1,blue,1,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+2,Defense and Shooting,solid-start-2,solid_start,SS2,Basic defensive positioning and shooting techniques,,all,1,blue,2,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+3,Catching and Hesitation,solid-start-3,solid_start,SS3,Catching skills with hesitation moves,,all,1,blue,3,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+4,Wind Up Dodging,solid-start-4,solid_start,SS4,Introduction to wind up dodging techniques,,all,2,blue,4,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+5,Switching Hands,solid-start-5,solid_start,SS5,Mastering hand switches and ambidextrous play,,all,2,blue,5,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+6,Establishment of Technique,attack-a1,attack,A1,Foundation attack techniques and mechanics,,attack,2,red,10,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+7,Split Dodge and Shooting on the Run,attack-a2,attack,A2,Split dodge mechanics with shooting on the run,,attack,2,red,11,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+8,Finishing From X,attack-a3,attack,A3,Finishing techniques from behind the goal,,attack,3,red,12,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+9,"Catching, Faking, Crease Play",attack-a4,attack,A4,"Advanced catching, faking, and crease positioning",,attack,3,red,13,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+10,Running A Fast Break,attack-a5,attack,A5,Fast break execution and finishing,,attack,3,red,14,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+11,Time and Room Shooting & Wind Up Dodging,attack-a6,attack,A6,Creating time and room with wind up dodges,,attack,3,red,15,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+12,Wing Hesitation Dodges,attack-a7,attack,A7,Hesitation moves from wing positions,,attack,3,red,16,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+13,Shooting on the Run & Slide Em Dodging,attack-a8,attack,A8,Advanced shooting and slide dodging,,attack,4,red,17,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+14,Inside Finishing & Roll Dodge,attack-a9,attack,A9,Inside finishing with roll dodge techniques,,attack,4,red,18,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+15,Ladder Drills and North South Dodging,attack-a10,attack,A10,Footwork with north-south dodging patterns,,attack,4,red,19,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+16,Time and Room Out of a Dodge,attack-a11,attack,A11,Creating shooting space from dodges,,attack,4,red,20,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+17,Ride Angles and Dodging Favorites,attack-a12,attack,A12,Riding techniques and signature dodges,,attack,5,red,21,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+18,Foundation of Skills,midfield-m1,midfield,M1,Core midfield fundamentals,,midfield,2,green,30,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+19,Shooting Progression,midfield-m2,midfield,M2,Complete shooting progression for midfielders,,midfield,2,green,31,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+20,"Catching, Faking, Inside Finishing",midfield-m3,midfield,M3,Midfield catching and finishing skills,,midfield,2,green,32,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+21,Defensive Footwork,midfield-m4,midfield,M4,Defensive approach angles and recovery,,midfield,3,green,33,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+22,Wing Dodging,midfield-m5,midfield,M5,Wing dodging techniques for midfielders,,midfield,3,green,34,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+23,Time and Room & Wind Up Dodging,midfield-m6,midfield,M6,Creating shooting space with dodges,,midfield,3,green,35,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+24,Split Dodge and Shoot on the Run,midfield-m7,midfield,M7,Mastering split dodges and running shots,,midfield,3,green,36,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+25,Ladder Footwork & Creative Dodging,midfield-m8,midfield,M8,Advanced footwork and creative moves,,midfield,4,green,37,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+26,Inside Finishing & Hesitations,midfield-m9,midfield,M9,Inside finishing with hesitation moves,,midfield,4,green,38,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+27,Face Dodge Mastery,midfield-m10,midfield,M10,Mastering the face dodge technique,,midfield,4,green,39,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+28,Shooting on the Run & Slide Em,midfield-m11,midfield,M11,Advanced running shots and slide dodges,,midfield,4,green,40,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+29,Defensive Approaches & Fast Break,midfield-m12,midfield,M12,Two-way midfield skills,,midfield,5,green,41,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+30,Pipe Approaches & Defending at X,defense-d1,defense,D1,Pipe defense and X coverage fundamentals,,defense,2,orange,50,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+31,4 Cone Footwork & Fast Break Defense,defense-d2,defense,D2,Footwork drills and transition defense,,defense,2,orange,51,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+32,Approach and Recover Low Positions,defense-d3,defense,D3,Low position defense and recovery,,defense,3,orange,52,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+33,Ladder Drills & Defending at X,defense-d4,defense,D4,Ladder footwork with X defense,,defense,3,orange,53,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+34,Pipe Approaches & Stick Checks,defense-d5,defense,D5,Advanced pipe defense with checking,,defense,3,orange,54,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+35,4 Cone Series 2 & Sliding,defense-d6,defense,D6,Advanced cone drills with slide packages,,defense,3,orange,55,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+36,Approach and Recover Sides,defense-d7,defense,D7,Side approach and recovery techniques,,defense,3,orange,56,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+37,Ladder Set 2 & Fast Break Defense,defense-d8,defense,D8,Advanced ladder work with transition D,,defense,4,orange,57,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+38,Pipe Approaches Group 3,defense-d9,defense,D9,Advanced pipe defensive techniques,,defense,4,orange,58,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+39,4 Cone Series 3 & Defending at X,defense-d10,defense,D10,Elite cone drills with X defense,,defense,4,orange,59,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+40,Approach and Recover Top,defense-d11,defense,D11,Top side approach and recovery,,defense,4,orange,60,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+41,Ladder Set 3 & Checking,defense-d12,defense,D12,Elite ladder work with checking techniques,,defense,5,orange,61,false,true,false,2025-08-08 00:08:31.062895+00,2025-08-08 00:08:31.062895+00
+46,Master Fundamentals,wall-ball-master-fundamentals,wall_ball,WB1,Build essential wall ball skills with fundamental drills,,wall_ball,1,orange,50,false,true,false,2025-08-10 08:53:03.193+00,2025-08-10 08:53:03.194+00
+47,Dodging,wall-ball-dodging,wall_ball,WB2,Develop dodging techniques and footwork,,wall_ball,2,orange,51,false,true,false,2025-08-10 08:53:03.194+00,2025-08-10 08:53:03.194+00
+48,Shooting,wall-ball-shooting,wall_ball,WB3,Improve shooting accuracy and power,,wall_ball,2,orange,52,false,true,false,2025-08-10 08:53:03.194+00,2025-08-10 08:53:03.194+00
+49,Conditioning,wall-ball-conditioning,wall_ball,WB4,High-intensity wall ball workout for fitness,,wall_ball,3,orange,53,false,true,false,2025-08-10 08:53:03.194+00,2025-08-10 08:53:03.194+00
+50,Faking and Finishing,wall-ball-faking-and-finishing,wall_ball,WB5,Master deceptive moves and close-range shots,,wall_ball,3,orange,54,false,true,false,2025-08-10 08:53:03.194+00,2025-08-10 08:53:03.194+00
+51,Catching Everything,wall-ball-catching-everything,wall_ball,WB6,Improve catching skills in all situations,,wall_ball,2,orange,55,false,true,false,2025-08-10 08:53:03.194+00,2025-08-10 08:53:03.194+00
+52,Long Pole,wall-ball-long-pole,wall_ball,WB7,Specialized training for defensive long stick players,,wall_ball,3,orange,56,false,true,false,2025-08-10 08:53:03.194+00,2025-08-10 08:53:03.194+00
+53,Advanced and Fun,wall-ball-advanced-and-fun,wall_ball,WB8,Challenging and entertaining advanced drills,,wall_ball,4,orange,57,false,true,false,2025-08-10 08:53:03.194+00,2025-08-10 08:53:03.194+00

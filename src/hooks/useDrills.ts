@@ -276,8 +276,8 @@ function mapDrillCategory(category: string): string {
   const lowerCategory = category.toLowerCase()
   
   // Map database categories to our UI categories based on screenshot
-  if (lowerCategory === 'admin') {
-    return 'admin'
+  if (lowerCategory === 'administrator') {
+    return 'administrator'
   } else if (lowerCategory === 'skill drills' || lowerCategory === 'skill development') {
     return 'skill'
   } else if (lowerCategory === 'concept drills') {
