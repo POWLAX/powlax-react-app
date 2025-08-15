@@ -1,21 +1,27 @@
 'use client'
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 
 export default function Home() {
-  const router = useRouter()
-  
-  useEffect(() => {
-    // Client-side redirect to practice planner
-    router.push('/teams/no-team/practiceplan')
-  }, [router])
-
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <div className="text-center">
+      <div className="text-center space-y-8">
         <h1 className="text-4xl font-bold">POWLAX</h1>
-        <p className="mt-4 text-gray-600">Loading...</p>
+        <p className="text-xl text-gray-600">Modern Lacrosse Training Platform</p>
+        
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+          <Link href="/teams/no-team/practiceplan">
+            <Button size="lg" className="w-full sm:w-auto">
+              Practice Planner
+            </Button>
+          </Link>
+          <Link href="/skills-academy/workouts">
+            <Button size="lg" variant="outline" className="w-full sm:w-auto">
+              Skills Academy
+            </Button>
+          </Link>
+        </div>
       </div>
     </main>
   )
