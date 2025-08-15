@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { Calendar, GraduationCap, ChevronUp, ChevronDown } from 'lucide-react'
 
@@ -20,15 +20,7 @@ const navItems = [
 
 export default function BottomNavigation() {
   const pathname = usePathname()
-  const router = useRouter()
   const [isExpanded, setIsExpanded] = useState(false)
-
-  // Enhanced mobile navigation handler
-  const handleMobileNavigation = (href: string) => {
-    setIsExpanded(false)
-    // Use router.push for more reliable mobile navigation
-    router.push(href)
-  }
   
   // Special collapsible behavior for Practice Planner and Skills Academy Workout pages
   if (pathname?.includes('/practiceplan') || pathname?.includes('/skills-academy/workout/')) {
@@ -54,20 +46,9 @@ export default function BottomNavigation() {
                         ? 'text-blue-600'
                         : 'text-gray-500 hover:text-gray-700'
                     }`}
-                    onClick={(e) => {
-                      // Enhanced mobile click handling
-                      e.preventDefault()
-                      handleMobileNavigation(item.href)
-                    }}
-                    onTouchStart={(e) => {
-                      // Handle touch start for mobile devices
-                      e.stopPropagation()
-                    }}
-                    onTouchEnd={(e) => {
-                      // Handle touch end for mobile devices - primary navigation trigger
-                      e.preventDefault()
-                      e.stopPropagation()
-                      handleMobileNavigation(item.href)
+                    onClick={() => {
+                      // Close the expanded menu when navigating
+                      setIsExpanded(false)
                     }}
                     role="button"
                     tabIndex={0}
@@ -127,19 +108,6 @@ export default function BottomNavigation() {
                   ? 'text-blue-600'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
-              onClick={(e) => {
-                // Enhanced mobile click handling for regular navigation
-                if (window.navigator.userAgent.includes('Mobile')) {
-                  e.preventDefault()
-                  router.push(item.href)
-                }
-              }}
-              onTouchEnd={(e) => {
-                // Handle touch end for mobile devices
-                e.preventDefault()
-                e.stopPropagation()
-                router.push(item.href)
-              }}
               role="button"
               tabIndex={0}
               aria-label={`Navigate to ${item.name}`}
